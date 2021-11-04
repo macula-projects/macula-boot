@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.6</version>
+        <relativePath/>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.macula.boot</groupId>
+    <artifactId>macula-boot-dependencies</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+    <name>macula-boot-dependencies</name>
+    <description>Based on Spring Boot and Spring Cloud dependencies</description>
+    <url>https://macula.dev</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License</name>
+            <url>https://apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>rainsoft</name>
+            <email>rainwzp@ustc.edu</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:macula-projects/macula-boot.git</connection>
+        <developerConnection>scm:git:git@github.com:macula-projects/macula-boot.git</developerConnection>
+        <url>https://github.com/macula-projects/macula-boot</url>
+    </scm>
+
+    <properties>
+        <revision>5.0.0-SNAPSHOT</revision>
+    </properties>
+
+</project>
