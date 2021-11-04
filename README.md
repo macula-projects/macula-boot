@@ -1,2 +1,2 @@
 # macula-boot
-A Java Development Framework based on Spring、Spring Boot、Spring Cloud Etc.
+基于Spring Boot、Spring Cloud Alibaba的微服务开发框架
