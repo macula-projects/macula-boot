@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>macula-boot-starter-common</module>
+        <module>macula-boot-starter-commons</module>
         <module>macula-boot-starter-database</module>
         <module>macula-boot-starter-redis</module>
     </modules>

@@ -14,7 +14,6 @@
     <artifactId>macula-boot-dependencies</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>macula-boot-dependencies</name>
     <description>Based on Spring Boot and Spring Cloud dependencies</description>
     <url>https://macula.dev</url>
 
