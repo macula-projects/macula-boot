@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.macula.boot</groupId>
+    <artifactId>macula-boot</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+
+    <name>macula-boot</name>
+    <description>基于Spring Boot、Spring Cloud Alibaba的微服务开发框架</description>
+    <url>https://macula.dev</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License</name>
+            <url>https://apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>rainsoft</name>
+            <email>rainwzp@ustc.edu</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:macula-projects/macula-boot.git</connection>
+        <developerConnection>scm:git:git@github.com:macula-projects/macula-boot.git</developerConnection>
+        <url>https://github.com/macula-projects/macula-boot</url>
+    </scm>
+
+    <modules>
+        <module>macula-boot-starters</module>
+        <module>macula-boot-examples</module>
+        <module>macula-boot-docs</module>
+        <module>macula-boot-dependencies</module>
+    </modules>
+
+    <properties>
+        <revision>5.0.0-SNAPSHOT</revision>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

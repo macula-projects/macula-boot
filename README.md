@@ -1,2 +1,3 @@
 # macula-boot
-基于Spring Boot、Spring Cloud Alibaba的微服务开发框架
+
+该模块提供微服务应用开发的基础依赖库
