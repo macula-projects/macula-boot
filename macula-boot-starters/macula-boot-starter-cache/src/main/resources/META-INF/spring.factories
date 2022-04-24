@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  org.macula.boot.starter.cache.config.TwoLevelCacheAutoConfiguration
