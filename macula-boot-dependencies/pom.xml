@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>2.6.3</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -16,6 +16,157 @@
     <packaging>pom</packaging>
     <description>Based on Spring Boot and Spring Cloud dependencies</description>
     <url>https://macula.dev</url>
+
+    <properties>
+        <revision>5.0.0-SNAPSHOT</revision>
+        <spring-boot.version>2.6.3</spring-boot.version>
+        <spring-cloud.version>2021.0.1</spring-cloud.version>
+        <spring-cloud-alibaba.version>2021.0.1.0</spring-cloud-alibaba.version>
+        <mysql.connector.version>8.0.22</mysql.connector.version>
+        <druid.version>1.2.8</druid.version>
+        <mybatis.plus.version>3.5.1</mybatis.plus.version>
+        <mybatis.mate.version>1.1.3</mybatis.mate.version>
+        <redisson.version>3.16.8</redisson.version>
+        <hutool.version>5.7.20</hutool.version>
+        <oauth2-oidc-sdk.version>9.19</oauth2-oidc-sdk.version>
+        <resilience4j.version>1.7.1</resilience4j.version>
+        <swagger.version>1.6.2</swagger.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- macula -->
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-cache</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-commons</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-feign</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-gateway</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-mproot</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-oauth2-resource-server</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- spring-cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring cloud alibaba -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- MySQL Connector -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.connector.version}</version>
+            </dependency>
+
+            <!-- Druid -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- mybastis plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis.plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-mate-starter</artifactId>
+                <version>${mybatis.mate.version}</version>
+            </dependency>
+
+            <!-- HuTool -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-json</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-data-26</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>${oauth2-oidc-sdk.version}</version>
+            </dependency>
+
+            <!-- resilience4j -->
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-circuitbreaker</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+
+            <!-- Swagger2 -->
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <licenses>
         <license>
@@ -36,9 +187,5 @@
         <developerConnection>scm:git:git@github.com:macula-projects/macula-boot.git</developerConnection>
         <url>https://github.com/macula-projects/macula-boot</url>
     </scm>
-
-    <properties>
-        <revision>5.0.0-SNAPSHOT</revision>
-    </properties>
 
 </project>

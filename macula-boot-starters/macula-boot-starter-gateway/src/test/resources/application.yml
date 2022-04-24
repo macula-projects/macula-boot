@@ -1,0 +1,16 @@
+server:
+  port: 9999
+spring:
+  application:
+    name: macula-gateway-test
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: macula-gateway-test
+          client-secret: macula-gateway-test
+          introspection-uri: http://localhost:9999/oauth2/userinfo
+macula:
+  security:
+    ignore-urls: static/**, public/**, swagger-ui.html, swagger-ui.html/**, webjars/**, swagger-resources/**, swagger-resources/**, favicon.ico
+    only-auth-urls: mall/**

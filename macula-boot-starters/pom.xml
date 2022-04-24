@@ -13,10 +13,23 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>macula-boot-starter-api</module>
         <module>macula-boot-starter-commons</module>
-        <module>macula-boot-starter-database</module>
+        <module>macula-boot-starter-mproot</module>
         <module>macula-boot-starter-redis</module>
+        <module>macula-boot-starter-cache</module>
+        <module>macula-boot-starter-web</module>
+        <module>macula-boot-starter-oauth2-resource-server</module>
         <module>macula-boot-starter-gateway</module>
+        <module>macula-boot-starter-feign</module>
+        <module>macula-boot-starter-alibaba</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-actuator</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>

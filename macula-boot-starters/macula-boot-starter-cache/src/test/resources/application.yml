@@ -1,0 +1,34 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    type: redis
+    # These properties are custom
+    two-level:
+      # Redis properties
+      default-time-to-live: 3600000
+      time-to-live:
+        user-service: 86400000
+        tag-service: 43200000
+      use-key-prefix: true
+      key-prefix: "macula:cache:"
+      topic: "macula:cache:two-level:topic"
+
+      # Local Caffeine cache properties
+      local:
+        max-size: 2000
+        expiry-jitter: 50
+
+      # Resilience4j Circuit Breaker properties for Redis
+      open-circuit-breaker: false
+      circuit-breaker:
+        failure-rate-threshold: 25
+        slow-call-rate-threshold: 25
+        slow-call-duration-threshold: 250ms
+        sliding-window-type: count_based
+        permitted-number-of-calls-in-half-open-state: 20
+        max-wait-duration-in-half-open-state: 5s
+        sliding-window-size: 40
+        minimum-number-of-calls: 10
+        wait-duration-in-open-state: 2500ms

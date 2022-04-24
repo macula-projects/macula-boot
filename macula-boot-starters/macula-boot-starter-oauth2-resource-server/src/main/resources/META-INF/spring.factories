@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    org.macula.boot.starter.oauth2.resource.server.config.Oauth2ResourceServerAutoConfiguration
