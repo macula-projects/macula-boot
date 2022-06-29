@@ -16,17 +16,18 @@ import java.io.Serializable;
 @NoArgsConstructor
 public enum ApiResultCode implements ResultCode, Serializable {
 
-	SUCCESS("00000", "一切ok"),
+    SUCCESS("200", "一切ok"),
+    SYS_ERR("500", "系统异常"),
 
-	USER_ERROR("A0001", "用户端错误"),
-	USER_LOGIN_ERROR("A0200", "用户登录异常"),
+    USER_ERROR("A0001", "用户端错误"),
+    USER_LOGIN_ERROR("A0200", "用户登录异常"),
 
-	USER_NOT_EXIST("A0201", "用户不存在"),
-	USER_ACCOUNT_LOCKED("A0202", "用户账户被冻结"),
-	USER_ACCOUNT_INVALID("A0203", "用户账户已作废"),
+    USER_NOT_EXIST("A0201", "用户不存在"),
+    USER_ACCOUNT_LOCKED("A0202", "用户账户被冻结"),
+    USER_ACCOUNT_INVALID("A0203", "用户账户已作废"),
 
-	USERNAME_OR_PASSWORD_ERROR("A0210", "用户名或密码错误"),
-	PASSWORD_ENTER_EXCEED_LIMIT("A0211", "用户输入密码次数超限"),
+    USERNAME_OR_PASSWORD_ERROR("A0210", "用户名或密码错误"),
+    PASSWORD_ENTER_EXCEED_LIMIT("A0211", "用户输入密码次数超限"),
 	CLIENT_AUTHENTICATION_FAILED("A0212", "客户端认证失败"),
 	TOKEN_INVALID_OR_EXPIRED("A0230", "token无效或已过期"),
 	TOKEN_ACCESS_FORBIDDEN("A0231", "token已被禁止访问"),
@@ -47,8 +48,6 @@ public enum ApiResultCode implements ResultCode, Serializable {
 
 	SYSTEM_EXECUTION_ERROR("B0001", "系统执行出错"),
 	SYSTEM_EXECUTION_TIMEOUT("B0100", "系统执行超时"),
-	SYSTEM_ORDER_PROCESSING_TIMEOUT("B0100", "系统订单处理超时"),
-
 	SYSTEM_DISASTER_RECOVERY_TRIGGER("B0200", "系统容灾功能被出发"),
 	FLOW_LIMITING("B0210", "系统限流"),
 	DEGRADATION("B0220", "系统功能降级"),
@@ -65,46 +64,28 @@ public enum ApiResultCode implements ResultCode, Serializable {
 	MESSAGE_SERVICE_ERROR("C0120", "消息服务出错"),
 	MESSAGE_DELIVERY_ERROR("C0121", "消息投递出错"),
 	MESSAGE_CONSUMPTION_ERROR("C0122", "消息消费出错"),
-	MESSAGE_SUBSCRIPTION_ERROR("C0123", "消息订阅出错"),
-	MESSAGE_GROUP_NOT_FOUND("C0124", "消息分组未查到"),
+    MESSAGE_SUBSCRIPTION_ERROR("C0123", "消息订阅出错"),
+    MESSAGE_GROUP_NOT_FOUND("C0124", "消息分组未查到"),
 
-	DATABASE_ERROR("C0300", "数据库服务出错"),
-	DATABASE_TABLE_NOT_EXIST("C0311", "表不存在"),
-	DATABASE_COLUMN_NOT_EXIST("C0312", "列不存在"),
-	DATABASE_DUPLICATE_COLUMN_NAME("C0321", "多表关联中存在多个相同名称的列"),
-	DATABASE_DEADLOCK("C0331", "数据库死锁"),
-	DATABASE_PRIMARY_KEY_CONFLICT("C0341", "主键冲突");
+    DATABASE_ERROR("C0300", "数据库服务出错"),
+    DATABASE_TABLE_NOT_EXIST("C0311", "表不存在"),
+    DATABASE_COLUMN_NOT_EXIST("C0312", "列不存在"),
+    DATABASE_DUPLICATE_COLUMN_NAME("C0321", "多表关联中存在多个相同名称的列"),
+    DATABASE_DEADLOCK("C0331", "数据库死锁"),
+    DATABASE_PRIMARY_KEY_CONFLICT("C0341", "主键冲突");
 
-	@Override
-	public String getCode() {
-		return code;
-	}
+    private String code;
 
-	@Override
-	public String getMsg() {
-		return msg;
-	}
+    private String msg;
 
-	private String code;
+    @Override
+    public String getCode() {
+        return code;
+    }
 
-	private String msg;
+    @Override
+    public String getMsg() {
+        return msg;
+    }
 
-	@Override
-	public String toString() {
-		return "{" +
-			"\"code\":\"" + code + '\"' +
-			", \"msg\":\"" + msg + '\"' +
-			'}';
-	}
-
-
-	public static ApiResultCode getValue(String code){
-		for (ApiResultCode value : values()) {
-			if (value.getCode().equals(code)) {
-				return value;
-			}
-		}
-		// 默认系统执行错误
-		return SYSTEM_EXECUTION_ERROR;
-	}
 }

@@ -1,6 +1,5 @@
 package org.macula.boot.starter.redis.test;
 
-import com.sun.deploy.security.UserDeclinedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.macula.boot.starter.redis.test.vo.User;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * <p>

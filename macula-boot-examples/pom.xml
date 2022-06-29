@@ -11,5 +11,9 @@
 
     <artifactId>macula-boot-examples</artifactId>
     <packaging>pom</packaging>
+    <modules>
+        <module>macula-example-consumer</module>
+        <module>macula-example-provider</module>
+    </modules>
 
 </project>

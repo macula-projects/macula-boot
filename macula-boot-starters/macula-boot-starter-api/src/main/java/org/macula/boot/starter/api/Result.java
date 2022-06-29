@@ -31,7 +31,7 @@ public class Result<T> implements Serializable {
 	public static <T> Result<T> success(T data) {
 		ApiResultCode rce = ApiResultCode.SUCCESS;
 		if (data instanceof Boolean && Boolean.FALSE.equals(data)) {
-			rce = ApiResultCode.SYSTEM_EXECUTION_ERROR;
+			rce = ApiResultCode.SYS_ERR;
 		}
 		return result(rce, data);
 	}
@@ -46,11 +46,11 @@ public class Result<T> implements Serializable {
 	}
 
 	public static <T> Result<T> failed() {
-		return result(ApiResultCode.SYSTEM_EXECUTION_ERROR.getCode(), ApiResultCode.SYSTEM_EXECUTION_ERROR.getMsg(), null);
+        return result(ApiResultCode.SYS_ERR.getCode(), ApiResultCode.SYS_ERR.getMsg(), null);
 	}
 
 	public static <T> Result<T> failed(String msg) {
-		return result(ApiResultCode.SYSTEM_EXECUTION_ERROR.getCode(), msg, null);
+        return result(ApiResultCode.SYS_ERR.getCode(), msg, null);
 	}
 
 	public static <T> Result<T> judge(boolean status) {

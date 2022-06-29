@@ -11,6 +11,11 @@
 
     <artifactId>macula-boot-starter-commons</artifactId>
 
+    <properties>
+        <mapstruct.version>1.5.0.RC1</mapstruct.version>
+        <lombok.version>1.18.22</lombok.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.macula.boot</groupId>
@@ -20,6 +25,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
         </dependency>
 
         <dependency>
@@ -42,4 +58,44 @@
             <artifactId>hutool-core</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
+                        <!-- Classpath elements to supply as annotation processor path. If specified, the compiler   -->
+                        <!-- will detect annotation processors only in those classpath elements. If omitted, the     -->
+                        <!-- default classpath is used to detect annotation processors. The detection itself depends -->
+                        <!-- on the configuration of annotationProcessors.                                           -->
+                        <!--                                                                                         -->
+                        <!-- According to this documentation, the provided dependency processor is not considered!   -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>0.2.0</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
