@@ -1,6 +1,10 @@
 package org.macula.boot.starter.feign.config;
 
 import feign.RequestInterceptor;
+import okhttp3.OkHttpClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.commons.httpclient.DefaultOkHttpClientFactory;
+import org.springframework.cloud.commons.httpclient.OkHttpClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -19,7 +23,6 @@ import java.util.Enumeration;
  */
 @Configuration
 public class FeignAutoConfiguration {
-
     /**
      * 将请求头传递到下面的微服务
      */

@@ -55,7 +55,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
         String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX) ) {
-            // 这里要可配置哪些要鉴权
+            // 这里要可配置哪些路径仅认证，无需鉴权
             if (onlyAuthUrls.stream().anyMatch(s -> pathMatcher.match(s, path))) {
                 // 不是需要鉴权的URL，直接放行
                 return Mono.just(new AuthorizationDecision(true));
