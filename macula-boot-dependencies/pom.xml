@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.8</version>
+        <version>2.7.1</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -19,39 +19,66 @@
 
     <properties>
         <revision>5.0.0-SNAPSHOT</revision>
-        <spring-boot.version>2.6.8</spring-boot.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.1.0</spring-cloud-alibaba.version>
-        <mysql.connector.version>8.0.22</mysql.connector.version>
+        <spring-cloud-tencent.version>1.5.3-2021.0.2</spring-cloud-tencent.version>
+        <mysql.connector.version>8.0.29</mysql.connector.version>
         <druid.version>1.2.8</druid.version>
-        <mybatis.plus.version>3.5.1</mybatis.plus.version>
+        <mybatis.plus.version>3.5.2</mybatis.plus.version>
         <mybatis.mate.version>1.1.3</mybatis.mate.version>
-        <redisson.version>3.16.8</redisson.version>
+        <redisson.version>3.17.4</redisson.version>
         <hutool.version>5.7.20</hutool.version>
+        <liteflow.version>2.8.0</liteflow.version>
         <oauth2-oidc-sdk.version>9.19</oauth2-oidc-sdk.version>
         <resilience4j.version>1.7.1</resilience4j.version>
-        <swagger.version>1.6.2</swagger.version>
+        <swagger2.version>1.6.2</swagger2.version>
+        <swagger3.version>2.2.0</swagger3.version>
         <mapstruct.version>1.5.0.RC1</mapstruct.version>
-        <cosid.version>1.12.0</cosid.version>
         <lock4j.version>2.2.1</lock4j.version>
+        <skywalking.version>8.11.0</skywalking.version>
+        <rocketmq-spring.version>2.2.2</rocketmq-spring.version>
+        <springdoc.version>1.6.9</springdoc.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- spring-cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring cloud alibaba -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring cloud tencent -->
+            <dependency>
+                <groupId>com.tencent.cloud</groupId>
+                <artifactId>spring-cloud-tencent-dependencies</artifactId>
+                <!--version number-->
+                <version>${spring-cloud-tencent.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- macula -->
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-api</artifactId>
+                <artifactId>macula-boot-commons</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-cache</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-commons</artifactId>
+                <artifactId>macula-boot-starter-tinyid</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -61,12 +88,17 @@
             </dependency>
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-feign</artifactId>
+                <artifactId>macula-boot-starter-redis</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-gateway</artifactId>
+                <artifactId>macula-boot-starter-cache</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-lock4j</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -76,7 +108,47 @@
             </dependency>
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-job</artifactId>
+                <artifactId>macula-boot-starter-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-springdoc</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-skywalking</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-rocketmq</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-task</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-feign</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-seata</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.macula.boot</groupId>
+                <artifactId>macula-boot-starter-gateway</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -96,56 +168,8 @@
             </dependency>
             <dependency>
                 <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-redis</artifactId>
+                <artifactId>macula-boot-starter-femas</artifactId>
                 <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-rocketmq</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-oauth2-rs</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-security-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-swagger</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-tinyid</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.macula.boot</groupId>
-                <artifactId>macula-boot-starter-web</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- spring-cloud -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- spring cloud alibaba -->
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${spring-cloud-alibaba.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <!-- MySQL Connector -->
@@ -167,12 +191,6 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis.plus.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-mate-starter</artifactId>
-                <version>${mybatis.mate.version}</version>
             </dependency>
 
             <!-- lock4j -->
@@ -200,6 +218,12 @@
                 <version>${hutool.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-spring-boot-starter</artifactId>
+                <version>${liteflow.version}</version>
+            </dependency>
+
             <!-- redisson -->
             <dependency>
                 <groupId>org.redisson</groupId>
@@ -224,7 +248,19 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
+                <version>${swagger2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${springdoc.version}</version>
             </dependency>
 
             <!-- mapstruct -->
@@ -240,27 +276,25 @@
                 <version>${mapstruct.version}</version>
             </dependency>
 
-            <!-- cosId -->
+            <!-- skywalking -->
             <dependency>
-                <groupId>me.ahoo.cosid</groupId>
-                <artifactId>cosid-spring-boot-starter</artifactId>
-                <version>${cosid.version}</version>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-toolkit-trace</artifactId>
+                <version>${skywalking.version}</version>
             </dependency>
             <dependency>
-                <groupId>me.ahoo.cosid</groupId>
-                <artifactId>cosid-jdbc</artifactId>
-                <version>${cosid.version}</version>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-toolkit-logback-1.x</artifactId>
+                <version>${skywalking.version}</version>
             </dependency>
+
+            <!-- RocketMQ -->
             <dependency>
-                <groupId>me.ahoo.cosid</groupId>
-                <artifactId>cosid-redis</artifactId>
-                <version>${cosid.version}</version>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-spring.version}</version>
             </dependency>
-            <dependency>
-                <groupId>me.ahoo.cosid</groupId>
-                <artifactId>cosid-shardingsphere</artifactId>
-                <version>${cosid.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

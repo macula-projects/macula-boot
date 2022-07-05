@@ -12,8 +12,7 @@ import org.macula.boot.starter.cache.TwoLevelCacheManager;
 import org.macula.boot.starter.cache.TwoLevelCacheProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -21,7 +20,6 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,9 +37,7 @@ import java.util.Objects;
  * @author Rain
  */
 @Slf4j
-@Configuration
-@AutoConfigureAfter(RedisAutoConfiguration.class)
-@AutoConfigureBefore(CacheAutoConfiguration.class)
+@AutoConfiguration(before = CacheAutoConfiguration.class, after = RedisAutoConfiguration.class)
 @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
 @EnableConfigurationProperties({
     CacheProperties.class,

@@ -34,10 +34,11 @@
     </scm>
 
     <modules>
+        <module>macula-boot-dependencies</module>
+        <module>macula-boot-commons</module>
         <module>macula-boot-starters</module>
         <module>macula-boot-examples</module>
         <module>macula-boot-docs</module>
-        <module>macula-boot-dependencies</module>
     </modules>
 
     <properties>

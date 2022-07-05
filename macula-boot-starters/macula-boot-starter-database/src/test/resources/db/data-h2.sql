@@ -1,7 +1,7 @@
 DELETE
-FROM user;
+FROM T_USER;
 
-INSERT INTO user (name, age, email, sex, create_by, create_time, last_update_by, last_update_time)
+INSERT INTO T_USER (name, age, email, sex, create_by, create_time, last_update_by, last_update_time)
 VALUES ('Jone', 18, 'test1@baomidou.com', 'F', '*ADMIN', current_timestamp, '*ADMIN', current_timestamp),
        ('Jack', 20, 'test2@baomidou.com', 'M', '*ADMIN', current_timestamp, '*ADMIN', current_timestamp),
        ('Tom', 28, 'test3@baomidou.com', 'M', '*ADMIN', current_timestamp, '*ADMIN', current_timestamp),

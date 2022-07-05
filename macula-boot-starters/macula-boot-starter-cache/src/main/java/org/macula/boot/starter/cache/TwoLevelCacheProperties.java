@@ -1,16 +1,18 @@
 package org.macula.boot.starter.cache;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 
-/** Simple set of properties to control most aspects of the multi-level cache functionality
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Simple set of properties to control most aspects of the multi-level cache functionality
+ *
  * @author Rain
  */
 @Data
