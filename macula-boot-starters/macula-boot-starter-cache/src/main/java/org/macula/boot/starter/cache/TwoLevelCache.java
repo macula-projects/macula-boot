@@ -2,11 +2,6 @@ package org.macula.boot.starter.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.locks.ReentrantLock;
-
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.vavr.CheckedFunction0;
 import io.vavr.control.Try;
@@ -17,6 +12,11 @@ import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Multi-level cache implementation

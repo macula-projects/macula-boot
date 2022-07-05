@@ -4,15 +4,15 @@ import org.macula.boot.starter.tinyid.base.factory.IdGeneratorFactory;
 import org.macula.boot.starter.tinyid.base.service.SegmentIdService;
 import org.macula.boot.starter.tinyid.factory.impl.CachedIdGeneratorFactory;
 import org.macula.boot.starter.tinyid.service.impl.HttpSegmentIdServiceImpl;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * @author rain
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(TinyIdProperties.class)
 public class TinyIdAutoConfiguration {
 

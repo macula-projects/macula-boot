@@ -9,14 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>macula-boot-starter-mproot</artifactId>
+    <artifactId>macula-boot-starter-database</artifactId>
 
 
     <dependencies>
-        <!-- macula-boot-starter-commons -->
+        <!-- macula-i18n-base-starter-commons -->
         <dependency>
             <groupId>org.macula.boot</groupId>
-            <artifactId>macula-boot-starter-commons</artifactId>
+            <artifactId>macula-boot-commons</artifactId>
         </dependency>
 
         <!-- MySql -->
@@ -39,11 +39,6 @@
         </dependency>
 
         <!-- For Test -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-mate-starter</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

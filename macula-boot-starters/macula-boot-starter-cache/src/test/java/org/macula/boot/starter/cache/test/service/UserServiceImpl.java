@@ -1,7 +1,6 @@
 package org.macula.boot.starter.cache.test.service;
 
 import org.macula.boot.starter.cache.test.vo.User;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 /**

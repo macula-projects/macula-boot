@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: macula-boot-web-test
+  messages:
+    basename: i18n/messages
+  mvc:
+    format:
+      date: iso
+      time: iso
+      date-time: iso-offset
+#  jackson:
+#    date-format: com.fasterxml.jackson.databind.util.StdDateFormat

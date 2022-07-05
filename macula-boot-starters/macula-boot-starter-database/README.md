@@ -45,7 +45,7 @@ IdType.ASSIGN_ID和ASSIGN_UUID：默认使用系统提供的雪花算法，如�
 ### 通用枚举
 ```yaml
 mybatis-plus:
-  type-enums-package: org.macula.boot.starter.mproot.test.entity.enums
+  type-enums-package: org.macula.i18n-base.starter.mproot.test.entity.enums
 ```
 要使用通用枚举，需要定义枚举类型，同时记得上述配置加入到你的应用配置中去
 [官方文档](https://baomidou.com/pages/8390a4/)

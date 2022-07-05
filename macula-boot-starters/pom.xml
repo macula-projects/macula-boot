@@ -13,26 +13,21 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>macula-boot-starter-gateway</module>
-
-        <module>macula-boot-starter-api</module>
-        <module>macula-boot-starter-commons</module>
-        <module>macula-boot-starter-database</module>
+        <module>macula-boot-starter-mapstruct</module>
         <module>macula-boot-starter-tinyid</module>
-        <module>macula-boot-starter-redis</module>
+        <module>macula-boot-starter-database</module>
         <module>macula-boot-starter-rocketmq</module>
+        <module>macula-boot-starter-redis</module>
         <module>macula-boot-starter-cache</module>
-        <module>macula-boot-starter-feign</module>
-
-        <module>macula-boot-starter-security</module>
-        <module>macula-boot-starter-web</module>
-        <module>macula-boot-starter-swagger</module>
-
-        <module>macula-boot-starter-msf</module>
-        <module>macula-boot-starter-job</module>
-        <module>macula-boot-starter-idempotent</module>
         <module>macula-boot-starter-lock4j</module>
-
+        <module>macula-boot-starter-idempotent</module>
+        <module>macula-boot-starter-liteflow</module>
+        <module>macula-boot-starter-web</module>
+        <module>macula-boot-starter-springdoc</module>
+        <module>macula-boot-starter-security</module>
+        <module>macula-boot-starter-task</module>
+        <module>macula-boot-starter-skywalking</module>
+        <module>macula-boot-starter-cloud</module>
     </modules>
 
     <dependencies>
