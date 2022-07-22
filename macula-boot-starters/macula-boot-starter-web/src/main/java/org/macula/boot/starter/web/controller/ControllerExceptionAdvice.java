@@ -2,7 +2,7 @@ package org.macula.boot.starter.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.macula.boot.api.ApiException;
+import org.macula.boot.exception.ApiException;
 import org.macula.boot.api.ApiResultCode;
 import org.macula.boot.api.Result;
 import org.springframework.context.MessageSource;

@@ -57,6 +57,7 @@ spring:
 如果需要支持跨时区，则需要设置为带时区的日期格式
 
 ```yaml
+spring:
   mvc:
     format:
       date: iso

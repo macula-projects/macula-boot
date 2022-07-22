@@ -20,25 +20,17 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>macula-boot-starters</artifactId>
+        <artifactId>macula-boot-examples</artifactId>
         <groupId>org.macula.boot</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>macula-boot-starter-cloud</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>macula-example-provider3</artifactId>
 
-    <modules>
-        <module>macula-boot-starter-cloud-feign</module>
-        <module>macula-boot-starter-cloud-gateway</module>
-
-        <module>macula-boot-starter-cloud-alibaba</module>
-        <module>macula-boot-starter-cloud-alibaba-scg</module>
-        <module>macula-boot-starter-cloud-tencent</module>
-        <module>macula-boot-starter-cloud-tencent-scg</module>
-        <module>macula-boot-starter-cloud-tsf</module>
-        <module>macula-boot-starter-cloud-tsf-scg</module>
-    </modules>
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
 
 </project>

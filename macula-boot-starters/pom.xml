@@ -25,7 +25,7 @@
         <module>macula-boot-starter-web</module>
         <module>macula-boot-starter-springdoc</module>
         <module>macula-boot-starter-security</module>
-        <module>macula-boot-starter-task</module>
+        <module>macula-boot-starter-powerjob</module>
         <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-cloud</module>
     </modules>

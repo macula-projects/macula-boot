@@ -15,30 +15,23 @@
  * limitations under the License.
  */
 
-package org.macula.boot.api.constant;
+package org.macula.examples.provider1;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * <p>
- * <b>ApiConstant</b> API常量
- * </p>
+ * {@code Provider1Application} is
  *
- * @author Rain
- * @since 2022-01-27
+ * @author rain
+ * @since 2022/7/22 14:55
  */
-@UtilityClass
-public class ApiConstant {
-    /**
-     * 默认为空消息
-     */
-    public static final String DEFAULT_NULL_MESSAGE = "承载数据为空";
-    /**
-     * 默认成功消息
-     */
-    public static final String DEFAULT_SUCCESS_MESSAGE = "处理成功";
-    /**
-     * 默认失败消息
-     */
-    public static final String DEFAULT_FAIL_MESSAGE = "处理失败";
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Provider1Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Provider1Application.class, args);
+    }
 }
