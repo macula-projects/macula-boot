@@ -19,7 +19,7 @@ package org.macula.boot.starter.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.macula.boot.api.ApiException;
+import org.macula.boot.exception.ApiException;
 import org.macula.boot.api.ApiResultCode;
 import org.macula.boot.api.Result;
 import org.macula.boot.starter.web.annotation.NotControllerResponseAdvice;

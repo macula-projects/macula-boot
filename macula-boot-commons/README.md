@@ -2,66 +2,105 @@
 
 主要引入所有模块都需要使用到的工具类，基础类
 
-## lombok
-
-## hutool
-
-## mapstruct
-
-MapStruct是类型转换工具，主要通过定义如下的转换接口，然后编译的时候自动生成实现类来工作。对于使用到mapstruct的应用来说，需要在parent或则自己的pom中定义如下的build插件
+## 统一的返回结构
 
 ```java
-@Mapper
-public interface SourceTargetMapper {
+@Data
+public class Result<T> implements Serializable {
+    private boolean success;
 
-    SourceTargetMapper MAPPER = Mappers.getMapper( SourceTargetMapper.class );
+    private String code;
 
-    @Mapping( source = "username", target = "user" )
-    TargetDto toTarget( SourceDto s );
+    private String msg;
+
+    private T data;
+
+    public static <T> Result<T> success() {
+        return success(null);
+    }
+
+    public static <T> Result<T> success(T data) {
+        Result<T> result = new Result<>();
+        result.setSuccess(true);
+        result.setCode(ApiResultCode.SUCCESS.getCode());
+        result.setMsg(ApiResultCode.SUCCESS.getMsg());
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> Result<T> failed() {
+        return failed(ApiResultCode.FAILED);
+    }
+
+    public static <T> Result<T> failed(ResultCode resultCode) {
+        return failed(resultCode, null);
+    }
+
+    public static <T> Result<T> failed(ResultCode resultCode, T data) {
+        // data是错误原因
+        Result<T> result = new Result<>();
+        result.setSuccess(false);
+        result.setCode(resultCode.getCode());
+        result.setMsg(resultCode.getMsg());
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> Result<T> judge(boolean status) {
+        if (status) {
+            return success();
+        } else {
+            return failed();
+        }
+    }
 }
 ```
 
-```xml
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
-                        <!-- Classpath elements to supply as annotation processor path. If specified, the compiler   -->
-                        <!-- will detect annotation processors only in those classpath elements. If omitted, the     -->
-                        <!-- default classpath is used to detect annotation processors. The detection itself depends -->
-                        <!-- on the configuration of annotationProcessors.                                           -->
-                        <!--                                                                                         -->
-                        <!-- According to this documentation, the provided dependency processor is not considered!   -->
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.mapstruct</groupId>
-                                <artifactId>mapstruct-processor</artifactId>
-                                <version>${mapstruct.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>0.2.0</version>
-                            </path>
-                        </annotationProcessorPaths>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
-```
+## 全局常量
 
-## swagger注解
+## Hutool工具类
+
+## 全局异常类
+
+```java
+// 框架异常基类
+public class MaculaException extends RuntimeException {
+
+    public MaculaException() {
+        super();
+    }
+
+    public MaculaException(String message) {
+        super(message);
+    }
+
+    public MaculaException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MaculaException(Throwable cause) {
+        super(cause);
+    }
+}
+
+// REST服务层异常
+public class ApiException extends MaculaException {
+    private ResultCode resultCode;
+
+    public ApiException(ResultCode resultCode, String exceptionMessage) {
+        // message用于用户设置抛出错误详情，例如：当前价格-5，小于0
+        super(exceptionMessage);
+        this.resultCode = resultCode;
+    }
+
+    public ApiException(String exceptionMessage) {
+        super(exceptionMessage);
+        this.resultCode = ApiResultCode.API_ERROR;
+    }
+
+    public ResultCode getResultCode() {
+        return this.resultCode;
+    }
+}
+```
 

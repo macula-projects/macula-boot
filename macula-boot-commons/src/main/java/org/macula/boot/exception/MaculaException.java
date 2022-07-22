@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022 Macula
  *   macula.dev, China
@@ -16,29 +15,29 @@
  * limitations under the License.
  */
 
-package org.macula.boot.api;
+package org.macula.boot.exception;
 
 /**
- * {@code ApiException} 是服务层对外的统一异常
+ * {@code MaculaException} 框架异常基类
  *
  * @author rain
- * @since 2022/6/29 10:37
+ * @since 2022/7/6 09:05
  */
-public class ApiException extends RuntimeException {
-    private ResultCode resultCode;
+public class MaculaException extends RuntimeException {
 
-    public ApiException(ResultCode resultCode, String exceptionMessage) {
-        // message用于用户设置抛出错误详情，例如：当前价格-5，小于0
-        super(exceptionMessage);
-        this.resultCode = resultCode;
+    public MaculaException() {
+        super();
     }
 
-    public ApiException(String exceptionMessage) {
-        super(exceptionMessage);
-        this.resultCode = ApiResultCode.API_ERROR;
+    public MaculaException(String message) {
+        super(message);
     }
 
-    public ResultCode getResultCode() {
-        return this.resultCode;
+    public MaculaException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MaculaException(Throwable cause) {
+        super(cause);
     }
 }

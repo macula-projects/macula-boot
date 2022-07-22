@@ -11,9 +11,16 @@
 
     <artifactId>macula-example-provider</artifactId>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.macula.boot</groupId>
+            <artifactId>macula-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.macula.boot</groupId>
+            <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
