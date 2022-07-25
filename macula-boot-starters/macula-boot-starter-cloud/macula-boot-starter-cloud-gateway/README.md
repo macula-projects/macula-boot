@@ -7,6 +7,8 @@
 ### 添加了安全处理，根据用户的角色和URL所需角色对比，控制URL权限
 
 ```yaml
+spring.security.oauth2.resourceserver
+
 macula:
   security:
     ignore-urls: /usr/xxx,/bbb/xxx  # 忽略认证的路径，Ant Path格式

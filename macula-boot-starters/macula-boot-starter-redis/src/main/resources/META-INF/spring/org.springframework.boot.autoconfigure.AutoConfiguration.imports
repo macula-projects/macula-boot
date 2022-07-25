@@ -1,1 +1,1 @@
-org.macula.boot.starter.redis.config.RedissonAutoConfiguration
+dev.macula.boot.starter.redis.config.RedissonAutoConfiguration
