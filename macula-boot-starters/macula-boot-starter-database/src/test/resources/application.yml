@@ -8,4 +8,4 @@ spring:
 # Logger Config
 logging:
   level:
-    org.macula.boot.starter.database.test: debug
+    dev.macula.boot.starter.database.test: debug

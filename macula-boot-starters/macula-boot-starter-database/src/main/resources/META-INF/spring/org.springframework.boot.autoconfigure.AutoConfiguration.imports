@@ -1,1 +1,1 @@
-org.macula.boot.starter.database.config.MyBatisPlusAutoConfiguration
+dev.macula.boot.starter.database.config.MyBatisPlusAutoConfiguration

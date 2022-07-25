@@ -1,0 +1,34 @@
+server:
+  port: 8090
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: 127.0.0.1:8848
+        # namespace:
+        # group:
+
+feign:
+  client:
+    config:
+      default:
+        logger-level: FULL
+
+seata:
+  enabled: false
+
+springdoc:
+  api-docs:
+    enabled: true  # 默认是true，用于开关API文档
+  swagger-ui:
+    enabled: true # 默认是true，用于开关API UI
+
+logging:
+  level:
+    com.alibaba.nacos.client: error
+    dev.macula.example.consumer: debug
