@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.macula.boot</groupId>
-    <artifactId>macula-boot-dependencies</artifactId>
+    <artifactId>macula-boot-parent</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
     <description>Based on Spring Boot and Spring Cloud dependencies</description>
@@ -19,6 +19,13 @@
 
     <properties>
         <revision>5.0.0-SNAPSHOT</revision>
+        <java.version>1.8</java.version>
+        <resource.delimiter>@</resource.delimiter>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.1.0</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.6.0-2021.0.3</spring-cloud-tencent.version>
@@ -330,7 +337,7 @@
     <developers>
         <developer>
             <name>rainsoft</name>
-            <email>rainwzp@ustc.edu</email>
+            <email>rainsoft@163.com</email>
         </developer>
     </developers>
 
@@ -339,16 +346,6 @@
         <developerConnection>scm:git:git@github.com:macula-projects/macula-boot.git</developerConnection>
         <url>https://github.com/macula-projects/macula-boot</url>
     </scm>
-
-    <repositories>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <!-- snapshotRepository与repository中的id一定要与maven setting.xml中server的id保持一致！ -->
     <distributionManagement>
