@@ -17,11 +17,16 @@
 
 package dev.macula.example.consumer.controller;
 
+import dev.macula.example.consumer.feign.GapiService;
+import dev.macula.example.consumer.vo.PoBaseDto;
+import dev.macula.example.consumer.vo.PoBaseResult;
 import dev.macula.example.consumer.vo.UserResult;
 import lombok.AllArgsConstructor;
 import dev.macula.example.consumer.feign.Provider1Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +42,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/consumer")
 public class ConsumerController {
 
+    @Autowired
     private Provider1Service provider1Service;
+
+    @Autowired
+    private GapiService gapiService;
 
     @GetMapping("/echo")
     public String echo() {
@@ -48,4 +57,11 @@ public class ConsumerController {
     public UserResult getUser() {
         return provider1Service.getUser();
     }
+
+    @PostMapping("/updateEvaluationStatus")
+    public PoBaseResult updateEvaluationStatus(@RequestBody PoBaseDto poBaseDto) {
+        PoBaseResult poBaseResult = gapiService.updateEvaluationStatus(poBaseDto);
+        return poBaseResult;
+    }
+
 }
