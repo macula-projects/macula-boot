@@ -26,15 +26,15 @@ public interface IdGenerator {
     /**
      * get next id
      *
-     * @return
+     * @return id
      */
     Long nextId();
 
     /**
      * get next id batch
      *
-     * @param batchSize
-     * @return
+     * @param batchSize batch size
+     * @return list of id
      */
     List<Long> nextId(Integer batchSize);
 }

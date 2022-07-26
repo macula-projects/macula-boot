@@ -1,5 +1,6 @@
 package dev.macula.example.consumer.feign.configuration;
 
+import dev.macula.boot.constants.SecurityConstants;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.apache.commons.codec.digest.HmacUtils;
@@ -40,7 +41,7 @@ public class GapiConfiguration implements RequestInterceptor {
         // HMAC 授权
         String authorization = "hmac username=\"" + CUSTOMER_USERNAME + "\", algorithm=\"hmac-sha256\", headers=\"date request-line digest\", signature=\"" + signature + "\"";
 
-        requestTemplate.header("Authorization", authorization);
+        requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
         requestTemplate.header("Date", date);
         requestTemplate.header("Digest", digest);
     }

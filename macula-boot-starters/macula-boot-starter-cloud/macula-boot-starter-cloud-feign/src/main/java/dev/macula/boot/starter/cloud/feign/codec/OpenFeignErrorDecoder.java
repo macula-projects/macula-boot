@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.cloud.feign.codec;
 
 import cn.hutool.json.JSONUtil;
+import dev.macula.boot.api.ApiResultCode;
 import dev.macula.boot.api.Result;
 import dev.macula.boot.exception.BizException;
 import feign.Response;
@@ -49,18 +50,21 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
         log.error("feign client error,response is {}:", response);
         try {
             // 获取数据
-            // String errorContent = IOUtils.toString(response.body().asInputStream());
             String body = Util.toString(response.body().asReader(Charset.defaultCharset()));
 
-            Result<?> resultData = JSONUtil.toBean(body, Result.class);
-            if (!resultData.isSuccess()) {
-                String errMsg = "Feign提供方异常：";
-                if (resultData.getData() != null && !"null".equals(resultData.getData().toString())) {
-                    errMsg = resultData.getData().toString();
-                } else {
-                    errMsg += resultData.getMsg();
+            try {
+                Result<?> resultData = JSONUtil.toBean(body, Result.class);
+                if (!resultData.isSuccess()) {
+                    String errMsg = "Feign提供方异常：";
+                    if (resultData.getData() != null && !"null".equals(resultData.getData().toString())) {
+                        errMsg = resultData.getData().toString();
+                    } else {
+                        errMsg += resultData.getMsg();
+                    }
+                    return new BizException(errMsg);
                 }
-                return new BizException(errMsg);
+            } catch (Exception ex) {
+                return new BizException(body);
             }
 
         } catch (IOException e) {

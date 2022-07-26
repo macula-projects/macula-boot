@@ -14,6 +14,10 @@ spring:
         # group:
 
 feign:
+  okhttp:
+    enabled: true
+  httpclient:
+    enabled: false
   client:
     config:
       default:

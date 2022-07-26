@@ -22,7 +22,7 @@
     <parent>
         <artifactId>macula-boot-starter-cloud</artifactId>
         <groupId>dev.macula.boot</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

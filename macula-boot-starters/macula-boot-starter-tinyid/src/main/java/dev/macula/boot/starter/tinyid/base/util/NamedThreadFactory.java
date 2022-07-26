@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @Author du_imba
+ * @author du_imba
  */
 public class NamedThreadFactory implements ThreadFactory {
 

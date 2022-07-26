@@ -22,7 +22,7 @@ import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 
 /**
  * @author lengleng
- * @date 2020/9/25
+ * @since 2020/9/25
  * <p>
  * 唯一标志处理器
  */
