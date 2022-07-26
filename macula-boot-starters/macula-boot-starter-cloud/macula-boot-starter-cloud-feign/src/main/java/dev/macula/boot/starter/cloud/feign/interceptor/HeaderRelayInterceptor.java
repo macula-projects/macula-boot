@@ -52,7 +52,7 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
 
             // 传递Gateway生成的Authorization头
             String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
-            if (!StringUtils.hasText(token)) {
+            if (StringUtils.hasText(token)) {
                 template.header(SecurityConstants.AUTHORIZATION_KEY, token);
             }
         }
