@@ -166,12 +166,6 @@
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
                         <version>1.2.1</version>
-                        <configuration>
-                            <!-- 避免IDE将 .flattened-pom.xml 自动识别为功能模块 -->
-                            <flattenedPomFilename>flattened.xml</flattenedPomFilename>
-                            <updatePomFile>true</updatePomFile>
-                            <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>flatten</id>
