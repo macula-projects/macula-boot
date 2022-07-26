@@ -1,6 +1,7 @@
 .gradle
 /build/
 target
+flattened.xml
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###

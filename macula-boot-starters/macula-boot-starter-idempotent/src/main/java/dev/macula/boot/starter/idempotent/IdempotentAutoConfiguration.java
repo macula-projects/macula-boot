@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * @author lengleng
- * @date 2020/9/25
+ * @since 2020/9/25
  * <p>
  * 幂等插件初始化
  */
@@ -38,6 +38,8 @@ public class IdempotentAutoConfiguration {
     /**
      * 切面 拦截处理所有 @Idempotent
      *
+     * @param redisson    Redisson连接
+     * @param keyResolver Key解析器
      * @return Aspect
      */
     @Bean

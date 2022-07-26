@@ -17,9 +17,11 @@
 
 package dev.macula.boot.starter.cloud.feign.interceptor;
 
+import dev.macula.boot.constants.SecurityConstants;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import dev.macula.boot.constants.GlobalConstants;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -40,19 +42,18 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (null != attributes) {
             HttpServletRequest request = attributes.getRequest();
-            Enumeration<String> headerNames = request.getHeaderNames();
-            if (headerNames != null) {
-                while (headerNames.hasMoreElements()) {
-                    String name = headerNames.nextElement();
-                    String values = request.getHeader(name);
-                    template.header(name, values);
-                }
-            }
 
             // 微服务之间传递的唯一标识,区分大小写所以通过httpServletRequest获取
-            if (request.getHeader(GlobalConstants.FEIGN_REQ_ID) == null) {
-                String sid = String.valueOf(UUID.randomUUID());
-                template.header(GlobalConstants.FEIGN_REQ_ID, sid);
+            String sid = request.getHeader(GlobalConstants.FEIGN_REQ_ID);
+            if (!StringUtils.hasText(sid)) {
+                sid = String.valueOf(UUID.randomUUID());
+            }
+            template.header(GlobalConstants.FEIGN_REQ_ID, sid);
+
+            // 传递Gateway生成的Authorization头
+            String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
+            if (!StringUtils.hasText(token)) {
+                template.header(SecurityConstants.AUTHORIZATION_KEY, token);
             }
         }
     }
