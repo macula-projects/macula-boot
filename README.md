@@ -17,9 +17,10 @@
 13. macula-boot-starter-powerjob
 14. macula-boot-starter-cloud
     1. macula-boot-starter-feign
-    2. macula-boot-starter-seata
-    3. macula-boot-starter-gateway
-    4. macula-boot-starter-alibaba
+    2. macula-boot-starter-gateway
+    3. macula-boot-starter-alibaba
+    4. macula-boot-starter-alibaba-scg
     5. macula-boot-starter-tencent
-    6. macula-boot-starter-tsf
-    7. macula-boot-starter-femas
+    6. macula-boot-starter-tecent-scg
+    7. macula-boot-starter-tsf
+    8. macula-boot-starter-tsf-scg
