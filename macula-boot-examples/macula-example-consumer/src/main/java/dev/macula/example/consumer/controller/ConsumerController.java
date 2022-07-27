@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -60,8 +61,12 @@ public class ConsumerController {
 
     @PostMapping("/updateEvaluationStatus")
     public PoBaseResult updateEvaluationStatus(@RequestBody PoBaseDto poBaseDto) {
-        PoBaseResult poBaseResult = gapiService.updateEvaluationStatus(poBaseDto);
-        return poBaseResult;
+        return gapiService.updateEvaluationStatus(poBaseDto);
+    }
+
+    @GetMapping("/getOrderDetail")
+    public PoBaseResult getOrderDetail(@RequestParam("poNo") String poNo) {
+        return gapiService.getOrderDetail2Result(poNo);
     }
 
 }
