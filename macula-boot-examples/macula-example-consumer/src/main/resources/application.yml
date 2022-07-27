@@ -30,6 +30,10 @@ springdoc:
   swagger-ui:
     enabled: true # 默认是true，用于开关API UI
 
+gapi:
+  username: applicationA
+  secret: 0UXNHZGKPUNUIJMVQRURULAEG2M0Y96R
+
 logging:
   level:
     com.alibaba.nacos.client: error
