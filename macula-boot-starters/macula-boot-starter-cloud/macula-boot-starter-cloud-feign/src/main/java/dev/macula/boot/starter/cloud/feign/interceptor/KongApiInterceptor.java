@@ -21,6 +21,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.digest.HMac;
 import cn.hutool.crypto.digest.HmacAlgorithm;
 import dev.macula.boot.constants.SecurityConstants;
+import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.AllArgsConstructor;
@@ -47,26 +48,32 @@ public class KongApiInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
-        // 时间
         String date = RFC_7231_FORMATTER.format(ZonedDateTime.now(UTC));
-
-        // 请求体摘要
-        MessageDigest messageDigest = null;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        byte[] hash = messageDigest.digest(requestTemplate.body());
-        String digest = "SHA-256=" + Base64.encode(hash);
-        // 签名，计算方法为 hmac_sha_256(key, 日期 + 方法 + 路径 + 摘要)
-        HMac hmacSha256 = new HMac(HmacAlgorithm.HmacSHA256, secret.getBytes());
-        String signature = hmacSha256.digestBase64("date: " + date + "\n" + requestTemplate.method() + " " + requestTemplate.url() + " HTTP/1.1\ndigest: " + digest, false);
-        // HMAC 授权
-        String authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line digest\", signature=\"" + signature + "\"";
-
-        requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
         requestTemplate.header("Date", date);
-        requestTemplate.header("Digest", digest);
+        // 签名，计算方法为 hmac_sha_256(key, 日期 + 方法 + 路径)
+        HMac hmacSha256 = new HMac(HmacAlgorithm.HmacSHA256, secret.getBytes());
+        String authorization = null;
+        String method = requestTemplate.method();
+        if (Request.HttpMethod.POST.name().equals(method)) {
+            // 请求体摘要
+            MessageDigest messageDigest = null;
+            try {
+                messageDigest = MessageDigest.getInstance("SHA-256");
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            byte[] hash = messageDigest.digest(requestTemplate.body());
+            String digest = "SHA-256=" + Base64.encode(hash);
+            String signature = hmacSha256.digestBase64("date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1\ndigest: " + digest, false);
+            // HMAC 授权
+            authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line digest\", signature=\"" + signature + "\"";
+            requestTemplate.header("Digest", digest);
+        } else if (Request.HttpMethod.GET.name().equals(method)) {
+            String signature = hmacSha256.digestBase64("date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1", false);
+            authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line\", signature=\"" + signature + "\"";
+        }
+        if (authorization != null) {
+            requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
+        }
     }
 }
