@@ -329,7 +329,6 @@
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -440,7 +439,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
-                        <version>1.2.1</version>
+                        <!--<version>1.2.7</version>-->
                         <configuration>
                             <!-- 避免IDE将 .flattened-pom.xml 自动识别为功能模块 -->
                             <flattenedPomFilename>flattened.xml</flattenedPomFilename>
@@ -468,5 +467,6 @@
             </build>
         </profile>
     </profiles>
+
 
 </project>
