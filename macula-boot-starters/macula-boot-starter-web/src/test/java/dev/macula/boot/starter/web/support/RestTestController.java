@@ -43,6 +43,7 @@ public class RestTestController {
         dto.setDateTime(new Date());
         dto.setLocalDateTime(LocalDateTime.now());
         dto.setZonedDateTime(ZonedDateTime.now());
+        dto.setMobile("13822132359");
         return dto;
     }
 
