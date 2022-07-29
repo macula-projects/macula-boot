@@ -39,6 +39,8 @@ import java.lang.annotation.Target;
 public @interface Sensitive {
     /**
      * 脱敏的类型,默认手机号
+     *
+     * @return 返回脱敏类型
      */
     Type value();
 

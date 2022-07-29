@@ -19,6 +19,9 @@ package dev.macula.boot.starter.web.utils;
 
 import cn.hutool.core.util.StrUtil;
 
+/**
+ * @author rain
+ */
 public class SensitiveUtil {
 
     public static String ASTERISK = "*";
@@ -79,7 +82,7 @@ public class SensitiveUtil {
     }
 
     /**
-     * [地址] 只显示到地区，不显示详细地址；我们要对个人信息增强保护<例子：广东省广州市天河区****>
+     * [地址] 只显示到地区，不显示详细地址；我们要对个人信息增强保护（例子：广东省广州市天河区****）
      *
      * @param address 地址
      * @return 脱敏地址
@@ -93,7 +96,7 @@ public class SensitiveUtil {
 
 
     /**
-     * [用户名] 只显示第一位 <例子：黄**>
+     * [用户名] 只显示第一位 （例子：黄**）
      *
      * @param username 用户名
      * @return 脱敏用户名
@@ -106,7 +109,7 @@ public class SensitiveUtil {
     }
 
     /**
-     * [固定电话] 后四位，其他隐藏<例子：****1234>
+     * [固定电话] 后四位，其他隐藏（例子：****1234）
      *
      * @param num 固定电话
      * @return 脱敏固定电话
@@ -119,7 +122,7 @@ public class SensitiveUtil {
     }
 
     /**
-     * [电子邮箱] 邮箱前缀仅显示第一个字母，前缀其他隐藏，用星号代替，@及后面的地址显示<例子:g**@163.com>
+     * [电子邮箱] 邮箱前缀仅显示第一个字母，前缀其他隐藏，用星号代替，@及后面的地址显示（例子:g**@163.com）
      *
      * @param email 电子邮箱
      * @return 脱敏电子邮箱

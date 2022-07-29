@@ -42,16 +42,12 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     private int endExclude;
     private int overlayRepeat;
 
-    public SensitiveSerializer() {
-    }
-
     public SensitiveSerializer(final Sensitive sensitive) {
         this.type = sensitive.value();
         this.startInclude = sensitive.startInclude();
         this.endExclude = sensitive.endExclude();
         this.overlayRepeat = sensitive.overlayRepeat();
     }
-
 
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
