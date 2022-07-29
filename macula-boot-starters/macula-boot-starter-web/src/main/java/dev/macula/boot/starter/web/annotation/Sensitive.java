@@ -39,32 +39,28 @@ import java.lang.annotation.Target;
 public @interface Sensitive {
     /**
      * 脱敏的类型,默认手机号
-     *
-     * @return
      */
     Type value();
 
     /**
      * CUSTOM_HIDE/CUSTOM_OVERLAY 时生效
-     * 开始位置（包含）
      *
-     * @return
+     * @return 开始位置（包含）
      */
     int startInclude() default 0;
 
     /**
      * CUSTOM_HIDE/CUSTOM_OVERLAY 时生效
-     * 结束位置（不包含）
      *
-     * @return
+     * @return 结束位置（不包含）
      */
     int endExclude() default 0;
 
 
     /**
-     * CUSTOM_OVERLAY 时生效,*重复的次数
+     * CUSTOM_OVERLAY 时生效
      *
-     * @return
+     * @return *重复的次数
      */
     int overlayRepeat() default 4;
 

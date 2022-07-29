@@ -29,7 +29,7 @@ public class SensitiveUtil {
      * [手机号码] 前3位后4位明码，中间4位掩码用****显示，如138****0000
      *
      * @param mobile 手机号码
-     * @return
+     * @return 脱敏手机号
      */
     public static String handlerMobile(String mobile) {
         if (StrUtil.isEmpty(mobile)) {
@@ -42,7 +42,7 @@ public class SensitiveUtil {
      * [手机号码] 只显示后四位, 如:*8856
      *
      * @param phone 手机号码
-     * @return
+     * @return 脱敏手机号
      */
     public static String handlerPhone(String phone) {
         if (StrUtil.isEmpty(phone)) {
@@ -55,8 +55,8 @@ public class SensitiveUtil {
     /**
      * [身份证号] 前6位后4位明码，中间掩码用***显示，如511623********0537
      *
-     * @param idNum
-     * @return
+     * @param idNum 身份证
+     * @return 脱敏身份证
      */
     public static String handlerIdCard(String idNum) {
         if (StrUtil.isEmpty(idNum)) {
@@ -68,8 +68,8 @@ public class SensitiveUtil {
     /**
      * [银行卡] 前6位后4位明码，中间部分****代替，如622848*********5579
      *
-     * @param cardNum
-     * @return
+     * @param cardNum 银行卡
+     * @return 脱敏银行卡
      */
     public static String handlerBankCard(String cardNum) {
         if (StrUtil.isEmpty(cardNum)) {
@@ -81,7 +81,8 @@ public class SensitiveUtil {
     /**
      * [地址] 只显示到地区，不显示详细地址；我们要对个人信息增强保护<例子：广东省广州市天河区****>
      *
-     * @param address
+     * @param address 地址
+     * @return 脱敏地址
      */
     public static String handlerAddress(String address) {
         if (StrUtil.isEmpty(address)) {
@@ -94,8 +95,8 @@ public class SensitiveUtil {
     /**
      * [用户名] 只显示第一位 <例子：黄**>
      *
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return 脱敏用户名
      */
     public static String handlerUsername(String username) {
         if (StrUtil.isEmpty(username)) {
@@ -106,6 +107,9 @@ public class SensitiveUtil {
 
     /**
      * [固定电话] 后四位，其他隐藏<例子：****1234>
+     *
+     * @param num 固定电话
+     * @return 脱敏固定电话
      */
     public static String handlerFixedPhone(final String num) {
         if (StrUtil.isEmpty(num)) {
@@ -117,8 +121,8 @@ public class SensitiveUtil {
     /**
      * [电子邮箱] 邮箱前缀仅显示第一个字母，前缀其他隐藏，用星号代替，@及后面的地址显示<例子:g**@163.com>
      *
-     * @param email
-     * @return
+     * @param email 电子邮箱
+     * @return 脱敏电子邮箱
      */
     public static String handlerEmail(final String email) {
         if (StrUtil.isEmpty(email)) {
@@ -140,7 +144,7 @@ public class SensitiveUtil {
      * @param overlayRepeat overlay重复的次数
      * @param start         开始位置
      * @param end           结束位置
-     * @return
+     * @return 脱敏后的字符串
      */
     public static String overlay(String str, String overlay, int overlayRepeat, int start, int end) {
         if (StrUtil.isEmpty(str)) {
@@ -189,7 +193,7 @@ public class SensitiveUtil {
      * @param str          字符串
      * @param startInclude 开始位置（包含）
      * @param endExclude   结束位置（不包含）
-     * @param replacedChar
+     * @param replacedChar 要替换的字符
      * @return 替换后的字符串
      */
     public static String hide(String str, int startInclude, int endExclude, char replacedChar) {
