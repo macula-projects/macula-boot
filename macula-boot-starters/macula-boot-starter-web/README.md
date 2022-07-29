@@ -75,3 +75,40 @@ spring:
 ## Validator校验
 
 默认引入了spring-boot-starter-validation，可以在这里继续扩展自定义的validator，比如身份证、电话、邮件等等
+
+## 脱敏
+
+通过使用@Sensitive注解可以令某个字段属性在序列化为JSON时按照一定的规则脱敏，并且预置了如下规则：
+
+* MOBILE：手机号，如：138****2359
+* CHINESE_NAME：中文名 ，如：黄**
+* ID_CARD：身份证号，如：如511623********0537
+* FIXED_PHONE：座机号，如：****1234
+* ADDRESS：地址，如：广东省广州市天河区****
+* EMAIL：电子邮件，如：g**@163.com
+* BANK_CARD：银行卡，如：如622848*********5579
+* CUSTOM_HIDE：自定义，有多少个字符替换成多少个*
+* CUSTOM_RETAIN_HIDE：保留方式隐藏
+* CUSTOM_OVERLAY：自定义,只替换成指定个*
+
+例如：
+
+```java
+
+@Data
+public class DemoDto {
+
+   @NotEmpty
+   private String password;
+
+   @Length(min = 5, max = 25, message = "{key.length}")
+   private String key;
+
+   @Pattern(regexp = "[012]", message = "无效的状态标志")
+   private String state;
+
+   @Sensitive(value = Sensitive.Type.MOBILE)
+   private String mobile;
+
+}
+```
