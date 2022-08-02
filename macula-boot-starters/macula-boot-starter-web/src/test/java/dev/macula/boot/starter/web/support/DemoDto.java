@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.web.support;
 
+import dev.macula.boot.starter.web.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -55,5 +56,8 @@ public class DemoDto {
     private LocalDate localDate;
 
     private ZonedDateTime zonedDateTime;
+
+    @Sensitive(value = Sensitive.Type.MOBILE)
+    private String mobile;
 
 }
