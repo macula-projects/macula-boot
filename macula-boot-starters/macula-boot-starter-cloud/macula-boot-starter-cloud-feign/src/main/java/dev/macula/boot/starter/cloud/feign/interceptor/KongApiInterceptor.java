@@ -73,6 +73,7 @@ public class KongApiInterceptor implements RequestInterceptor {
             authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line\", signature=\"" + signature + "\"";
         }
         if (authorization != null) {
+            requestTemplate.removeHeader(SecurityConstants.AUTHORIZATION_KEY);
             requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
         }
     }
