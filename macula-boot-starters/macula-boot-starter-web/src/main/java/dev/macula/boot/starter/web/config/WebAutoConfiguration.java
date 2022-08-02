@@ -17,9 +17,10 @@
 
 package dev.macula.boot.starter.web.config;
 
-import dev.macula.boot.starter.web.controller.ControllerExceptionAdvice;
-import dev.macula.boot.starter.web.controller.ControllerResponseAdvice;
+import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
+import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -44,12 +45,14 @@ public class WebAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "macula.web.exception-advice", havingValue = "true", matchIfMissing = true)
     public ControllerExceptionAdvice controllerExceptionAdvice() {
         return new ControllerExceptionAdvice();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "macula.web.response-advice", havingValue = "true", matchIfMissing = true)
     public ControllerResponseAdvice controllerResponseAdvice() {
         return new ControllerResponseAdvice();
