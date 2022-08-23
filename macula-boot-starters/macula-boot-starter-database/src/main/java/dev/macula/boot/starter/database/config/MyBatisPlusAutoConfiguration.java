@@ -25,11 +25,17 @@ import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerIntercep
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import dev.macula.boot.starter.database.handler.AuditMetaObjectHandler;
+import dev.macula.boot.starter.database.handler.CryptoTypeHandler;
+import dev.macula.boot.starter.database.interceptor.DecryptInterceptor;
+import dev.macula.boot.starter.database.interceptor.EncryptInterceptor;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.annotation.PostConstruct;
 
 /**
  * <p>
@@ -64,6 +70,16 @@ public class MyBatisPlusAutoConfiguration {
         BlockAttackInnerInterceptor blockAttackInnerInterceptor = new BlockAttackInnerInterceptor();
         interceptor.addInnerInterceptor(blockAttackInnerInterceptor);
         return interceptor;
+    }
+
+    @Bean
+    public EncryptInterceptor encryptInterceptor(MyBatisPlusProperties properties) {
+        return new EncryptInterceptor(properties);
+    }
+
+    @Bean
+    public DecryptInterceptor decryptInterceptor(MyBatisPlusProperties properties) {
+        return new DecryptInterceptor(properties);
     }
 
     @Bean

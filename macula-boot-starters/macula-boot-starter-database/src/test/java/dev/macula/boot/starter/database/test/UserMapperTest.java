@@ -17,6 +17,8 @@
 
 package dev.macula.boot.starter.database.test;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import dev.macula.boot.starter.database.test.entity.User;
@@ -98,5 +100,23 @@ public class UserMapperTest {
         List<UserVO> vo = userMapper.listById(1L);
         Assertions.assertEquals(1, vo.size());
         Assertions.assertEquals("Jone", vo.get(0).getName());
+    }
+
+    @Test
+    public void testCryptoField() {
+        String email = "rainsoft@xxx.com";
+        User user = new User();
+        user.setAge(20);
+        user.setEmail(email);
+        user.setName("rain.wang");
+        int i = userMapper.insert(user);
+        Assertions.assertTrue(i > 0);
+
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(User::getName, "rain.wang");
+        user = userMapper.selectOne(queryWrapper);
+
+        Assertions.assertEquals(email, user.getEmail());
+        System.out.println("1=======" + user.getId() + " " + user.getEmail() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
     }
 }
