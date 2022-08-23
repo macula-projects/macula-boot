@@ -19,6 +19,7 @@ package dev.macula.boot.starter.database.test.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
+import dev.macula.boot.starter.database.annotation.CryptoField;
 import dev.macula.boot.starter.database.entity.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +45,7 @@ public class User extends BaseEntity {
 
     private Integer age;
 
+    @CryptoField
     private String email;
 
     private SexEnum sex;
