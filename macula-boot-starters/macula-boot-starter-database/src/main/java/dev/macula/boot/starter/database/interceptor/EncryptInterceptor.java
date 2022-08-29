@@ -62,7 +62,7 @@ public class EncryptInterceptor extends AbstractCrypto implements Interceptor {
         // 可以考虑直接在原数据上加密处理，这种方式最简单，弊端是会改变入参的值
         Map<String, String> cryptFieldMap = CryptoFieldUtils.getCryptoMap(null, boundSql.getParameterObject());
         cryptFieldMap.forEach((key, value) -> {
-            boundSql.setAdditionalParameter(key, getAES().encryptBase64(value, CharsetUtil.CHARSET_UTF_8));
+            boundSql.setAdditionalParameter(key, encryptBase64(value));
         });
     }
 

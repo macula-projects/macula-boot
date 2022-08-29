@@ -48,6 +48,12 @@
         <springdoc.version>1.6.9</springdoc.version>
         <powerjob.version>4.0.1</powerjob.version>
         <dubbo.version>2.7.16</dubbo.version>
+        <bouncycastle.version>1.71.1</bouncycastle.version>
+        <aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
+        <qcloud-sdk-oss.version>5.6.99</qcloud-sdk-oss.version>
+        <aws-sdk-oss.version>1.12.289</aws-sdk-oss.version>
+        <minio.version>8.4.2</minio.version>
+        <tika.version>2.4.1</tika.version>
     </properties>
 
     <dependencyManagement>
@@ -328,6 +334,43 @@
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.version}</version>
+            </dependency>
+
+            <!-- Bouncy Castle -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
+            <!-- file storage -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-sdk-oss.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.qcloud</groupId>
+                <artifactId>cos_api</artifactId>
+                <version>${qcloud-sdk-oss.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>${tika.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>${aws-sdk-oss.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
