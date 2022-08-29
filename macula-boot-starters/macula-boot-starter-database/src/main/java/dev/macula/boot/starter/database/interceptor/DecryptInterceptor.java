@@ -54,7 +54,7 @@ public class DecryptInterceptor extends AbstractCrypto implements Interceptor {
                 for (Field cryptField : cryptFields) {
                     Object ciphertext = cryptField.get(obj);
                     if (ciphertext instanceof String && !"".equals(ciphertext)) {
-                        cryptField.set(obj, getAES().decryptStr(ciphertext.toString(), CharsetUtil.CHARSET_UTF_8));
+                        cryptField.set(obj, decryptStr(ciphertext.toString()));
                     }
                 }
             }

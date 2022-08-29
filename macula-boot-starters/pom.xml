@@ -16,6 +16,7 @@
         <module>macula-boot-starter-mapstruct</module>
         <module>macula-boot-starter-tinyid</module>
         <module>macula-boot-starter-database</module>
+        <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-rocketmq</module>
         <module>macula-boot-starter-redis</module>
         <module>macula-boot-starter-cache</module>
