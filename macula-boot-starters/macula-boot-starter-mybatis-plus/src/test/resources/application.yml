@@ -1,0 +1,11 @@
+# DataSource Config
+spring:
+  sql:
+    init:
+      schema-locations: classpath:db/schema-h2.sql
+      data-locations: classpath:db/data-h2.sql
+
+# Logger Config
+logging:
+  level:
+    dev.macula.boot.starter.mp.test: debug

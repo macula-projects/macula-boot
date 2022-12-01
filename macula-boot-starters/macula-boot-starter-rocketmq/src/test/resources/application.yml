@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: rocketmq-demo
+  profiles:
+    active: dev
+
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    namespace: ${spring.profiles.active} # 建议与环境保持一致${spring.profiles.active}
+    group: ${spring.application.name}    # 建议采用${spring.application.name}
+    sendMessageTimeout: 300000
+    enableMsgTrace: true                 # 消息轨迹开启，根据需要来决定
+
+demo:
+  rocketmq:
+    stringRequestTopic: TOPIC_ORDER_TX:tagA
