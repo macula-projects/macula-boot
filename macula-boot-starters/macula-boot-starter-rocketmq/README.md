@@ -162,3 +162,50 @@ public class ProducerApplication implements CommandLineRunner{
     }
 }
 ```
+
+默认情况下，@RocketMQTranscationListenner只能有一个，不过可以指定rocketMQTemplateBeanName来定义多个Listener
+通过@ExtRocketMQTemplateConfiguration扩展RocketMQTemplate
+
+```java
+
+@ExtRocketMQTemplateConfiguration
+public class ExtRocketMQTemplate extends RocketMQTemplate {
+
+}
+```
+
+可以参考[rocketmq-samples](https://github.com/apache/rocketmq-spring/blob/master/rocketmq-spring-boot-samples/rocketmq-produce-demo/src/main/java/org/apache/rocketmq/samples/springboot/ProducerApplication.java)
+
+Macula RocketMQ也提供额外的扩展
+
+- 通过sendMessageInTransaction最后的arg参数传入需要执行的本地事务方法
+- 通过消息头传入check方法的BeanId
+
+```java
+    private RocketMQTemplate rocketMQTemplate;
+
+    private final String BIZ_NAME_ORDER = "BIZ_ORDER";
+
+    private final String TOPIC_ORDER = "TOPIC_ORDER_TX";
+
+    public OrderServiceImpl(RocketMQTemplate template) {
+        this.rocketMQTemplate = template;
+    }
+
+    public void createOrderWithMq(OrderVo order) {
+        TxMqMessage txMsg = new TxMqMessage(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
+        rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg, new Object[] { order });
+    }
+
+    @Transactional
+    @TxMqExecute(BIZ_NAME_ORDER)
+    public void createOrder(OrderVo order) {
+        System.out.println("=============" + order.getOrderNo());
+    }
+
+    @TxMqCheck(BIZ_NAME_ORDER)
+    public boolean checkOrder(String orderNo) {
+        System.out.println("order_no=" + orderNo);
+        return true;
+    }
+```

@@ -17,7 +17,18 @@
         <module>macula-example-provider1</module>
         <module>macula-example-provider2</module>
         <module>macula-example-provider3</module>
+        <module>macula-example-ddd</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-mybatis-plus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
