@@ -18,8 +18,6 @@
         <module>macula-boot-starter-mybatis-plus</module>
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-rocketmq</module>
-        <module>macula-boot-starter-rocketmq-mysql</module>
-        <module>macula-boot-starter-rocketmq-redis</module>
         <module>macula-boot-starter-redis</module>
         <module>macula-boot-starter-cache</module>
         <module>macula-boot-starter-leaderelection</module>
