@@ -1,3 +1,0 @@
-#RocketMQ-MySQL
-
-读取mysql的binlog发送到rocketmq
