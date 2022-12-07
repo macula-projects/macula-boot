@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: macula-boot-starter-leader-demo
+  redis:
+    host: localhost
+    port: 6379
+    redisson:
+      file: classpath:redisson.yml

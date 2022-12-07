@@ -18,10 +18,11 @@
         <module>macula-boot-starter-mybatis-plus</module>
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-rocketmq</module>
-        <module>macula-boot-starter-rocketmq-redis</module>
         <module>macula-boot-starter-rocketmq-mysql</module>
+        <module>macula-boot-starter-rocketmq-redis</module>
         <module>macula-boot-starter-redis</module>
         <module>macula-boot-starter-cache</module>
+        <module>macula-boot-starter-leaderelection</module>
         <module>macula-boot-starter-lock4j</module>
         <module>macula-boot-starter-idempotent</module>
         <module>macula-boot-starter-liteflow</module>
@@ -33,6 +34,7 @@
         <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-dubbo</module>
+
     </modules>
 
     <dependencies>
