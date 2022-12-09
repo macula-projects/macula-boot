@@ -18,6 +18,8 @@
 package dev.macula.example.consumer.controller;
 
 import dev.macula.example.consumer.feign.GapiService;
+import dev.macula.example.consumer.feign.IpaasService;
+import dev.macula.example.consumer.vo.CompanyDto;
 import dev.macula.example.consumer.vo.PoBaseDto;
 import dev.macula.example.consumer.vo.PoBaseResult;
 import dev.macula.example.consumer.vo.UserResult;
@@ -49,6 +51,9 @@ public class ConsumerController {
     @Autowired
     private GapiService gapiService;
 
+    @Autowired
+    private IpaasService ipaasService;
+
     @GetMapping("/echo")
     public String echo() {
         return provider1Service.echo("consumer");
@@ -67,6 +72,16 @@ public class ConsumerController {
     @GetMapping("/getOrderDetail")
     public PoBaseResult getOrderDetail(@RequestParam("poNo") String poNo) {
         return gapiService.getOrderDetail2Result(poNo);
+    }
+
+    @PostMapping("/companies")
+    public String companies(@RequestBody CompanyDto companyDto) {
+        return ipaasService.companies(companyDto);
+    }
+
+    @GetMapping("/listSku")
+    public String listSku(@RequestParam("sku") String sku) {
+        return ipaasService.listSkus(sku);
     }
 
 }
