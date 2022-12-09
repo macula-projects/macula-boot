@@ -34,6 +34,11 @@ gapi:
   username: applicationA
   secret: 0UXNHZGKPUNUIJMVQRURULAEG2M0Y96R
 
+ipaas:
+  username: gbsspo
+  secret: JKW13T2LJBHFYR1XR2SEWIR0TD7S3FAQ
+  appKey: 6350a32457752021cb06c917
+
 logging:
   level:
     com.alibaba.nacos.client: error
