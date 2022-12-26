@@ -18,8 +18,8 @@
 
 package dev.macula.boot.exception;
 
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.ResultCode;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.ResultCode;
 
 /**
  * {@code ApiException} 是服务层对外的统一异常

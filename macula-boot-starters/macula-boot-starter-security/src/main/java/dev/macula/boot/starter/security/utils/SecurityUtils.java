@@ -47,36 +47,6 @@ public class SecurityUtils {
     }
 
     /**
-     * 获取用户ID
-     *
-     * @return
-     */
-    public static Long getUserId() {
-        Long userId = Convert.toLong(getTokenAttributes().get("userId"));
-        return userId;
-    }
-
-    /**
-     * 获取会员ID
-     *
-     * @return
-     */
-    public static Long getMemberId() {
-        Long userId = Convert.toLong(getTokenAttributes().get("memberId"));
-        return userId;
-    }
-
-    /**
-     * 获取用户登录名
-     *
-     * @return username
-     */
-    public static String getUsername() {
-        String username = Convert.toStr(getTokenAttributes().get("username"));
-        return username;
-    }
-
-    /**
      * 获取用户昵称/姓名
      *
      * @return nickname

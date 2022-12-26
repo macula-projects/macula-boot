@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.api;
+package dev.macula.boot.result;
 
 import lombok.Data;
 

@@ -17,16 +17,19 @@
 
 package dev.macula.boot.starter.security.config;
 
-import dev.macula.boot.api.ApiResultCode;
+import cn.hutool.core.convert.Convert;
+import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.security.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import dev.macula.boot.constants.SecurityConstants;
+import lombok.Setter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -63,11 +67,15 @@ import java.util.*;
  */
 
 @RequiredArgsConstructor
+@ConfigurationProperties(prefix = "macula.security")
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.secret:macula_secret$terces_alucam$123456}")
     String jwtSecret;
+
+    @Setter
+    List<String> ignoreUrls = new ArrayList<>();
 
     private final OAuth2ResourceServerProperties properties;
 
@@ -75,6 +83,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // 添加默认忽略的路径
+        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
+
         http.oauth2ResourceServer()
                 .jwt()
                 .decoder(applicationContext.getBean(JwtDecoder.class))
@@ -83,7 +94,12 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
                 .accessDeniedHandler(accessDeniedHandler())
                 .authenticationEntryPoint(authenticationEntryPoint());
 
-        http.authorizeRequests()
+        http.sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()

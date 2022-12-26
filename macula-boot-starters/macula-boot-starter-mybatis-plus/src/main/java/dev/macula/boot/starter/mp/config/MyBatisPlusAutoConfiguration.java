@@ -21,12 +21,11 @@ import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.handler.DataPermissionHandler;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
-import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.*;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
+import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
 import dev.macula.boot.starter.mp.interceptor.DecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.EncryptInterceptor;
 import net.sf.jsqlparser.expression.Expression;
@@ -74,6 +73,9 @@ public class MyBatisPlusAutoConfiguration {
                 return !Arrays.stream(properties.getTenantSuffixes()).anyMatch(suffix -> tableName.endsWith(suffix));
             }
         }));
+
+        // 数据权限
+        interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
 
         // 分页插件
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();

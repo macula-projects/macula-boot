@@ -1,1 +1,1 @@
-dev.macula.boot.starter.security.config.Oauth2ResourceServerAutoConfiguration
+dev.macula.boot.starter.security.config.SecurityAutoConfiguration

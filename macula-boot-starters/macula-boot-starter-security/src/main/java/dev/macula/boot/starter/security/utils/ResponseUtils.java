@@ -18,8 +18,8 @@
 package dev.macula.boot.starter.security.utils;
 
 import cn.hutool.json.JSONUtil;
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.Result;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 
