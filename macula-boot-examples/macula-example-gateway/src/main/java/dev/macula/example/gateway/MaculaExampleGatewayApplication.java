@@ -15,26 +15,22 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.api;
+package dev.macula.example.gateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * 返回码接口
+ * {@code MaculaExampleGatewayApplication} 网关应用
  *
- * @author pangu
+ * @author rain
+ * @since 2022/7/23 14:37
  */
-public interface ResultCode {
-
-    /**
-     * 返回码
-     *
-     * @return String
-     */
-    String getCode();
-
-    /**
-     * 返回消息
-     *
-     * @return String
-     */
-    String getMsg();
+@SpringBootApplication
+@EnableDiscoveryClient
+public class MaculaExampleGatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MaculaExampleGatewayApplication.class, args);
+    }
 }

@@ -38,6 +38,12 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-security</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- For Test -->
         <dependency>
             <groupId>javax.servlet</groupId>

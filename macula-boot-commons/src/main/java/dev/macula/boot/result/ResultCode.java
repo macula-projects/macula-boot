@@ -15,13 +15,26 @@
  * limitations under the License.
  */
 
-package dev.macula.example.ddd.interfaces.rest;
+package dev.macula.boot.result;
 
 /**
- * {@code UserController} 用户入口
+ * 返回码接口
  *
- * @author rain
- * @since 2022/11/15 10:50
+ * @author pangu
  */
-public class UserController {
+public interface ResultCode {
+
+    /**
+     * 返回码
+     *
+     * @return String
+     */
+    String getCode();
+
+    /**
+     * 返回消息
+     *
+     * @return String
+     */
+    String getMsg();
 }

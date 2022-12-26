@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.security.config;
+package dev.macula.boot.annotation;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * <p>
- * <b>Oauth2ResourceServerAutoConfiguration</b> Oauth2自动配置
- * </p>
+ * {@code Default} MapperStruct指定默认的构造
  *
- * @author Rain
- * @since 2022-02-09
+ * @author rain
+ * @since 2022/12/23 11:23
  */
-@AutoConfiguration
-@Import({ResourceServerConfiguration.class})
-public class Oauth2ResourceServerAutoConfiguration {
-
+@Target(ElementType.CONSTRUCTOR)
+@Retention(RetentionPolicy.CLASS)
+public @interface Default {
 }

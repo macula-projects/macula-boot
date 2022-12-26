@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-package dev.macula.example.gateway;
+package dev.macula.boot.starter.security.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
- * {@code GatewayApplication} 网关应用
+ * <p>
+ * <b>SecurityAutoConfiguration</b> 安全配置
+ * </p>
  *
- * @author rain
- * @since 2022/7/23 14:37
+ * @author Rain
+ * @since 2022-02-09
  */
-@SpringBootApplication
-@EnableDiscoveryClient
-public class GatewayApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(GatewayApplication.class, args);
-    }
+@AutoConfiguration
+@Import({ResourceServerConfiguration.class})
+public class SecurityAutoConfiguration {
+
 }

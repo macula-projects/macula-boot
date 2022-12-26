@@ -33,6 +33,17 @@ public interface GlobalConstants {
     Integer STATUS_YES = 1;
 
     /**
+     * 根部门ID
+     */
+    Long ROOT_NODE_ID = 0l;
+
+
+    /**
+     * 系统默认密码
+     */
+    String DEFAULT_USER_PASSWORD = "123456";
+
+    /**
      * 超级管理员角色编码
      */
     String ROOT_ROLE_CODE = "ROOT";
@@ -48,5 +59,4 @@ public interface GlobalConstants {
     String BTN_PERM_ROLES_KEY = "system:perm_roles_rule:btn";
 
     String FEIGN_REQ_ID = "FEIGN_REQ_ID";
-
 }

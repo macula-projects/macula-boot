@@ -15,22 +15,24 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.mp.utils;
+package dev.macula.boot.base;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import dev.macula.boot.api.Search;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
- * <p>
- * <b>PageUtils</b> 分页实体构造器
- * </p>
+ * {@code BasePageQuery} 带分页查询的基类
  *
- * @author Rain
- * @since 2022-01-27
+ * @author rain
+ * @since 2022/12/21 13:47
  */
-public class PageUtils {
-    public static <T> IPage<T> getPage(Search search) {
-        return new Page<T>(search.getCurrent(), search.getSize());
-    }
+@Data
+@Schema
+public class BasePageQuery {
+
+    @Schema(description = "页码", example = "1")
+    private int pageNum = 1;
+
+    @Schema(description = "每页记录数", example = "10")
+    private int pageSize = 10;
 }

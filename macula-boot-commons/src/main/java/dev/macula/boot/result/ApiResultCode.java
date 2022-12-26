@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.api;
+package dev.macula.boot.result;
 
+import dev.macula.boot.result.ResultCode;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -42,7 +43,10 @@ public enum ApiResultCode implements ResultCode, Serializable {
     BIZ_ERROR("10021", "业务异常"),
     SYS_ERROR("10022", "系统异常"),
     VALIDATE_ERROR("10023", "参数校验错误"),
-    RESPONSE_PACK_ERROR("10024", "Response返回包装失败");;
+    RESPONSE_PACK_ERROR("10024", "Response返回包装失败"),
+    FLOW_LIMITING("10051", "限流"),
+    DEGRADATION("10052", "系统降级");
+
     private String code;
 
     private String msg;

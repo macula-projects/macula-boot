@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import cn.hutool.core.convert.Convert;
-import dev.macula.boot.api.ApiResultCode;
+import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.constants.SecurityConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -58,11 +58,7 @@ import java.util.stream.Collectors;
 @ConfigurationProperties(prefix = "macula.security")
 @Configuration
 @RequiredArgsConstructor
-@EnableWebFluxSecurity
 public class ResourceServerConfiguration {
-
-    private static final List<String> DEFAULT_IGNORE_URLS = Arrays.asList("/favicon**");
-
     @Setter
     private List<String> ignoreUrls = new ArrayList<>();
 
@@ -81,7 +77,7 @@ public class ResourceServerConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         // 添加默认忽略的路径
-        ignoreUrls.addAll(DEFAULT_IGNORE_URLS);
+        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
 
         http.oauth2ResourceServer()
                 .opaqueToken()

@@ -25,4 +25,4 @@ logging:
   level:
     com.alibaba.nacos.client: error
     dev.macula.example: debug
-    org.springframework: debug
+    org.springframework: info

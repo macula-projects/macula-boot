@@ -19,8 +19,8 @@ package dev.macula.boot.starter.web.advice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.Result;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;

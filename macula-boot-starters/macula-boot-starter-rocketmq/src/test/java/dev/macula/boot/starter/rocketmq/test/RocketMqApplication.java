@@ -15,23 +15,21 @@
  * limitations under the License.
  */
 
-package dev.macula.example.provider1;
+package dev.macula.boot.starter.rocketmq.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * {@code Provider1Application} is
+ * {@code Application} 启动类
  *
  * @author rain
- * @since 2022/7/22 14:55
+ * @since 2022/11/30 15:05
  */
 
 @SpringBootApplication
-@EnableDiscoveryClient
-public class Provider1Application {
+public class RocketMqApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Provider1Application.class, args);
+        SpringApplication.run(RocketMqApplication.class, args);
     }
 }

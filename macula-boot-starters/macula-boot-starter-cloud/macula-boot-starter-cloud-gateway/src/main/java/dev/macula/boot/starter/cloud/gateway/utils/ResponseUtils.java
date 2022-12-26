@@ -18,8 +18,8 @@
 package dev.macula.boot.starter.cloud.gateway.utils;
 
 import cn.hutool.json.JSONUtil;
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.Result;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;

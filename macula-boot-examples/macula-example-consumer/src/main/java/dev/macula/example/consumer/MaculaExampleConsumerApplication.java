@@ -15,21 +15,24 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.rocketmq.test;
+package dev.macula.example.consumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * {@code Application} 启动类
+ * {@code MaculaConsumerApplication} 消费者演示
  *
  * @author rain
- * @since 2022/11/30 15:05
+ * @since 2022/7/22 22:27
  */
-
 @SpringBootApplication
-public class Application {
+@EnableDiscoveryClient
+@EnableFeignClients
+public class MaculaExampleConsumerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(MaculaExampleConsumerApplication.class, args);
     }
 }

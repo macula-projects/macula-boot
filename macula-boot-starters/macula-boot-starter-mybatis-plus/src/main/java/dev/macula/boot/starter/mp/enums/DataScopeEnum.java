@@ -15,24 +15,38 @@
  * limitations under the License.
  */
 
-package dev.macula.example.consumer;
+package dev.macula.boot.starter.mp.enums;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import dev.macula.boot.base.IBaseEnum;
+import lombok.Getter;
 
 /**
- * {@code ConsumerApplication} 消费者演示
+ * {@code DataScopeEnum} 数据权限范围
  *
  * @author rain
- * @since 2022/7/22 22:27
+ * @since 2022/12/9 09:47
  */
-@SpringBootApplication
-@EnableDiscoveryClient
-@EnableFeignClients
-public class ConsumerApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(ConsumerApplication.class, args);
+public enum DataScopeEnum implements IBaseEnum<Integer> {
+
+    /**
+     * value 越小，数据权限范围越大
+     */
+    ALL(0, "所有数据"),
+    DEPT_AND_SUB(1, "部门及子部门数据"),
+    DEPT(2, "本部门数据"),
+    SELF(3, "本人数据"),
+
+    DEFAULT(9, "默认范围");
+
+
+    @Getter
+    private Integer value;
+
+    @Getter
+    private String label;
+
+    DataScopeEnum(Integer value, String label) {
+        this.value = value;
+        this.label = label;
     }
 }

@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.mp.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import dev.macula.boot.starter.security.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import dev.macula.boot.starter.mp.config.MyBatisPlusProperties;
@@ -57,9 +58,9 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         log.debug("start insert fill ....");
         this.strictInsertFill(metaObject, createTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictInsertFill(metaObject, createByName, String.class, getUserName());
+        this.strictInsertFill(metaObject, createByName, String.class, SecurityUtils.getCurrentUser());
         this.strictInsertFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictInsertFill(metaObject, lastUpdateByName, String.class, getUserName());
+        this.strictInsertFill(metaObject, lastUpdateByName, String.class, SecurityUtils.getCurrentUser());
     }
 
     @Override
@@ -67,7 +68,7 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
         log.debug("start update fill ....");
 
         this.strictUpdateFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictUpdateFill(metaObject, lastUpdateByName, String.class, getUserName());
+        this.strictUpdateFill(metaObject, lastUpdateByName, String.class, SecurityUtils.getCurrentUser());
     }
 
     @Override
@@ -81,17 +82,5 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
             return this;
         }
         return MetaObjectHandler.super.strictFillStrategy(metaObject, fieldName, fieldVal);
-    }
-
-    /**
-     * 获取 spring security 当前的用户名
-     * @return 当前用户名
-     */
-    private String getUserName() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Optional.ofNullable(authentication).isPresent()) {
-            return authentication.getName();
-        }
-        return "*SYSADM";
     }
 }

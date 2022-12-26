@@ -29,9 +29,9 @@ import org.springframework.stereotype.Component;
  * @since 2022/12/3 19:12
  */
 @SpringBootApplication
-public class Application {
+public class LeaderElectionApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(LeaderElectionApplication.class, args);
     }
 
     @Component

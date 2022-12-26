@@ -17,6 +17,9 @@
 
 package dev.macula.boot.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * <p>
  * <b>SecurityConstants</b> 安全相关常量
@@ -26,6 +29,8 @@ package dev.macula.boot.constants;
  * @since 2022-02-20
  */
 public interface SecurityConstants {
+
+    List<String> DEFAULT_IGNORE_URLS = Arrays.asList("/favicon**", "/webjars/**", "/doc.html", "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs");
 
     /**
      * 认证请求头key
@@ -79,52 +84,5 @@ public interface SecurityConstants {
      */
     String AUTHORITIES_KEY = "authorities";
 
-    String GRANT_TYPE_KEY = "grant_type";
-
-    String REFRESH_TOKEN_KEY = "refresh_token";
-
-    String APP_API_PATTERN = "/*/app-i18n-base/**";
-
-    String LOGOUT_PATH = "/youlai-auth/oauth/logout";
-
-    /**
-     * 新增菜单路径,新增不存在的路由会导致系统无法访问，线上禁止新增菜单的操作
-     */
-    String SAVE_MENU_PATH = "/youlai-admin/i18n-base/v1/menus";
-
-    /**
-     * 认证方式
-     */
-    String AUTHENTICATION_METHOD = "authenticationMethod";
-
-    /**
-     * 验证码key前缀
-     */
-    String VALIDATE_CODE_PREFIX = "VALIDATE_CODE:";
-
-    /**
-     * 短信验证码key前缀
-     */
-    String SMS_CODE_PREFIX = "SMS_CODE:";
-
-    /**
-     * 接口文档 Knife4j 测试客户端ID
-     */
-    String TEST_CLIENT_ID = "client";
-
-    /**
-     * 系统管理 web 客户端ID
-     */
-    String ADMIN_CLIENT_ID = "mall-admin-web";
-
-    /**
-     * 移动端（H5/Android/IOS）客户端ID
-     */
-    String APP_CLIENT_ID = "mall-app";
-
-    /**
-     * 小程序端（微信小程序、....） 客户端ID
-     */
-    String WEAPP_CLIENT_ID = "mall-weapp";
 
 }

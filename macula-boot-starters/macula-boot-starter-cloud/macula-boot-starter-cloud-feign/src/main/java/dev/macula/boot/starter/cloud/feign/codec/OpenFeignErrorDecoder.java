@@ -18,8 +18,7 @@
 package dev.macula.boot.starter.cloud.feign.codec;
 
 import cn.hutool.json.JSONUtil;
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.Result;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.exception.BizException;
 import feign.Response;
 import feign.Util;

@@ -17,8 +17,8 @@
 
 package dev.macula.boot.starter.web.advice;
 
-import dev.macula.boot.api.ApiResultCode;
-import dev.macula.boot.api.Result;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
