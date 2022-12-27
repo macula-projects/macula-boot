@@ -28,11 +28,6 @@ package dev.macula.boot.constants;
 public interface GlobalConstants {
 
     /**
-     * 全局状态-是
-     */
-    Integer STATUS_YES = 1;
-
-    /**
      * 根部门ID
      */
     Long ROOT_NODE_ID = 0l;
@@ -53,10 +48,7 @@ public interface GlobalConstants {
      */
     String URL_PERM_ROLES_KEY = "system:perm_roles_rule:url";
 
-    /**
-     * [{按钮权限:[角色编码]},...]
-     */
-    String BTN_PERM_ROLES_KEY = "system:perm_roles_rule:btn";
+    String AUTH_USER_PERMS_KEY = "system:auth:user_perms:";
 
     String FEIGN_REQ_ID = "FEIGN_REQ_ID";
 }
