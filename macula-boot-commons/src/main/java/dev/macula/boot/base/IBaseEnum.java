@@ -26,17 +26,17 @@ import java.util.Objects;
  * 枚举通用接口
  *
  * @author haoxr
- * @date 2022/3/27 12:06
+ * @since 2022/3/27 12:06
  */
 public interface IBaseEnum<T> {
 
     /**
      * 根据值获取枚举
      *
-     * @param value
-     * @param clazz
+     * @param value 枚举值
+     * @param clazz 枚举类型
      * @param <E>   枚举
-     * @return
+     * @return 枚举
      */
     static <E extends Enum<E> & IBaseEnum> E getEnumByValue(Object value, Class<E> clazz) {
         Objects.requireNonNull(value);
@@ -51,10 +51,10 @@ public interface IBaseEnum<T> {
     /**
      * 根据文本标签获取值
      *
-     * @param value
-     * @param clazz
-     * @param <E>
-     * @return
+     * @param value 枚举值
+     * @param clazz 枚举类型
+     * @param <E>   枚举
+     * @return 枚举
      */
     static <E extends Enum<E> & IBaseEnum> String getLabelByValue(Object value, Class<E> clazz) {
         Objects.requireNonNull(value);
@@ -74,10 +74,10 @@ public interface IBaseEnum<T> {
     /**
      * 根据文本标签获取值
      *
-     * @param label
-     * @param clazz
-     * @param <E>
-     * @return
+     * @param label 标签
+     * @param clazz 类型
+     * @param <E> 枚举
+     * @return 枚举
      */
     static <E extends Enum<E> & IBaseEnum> Object getValueByLabel(String label, Class<E> clazz) {
         Objects.requireNonNull(label);
