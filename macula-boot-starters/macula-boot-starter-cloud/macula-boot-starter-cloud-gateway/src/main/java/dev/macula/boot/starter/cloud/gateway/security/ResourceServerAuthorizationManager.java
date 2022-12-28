@@ -80,7 +80,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         }
 
         /*
-         * 鉴权开始，TODO 需要在管理端同步URL权限-角色集合
+         * 鉴权开始
          *
          * 缓存取 [URL权限-角色集合] 规则数据
          * urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]

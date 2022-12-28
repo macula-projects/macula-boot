@@ -24,6 +24,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -90,10 +91,24 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
                 .jwtID(UUID.randomUUID().toString());
+
+        // copy oauth2服务器返回的attribute
         principal.getAttributes().forEach(builder::claim);
+
         // 处理时间
         builder.expirationTime(DateUtil.offsetMonth(new Date(), 12));
         builder.issueTime(new Date());
+
+        // 如果缺少deptId、dataScope、nickname，设置默认值
+        if (!principal.getAttributes().containsKey(SecurityConstants.JWT_NICKNAME_KEY)) {
+            builder.claim(SecurityConstants.JWT_NICKNAME_KEY, principal.getName());
+        }
+        if (!principal.getAttributes().containsKey(SecurityConstants.JWT_DEPTID_KEY)) {
+            builder.claim(SecurityConstants.JWT_DEPTID_KEY, GlobalConstants.ROOT_NODE_ID);
+        }
+        if (!principal.getAttributes().containsKey(SecurityConstants.JWT_DATASCOPE_KEY)) {
+            builder.claim(SecurityConstants.JWT_DATASCOPE_KEY, 0);
+        }
 
         JWTClaimsSet claimsSet = builder.build();
 

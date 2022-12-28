@@ -21,6 +21,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -52,7 +53,7 @@ public class SecurityUtils {
      * @return nickname
      */
     public static String getNickname() {
-        String nickname = Convert.toStr(getTokenAttributes().get("nickname"));
+        String nickname = Convert.toStr(getTokenAttributes().get(SecurityConstants.JWT_NICKNAME_KEY));
         return nickname;
     }
 
@@ -79,7 +80,7 @@ public class SecurityUtils {
      * @return deptId
      */
     public static Long getDeptId() {
-        Long deptId = Convert.toLong(getTokenAttributes().get("deptId"));
+        Long deptId = Convert.toLong(getTokenAttributes().get(SecurityConstants.JWT_DEPTID_KEY));
         return deptId;
     }
 
@@ -89,7 +90,7 @@ public class SecurityUtils {
      * @return DataScope
      */
     public static Integer getDataScope() {
-        Integer dataScope = Convert.toInt(getTokenAttributes().get("dataScope"));
+        Integer dataScope = Convert.toInt(getTokenAttributes().get(SecurityConstants.JWT_DATASCOPE_KEY));
         return dataScope;
     }
 
