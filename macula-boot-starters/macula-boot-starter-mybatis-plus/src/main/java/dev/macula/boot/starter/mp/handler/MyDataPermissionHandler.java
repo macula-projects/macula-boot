@@ -37,17 +37,11 @@ import java.lang.reflect.Method;
  * {@code DataPermissionHandler} 数据权限控制器
  *
  * @author <a href="mailto:2256222053@qq.com">zc</a>
- * @date 2021-12-10 13:28
+ * @since 2021-12-10 13:28
  */
 @Slf4j
 public class MyDataPermissionHandler implements DataPermissionHandler {
 
-    /**
-     * 构建过滤条件
-     *
-     * @param where 当前查询条件
-     * @return 构建后查询条件
-     */
     @SneakyThrows
     public static Expression dataScopeFilter(String deptAlias, String deptIdColumnName, String userAlias, String userIdColumnName, Expression where) {
 
