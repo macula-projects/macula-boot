@@ -42,37 +42,11 @@ public interface SecurityConstants {
      */
     String TOKEN_PREFIX = "Bearer ";
 
+    String JWT_NICKNAME_KEY = "nickname";
 
-    /**
-     * Basic认证前缀
-     */
-    String BASIC_PREFIX = "Basic ";
+    String JWT_DATASCOPE_KEY = "dataScope";
 
-    /**
-     * JWT载体key
-     */
-    String JWT_PAYLOAD_KEY = "payload";
-
-    /**
-     * JWT ID 唯一标识
-     */
-    String JWT_JTI = "jti";
-
-    /**
-     * JWT ID 唯一标识
-     */
-    String JWT_EXP = "exp";
-
-    /**
-     * 黑名单token前缀
-     */
-    String TOKEN_BLACKLIST_PREFIX = "auth:token:blacklist:";
-
-    String USER_ID_KEY = "userId";
-
-    String USER_NAME_KEY = "username";
-
-    String CLIENT_ID_KEY = "client_id";
+    String JWT_DEPTID_KEY = "deptId";
 
     /**
      * JWT存储权限前缀

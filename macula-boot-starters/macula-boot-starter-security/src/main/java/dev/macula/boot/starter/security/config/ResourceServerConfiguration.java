@@ -18,14 +18,15 @@
 package dev.macula.boot.starter.security.config;
 
 import cn.hutool.core.convert.Convert;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.security.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
-import dev.macula.boot.constants.SecurityConstants;
 import lombok.Setter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
@@ -37,6 +38,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -54,7 +56,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -68,6 +73,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @ConfigurationProperties(prefix = "macula.security")
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {
 
