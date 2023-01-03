@@ -17,16 +17,8 @@
 
 package dev.macula.boot.starter.security.service;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
-import dev.macula.boot.constants.GlobalConstants;
-import dev.macula.boot.starter.security.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.PatternMatchUtils;
-
-import java.util.Set;
 
 /**
  * {@code PermissionService} 鉴权服务，用于校验按钮权限标识，可用在Controller方法的注解中
@@ -39,26 +31,26 @@ import java.util.Set;
 public class PermissionService {
 
     // TODO 这里的redis要指向system模块
-    private final RedisTemplate redisTemplate;
-
-    public boolean hasPermission(String perm) {
-
-        if (StrUtil.isBlank(perm)) {
-            return false;
-        }
-
-        if (SecurityUtils.isRoot()) {
-            return true;
-        }
-
-        String userName = SecurityUtils.getCurrentUser();
-
-        Set<String> perms = (Set<String>) redisTemplate.opsForValue().get(GlobalConstants.AUTH_USER_PERMS_KEY + userName);
-
-        if (CollectionUtil.isEmpty(perms)) {
-            return false;
-        }
-        return perms.stream().anyMatch(item -> PatternMatchUtils.simpleMatch(perm, item));
-    }
+//    private final RedisTemplate redisTemplate;
+//
+//    public boolean hasPermission(String perm) {
+//
+//        if (StrUtil.isBlank(perm)) {
+//            return false;
+//        }
+//
+//        if (SecurityUtils.isRoot()) {
+//            return true;
+//        }
+//
+//        String userName = SecurityUtils.getCurrentUser();
+//
+//        Set<String> perms = (Set<String>) redisTemplate.opsForValue().get(GlobalConstants.AUTH_USER_PERMS_KEY + userName);
+//
+//        if (CollectionUtil.isEmpty(perms)) {
+//            return false;
+//        }
+//        return perms.stream().anyMatch(item -> PatternMatchUtils.simpleMatch(perm, item));
+//    }
 }
 
