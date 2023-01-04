@@ -32,6 +32,9 @@
         <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-dubbo</module>
+        <module>macula-boot-starter-system</module>
+        <module>macula-boot-starter-sender</module>
+
 
     </modules>
 
