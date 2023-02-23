@@ -17,9 +17,9 @@
 
 package dev.macula.boot.starter.tinyid.service.impl;
 
-import dev.macula.boot.starter.tinyid.config.TinyIdProperties;
 import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
 import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
+import dev.macula.boot.starter.tinyid.config.TinyIdProperties;
 import dev.macula.boot.starter.tinyid.utils.TinyIdHttpUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class HttpSegmentIdServiceImpl implements SegmentIdService {
     private static final Logger logger = Logger.getLogger(HttpSegmentIdServiceImpl.class.getName());
-    private static String serverUrl = "http://{0}/tinyid/id/nextSegmentIdSimple?token={1}&bizType=";
+    private static String serverUrl = "http://{0}/tinyid/api/v1/id/nextSegmentIdSimple?token={1}&bizType=";
     private TinyIdProperties properties;
     private List<String> serverList;
 

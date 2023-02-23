@@ -19,19 +19,14 @@ package dev.macula.example.consumer.controller;
 
 import dev.macula.example.consumer.feign.GapiService;
 import dev.macula.example.consumer.feign.IpaasService;
+import dev.macula.example.consumer.feign.Provider1Service;
 import dev.macula.example.consumer.vo.CompanyDto;
 import dev.macula.example.consumer.vo.PoBaseDto;
 import dev.macula.example.consumer.vo.PoBaseResult;
 import dev.macula.example.consumer.vo.UserResult;
 import lombok.AllArgsConstructor;
-import dev.macula.example.consumer.feign.Provider1Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * {@code ConsumerController} 消费者演示
@@ -42,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/consumer")
+@RequestMapping("/api/v1/consumer")
 public class ConsumerController {
 
     @Autowired

@@ -21,7 +21,9 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
-import dev.macula.boot.constants.SecurityConstants;
+import dev.macula.boot.result.Result;
+import dev.macula.boot.starter.cloud.gateway.utils.GatewayConstant;
+import dev.macula.boot.starter.cloud.gateway.utils.HmacUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -51,6 +53,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
     private final RedisTemplate redisTemplate;
 
+    // 给前端个人的API（只认证Token，不鉴权)
     private final List<String> onlyAuthUrls;
 
     @Override
@@ -63,36 +66,53 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         PathMatcher pathMatcher = new AntPathMatcher();
         String method = request.getMethodValue();
         String path = request.getURI().getPath();
-
-        // RESTFul接口权限设计 @link https://www.cnblogs.com/haoxianrui/p/14961707.html
         String restfulPath = method + ":" + path;
 
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
-        String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
-        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX) ) {
-            // 这里要可配置哪些路径仅认证，无需鉴权
+        String token = request.getHeaders().getFirst(GlobalConstants.AUTHORIZATION_KEY);
+
+        // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GlobalConstants.TOKEN_PREFIX)) {
+            // 这里要可配置哪些路径仅认证，无需鉴权(比如前端API)
             if (onlyAuthUrls.stream().anyMatch(s -> pathMatcher.match(s, path))) {
                 // 不是需要鉴权的URL，直接放行
                 return Mono.just(new AuthorizationDecision(true));
             }
-        } else {
-            return Mono.just(new AuthorizationDecision(false));
+
+            // 鉴权
+            return checkPerm(mono, restfulPath);
         }
 
-        /*
-         * 鉴权开始
-         *
-         * 缓存取 [URL权限-角色集合] 规则数据
-         * urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
-         */
-        Map<String, Object> urlPermRolesRules = redisTemplate.opsForHash().entries(GlobalConstants.URL_PERM_ROLES_KEY);
+        // Hmac Token，属于系统访问的API
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstant.HMAC_AUTH_PREFIX)) {
+            Result result = HmacUtils.checkSign(authorizationContext.getExchange(), redisTemplate, restfulPath);
+            if (result.isSuccess()) {
+                return Mono.just(new AuthorizationDecision(true));
+            } else {
+                log.error(result.getCode() + ":" + result.getMsg() + ", cause:" + result.getData());
+            }
+        }
+
+        // 没有 Token不放行
+        return Mono.just(new AuthorizationDecision(false));
+    }
+
+    /**
+     * 鉴权
+     * <p>
+     * 缓存取 [URL权限-角色集合] 规则数据
+     * urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
+     */
+    private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
+
+        Map<String, Object> urlPermRolesRules = redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_URL_PERM_ROLES_KEY);
 
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色
         List<String> authorizedRoles = new ArrayList<>();
         // 是否需要鉴权，默认未设置拦截规则不需鉴权
         boolean requireCheck = false;
-
+        PathMatcher pathMatcher = new AntPathMatcher();
         for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
             if (pathMatcher.match(perm, restfulPath)) {
@@ -110,19 +130,19 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // 判断Token中携带的用户角色是否有权限访问
         Mono<AuthorizationDecision> authorizationDecisionMono = mono
-            .filter(Authentication::isAuthenticated)
-            .flatMapIterable(Authentication::getAuthorities)
-            .map(GrantedAuthority::getAuthority)
-            .any(authority -> {
-                String roleCode = authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
-                if (GlobalConstants.ROOT_ROLE_CODE.equals(roleCode)) {
-                    return true; // 如果是超级管理员则放行
-                }
-                boolean hasAuthorized = CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
-                return hasAuthorized;
-            })
-            .map(AuthorizationDecision::new)
-            .defaultIfEmpty(new AuthorizationDecision(false));
+                .filter(Authentication::isAuthenticated)
+                .flatMapIterable(Authentication::getAuthorities)
+                .map(GrantedAuthority::getAuthority)
+                .any(authority -> {
+                    String roleCode = authority.substring(GlobalConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
+                    if (GlobalConstants.ROOT_ROLE_CODE.equals(roleCode)) {
+                        return true; // 如果是超级管理员则放行
+                    }
+                    boolean hasAuthorized = CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
+                    return hasAuthorized;
+                })
+                .map(AuthorizationDecision::new)
+                .defaultIfEmpty(new AuthorizationDecision(false));
         return authorizationDecisionMono;
     }
 }

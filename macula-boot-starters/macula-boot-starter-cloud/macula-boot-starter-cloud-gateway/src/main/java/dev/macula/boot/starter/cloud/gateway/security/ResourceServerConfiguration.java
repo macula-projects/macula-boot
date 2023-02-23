@@ -18,17 +18,16 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import cn.hutool.core.convert.Convert;
+import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.result.ApiResultCode;
-import dev.macula.boot.constants.SecurityConstants;
+import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,7 +45,10 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +57,7 @@ import java.util.stream.Collectors;
  * @author huan.fu 2021/8/24 - 上午10:08
  */
 
-@ConfigurationProperties(prefix = "macula.security")
+@ConfigurationProperties(prefix = "macula.gateway.security")
 @Configuration
 @RequiredArgsConstructor
 public class ResourceServerConfiguration {
@@ -77,7 +79,7 @@ public class ResourceServerConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         // 添加默认忽略的路径
-        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
+        ignoreUrls.addAll(GlobalConstants.DEFAULT_IGNORE_URLS);
 
         http.oauth2ResourceServer()
                 .opaqueToken()
@@ -117,11 +119,11 @@ public class ResourceServerConfiguration {
             private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
                 List<GrantedAuthority> result = new ArrayList<>(principal.getAuthorities());
 
-                List<String> authorities = principal.getAttribute(SecurityConstants.AUTHORITIES_KEY);
+                List<String> authorities = principal.getAttribute(GlobalConstants.AUTHORITIES_KEY);
                 if (authorities != null) {
                     result.addAll(
                             authorities.stream()
-                                    .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
+                                    .map(role -> new SimpleGrantedAuthority(GlobalConstants.AUTHORITIES_PREFIX + role))
                                     .collect(Collectors.toList())
                     );
                 }
@@ -155,7 +157,7 @@ public class ResourceServerConfiguration {
 
     @Bean
     AddJwtFilter addJwtFilter() {
-        return new AddJwtFilter(jwtSecret);
+        return new AddJwtFilter(jwtSecret, redisTemplate);
     }
 
     @Bean

@@ -17,7 +17,6 @@
 
 package dev.macula.boot.result;
 
-import dev.macula.boot.result.ResultCode;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -39,6 +38,8 @@ public enum ApiResultCode implements ResultCode, Serializable {
     ACCESS_UNAUTHORIZED("10010", "未授权的访问"),
     TOKEN_INVALID_OR_EXPIRED("10011", "访问令牌无效或已过期"),
     TOKEN_ACCESS_FORBIDDEN("10012", "令牌没有访问授权"),
+
+    AKSK_ACCESS_FORBIDDEN("10013", "基于AKSK的访问签名无效"),
 
     BIZ_ERROR("10021", "业务异常"),
     SYS_ERROR("10022", "系统异常"),

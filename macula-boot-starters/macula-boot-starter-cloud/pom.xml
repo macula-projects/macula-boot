@@ -30,13 +30,14 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>macula-boot-starter-cloud-feign</module>
         <module>macula-boot-starter-cloud-gateway</module>
 
         <module>macula-boot-starter-cloud-alibaba</module>
         <module>macula-boot-starter-cloud-alibaba-scg</module>
+
         <module>macula-boot-starter-cloud-tencent</module>
         <module>macula-boot-starter-cloud-tencent-scg</module>
+
         <module>macula-boot-starter-cloud-tsf</module>
         <module>macula-boot-starter-cloud-tsf-scg</module>
     </modules>

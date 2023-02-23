@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 8000
 
 spring:
   cloud:
@@ -14,7 +14,7 @@ spring:
         - id: macula-example-consumer
           uri: lb://macula-example-consumer
           predicates:
-            - Path=/api/**
+            - Path=/consumer/**
           filters:
             - StripPrefix=1
   security:
@@ -25,9 +25,9 @@ spring:
           client-secret: password
           introspection-uri: https://goauth-dev.infinitus.com.cn/introspect
 macula:
-  security:
-    ignore-urls: /api/v3/**
-    only-auth-urls: /api/**
+  gateway:
+    security:
+      only-auth-urls: /api/**
 
 logging:
   level:

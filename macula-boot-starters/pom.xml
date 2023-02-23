@@ -14,10 +14,9 @@
 
     <modules>
         <module>macula-boot-starter-mapstruct</module>
-        <module>macula-boot-starter-tinyid</module>
         <module>macula-boot-starter-mybatis-plus</module>
-        <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-rocketmq</module>
+        <module>macula-boot-starter-sender</module>
         <module>macula-boot-starter-redis</module>
         <module>macula-boot-starter-cache</module>
         <module>macula-boot-starter-leaderelection</module>
@@ -26,16 +25,16 @@
         <module>macula-boot-starter-liteflow</module>
         <module>macula-boot-starter-statemachine</module>
         <module>macula-boot-starter-web</module>
-        <module>macula-boot-starter-springdoc</module>
         <module>macula-boot-starter-security</module>
-        <module>macula-boot-starter-powerjob</module>
         <module>macula-boot-starter-skywalking</module>
-        <module>macula-boot-starter-cloud</module>
+        <module>macula-boot-starter-springdoc</module>
         <module>macula-boot-starter-dubbo</module>
+        <module>macula-boot-starter-feign</module>
+        <module>macula-boot-starter-cloud</module>
+        <module>macula-boot-starter-tinyid</module>
+        <module>macula-boot-starter-powerjob</module>
         <module>macula-boot-starter-system</module>
-        <module>macula-boot-starter-sender</module>
-
-
+        <module>macula-boot-starter-oss</module>
     </modules>
 
     <dependencies>
