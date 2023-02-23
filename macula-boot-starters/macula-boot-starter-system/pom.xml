@@ -28,5 +28,22 @@
 
     <artifactId>macula-boot-starter-system</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-springdoc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-feign</artifactId>
+        </dependency>
+    </dependencies>
 </project>

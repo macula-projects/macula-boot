@@ -17,6 +17,9 @@
 
 package dev.macula.boot.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * <p>
  * <b>GlobalConstants</b> 全局常量
@@ -26,6 +29,34 @@ package dev.macula.boot.constants;
  * @since 2022-02-20
  */
 public interface GlobalConstants {
+
+    List<String> DEFAULT_IGNORE_URLS = Arrays.asList("/favicon**", "/webjars/**", "/doc.html", "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs");
+
+    /**
+     * 认证请求头key
+     */
+    String AUTHORIZATION_KEY = "Authorization";
+
+    /**
+     * JWT令牌前缀
+     */
+    String TOKEN_PREFIX = "Bearer ";
+
+    String JWT_NICKNAME_KEY = "nickname";
+
+    String JWT_DATASCOPE_KEY = "dataScope";
+
+    String JWT_DEPTID_KEY = "deptId";
+
+    /**
+     * JWT存储权限前缀
+     */
+    String AUTHORITIES_PREFIX = "ROLE_";
+
+    /**
+     * JWT存储权限属性
+     */
+    String AUTHORITIES_KEY = "authorities";
 
     /**
      * 根部门ID
@@ -46,9 +77,15 @@ public interface GlobalConstants {
     /**
      * [ {接口路径:[角色编码]},...]
      */
-    String URL_PERM_ROLES_KEY = "system:perm_roles_rule:url";
+    String SECURITY_URL_PERM_ROLES_KEY = "system:security:url_perm_roles";
 
-    String AUTH_USER_PERMS_KEY = "system:auth:user_perms:";
+    String SECURITY_USER_BTN_PERMS_KEY = "system:security:user_btn_perms:";
+
+    String SECURITY_SYSTEM_APPS = "system:security:system_apps:";
+
+    String SECURITY_SYSTEM_APPS_SECRIT_KEY = "secretKey";
+
+    String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
 
     String FEIGN_REQ_ID = "FEIGN_REQ_ID";
 }

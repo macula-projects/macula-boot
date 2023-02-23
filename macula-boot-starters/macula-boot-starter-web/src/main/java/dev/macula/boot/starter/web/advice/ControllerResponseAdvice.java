@@ -19,10 +19,10 @@ package dev.macula.boot.starter.web.advice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.macula.boot.result.ApiResultCode;
-import dev.macula.boot.result.Result;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -59,7 +59,7 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
             return data;
         }
 
-        //Feign请求时通过拦截器设置请求头，如果是Feign请求则直接返回实体对象
+        // Feign请求时通过拦截器设置请求头，如果是Feign请求则直接返回实体对象
         if (request.getHeaders().containsKey(GlobalConstants.FEIGN_REQ_ID)) {
             return data;
         }

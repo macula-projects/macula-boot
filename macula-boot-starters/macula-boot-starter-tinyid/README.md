@@ -10,3 +10,5 @@ macula:
     connectTimeout: 5000
     readTimeout: 5000
 ```
+
+# tinyid不经过网关，从性能和稳定性角度考虑，减少依赖环节。

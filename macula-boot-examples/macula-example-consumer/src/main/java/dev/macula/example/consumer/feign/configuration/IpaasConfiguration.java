@@ -1,6 +1,6 @@
 package dev.macula.example.consumer.feign.configuration;
 
-import dev.macula.boot.starter.cloud.feign.interceptor.KongApiInterceptor;
+import dev.macula.boot.starter.feign.interceptor.KongApiInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
