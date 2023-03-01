@@ -33,9 +33,7 @@ public class CryptoFieldUtils {
 
     private static final ConcurrentHashMap<String, Set<Field>> CRYPT_FIELDS = new ConcurrentHashMap<>();
 
-
-    public static Map<String, String> getCryptoMap(String prefix, Object params)
-            throws IllegalAccessException {
+    public static Map<String, String> getCryptoMap(String prefix, Object params) throws IllegalAccessException {
         if (params == null || params instanceof Collections) {
             return Collections.emptyMap();
         }
@@ -47,7 +45,7 @@ public class CryptoFieldUtils {
         }
         Map<String, String> cryptFieldMap = new HashMap<>();
         if (params instanceof Map) {
-            Map<String, Object> paramsMap = (Map<String, Object>) params;
+            Map<String, Object> paramsMap = (Map<String, Object>)params;
             for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
                 cryptFieldMap.putAll(getCryptoMap(prefix + entry.getKey(), entry.getValue()));
             }

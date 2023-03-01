@@ -29,17 +29,16 @@ import org.springframework.web.server.ServerWebExchange;
 public class RequestBodyUtils {
     public static byte[] getBody(ServerWebExchange exchange) {
         // 如果没有缓存过，获取字节数组存入 exchange 的自定义属性中
-        Object cachedRequestBodyObject = exchange.getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);
+        Object cachedRequestBodyObject =
+            exchange.getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);
         if (cachedRequestBodyObject == null) {
-            DataBufferUtils.join(exchange.getRequest().getBody())
-                    .map(dataBuffer -> {
-                        byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                        dataBuffer.read(bytes);
-                        DataBufferUtils.release(dataBuffer);
-                        return bytes;
-                    })
-                    .defaultIfEmpty(new byte[0])
-                    .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, bytes));
+            DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer);
+                    return bytes;
+                }).defaultIfEmpty(new byte[0])
+                .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, bytes));
 
         }
         return exchange.getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);

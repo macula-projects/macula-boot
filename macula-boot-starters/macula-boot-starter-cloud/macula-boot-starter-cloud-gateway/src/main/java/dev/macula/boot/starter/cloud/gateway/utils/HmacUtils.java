@@ -65,7 +65,8 @@ public class HmacUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
             }
 
-            Map<String, String> apps = redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_SYSTEM_APPS + username);
+            Map<String, String> apps =
+                redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_SYSTEM_APPS + username);
             // 验证ak/sk
             String secretKey = apps.get(GlobalConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
             if (StrUtil.isBlank(secretKey)) {
@@ -87,7 +88,6 @@ public class HmacUtils {
             }
 
             String algorithm = StrUtil.subBetween(token, "algorithm=\"", "\"");
-
 
             // 校验date是否过期，默认5分钟过期
             String dateStr = request.getHeaders().getFirst("Date");
@@ -128,7 +128,9 @@ public class HmacUtils {
                 }
                 byte[] hash = messageDigest.digest(body);
                 String digest = "SHA-256=" + Base64.encode(hash);
-                signatureNew = hmac.digestBase64("date: " + dateStr + "\n" + method + " " + uri + " HTTP/1.1\ndigest: " + digest, false);
+                signatureNew =
+                    hmac.digestBase64("date: " + dateStr + "\n" + method + " " + uri + " HTTP/1.1\ndigest: " + digest,
+                        false);
             }
 
             if (StrUtil.isNotBlank(signature) && signature.equals(signatureNew)) {

@@ -44,7 +44,6 @@ public class Swagger3DemoController {
     public static Integer id = 1;
     public static Map<Integer, User> users = new HashMap();
 
-
     @PostMapping("add")
     @Operation(summary = "添加用户接口", description = "可以用来新增用户")
     @Parameter(name = "user", description = "用户实体模型")
@@ -64,11 +63,10 @@ public class Swagger3DemoController {
     @PutMapping("update")
     @Operation(summary = "修改用户接口", description = "可以用来修改用户")
     @Parameter(name = "id", description = "用户ID", in = ParameterIn.QUERY)
-    @Parameters({
-            @Parameter(name = "userName", description = "用户名", in = ParameterIn.QUERY),
-            @Parameter(name = "passWord", description = "密码", in = ParameterIn.QUERY)
-    })
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {@Content(mediaType = "application/x-www-form-urlencoded")})
+    @Parameters({@Parameter(name = "userName", description = "用户名", in = ParameterIn.QUERY),
+        @Parameter(name = "passWord", description = "密码", in = ParameterIn.QUERY)})
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        content = {@Content(mediaType = "application/x-www-form-urlencoded")})
     public ResponseEntity<Map> updateUser(Integer id, String userName, String passWord) {
         User user = users.get(id);
         user.setUserName(userName);

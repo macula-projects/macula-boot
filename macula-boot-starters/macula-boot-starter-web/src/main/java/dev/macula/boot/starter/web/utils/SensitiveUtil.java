@@ -27,7 +27,6 @@ public class SensitiveUtil {
     public static String ASTERISK = "*";
     public static char ASTERISK_CHAR = '*';
 
-
     /**
      * [手机号码] 前3位后4位明码，中间4位掩码用****显示，如138****0000
      *
@@ -53,7 +52,6 @@ public class SensitiveUtil {
         }
         return overlay(phone, ASTERISK, 1, 0, phone.length() - 4);
     }
-
 
     /**
      * [身份证号] 前6位后4位明码，中间掩码用***显示，如511623********0537
@@ -93,7 +91,6 @@ public class SensitiveUtil {
         }
         return overlay(address, ASTERISK, 4, 9, address.length());
     }
-
 
     /**
      * [用户名] 只显示第一位 （例子：黄**）

@@ -17,9 +17,9 @@
 
 package dev.macula.boot.starter.web.advice;
 
+import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
-import dev.macula.boot.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.context.MessageSource;
@@ -55,7 +55,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
         StringBuilder validateMsg = new StringBuilder();
         for (ObjectError error : e.getAllErrors()) {
             validateMsg.append("[");
-            validateMsg.append(((FieldError) error).getField());
+            validateMsg.append(((FieldError)error).getField());
             validateMsg.append(" ");
             validateMsg.append(error.getDefaultMessage());
             validateMsg.append("]");
@@ -72,7 +72,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
         StringBuilder validateMsg = new StringBuilder();
         for (ConstraintViolation<?> error : e.getConstraintViolations()) {
-            PathImpl pathImpl = (PathImpl) error.getPropertyPath();
+            PathImpl pathImpl = (PathImpl)error.getPropertyPath();
             String paramName = pathImpl.getLeafNode().getName();
             validateMsg.append("[");
             validateMsg.append(paramName);
@@ -88,7 +88,8 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result ApiExceptionHandler(BizException e) {
         log.error("ApiException:" + e.getCode(), e);
-        return Result.failed(e.getCode(), e.getMsg(), messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale()));
+        return Result.failed(e.getCode(), e.getMsg(),
+            messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(NullPointerException.class)

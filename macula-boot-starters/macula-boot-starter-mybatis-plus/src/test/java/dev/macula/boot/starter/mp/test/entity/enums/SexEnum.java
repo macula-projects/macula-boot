@@ -41,9 +41,6 @@ public enum SexEnum {
 
     @Override
     public String toString() {
-        return "SexEnum{" +
-                "code='" + code + '\'' +
-                ", desc='" + desc + '\'' +
-                '}';
+        return "SexEnum{" + "code='" + code + '\'' + ", desc='" + desc + '\'' + '}';
     }
 }

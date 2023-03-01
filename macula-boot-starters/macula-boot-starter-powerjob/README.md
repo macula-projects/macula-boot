@@ -17,10 +17,12 @@ powerjob:
 
 目前，powerjob-worker 并没有实现自己的 LogFactory（如果有需求的话请提 ISSUE，可以考虑实现），原因如下：
 
-1. powerjob-worker 的日志基于 Slf4J 输出，即采用了基于门面设计模式的日志框架，宿主应用无论如何都可以搭起 Slf4J 与实际的日志框架这座桥梁。
+1. powerjob-worker 的日志基于 Slf4J 输出，即采用了基于门面设计模式的日志框架，宿主应用无论如何都可以搭起 Slf4J
+   与实际的日志框架这座桥梁。
 2. 减轻了部分开发工作量，不再需要实现自己的 LogFactory。
 
-为此，为了顺利且友好地输出日志，请在日志配置文件（logback.xml/log4j2.xml/...）中为 powerjob-worker 单独进行日志配置，比如（logback 示例）：
+为此，为了顺利且友好地输出日志，请在日志配置文件（logback.xml/log4j2.xml/...）中为 powerjob-worker 单独进行日志配置，比如（logback
+示例）：
 
 ```xml
 <appender name="POWERJOB_WORKER_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">

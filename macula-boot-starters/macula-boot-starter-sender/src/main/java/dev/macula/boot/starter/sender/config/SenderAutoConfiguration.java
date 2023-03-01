@@ -48,13 +48,14 @@ public class SenderAutoConfiguration {
     }
 
     @Bean
-    public ReliableMessageCompensator reliableMessageCompensator(ReliableMessageSendService reliableMessageSendService) {
+    public ReliableMessageCompensator reliableMessageCompensator(
+        ReliableMessageSendService reliableMessageSendService) {
         return new LocalTableBasedReliableMessageCompensator(reliableMessageSendService);
     }
 
     @Bean
     public ReliableMessageSendService reliableMessageSendService(LocalMessageRepository localMessageRepository,
-                                                                 MessageSender messageSender) {
+        MessageSender messageSender) {
         return new ReliableMessageSendService(localMessageRepository, messageSender);
     }
 

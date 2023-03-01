@@ -99,8 +99,8 @@ public class LocalMessage {
 
     public boolean needRetry(Date now) {
         return this.status != STATUS_SUCCESS //未成功
-                && this.retryTime < MAX_RETRY_TIME //未达到最大尝试次数
-                && now.getTime() - updateTime.getTime() > 10 * 1000; //更新时间在10秒外
+            && this.retryTime < MAX_RETRY_TIME //未达到最大尝试次数
+            && now.getTime() - updateTime.getTime() > 10 * 1000; //更新时间在10秒外
     }
 
     public void sendSuccess(String msgId) {

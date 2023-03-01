@@ -45,14 +45,19 @@ public class DateTimeTest {
         System.out.println(OffsetDateTime.now(ZoneId.of("+07:00")).withOffsetSameLocal(ZoneOffset.ofHours(8)));
         System.out.println(LocalDateTime.now().atOffset(ZoneOffset.ofHours(7)));
 
-        System.out.println("带时区日期字符串转UTC时间：" + OffsetDateTime.parse("2016-02-14T10:32:04.150+07:00").toInstant());
-        System.out.println("带时区日期字符串转其他时区时间：" + OffsetDateTime.ofInstant(OffsetDateTime.parse("2016-02-14T10:32:04.150+07:00").toInstant(), ZoneId.of("+08:00")));
-        System.out.println("带时区日期字符串转本地时间：" + LocalDateTime.ofInstant(Instant.parse("2016-02-14T10:32:04.150Z"), ZoneId.of("+08:00")));
+        System.out.println(
+            "带时区日期字符串转UTC时间：" + OffsetDateTime.parse("2016-02-14T10:32:04.150+07:00").toInstant());
+        System.out.println("带时区日期字符串转其他时区时间：" + OffsetDateTime.ofInstant(
+            OffsetDateTime.parse("2016-02-14T10:32:04.150+07:00").toInstant(), ZoneId.of("+08:00")));
+        System.out.println(
+            "带时区日期字符串转本地时间：" + LocalDateTime.ofInstant(Instant.parse("2016-02-14T10:32:04.150Z"),
+                ZoneId.of("+08:00")));
         System.out.println("本地时间转UTC时间：" + LocalDateTime.now().atZone(ZoneOffset.of("+08:00")).toInstant());
         System.out.println("UTC当前时间：" + Instant.now());
         System.out.println("指定时区的当前时间：" + OffsetDateTime.now(ZoneId.of("+07:00")));
         System.out.println("时区当前时间：" + ZonedDateTime.now());
-        System.out.println("Parse测试:" + LocalDate.parse("2019-12-12T23:44:32.000+09:00", DateTimeFormatter.ISO_DATE_TIME));
+        System.out.println(
+            "Parse测试:" + LocalDate.parse("2019-12-12T23:44:32.000+09:00", DateTimeFormatter.ISO_DATE_TIME));
 
         DateFormatter formatter = new DateFormatter();
         //formatter.setIso(DateTimeFormat.ISO.DATE_TIME);
@@ -68,10 +73,12 @@ public class DateTimeTest {
         System.out.println(LocalDateTime.now().atZone(ZoneId.of("+07:00")).toOffsetDateTime());
         System.out.println("OffsetDateTime to LocaleDateTime:" + OffsetDateTime.now().toLocalDateTime());
 
-        System.out.println("ISO_LOCAL_DATE_TIME:" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("+09:00")).format(LocalDateTime.now()));
-        System.out.println("ISO_LOCAL_DATE_TIME:" + DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("+09:00")).format(OffsetDateTime.now()));
-        System.out.println("OffsetDateTime:" + OffsetDateTime.parse("2019-02-27T15:28:14.965+07:00", DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("+09:00"))));
-
+        System.out.println("ISO_LOCAL_DATE_TIME:" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("+09:00"))
+            .format(LocalDateTime.now()));
+        System.out.println("ISO_LOCAL_DATE_TIME:" + DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("+09:00"))
+            .format(OffsetDateTime.now()));
+        System.out.println("OffsetDateTime:" + OffsetDateTime.parse("2019-02-27T15:28:14.965+07:00",
+            DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("+09:00"))));
 
         String iso8601 = "2016-02-14T18:32:04.150+07:00";
         ZonedDateTime zdt = ZonedDateTime.parse(iso8601);

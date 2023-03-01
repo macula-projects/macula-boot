@@ -62,9 +62,8 @@ public class TwoLevelCacheProperties {
 
     /** @return configuration for Redis cache */
     public RedisCacheConfiguration toRedisCacheConfiguration(String name) {
-        RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
-                .disableCachingNullValues()
-                .entryTtl(timeToLive.getOrDefault(name, defaultTimeToLive));
+        RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()
+            .entryTtl(timeToLive.getOrDefault(name, defaultTimeToLive));
 
         if (useKeyPrefix) {
             configuration = configuration.prefixCacheNameWith(keyPrefix);
@@ -122,11 +121,12 @@ public class TwoLevelCacheProperties {
         private Duration slowCallDurationThreshold = Duration.ofMillis(250);
 
         /** Sliding window type for connectivity analysis */
-        private CircuitBreakerConfig.SlidingWindowType slidingWindowType = CircuitBreakerConfig.SlidingWindowType.COUNT_BASED;
+        private CircuitBreakerConfig.SlidingWindowType slidingWindowType =
+            CircuitBreakerConfig.SlidingWindowType.COUNT_BASED;
 
         /** Amount of Redis calls to test if backend is responsive when circuit breaker closes */
         private int permittedNumberOfCallsInHalfOpenState =
-            (int) (Duration.ofSeconds(5).toNanos() / slowCallDurationThreshold.toNanos());
+            (int)(Duration.ofSeconds(5).toNanos() / slowCallDurationThreshold.toNanos());
 
         /** Amount of time to wait before closing circuit breaker, 0 - wait for all permitted calls. */
         private Duration maxWaitDurationInHalfOpenState =
@@ -139,7 +139,6 @@ public class TwoLevelCacheProperties {
         private int minimumNumberOfCalls = permittedNumberOfCallsInHalfOpenState / 2;
 
         /** Time to wait before permitting Redis calls to test backend connectivity. */
-        private Duration waitDurationInOpenState =
-            slowCallDurationThreshold.multipliedBy(minimumNumberOfCalls);
+        private Duration waitDurationInOpenState = slowCallDurationThreshold.multipliedBy(minimumNumberOfCalls);
     }
 }

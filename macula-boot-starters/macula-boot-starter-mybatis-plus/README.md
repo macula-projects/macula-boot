@@ -5,8 +5,10 @@
 该模块主要使用alibaba druid作为数据源工具，mybatis-plus作为数据库操作框架
 
 ## 配置
+
 默认自动加载MyBatisPlusAutoConfiguration，已经开启了EnableTransactionManagement事务注解
 可配置属性：
+
 ```yaml
 macula:
   mybatis-plus:
@@ -16,29 +18,39 @@ macula:
       last-update-by-name: lastUpdateBy       #最后更新人
       last-update-time-name: lastUpdateTime   #最后更新时间
 ```
+
 ## 核心功能
+
 ### druid数据源配置
+
 数据源的配置请参考[druid-spring-boot-starter 官方文档](https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter)
 
 ### BaseEntity
+
 默认提供了ID和审计字段，ID默认是自增长模式，如果数据库的默认字段不是标准的，请自行编写基础的Entity。同时记得在配置文件中设置审计字段的名称
 
 ### 主键策略
+
 @TableId注解用于设置主键字段，通过IdType设置采用的主键策略
 
 #### 自动增长
+
 IdType.AUTO：使用数据库自增长ID
 
 #### 数据库序列
+
 IdType.INPUT： 如果要使用数据库的序列，要使用@KeySequence注解，同时要定义IKeyGenerator实现类并注册到Spring
 
 #### 分配ID
+
 IdType.ASSIGN_ID和ASSIGN_UUID：默认使用系统提供的雪花算法，如要自定义雪花算法，则需要实现IdentifierGenerator接口，并且注册到Spring，
 但是不能与IKeyGenerator同时注册。
 [官方文档](https://baomidou.com/pages/223848/#tableid)
 
 ## 扩展功能
+
 ### 逻辑删除
+
 通过@TableLogic注解标识逻辑删除字段
 [官方文档](https://baomidou.com/pages/6b03c5/#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)
 
@@ -137,18 +149,23 @@ mybatis-plus:
 ```
 
 ## 默认开启插件
+
 ### 分页插件
+
 引入PaginationInnerInterceptor分页拦截器，返回IPage<T>接口
 [官方文档](https://baomidou.com/pages/97710a)
 
 ### 乐观锁插件
+
 引入OptimisticLockerInnerInterceptor乐观锁插件，更新具有@Version注解的实体时会自动加上version=xx条件
 这种情况下需要判断update的返回值是否是>=1或者是否是true，以判断更新是否成功。
 [官方文档](https://baomidou.com/pages/0d93c0)
 
 ### 防全表更新与删除插件
+
 [官方文档](https://baomidou.com/pages/f9a237)
 
 ### 自动填充审计字段
+
 默认的审计字段名称是createTime, lastUpdateTime, createBy, lastUpdateBy。数据库中的字段请转换为下划线。该名称有配置属性决定。
 如果你先于MyBatisPlusAutoConfiguration定义MetaObjectHandler，则会使用你定义的类

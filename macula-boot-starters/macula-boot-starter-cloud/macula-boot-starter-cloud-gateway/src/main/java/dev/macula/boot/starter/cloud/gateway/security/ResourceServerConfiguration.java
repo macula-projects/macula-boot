@@ -81,22 +81,12 @@ public class ResourceServerConfiguration {
         // 添加默认忽略的路径
         ignoreUrls.addAll(GlobalConstants.DEFAULT_IGNORE_URLS);
 
-        http.oauth2ResourceServer()
-                .opaqueToken()
-                .introspector(opaqueTokenIntrospector())
-                .and()
-                .accessDeniedHandler(accessDeniedHandler())
-                .authenticationEntryPoint(authenticationEntryPoint())
+        http.oauth2ResourceServer().opaqueToken().introspector(opaqueTokenIntrospector()).and()
+            .accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint())
 
-                .and().authorizeExchange()
-                .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
-                .anyExchange().access(authorizationManager())
-            .and()
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler())
-                .authenticationEntryPoint(authenticationEntryPoint())
-            .and()
-                .csrf().disable();
+            .and().authorizeExchange().pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll().anyExchange()
+            .access(authorizationManager()).and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint()).and().csrf().disable();
 
         return http.build();
     }
@@ -105,14 +95,15 @@ public class ResourceServerConfiguration {
     public ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector() {
         return new ReactiveOpaqueTokenIntrospector() {
             final OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
-            final ReactiveOpaqueTokenIntrospector delegate = new NimbusReactiveOpaqueTokenIntrospector(
-                    opaqueToken.getIntrospectionUri(), opaqueToken.getClientId(), opaqueToken.getClientSecret());
+            final ReactiveOpaqueTokenIntrospector delegate =
+                new NimbusReactiveOpaqueTokenIntrospector(opaqueToken.getIntrospectionUri(), opaqueToken.getClientId(),
+                    opaqueToken.getClientSecret());
 
             @Override
             public Mono<OAuth2AuthenticatedPrincipal> introspect(String token) {
-                return this.delegate.introspect(token)
-                        .map(principal -> new DefaultOAuth2AuthenticatedPrincipal(
-                                principal.getName(), principal.getAttributes(), extractAuthorities(principal)));
+                return this.delegate.introspect(token).map(
+                    principal -> new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), principal.getAttributes(),
+                        extractAuthorities(principal)));
             }
 
             // 自定义获取用户的authorities
@@ -121,11 +112,9 @@ public class ResourceServerConfiguration {
 
                 List<String> authorities = principal.getAttribute(GlobalConstants.AUTHORITIES_KEY);
                 if (authorities != null) {
-                    result.addAll(
-                            authorities.stream()
-                                    .map(role -> new SimpleGrantedAuthority(GlobalConstants.AUTHORITIES_PREFIX + role))
-                                    .collect(Collectors.toList())
-                    );
+                    result.addAll(authorities.stream()
+                        .map(role -> new SimpleGrantedAuthority(GlobalConstants.AUTHORITIES_PREFIX + role))
+                        .collect(Collectors.toList()));
                 }
                 return result;
             }
@@ -143,7 +132,7 @@ public class ResourceServerConfiguration {
     @Bean
     ServerAccessDeniedHandler accessDeniedHandler() {
         return (exchange, denied) -> Mono.defer(() -> Mono.just(exchange.getResponse()))
-                .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.ACCESS_UNAUTHORIZED));
+            .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.ACCESS_UNAUTHORIZED));
     }
 
     /**
@@ -152,7 +141,7 @@ public class ResourceServerConfiguration {
     @Bean
     ServerAuthenticationEntryPoint authenticationEntryPoint() {
         return (exchange, e) -> Mono.defer(() -> Mono.just(exchange.getResponse()))
-                .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
+            .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
     }
 
     @Bean

@@ -18,16 +18,13 @@
 package dev.macula.boot.starter.mp.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import dev.macula.boot.starter.mp.config.MyBatisPlusProperties;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import dev.macula.boot.starter.mp.config.MyBatisPlusProperties;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -74,7 +71,8 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     @Override
     public MetaObjectHandler strictFillStrategy(MetaObject metaObject, String fieldName, Supplier<?> fieldVal) {
         // 审计字段不管是否原来存在都要替换
-        if ( createTimeName.equals(fieldName) || createByName.equals(fieldName) || lastUpdateTimeName.equals(fieldName) || lastUpdateByName.equals(fieldName) ) {
+        if (createTimeName.equals(fieldName) || createByName.equals(fieldName) || lastUpdateTimeName.equals(
+            fieldName) || lastUpdateByName.equals(fieldName)) {
             Object obj = fieldVal.get();
             if (Objects.nonNull(obj)) {
                 metaObject.setValue(fieldName, obj);

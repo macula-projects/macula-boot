@@ -21,10 +21,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import dev.macula.boot.starter.mp.annotation.CryptoField;
 import dev.macula.boot.starter.mp.entity.BaseEntity;
+import dev.macula.boot.starter.mp.test.entity.enums.SexEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import dev.macula.boot.starter.mp.test.entity.enums.SexEnum;
 
 /**
  * <p>

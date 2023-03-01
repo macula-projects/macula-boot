@@ -38,9 +38,8 @@ import java.util.stream.Collectors;
  */
 public class SecurityUtils {
     public static String getCurrentUser() {
-        if (SecurityContextHolder.getContext() != null
-                && SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext()
+            .getAuthentication() != null && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
             return SecurityContextHolder.getContext().getAuthentication().getName();
         }
         return null;
@@ -64,9 +63,8 @@ public class SecurityUtils {
     public static Set<String> getRoles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && CollectionUtil.isNotEmpty(authentication.getAuthorities())) {
-            Set<String> roles = authentication.getAuthorities()
-                    .stream()
-                    .map(item -> StrUtil.removePrefix(item.getAuthority(), "ROLE_"))
+            Set<String> roles =
+                authentication.getAuthorities().stream().map(item -> StrUtil.removePrefix(item.getAuthority(), "ROLE_"))
                     .collect(Collectors.toSet());
             return roles;
         }
@@ -106,7 +104,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             if (authentication instanceof JwtAuthenticationToken) {
-                JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+                JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
                 Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
                 return tokenAttributes;
             }

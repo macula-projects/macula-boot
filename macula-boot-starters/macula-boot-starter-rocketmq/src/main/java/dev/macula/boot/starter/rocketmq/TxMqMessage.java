@@ -39,7 +39,6 @@ public class TxMqMessage<T> implements Message<T> {
 
     private MessageHeaders headers;
 
-
     public TxMqMessage(T payload, Class<?> beanClass, String bizName, String checkId) {
         this.payload = payload;
 
@@ -67,7 +66,7 @@ public class TxMqMessage<T> implements Message<T> {
         } else if (!(other instanceof TxMqMessage)) {
             return false;
         } else {
-            TxMqMessage<?> otherMsg = (TxMqMessage) other;
+            TxMqMessage<?> otherMsg = (TxMqMessage)other;
             return ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers);
         }
     }
@@ -80,7 +79,7 @@ public class TxMqMessage<T> implements Message<T> {
         StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
         sb.append(" [payload=");
         if (this.payload instanceof byte[]) {
-            sb.append("byte[").append(((byte[]) ((byte[]) this.payload)).length).append(']');
+            sb.append("byte[").append(((byte[])((byte[])this.payload)).length).append(']');
         } else {
             sb.append(this.payload);
         }

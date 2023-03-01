@@ -51,7 +51,8 @@ public class UserSeqMapperTest {
         user.setName("rain.wang");
         int i = userSeqMapper.insert(user);
         Assertions.assertTrue(i > 0);
-        System.out.println("1=======" + user.getId() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
+        System.out.println(
+            "1=======" + user.getId() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
 
         UserSeq user2 = new UserSeq();
         user2.setAge(20);
@@ -59,12 +60,13 @@ public class UserSeqMapperTest {
         user2.setName("rain.wang");
         int r = userSeqMapper.insert(user2);
         Assertions.assertTrue(r > 0);
-        System.out.println("2=======" + user2.getId() + " " + user2.getName() + " " + user2.getVersion() + " " + user2.getLastUpdateTime());
+        System.out.println(
+            "2=======" + user2.getId() + " " + user2.getName() + " " + user2.getVersion() + " " + user2.getLastUpdateTime());
     }
 
     @Test
     public void testLogicDelete() {
         int r = userSeqMapper.deleteById(new UserSeq(1L));
-        Assertions.assertTrue( r > 0);
+        Assertions.assertTrue(r > 0);
     }
 }

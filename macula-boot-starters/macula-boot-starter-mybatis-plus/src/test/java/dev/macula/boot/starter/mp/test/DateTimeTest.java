@@ -35,15 +35,16 @@ import java.time.ZonedDateTime;
 public class DateTimeTest {
     public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test?serverTimezone=GMT%2B8", "root", "");
-        PreparedStatement st = conn.prepareStatement("insert into tb_java8date (t_date, t_time, t_datetime, t_timestamp) values (?, ?, ?, ?)");
+        Connection conn =
+            DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test?serverTimezone=GMT%2B8", "root", "");
+        PreparedStatement st = conn.prepareStatement(
+            "insert into tb_java8date (t_date, t_time, t_datetime, t_timestamp) values (?, ?, ?, ?)");
         st.setObject(1, LocalDate.now());
         st.setObject(2, LocalTime.now());
         st.setObject(3, LocalDateTime.now());
         st.setObject(4, ZonedDateTime.now());
         st.execute();
         st.close();
-
 
         st = conn.prepareStatement("select t_date, t_time, t_datetime, t_timestamp from tb_java8date");
         ResultSet data = st.executeQuery();

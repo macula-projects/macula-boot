@@ -44,13 +44,14 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
         // response是ResultVo类型，或者注释了NotControllerResponseAdvice都不进行包装
-        return !(methodParameter.getParameterType().isAssignableFrom(Result.class)
-                || methodParameter.getParameterType().isAssignableFrom(ResponseEntity.class)
-                || methodParameter.hasMethodAnnotation(NotControllerResponseAdvice.class));
+        return !(methodParameter.getParameterType().isAssignableFrom(Result.class) || methodParameter.getParameterType()
+            .isAssignableFrom(ResponseEntity.class) || methodParameter.hasMethodAnnotation(
+            NotControllerResponseAdvice.class));
     }
 
     @Override
-    public Object beforeBodyWrite(Object data, MethodParameter returnType, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object data, MethodParameter returnType, MediaType mediaType,
+        Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest request, ServerHttpResponse response) {
         if (request.getURI().getPath().contains("v3/api-docs")) {
             return data;
         }

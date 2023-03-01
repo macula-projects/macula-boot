@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Bean;
 /**
  * @author lengleng
  * @since 2020/9/25
- * <p>
- * 幂等插件初始化
+ *     <p>
+ *     幂等插件初始化
  */
 @AutoConfiguration(after = RedissonAutoConfiguration.class)
 public class IdempotentAutoConfiguration {

@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 public class LocalTableBasedReliableMessageSender implements ReliableMessageSender {
     private final ReliableMessageSendService reliableMessageSendService;
 
-
     public LocalTableBasedReliableMessageSender(ReliableMessageSendService reliableMessageSendService) {
         this.reliableMessageSendService = reliableMessageSendService;
     }

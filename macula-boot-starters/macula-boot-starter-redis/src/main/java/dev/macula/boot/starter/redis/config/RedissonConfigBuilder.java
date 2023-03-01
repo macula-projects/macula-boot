@@ -51,7 +51,8 @@ public class RedissonConfigBuilder {
         return build(ctx, null, redissonProperties);
     }
 
-    public Config build(ApplicationContext ctx, RedisProperties redisProperties, RedissonProperties redissonProperties)  throws IOException {
+    public Config build(ApplicationContext ctx, RedisProperties redisProperties, RedissonProperties redissonProperties)
+        throws IOException {
         if (redisProperties == null) {
             redisProperties = new RedisProperties();
         }
@@ -61,11 +62,11 @@ public class RedissonConfigBuilder {
         Method timeoutMethod = ReflectionUtils.findMethod(RedisProperties.class, "getTimeout");
         Object timeoutValue = ReflectionUtils.invokeMethod(timeoutMethod, redisProperties);
         int timeout;
-        if(null == timeoutValue){
+        if (null == timeoutValue) {
             timeout = 10000;
-        }else if (!(timeoutValue instanceof Integer)) {
+        } else if (!(timeoutValue instanceof Integer)) {
             Method millisMethod = ReflectionUtils.findMethod(timeoutValue.getClass(), "toMillis");
-            timeout = ((Long) ReflectionUtils.invokeMethod(millisMethod, timeoutValue)).intValue();
+            timeout = ((Long)ReflectionUtils.invokeMethod(millisMethod, timeoutValue)).intValue();
         } else {
             timeout = (Integer)timeoutValue;
         }
@@ -105,23 +106,18 @@ public class RedissonConfigBuilder {
             }
 
             config = new Config();
-            config.useSentinelServers()
-                .setMasterName(redisProperties.getSentinel().getMaster())
-                .addSentinelAddress(nodes)
-                .setDatabase(redisProperties.getDatabase())
-                .setConnectTimeout(timeout)
+            config.useSentinelServers().setMasterName(redisProperties.getSentinel().getMaster())
+                .addSentinelAddress(nodes).setDatabase(redisProperties.getDatabase()).setConnectTimeout(timeout)
                 .setPassword(redisProperties.getPassword());
         } else if (clusterMethod != null && ReflectionUtils.invokeMethod(clusterMethod, redisProperties) != null) {
             Object clusterObject = ReflectionUtils.invokeMethod(clusterMethod, redisProperties);
             Method nodesMethod = ReflectionUtils.findMethod(clusterObject.getClass(), "getNodes");
-            List<String> nodesObject = (List) ReflectionUtils.invokeMethod(nodesMethod, clusterObject);
+            List<String> nodesObject = (List)ReflectionUtils.invokeMethod(nodesMethod, clusterObject);
 
             String[] nodes = convert(nodesObject);
 
             config = new Config();
-            config.useClusterServers()
-                .addNodeAddress(nodes)
-                .setConnectTimeout(timeout)
+            config.useClusterServers().addNodeAddress(nodes).setConnectTimeout(timeout)
                 .setPassword(redisProperties.getPassword());
         } else {
             config = new Config();
@@ -131,10 +127,8 @@ public class RedissonConfigBuilder {
                 prefix = REDISS_PROTOCOL_PREFIX;
             }
 
-            config.useSingleServer()
-                .setAddress(prefix + redisProperties.getHost() + ":" + redisProperties.getPort())
-                .setConnectTimeout(timeout)
-                .setDatabase(redisProperties.getDatabase())
+            config.useSingleServer().setAddress(prefix + redisProperties.getHost() + ":" + redisProperties.getPort())
+                .setConnectTimeout(timeout).setDatabase(redisProperties.getDatabase())
                 .setPassword(redisProperties.getPassword());
         }
 
@@ -153,7 +147,8 @@ public class RedissonConfigBuilder {
         return nodes.toArray(new String[nodes.size()]);
     }
 
-    private InputStream getConfigStream(ApplicationContext ctx, RedissonProperties redissonProperties) throws IOException {
+    private InputStream getConfigStream(ApplicationContext ctx, RedissonProperties redissonProperties)
+        throws IOException {
         Resource resource = ctx.getResource(redissonProperties.getFile());
         InputStream is = resource.getInputStream();
         return is;

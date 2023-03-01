@@ -43,11 +43,13 @@ import java.lang.reflect.Method;
 public class MyDataPermissionHandler implements DataPermissionHandler {
 
     @SneakyThrows
-    public static Expression dataScopeFilter(String deptAlias, String deptIdColumnName, String userAlias, String userIdColumnName, Expression where) {
+    public static Expression dataScopeFilter(String deptAlias, String deptIdColumnName, String userAlias,
+        String userIdColumnName, Expression where) {
 
-
-        String deptColumnName = StrUtil.isNotBlank(deptAlias) ? (deptAlias + StringPool.DOT + deptIdColumnName) : deptIdColumnName;
-        String userColumnName = StrUtil.isNotBlank(userAlias) ? (userAlias + StringPool.DOT + userIdColumnName) : userIdColumnName;
+        String deptColumnName =
+            StrUtil.isNotBlank(deptAlias) ? (deptAlias + StringPool.DOT + deptIdColumnName) : deptIdColumnName;
+        String userColumnName =
+            StrUtil.isNotBlank(userAlias) ? (userAlias + StringPool.DOT + userIdColumnName) : userIdColumnName;
 
         // 获取当前用户的数据权限
         Integer dataScope = SecurityUtils.getDataScope();
@@ -73,7 +75,8 @@ public class MyDataPermissionHandler implements DataPermissionHandler {
             // 默认部门及子部门数据权限
             case DEPT_AND_SUB:
                 deptId = SecurityUtils.getDeptId();
-                appendSqlStr = deptColumnName + " IN ( SELECT id FROM sys_dept WHERE id = " + deptId + " or find_in_set( " + deptId + " , tree_path ) )";
+                appendSqlStr =
+                    deptColumnName + " IN ( SELECT id FROM sys_dept WHERE id = " + deptId + " or find_in_set( " + deptId + " , tree_path ) )";
                 break;
             default:
                 appendSqlStr = "";
@@ -105,9 +108,10 @@ public class MyDataPermissionHandler implements DataPermissionHandler {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             DataPermission annotation = method.getAnnotation(DataPermission.class);
-            if (ObjectUtils.isNotEmpty(annotation)
-                    && (method.getName().equals(methodName) || (method.getName() + "_COUNT").equals(methodName))) {
-                return dataScopeFilter(annotation.deptAlias(), annotation.deptIdColumnName(), annotation.userAlias(), annotation.userIdColumnName(), where);
+            if (ObjectUtils.isNotEmpty(annotation) && (method.getName()
+                .equals(methodName) || (method.getName() + "_COUNT").equals(methodName))) {
+                return dataScopeFilter(annotation.deptAlias(), annotation.deptIdColumnName(), annotation.userAlias(),
+                    annotation.userIdColumnName(), where);
             }
         }
         return where;

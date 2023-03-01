@@ -55,7 +55,8 @@ spring:
     port: 6379
 ```
 
-理论是支持 [redisson-spring-boot-starter](https://github.com/redisson/redisson/tree/master/redisson-spring-boot-starter) 全部配置
+理论是支持 [redisson-spring-boot-starter](https://github.com/redisson/redisson/tree/master/redisson-spring-boot-starter)
+全部配置
 
 -
     3. 接口设置注解

@@ -67,37 +67,23 @@ public class TwoLevelCache extends RedisCache {
 
     private final RedisTemplate<Object, Object> redisTemplate;
 
-    public TwoLevelCache(
-        String name,
-        TwoLevelCacheProperties properties,
-        RedisTemplate<Object, Object> redisTemplate,
-        Cache<Object, Object> localCache,
-        CircuitBreaker cacheCircuitBreaker) {
-        this(
-            name,
-            properties,
-            RedisCacheWriter.nonLockingRedisCacheWriter(Objects.requireNonNull(redisTemplate.getConnectionFactory(), NO_REDIS_CONNECTION)),
-            redisTemplate,
-            localCache,
-            cacheCircuitBreaker);
+    public TwoLevelCache(String name, TwoLevelCacheProperties properties, RedisTemplate<Object, Object> redisTemplate,
+        Cache<Object, Object> localCache, CircuitBreaker cacheCircuitBreaker) {
+        this(name, properties, RedisCacheWriter.nonLockingRedisCacheWriter(
+                Objects.requireNonNull(redisTemplate.getConnectionFactory(), NO_REDIS_CONNECTION)), redisTemplate,
+            localCache, cacheCircuitBreaker);
     }
 
-    public TwoLevelCache(
-        String name,
-        TwoLevelCacheProperties properties,
-        RedisCacheWriter redisCacheWriter,
-        RedisTemplate<Object, Object> redisTemplate,
-        Cache<Object, Object> localCache,
+    public TwoLevelCache(String name, TwoLevelCacheProperties properties, RedisCacheWriter redisCacheWriter,
+        RedisTemplate<Object, Object> redisTemplate, Cache<Object, Object> localCache,
         CircuitBreaker cacheCircuitBreaker) {
         super(name, redisCacheWriter, properties.toRedisCacheConfiguration(name));
 
         this.properties = properties;
         this.redisTemplate = redisTemplate;
         this.localCache = localCache;
-        this.locks = Caffeine.newBuilder()
-                .maximumSize(LOCKS_CACHE_MAXIMUM_SIZE)
-                .expireAfterAccess(LOCKS_CACHE_EXPIRE_AFTER_ACCESS)
-                .build();
+        this.locks = Caffeine.newBuilder().maximumSize(LOCKS_CACHE_MAXIMUM_SIZE)
+            .expireAfterAccess(LOCKS_CACHE_EXPIRE_AFTER_ACCESS).build();
         this.cacheCircuitBreaker = cacheCircuitBreaker;
     }
 
@@ -109,7 +95,7 @@ public class TwoLevelCache extends RedisCache {
     @Nullable
     @SuppressWarnings("unchecked")
     <T> T nativeGet(@NonNull Object key) {
-        return (T) callRedis(() -> super.get(key, () -> null)).get();
+        return (T)callRedis(() -> super.get(key, () -> null)).get();
     }
 
     void nativePut(@NonNull Object key, @Nullable Object value) {
@@ -121,9 +107,8 @@ public class TwoLevelCache extends RedisCache {
      * Perform an actual lookup in the underlying store.
      *
      * <p>We do not allow storing {@code null} values, if local cache does not have mapping for
-     * specified key we query Redis using circuit breaker and error handling logic. If Redis contains
-     * requested mapping, value will be saved in local cache. If Redis is not available, {@code null}
-     * will be returned.
+     * specified key we query Redis using circuit breaker and error handling logic. If Redis contains requested mapping,
+     * value will be saved in local cache. If Redis is not available, {@code null} will be returned.
      *
      * @param key the key whose associated value is to be returned
      * @return the raw store value for the key, or {@code null} if none
@@ -134,19 +119,17 @@ public class TwoLevelCache extends RedisCache {
         Object localValue = localCache.getIfPresent(localKey);
 
         if (localValue == null) {
-            return callRedis(() -> super.lookup(key))
-                .andThen(value -> localCache.put(localKey, value))
-                .recover(e -> null)
-                .get();
+            return callRedis(() -> super.lookup(key)).andThen(value -> localCache.put(localKey, value))
+                .recover(e -> null).get();
         }
 
         return localValue;
     }
 
     /**
-     * Return the value to which this cache maps the specified key, obtaining that value from {@code
-     * valueLoader} if necessary. This method provides a simple substitute for the conventional "if
-     * cached, return; otherwise create, cache and return" pattern.
+     * Return the value to which this cache maps the specified key, obtaining that value from {@code valueLoader} if
+     * necessary. This method provides a simple substitute for the conventional "if cached, return; otherwise create,
+     * cache and return" pattern.
      *
      * <p>If the {@code valueLoader} throws an exception, it is wrapped in a {@link
      * ValueRetrievalException}
@@ -156,8 +139,8 @@ public class TwoLevelCache extends RedisCache {
      *
      * @param key the key whose associated value is to be returned
      * @return the value to which this cache maps the specified key
-     * @throws ValueRetrievalException if the {@code valueLoader} throws an exception or retrieved
-     *     value was {@code null}
+     * @throws ValueRetrievalException if the {@code valueLoader} throws an exception or retrieved value was
+     *                                 {@code null}
      * @see #get(Object)
      */
     @Override
@@ -166,23 +149,20 @@ public class TwoLevelCache extends RedisCache {
     public synchronized <T> T get(@NonNull Object key, @NonNull Callable<T> valueLoader) {
         Object result = lookup(key);
         if (result != null) {
-            return (T) result;
+            return (T)result;
         }
 
         final String localKey = convertKey(key);
-        return callRedis(() -> super.get(key, valueLoader))
-            .andThen(value -> localCache.put(localKey, value))
-            .recover(
-                e -> {
-                    try {
-                        T value = valueLoader.call();
-                        localCache.put(localKey, value);
-                        return value;
-                    } catch (Exception recoverException) {
-                        throw new ValueRetrievalException(key, valueLoader, recoverException);
-                    }
-                })
-            .get();
+        return callRedis(() -> super.get(key, valueLoader)).andThen(value -> localCache.put(localKey, value))
+            .recover(e -> {
+                try {
+                    T value = valueLoader.call();
+                    localCache.put(localKey, value);
+                    return value;
+                } catch (Exception recoverException) {
+                    throw new ValueRetrievalException(key, valueLoader, recoverException);
+                }
+            }).get();
     }
 
     /**
@@ -194,10 +174,9 @@ public class TwoLevelCache extends RedisCache {
      * <p>If value is {@code null} specified key will be evicted.
      *
      * <p>Actual registration performed in an asynchronous fashion, with subsequent lookups possibly
-     * not seeing the entry yet. Use {@link #putIfAbsent} for guaranteed immediate registration for
-     * current cache.
+     * not seeing the entry yet. Use {@link #putIfAbsent} for guaranteed immediate registration for current cache.
      *
-     * @param key the key with which the specified value is to be associated
+     * @param key   the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @see #putIfAbsent(Object, Object)
      */
@@ -217,8 +196,7 @@ public class TwoLevelCache extends RedisCache {
     }
 
     /**
-     * Atomically associate the specified value with the specified key in this cache if it is not set
-     * already.
+     * Atomically associate the specified value with the specified key in this cache if it is not set already.
      *
      * <p>This is equivalent to:
      *
@@ -234,12 +212,11 @@ public class TwoLevelCache extends RedisCache {
      *
      * <p>If value is {@code null} specified key will be evicted.
      *
-     * @param key the key with which the specified value is to be associated
+     * @param key   the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
-     * @return the value to which this cache maps the specified key (which may be {@code null}
-     *     itself), or also {@code null} if the cache did not contain any mapping for that key prior
-     *     to this call. Returning {@code null} is therefore an indicator that the given {@code value}
-     *     has been associated with the key, or it was evicted.
+     * @return the value to which this cache maps the specified key (which may be {@code null} itself), or also
+     *     {@code null} if the cache did not contain any mapping for that key prior to this call. Returning {@code null}
+     *     is therefore an indicator that the given {@code value} has been associated with the key, or it was evicted.
      * @see #put(Object, Object)
      */
     @Override
@@ -274,8 +251,7 @@ public class TwoLevelCache extends RedisCache {
      * Evict the mapping for this key from this cache if it is present.
      *
      * <p>Actual eviction performed in an asynchronous fashion, with subsequent lookups possibly still
-     * seeing the entry. Use {@link #evictIfPresent} for guaranteed immediate removal for current
-     * cache.
+     * seeing the entry. Use {@link #evictIfPresent} for guaranteed immediate removal for current cache.
      *
      * @param key the key whose mapping is to be removed from the cache
      * @see #evictIfPresent(Object)
@@ -297,8 +273,7 @@ public class TwoLevelCache extends RedisCache {
      * Clear the cache through removing all mappings.
      *
      * <p>Actual clearing performed in an asynchronous fashion, with subsequent lookups possibly still
-     * seeing the entries. Use {@link #invalidate()} for guaranteed immediate removal of entries for
-     * current cache.
+     * seeing the entries. Use {@link #invalidate()} for guaranteed immediate removal of entries for current cache.
      *
      * @see #invalidate()
      */
@@ -313,8 +288,7 @@ public class TwoLevelCache extends RedisCache {
         log.debug("clear local cache, the key is : {}", key);
         if (key == null) {
             localCache.invalidateAll();
-        }
-        else {
+        } else {
             localCache.invalidate(convertKey(key));
         }
     }
@@ -343,15 +317,11 @@ public class TwoLevelCache extends RedisCache {
     /** @param key to send notification about eviction. Can be {@code null}. */
     private void sendViaRedis(@Nullable String key) {
         if (properties.isOpenCircuitBreaker()) {
-            Try.runRunnable(
-                cacheCircuitBreaker.decorateRunnable(
-                    () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key))
-                )
-            );
+            Try.runRunnable(cacheCircuitBreaker.decorateRunnable(
+                () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key))));
         } else {
             Try.runRunnable(
-                () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key))
-            );
+                () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key)));
         }
     }
 
@@ -361,7 +331,6 @@ public class TwoLevelCache extends RedisCache {
      */
     @NonNull
     private ReentrantLock makeLock(@NonNull Object key) {
-        return Objects.requireNonNull(
-            locks.get(key, o -> new ReentrantLock()), LOCK_WAS_NOT_INITIALIZED);
+        return Objects.requireNonNull(locks.get(key, o -> new ReentrantLock()), LOCK_WAS_NOT_INITIALIZED);
     }
 }

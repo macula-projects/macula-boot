@@ -17,8 +17,8 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
-import lombok.RequiredArgsConstructor;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
@@ -34,6 +34,5 @@ import org.springframework.context.annotation.Import;
 @RequiredArgsConstructor
 @Import(ResourceServerConfiguration.class)
 public class GatewayAutoConfiguration {
-
 
 }

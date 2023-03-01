@@ -17,9 +17,9 @@
 
 package dev.macula.boot.starter.redis.test;
 
+import dev.macula.boot.starter.redis.test.vo.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import dev.macula.boot.starter.redis.test.vo.User;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

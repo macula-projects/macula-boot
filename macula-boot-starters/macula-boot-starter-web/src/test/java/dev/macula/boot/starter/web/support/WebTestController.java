@@ -36,8 +36,8 @@ import java.util.Date;
 public class WebTestController {
     @PostMapping("/getdate")
     public String testDate(@RequestParam(value = "date", required = false) Date date,
-                           @RequestParam(value = "local", required = false) LocalDateTime local,
-                           @RequestParam(value = "zoned", required = false) ZonedDateTime zoned) {
+        @RequestParam(value = "local", required = false) LocalDateTime local,
+        @RequestParam(value = "zoned", required = false) ZonedDateTime zoned) {
         System.out.println("date=" + date + ", local=" + local + ", zoned=" + zoned);
         return "";
     }

@@ -80,11 +80,9 @@ public class RedissonAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedissonClient redissonClient(
-            ApplicationContext ctx,
-            RedisProperties redisProperties,
-            RedissonProperties redissonProperties,
-            List<RedissonAutoConfigurationCustomizer> redissonAutoConfigurationCustomizers) throws IOException {
+    public RedissonClient redissonClient(ApplicationContext ctx, RedisProperties redisProperties,
+        RedissonProperties redissonProperties,
+        List<RedissonAutoConfigurationCustomizer> redissonAutoConfigurationCustomizers) throws IOException {
 
         Config config = RedissonConfigBuilder.create().build(ctx, redisProperties, redissonProperties);
         if (redissonAutoConfigurationCustomizers != null) {
@@ -112,10 +110,9 @@ public class RedissonAutoConfiguration {
         //设置序列化可见度(PropertyAccessor表示序列化的范围 Visibility用于设置访问权限（访问修饰符）)
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         //启动"自行在JSON中添加类型信息" 并进行相关设置（若无需反序列化可不设置）
-        objectMapper.activateDefaultTyping(
-                objectMapper.getPolymorphicTypeValidator(), //多态类型验证程序（必须参数）
-                ObjectMapper.DefaultTyping.NON_FINAL,       //允许序列化的类型（此处表示类不可被final修饰 但String, Boolean, Integer, Double除外）
-                JsonTypeInfo.As.WRAPPER_ARRAY);             /*
+        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), //多态类型验证程序（必须参数）
+            ObjectMapper.DefaultTyping.NON_FINAL,       //允许序列化的类型（此处表示类不可被final修饰 但String, Boolean, Integer, Double除外）
+            JsonTypeInfo.As.WRAPPER_ARRAY);             /*
                                                                 类型信息在JSON中的形式（默认为WRAPPER_ARRAY）
                                                                 WRAPPER_ARRAY
                                                                 WRAPPER_Object

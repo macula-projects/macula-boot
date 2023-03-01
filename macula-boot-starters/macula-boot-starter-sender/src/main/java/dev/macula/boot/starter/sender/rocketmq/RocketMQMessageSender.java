@@ -51,7 +51,8 @@ public class RocketMQMessageSender implements MessageSender {
 
             SendResult result;
             if (message.isOrderly()) {
-                result = template.syncSendOrderly(destination, MessageBuilder.withPayload(message), message.getMsgKey());
+                result =
+                    template.syncSendOrderly(destination, MessageBuilder.withPayload(message), message.getMsgKey());
             } else {
                 result = template.syncSend(destination, MessageBuilder.withPayload(message).build());
             }

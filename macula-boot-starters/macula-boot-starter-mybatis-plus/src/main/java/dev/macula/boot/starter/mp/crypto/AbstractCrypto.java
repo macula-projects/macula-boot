@@ -43,10 +43,9 @@ public abstract class AbstractCrypto {
 
     private AES getAES() {
         if (aes == null) {
-            aes = new AES(properties.getAes().getMode(),
-                    properties.getAes().getPadding(),
-                    properties.getAes().getKey().getBytes(),
-                    properties.getAes().getIv() == null ? null : properties.getAes().getIv().getBytes());
+            aes = new AES(properties.getAes().getMode(), properties.getAes().getPadding(),
+                properties.getAes().getKey().getBytes(),
+                properties.getAes().getIv() == null ? null : properties.getAes().getIv().getBytes());
         }
         return aes;
     }

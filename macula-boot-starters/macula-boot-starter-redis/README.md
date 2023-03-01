@@ -1,6 +1,9 @@
 # Redis
+
 提供连接Redis的相关配置，使用了[redisson库](https://redisson.pro/)
+
 ## 默认依赖如下：
+
 ```xml
 <dependencies>
     <dependency>
@@ -24,8 +27,11 @@
     </dependency>
 </dependencies>
 ```
+
 ## 配置方式
+
 使用时可以通过两种方式配置，一种是spring-boot默认的配置形式，另一种是redisson的配置形式：
+
 ```yaml
 spring:
   redis:
@@ -41,7 +47,9 @@ spring:
       master:
       nodes:
 ```
+
 redisson的配置方式如下，包括单点、主从、集群，下面是集群模式：
+
 ```yaml
 spring:
   redis:
@@ -94,7 +102,9 @@ spring:
 - ReactiveStringRedisTemplate
 
 ## 多Redis源的配置
+
 首先需要在配置文件中添加：
+
 ```yaml
 spring:
   redis:
@@ -108,7 +118,9 @@ spring:
         config: |
           xxxxx
 ``` 
+
 然后添加配置Bean，注意其中一个要设置@Primary注解，以便给默认的RedisConnectionFactory使用
+
 ```java
 public class Config {
     @Bean(name = "redissonPropertiesOne")
@@ -137,4 +149,5 @@ public class Config {
     }
 }
 ```
+
 `注意，如果定义多个RedisConnectonFactory，需要标识其中一个为@Primary，否则会报错。`

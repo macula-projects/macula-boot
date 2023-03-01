@@ -37,7 +37,7 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
         if (null != attributes) {
             HttpServletRequest request = attributes.getRequest();
 

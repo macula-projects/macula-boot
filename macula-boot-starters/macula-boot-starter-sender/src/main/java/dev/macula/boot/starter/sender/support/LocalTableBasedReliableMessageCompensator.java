@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.sender.support;
 
-
 import dev.macula.boot.starter.sender.ReliableMessageCompensator;
 
 import java.util.Date;

@@ -20,13 +20,13 @@ package dev.macula.boot.starter.cache.config;
 import dev.macula.boot.starter.cache.CacheEvictMessage;
 import dev.macula.boot.starter.cache.TwoLevelCache;
 import dev.macula.boot.starter.cache.TwoLevelCacheManager;
+import dev.macula.boot.starter.cache.TwoLevelCacheProperties;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 import lombok.extern.slf4j.Slf4j;
-import dev.macula.boot.starter.cache.TwoLevelCacheProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -56,10 +56,7 @@ import java.util.Objects;
 @Slf4j
 @AutoConfiguration(before = CacheAutoConfiguration.class, after = RedisAutoConfiguration.class)
 @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
-@EnableConfigurationProperties({
-    CacheProperties.class,
-    TwoLevelCacheProperties.class
-})
+@EnableConfigurationProperties({CacheProperties.class, TwoLevelCacheProperties.class})
 @EnableCaching
 public class TwoLevelCacheAutoConfiguration {
 
@@ -85,55 +82,10 @@ public class TwoLevelCacheAutoConfiguration {
     }
 
     /**
-     * @param cacheProperties            for multi-level cache
-     * @param twoLevelCacheRedisTemplate to send messages about evicted entries
-     * @return cache manager for multi-level caching
-     */
-    @Bean
-    public TwoLevelCacheManager cacheManager(
-        ObjectProvider<CacheProperties> highLevelCacheProperties,
-        TwoLevelCacheProperties cacheProperties,
-        RedisTemplate<Object, Object> twoLevelCacheRedisTemplate) {
-        CircuitBreaker circuitBreaker = cacheCircuitBreaker(cacheProperties);
-        return new TwoLevelCacheManager(highLevelCacheProperties, cacheProperties, twoLevelCacheRedisTemplate, circuitBreaker);
-    }
-
-    /**
-     * @return cache meter binder for local level of multi level cache
-     */
-    @Bean
-    @ConditionalOnBean(TwoLevelCacheManager.class)
-    @ConditionalOnClass({MeterBinder.class, CacheMeterBinderProvider.class})
-    public CacheMeterBinderProvider<TwoLevelCache> twoLevelCacheCacheMeterBinderProvider() {
-        return (cache, tags) -> new CaffeineCacheMetrics(cache.getLocalCache(), cache.getName(), tags);
-    }
-
-    /**
-     * @param cacheProperties            for multi-level cache
-     * @param twoLevelCacheRedisTemplate to receive messages about evicted entries
-     * @param cacheManager               for multi-level caching
-     * @return Redis topic listener to coordinate entries eviction
-     */
-    @Bean
-    public RedisMessageListenerContainer twoLevelCacheRedisMessageListenerContainer(
-        TwoLevelCacheProperties cacheProperties,
-        RedisTemplate<Object, Object> twoLevelCacheRedisTemplate,
-        TwoLevelCacheManager cacheManager) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(
-            Objects.requireNonNull(twoLevelCacheRedisTemplate.getConnectionFactory()));
-        container.addMessageListener(
-            createMessageListener(twoLevelCacheRedisTemplate, cacheManager),
-            new ChannelTopic(cacheProperties.getTopic()));
-        return container;
-    }
-
-    /**
      * @param cacheProperties to get circuit breaker properties for fault tolerance
      * @return circuit breaker to handle Redis connection exceptions and fallback to use local cache
      */
-    static CircuitBreaker cacheCircuitBreaker(
-        TwoLevelCacheProperties cacheProperties) {
+    static CircuitBreaker cacheCircuitBreaker(TwoLevelCacheProperties cacheProperties) {
         CircuitBreakerRegistry cbr = CircuitBreakerRegistry.ofDefaults();
 
         if (!cbr.getConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME).isPresent()) {
@@ -150,46 +102,45 @@ public class TwoLevelCacheAutoConfiguration {
             cbc.minimumNumberOfCalls(props.getMinimumNumberOfCalls());
             cbc.waitDurationInOpenState(props.getWaitDurationInOpenState());
 
-            Duration recommendedMaxDurationInOpenState = cacheProperties
-                .getDefaultTimeToLive()
-                .multipliedBy(cacheProperties.getLocal().getExpiryJitter() - 100L)
-                .dividedBy(200);
+            Duration recommendedMaxDurationInOpenState =
+                cacheProperties.getDefaultTimeToLive().multipliedBy(cacheProperties.getLocal().getExpiryJitter() - 100L)
+                    .dividedBy(200);
 
             if (props.getWaitDurationInOpenState().compareTo(recommendedMaxDurationInOpenState) <= 0) {
                 log.warn(
-                    "Cache circuit breaker wait duration in open state {} is more than recommended value of {}, "
-                        + "this can result in local cache expiry while circuit breaker is still in OPEN state.",
-                    props.getWaitDurationInOpenState(),
-                    recommendedMaxDurationInOpenState);
+                    "Cache circuit breaker wait duration in open state {} is more than recommended value of {}, " + "this can result in local cache expiry while circuit breaker is still in OPEN state.",
+                    props.getWaitDurationInOpenState(), recommendedMaxDurationInOpenState);
             }
 
             cbr.addConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME, cbc.build());
         }
 
         CircuitBreaker cb = cbr.circuitBreaker(CIRCUIT_BREAKER_NAME, CIRCUIT_BREAKER_CONFIGURATION_NAME);
-        cb.getEventPublisher()
-            .onError(
-                event -> log.trace("Cache circuit breaker error occurred in " + event.getElapsedDuration(), event.getThrowable())
-            )
-            .onSlowCallRateExceeded(
-                event -> log.trace("Cache circuit breaker {} calls were slow, rate exceeded", event.getSlowCallRate())
-            )
+        cb.getEventPublisher().onError(
+                event -> log.trace("Cache circuit breaker error occurred in " + event.getElapsedDuration(),
+                    event.getThrowable())).onSlowCallRateExceeded(
+                event -> log.trace("Cache circuit breaker {} calls were slow, rate exceeded", event.getSlowCallRate()))
             .onFailureRateExceeded(
-                event -> log.trace("Cache circuit breaker {} calls failed, rate exceeded", event.getFailureRate())
-            )
-            .onStateTransition(
-                event -> log.trace(
-                        "Cache circuit breaker {} state transitioned from {} to {}",
-                        event.getCircuitBreakerName(),
-                        event.getStateTransition().getFromState(),
-                        event.getStateTransition().getToState())
-            );
+                event -> log.trace("Cache circuit breaker {} calls failed, rate exceeded", event.getFailureRate()))
+            .onStateTransition(event -> log.trace("Cache circuit breaker {} state transitioned from {} to {}",
+                event.getCircuitBreakerName(), event.getStateTransition().getFromState(),
+                event.getStateTransition().getToState()));
         return cb;
     }
 
     /**
+     * @return cache meter binder for local level of multi level cache
+     */
+    @Bean
+    @ConditionalOnBean(TwoLevelCacheManager.class)
+    @ConditionalOnClass({MeterBinder.class, CacheMeterBinderProvider.class})
+    public CacheMeterBinderProvider<TwoLevelCache> twoLevelCacheCacheMeterBinderProvider() {
+        return (cache, tags) -> new CaffeineCacheMetrics(cache.getLocalCache(), cache.getName(), tags);
+    }
+
+    /**
      * @param twoLevelCacheRedisTemplate to receive messages about evicted entries
-     * @param cacheManager                 for multi-level caching
+     * @param cacheManager               for multi-level caching
      * @return Redis topic message listener to coordinate entries eviction
      */
     private static MessageListener createMessageListener(RedisTemplate<Object, Object> twoLevelCacheRedisTemplate,
@@ -197,7 +148,7 @@ public class TwoLevelCacheAutoConfiguration {
         return (message, pattern) -> {
             try {
                 CacheEvictMessage request =
-                    (CacheEvictMessage) twoLevelCacheRedisTemplate.getValueSerializer().deserialize(message.getBody());
+                    (CacheEvictMessage)twoLevelCacheRedisTemplate.getValueSerializer().deserialize(message.getBody());
 
                 if (request == null) {
                     return;
@@ -210,7 +161,7 @@ public class TwoLevelCacheAutoConfiguration {
                     return;
                 }
 
-                TwoLevelCache cache = (TwoLevelCache) cacheManager.getCache(cacheName);
+                TwoLevelCache cache = (TwoLevelCache)cacheManager.getCache(cacheName);
 
                 if (cache == null) {
                     return;
@@ -220,13 +171,40 @@ public class TwoLevelCacheAutoConfiguration {
                 cache.clearLocal(entryKey);
 
             } catch (ClassCastException e) {
-                log.error(
-                    "Cannot cast cache instance returned by cache manager to "
-                        + TwoLevelCache.class.getName(),
-                    e);
+                log.error("Cannot cast cache instance returned by cache manager to " + TwoLevelCache.class.getName(), e);
             } catch (Exception e) {
                 log.debug("Unknown Redis message", e);
             }
         };
+    }
+
+    /**
+     * @param cacheProperties            for multi-level cache
+     * @param twoLevelCacheRedisTemplate to send messages about evicted entries
+     * @return cache manager for multi-level caching
+     */
+    @Bean
+    public TwoLevelCacheManager cacheManager(ObjectProvider<CacheProperties> highLevelCacheProperties,
+        TwoLevelCacheProperties cacheProperties, RedisTemplate<Object, Object> twoLevelCacheRedisTemplate) {
+        CircuitBreaker circuitBreaker = cacheCircuitBreaker(cacheProperties);
+        return new TwoLevelCacheManager(highLevelCacheProperties, cacheProperties, twoLevelCacheRedisTemplate,
+            circuitBreaker);
+    }
+
+    /**
+     * @param cacheProperties            for multi-level cache
+     * @param twoLevelCacheRedisTemplate to receive messages about evicted entries
+     * @param cacheManager               for multi-level caching
+     * @return Redis topic listener to coordinate entries eviction
+     */
+    @Bean
+    public RedisMessageListenerContainer twoLevelCacheRedisMessageListenerContainer(
+        TwoLevelCacheProperties cacheProperties, RedisTemplate<Object, Object> twoLevelCacheRedisTemplate,
+        TwoLevelCacheManager cacheManager) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(Objects.requireNonNull(twoLevelCacheRedisTemplate.getConnectionFactory()));
+        container.addMessageListener(createMessageListener(twoLevelCacheRedisTemplate, cacheManager),
+            new ChannelTopic(cacheProperties.getTopic()));
+        return container;
     }
 }

@@ -18,9 +18,9 @@
 package dev.macula.boot.starter.mp.test.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import dev.macula.boot.starter.mp.entity.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
-import dev.macula.boot.starter.mp.entity.BaseEntity;
 
 /**
  * <p>
