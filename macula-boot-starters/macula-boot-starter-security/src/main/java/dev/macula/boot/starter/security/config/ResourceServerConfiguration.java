@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.security.config;
 
 import cn.hutool.core.convert.Convert;
-import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.security.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +90,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 添加默认忽略的路径
-        ignoreUrls.addAll(GlobalConstants.DEFAULT_IGNORE_URLS);
+        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
 
         http.oauth2ResourceServer().jwt().decoder(applicationContext.getBean(JwtDecoder.class))
             .jwtAuthenticationConverter(jwtAuthenticationConverter()).and().accessDeniedHandler(accessDeniedHandler())
@@ -136,8 +136,8 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
                 // 先把SCOPE变成authorities
                 Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
                 // 再把authorities属性转换过来，相加
-                jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(GlobalConstants.AUTHORITIES_KEY);
-                jwtGrantedAuthoritiesConverter.setAuthorityPrefix(GlobalConstants.AUTHORITIES_PREFIX);
+                jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_KEY);
+                jwtGrantedAuthoritiesConverter.setAuthorityPrefix(SecurityConstants.AUTHORITIES_PREFIX);
                 authorities.addAll(jwtGrantedAuthoritiesConverter.convert(jwt));
                 return authorities;
             }

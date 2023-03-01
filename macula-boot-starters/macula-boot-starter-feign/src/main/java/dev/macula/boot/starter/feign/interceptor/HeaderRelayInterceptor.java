@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.feign.interceptor;
 
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.util.StringUtils;
@@ -49,9 +50,9 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
             template.header(GlobalConstants.FEIGN_REQ_ID, sid);
 
             // 传递Gateway生成的Authorization头
-            String token = request.getHeader(GlobalConstants.AUTHORIZATION_KEY);
+            String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
             if (StringUtils.hasText(token)) {
-                template.header(GlobalConstants.AUTHORIZATION_KEY, token);
+                template.header(SecurityConstants.AUTHORIZATION_KEY, token);
             }
         }
     }
