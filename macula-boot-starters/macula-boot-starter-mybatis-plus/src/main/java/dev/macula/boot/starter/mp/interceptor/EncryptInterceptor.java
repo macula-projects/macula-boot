@@ -41,9 +41,7 @@ import java.util.Properties;
  * @author rain
  * @since 2022/8/22 11:46
  */
-@Intercepts({
-        @Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}),
-})
+@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}),})
 public class EncryptInterceptor extends AbstractCrypto implements Interceptor {
 
     public EncryptInterceptor(MyBatisPlusProperties properties) {
@@ -52,7 +50,7 @@ public class EncryptInterceptor extends AbstractCrypto implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
+        StatementHandler statementHandler = (StatementHandler)invocation.getTarget();
         encryptParameters(statementHandler.getBoundSql());
         return invocation.proceed();
     }

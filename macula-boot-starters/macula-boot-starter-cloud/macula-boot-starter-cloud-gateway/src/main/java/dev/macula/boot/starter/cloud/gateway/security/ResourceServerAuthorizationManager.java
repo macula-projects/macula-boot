@@ -100,12 +100,12 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     /**
      * 鉴权
      * <p>
-     * 缓存取 [URL权限-角色集合] 规则数据
-     * urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
+     * 缓存取 [URL权限-角色集合] 规则数据 urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
      */
     private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
 
-        Map<String, Object> urlPermRolesRules = redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_URL_PERM_ROLES_KEY);
+        Map<String, Object> urlPermRolesRules =
+            redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_URL_PERM_ROLES_KEY);
 
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色
@@ -129,20 +129,17 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         }
 
         // 判断Token中携带的用户角色是否有权限访问
-        Mono<AuthorizationDecision> authorizationDecisionMono = mono
-                .filter(Authentication::isAuthenticated)
-                .flatMapIterable(Authentication::getAuthorities)
-                .map(GrantedAuthority::getAuthority)
-                .any(authority -> {
+        Mono<AuthorizationDecision> authorizationDecisionMono =
+            mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
+                .map(GrantedAuthority::getAuthority).any(authority -> {
                     String roleCode = authority.substring(GlobalConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
                     if (GlobalConstants.ROOT_ROLE_CODE.equals(roleCode)) {
                         return true; // 如果是超级管理员则放行
                     }
-                    boolean hasAuthorized = CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
+                    boolean hasAuthorized =
+                        CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
                     return hasAuthorized;
-                })
-                .map(AuthorizationDecision::new)
-                .defaultIfEmpty(new AuthorizationDecision(false));
+                }).map(AuthorizationDecision::new).defaultIfEmpty(new AuthorizationDecision(false));
         return authorizationDecisionMono;
     }
 }

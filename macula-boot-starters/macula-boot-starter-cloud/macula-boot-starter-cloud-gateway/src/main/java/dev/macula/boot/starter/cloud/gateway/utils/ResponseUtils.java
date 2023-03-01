@@ -58,8 +58,7 @@ public class ResponseUtils {
         response.getHeaders().set("Cache-Control", "no-cache");
         String body = JSONUtil.toJsonStr(Result.failed(resultCode));
         DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
-        return response.writeWith(Mono.just(buffer))
-            .doOnError(error -> DataBufferUtils.release(buffer));
+        return response.writeWith(Mono.just(buffer)).doOnError(error -> DataBufferUtils.release(buffer));
     }
 
 }

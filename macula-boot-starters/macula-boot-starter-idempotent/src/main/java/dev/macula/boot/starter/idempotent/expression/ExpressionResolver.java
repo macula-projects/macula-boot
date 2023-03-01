@@ -22,9 +22,9 @@ package dev.macula.boot.starter.idempotent.expression;
  * @since 2020/9/25
  */
 
+import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -34,15 +34,16 @@ import java.lang.reflect.Method;
 
 /**
  * @author lengleng
- * <p>
- * 默认key 抽取， 优先根据 spel 处理
+ *     <p>
+ *     默认key 抽取， 优先根据 spel 处理
  * @since 2020-09-25
  */
 public class ExpressionResolver implements KeyResolver {
 
     private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
-    private static final LocalVariableTableParameterNameDiscoverer DISCOVERER = new LocalVariableTableParameterNameDiscoverer();
+    private static final LocalVariableTableParameterNameDiscoverer DISCOVERER =
+        new LocalVariableTableParameterNameDiscoverer();
 
     @Override
     public String resolver(Idempotent idempotent, JoinPoint point) {
@@ -67,12 +68,12 @@ public class ExpressionResolver implements KeyResolver {
      * @return Method 原信息
      */
     private Method getMethod(JoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
         Method method = signature.getMethod();
         if (method.getDeclaringClass().isInterface()) {
             try {
-                method = joinPoint.getTarget().getClass().getDeclaredMethod(joinPoint.getSignature().getName(),
-                        method.getParameterTypes());
+                method = joinPoint.getTarget().getClass()
+                    .getDeclaredMethod(joinPoint.getSignature().getName(), method.getParameterTypes());
             } catch (SecurityException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }

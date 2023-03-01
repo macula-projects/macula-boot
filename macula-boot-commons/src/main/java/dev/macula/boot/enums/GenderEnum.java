@@ -28,9 +28,7 @@ import lombok.Getter;
  */
 public enum GenderEnum implements IBaseEnum<Integer> {
 
-    MALE(1, "男"),
-    FEMALE(2, "女"),
-    UNKNOWN(0, "未知");
+    MALE(1, "男"), FEMALE(2, "女"), UNKNOWN(0, "未知");
 
     @Getter
     // @EnumValue //  Mybatis-Plus 提供注解表示插入数据库时插入该值

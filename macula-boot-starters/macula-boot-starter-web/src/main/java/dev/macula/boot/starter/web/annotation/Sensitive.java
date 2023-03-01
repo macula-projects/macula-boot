@@ -58,14 +58,12 @@ public @interface Sensitive {
      */
     int endExclude() default 0;
 
-
     /**
      * CUSTOM_OVERLAY 时生效
      *
      * @return *重复的次数
      */
     int overlayRepeat() default 4;
-
 
     /**
      * Enumeration used with {@link Sensitive}
@@ -100,13 +98,11 @@ public @interface Sensitive {
          */
         BANK_CARD,
         /**
-         * 自定义，有多少个字符替换成多少个*
-         * e.g: startInclude=3,endExclude=7,隐藏第3个到第7个的字符
+         * 自定义，有多少个字符替换成多少个* e.g: startInclude=3,endExclude=7,隐藏第3个到第7个的字符
          */
         CUSTOM_HIDE,
         /**
-         * 保留方式隐藏
-         * e.g: startInclude=3,endExclude=4 ,保留前面3个和后面的4个
+         * 保留方式隐藏 e.g: startInclude=3,endExclude=4 ,保留前面3个和后面的4个
          */
         CUSTOM_RETAIN_HIDE,
         /**

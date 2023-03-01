@@ -30,7 +30,9 @@ import java.util.List;
  */
 public interface GlobalConstants {
 
-    List<String> DEFAULT_IGNORE_URLS = Arrays.asList("/favicon**", "/webjars/**", "/doc.html", "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs");
+    List<String> DEFAULT_IGNORE_URLS =
+        Arrays.asList("/favicon**", "/webjars/**", "/doc.html", "/swagger-ui/**", "/swagger-resources/**",
+            "/v2/api-docs", "/v3/api-docs");
 
     /**
      * 认证请求头key
@@ -62,7 +64,6 @@ public interface GlobalConstants {
      * 根部门ID
      */
     Long ROOT_NODE_ID = 0l;
-
 
     /**
      * 系统默认密码

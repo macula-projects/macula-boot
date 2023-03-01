@@ -45,7 +45,7 @@ public class CryptoTypeHandler extends BaseTypeHandler<String> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, String parameter, JdbcType jdbcType)
-            throws SQLException {
+        throws SQLException {
         if (!"".equals(parameter)) {
             parameter = getAES().encryptBase64(parameter, CharsetUtil.CHARSET_UTF_8);
         }
@@ -53,8 +53,7 @@ public class CryptoTypeHandler extends BaseTypeHandler<String> {
     }
 
     @Override
-    public String getNullableResult(ResultSet rs, String columnName)
-            throws SQLException {
+    public String getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String columnValue = rs.getString(columnName);
         if (StringUtils.hasLength(columnValue)) {
             columnValue = getAES().decryptStr(columnValue, CharsetUtil.CHARSET_UTF_8);
@@ -63,8 +62,7 @@ public class CryptoTypeHandler extends BaseTypeHandler<String> {
     }
 
     @Override
-    public String getNullableResult(ResultSet rs, int columnIndex)
-            throws SQLException {
+    public String getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String columnValue = rs.getString(columnIndex);
         if (StringUtils.hasLength(columnValue)) {
             columnValue = getAES().decryptStr(columnValue, CharsetUtil.CHARSET_UTF_8);
@@ -73,8 +71,7 @@ public class CryptoTypeHandler extends BaseTypeHandler<String> {
     }
 
     @Override
-    public String getNullableResult(CallableStatement cs, int columnIndex)
-            throws SQLException {
+    public String getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String columnValue = cs.getString(columnIndex);
         if (StringUtils.hasLength(columnValue)) {
             columnValue = getAES().decryptStr(columnValue, CharsetUtil.CHARSET_UTF_8);
@@ -84,10 +81,9 @@ public class CryptoTypeHandler extends BaseTypeHandler<String> {
 
     protected AES getAES() {
         if (aes == null) {
-            aes = new AES(properties.getAes().getMode(),
-                    properties.getAes().getPadding(),
-                    properties.getAes().getKey().getBytes(),
-                    properties.getAes().getIv() == null ? null : properties.getAes().getIv().getBytes());
+            aes = new AES(properties.getAes().getMode(), properties.getAes().getPadding(),
+                properties.getAes().getKey().getBytes(),
+                properties.getAes().getIv() == null ? null : properties.getAes().getIv().getBytes());
         }
         return aes;
     }

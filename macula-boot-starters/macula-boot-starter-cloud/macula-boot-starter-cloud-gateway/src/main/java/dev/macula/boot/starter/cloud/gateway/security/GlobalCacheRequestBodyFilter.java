@@ -49,25 +49,23 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
         log.debug("GlobalCacheRequestBodyFilter start...");
 
         // 将 request body 中的内容 copy 一份，记录到 exchange 的一个自定义属性中
-        Object cachedRequestBodyObject = exchange
-                .getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);
+        Object cachedRequestBodyObject =
+            exchange.getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);
         // 如果已经缓存过，略过
         if (cachedRequestBodyObject != null) {
             return chain.filter(exchange);
         }
         // 如果没有缓存过，获取字节数组存入 exchange 的自定义属性中
-        return DataBufferUtils.join(exchange.getRequest().getBody())
-                .map(dataBuffer -> {
-                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                    dataBuffer.read(bytes);
-                    DataBufferUtils.release(dataBuffer);
-                    String requestBody = new String(bytes);
-                    log.debug("请求缓存的body为：{}", requestBody);
-                    return bytes;
-                }).defaultIfEmpty(new byte[0])
-                .doOnNext(bytes -> exchange.getAttributes()
-                        .put(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
-                .then(chain.filter(exchange));
+        return DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
+                byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                dataBuffer.read(bytes);
+                DataBufferUtils.release(dataBuffer);
+                String requestBody = new String(bytes);
+                log.debug("请求缓存的body为：{}", requestBody);
+                return bytes;
+            }).defaultIfEmpty(new byte[0])
+            .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
+            .then(chain.filter(exchange));
     }
 
     @Override

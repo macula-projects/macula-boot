@@ -34,7 +34,6 @@ public class TinyIdHttpUtils {
 
     private static final Logger logger = Logger.getLogger(TinyIdHttpUtils.class.getName());
 
-
     private TinyIdHttpUtils() {
 
     }
@@ -61,7 +60,7 @@ public class TinyIdHttpUtils {
             }
         }
         try {
-            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn = (HttpURLConnection)new URL(url).openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setDoInput(true);

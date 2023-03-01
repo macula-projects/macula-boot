@@ -39,7 +39,7 @@ public class MyBatisPlusProperties {
 
     private long tenantId = 0L;
 
-    private String[] tenantSuffixes = new String[]{"tenant", "TENANT"};
+    private String[] tenantSuffixes = new String[] {"tenant", "TENANT"};
 
     @Getter
     @Setter

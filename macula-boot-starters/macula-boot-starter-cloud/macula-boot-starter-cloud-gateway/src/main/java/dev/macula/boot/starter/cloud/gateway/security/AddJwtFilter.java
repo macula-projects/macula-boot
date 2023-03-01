@@ -76,22 +76,17 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
             // OAuth2的Token才转为JWT
             String token = exchange.getRequest().getHeaders().getFirst(GlobalConstants.AUTHORIZATION_KEY);
             if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GlobalConstants.TOKEN_PREFIX)) {
-                return ReactiveSecurityContextHolder.getContext()
-                        .map(SecurityContext::getAuthentication)
-                        .cast(BearerTokenAuthentication.class)
-                        .map(BearerTokenAuthentication::getPrincipal)
-                        .filter(OAuth2AuthenticatedPrincipal.class::isInstance)
-                        .cast(OAuth2AuthenticatedPrincipal.class)
-                        .switchIfEmpty(Mono.error(new BadCredentialsException("Bad Credentials")))
-                        .flatMap(principal -> {
-                            ServerHttpRequest request = exchange.getRequest();
-                            request = request.mutate()
-                                    .header(GlobalConstants.AUTHORIZATION_KEY, GlobalConstants.TOKEN_PREFIX + generateJwtToken(principal))
-                                    .build();
+                return ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication)
+                    .cast(BearerTokenAuthentication.class).map(BearerTokenAuthentication::getPrincipal)
+                    .filter(OAuth2AuthenticatedPrincipal.class::isInstance).cast(OAuth2AuthenticatedPrincipal.class)
+                    .switchIfEmpty(Mono.error(new BadCredentialsException("Bad Credentials"))).flatMap(principal -> {
+                        ServerHttpRequest request = exchange.getRequest();
+                        request = request.mutate().header(GlobalConstants.AUTHORIZATION_KEY,
+                            GlobalConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
 
-                            ServerWebExchange newExchange = exchange.mutate().request(request).build();
-                            return chain.filter(newExchange);
-                        });
+                        ServerWebExchange newExchange = exchange.mutate().request(request).build();
+                        return chain.filter(newExchange);
+                    });
             }
 
             // AK/SK转JWT
@@ -101,8 +96,10 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
                 String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put(JWTClaimNames.SUBJECT, username);
-                OAuth2AuthenticatedPrincipal principal = new DefaultOAuth2AuthenticatedPrincipal(username, attributes, AuthorityUtils.NO_AUTHORITIES);
-                request = request.mutate().header(GlobalConstants.AUTHORIZATION_KEY, GlobalConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
+                OAuth2AuthenticatedPrincipal principal =
+                    new DefaultOAuth2AuthenticatedPrincipal(username, attributes, AuthorityUtils.NO_AUTHORITIES);
+                request = request.mutate().header(GlobalConstants.AUTHORIZATION_KEY,
+                    GlobalConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
                 ServerWebExchange newExchange = exchange.mutate().request(request).build();
 
                 return chain.filter(newExchange);
@@ -114,16 +111,14 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     @SneakyThrows
     /**
      * 根据OAuth2的内容生成JWT，采用HS256
-     */
-    private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
+     */ private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
         // 先看缓存，有则直接返回JWT
-        String jwtStr = (String) redisTemplate.opsForValue().get(GatewayConstant.JWT_CACHE_KEY + principal.getName());
+        String jwtStr = (String)redisTemplate.opsForValue().get(GatewayConstant.JWT_CACHE_KEY + principal.getName());
         if (StrUtil.isNotBlank(jwtStr)) {
             return jwtStr;
         }
 
-        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
-                .jwtID(UUID.randomUUID().toString());
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder().jwtID(UUID.randomUUID().toString());
 
         // copy oauth2服务器返回的attribute
         principal.getAttributes().forEach(builder::claim);
@@ -145,7 +140,8 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
 
         JWTClaimsSet claimsSet = builder.build();
 
-        JWSObject jwt = new JWSObject(new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT).build(), claimsSet.toPayload());
+        JWSObject jwt = new JWSObject(new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT).build(),
+            claimsSet.toPayload());
 
         MACSigner signer = new MACSigner(jwtSecret);
         jwt.sign(signer);

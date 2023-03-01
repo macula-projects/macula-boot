@@ -32,21 +32,19 @@ import java.io.Serializable;
 @NoArgsConstructor
 public enum ApiResultCode implements ResultCode, Serializable {
 
-    SUCCESS("10000", "请求成功"),
-    FAILED("10001", "请求失败"),
+    SUCCESS("00000", "请求成功"), FAILED("99999", "请求失败"),
 
-    ACCESS_UNAUTHORIZED("10010", "未授权的访问"),
-    TOKEN_INVALID_OR_EXPIRED("10011", "访问令牌无效或已过期"),
-    TOKEN_ACCESS_FORBIDDEN("10012", "令牌没有访问授权"),
+    /** 用户异常 */
+    ACCESS_UNAUTHORIZED("A0301", "未授权的访问"), TOKEN_INVALID_OR_EXPIRED("A0311", "访问令牌无效或已过期"),
+    TOKEN_ACCESS_FORBIDDEN("A0312", "令牌没有访问授权"), AKSK_ACCESS_FORBIDDEN("A0340", "基于AKSK的访问签名无效"),
+    VALIDATE_ERROR("A0400", "参数校验错误"),
 
-    AKSK_ACCESS_FORBIDDEN("10013", "基于AKSK的访问签名无效"),
+    /** 业务异常 */
+    BIZ_ERROR("B0001", "业务异常"), SYS_ERROR("B0002", "系统异常"),
+    RESPONSE_PACK_ERROR("B0400", "Response返回包装失败"),
 
-    BIZ_ERROR("10021", "业务异常"),
-    SYS_ERROR("10022", "系统异常"),
-    VALIDATE_ERROR("10023", "参数校验错误"),
-    RESPONSE_PACK_ERROR("10024", "Response返回包装失败"),
-    FLOW_LIMITING("10051", "限流"),
-    DEGRADATION("10052", "系统降级");
+    /** 调用第三方产生的异常 */
+    FLOW_LIMITING("C0401", "限流"), DEGRADATION("C0402", "系统降级");
 
     private String code;
 

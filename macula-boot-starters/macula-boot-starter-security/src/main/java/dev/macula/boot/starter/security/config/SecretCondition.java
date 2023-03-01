@@ -38,7 +38,8 @@ public class SecretCondition extends SpringBootCondition {
         Environment environment = context.getEnvironment();
         String issuerUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri");
         String jwkSetUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.jwk-set-uri");
-        String publicKeyLocation = environment.getProperty("spring.security.oauth2.resourceserver.jwt.public-key-location");
+        String publicKeyLocation =
+            environment.getProperty("spring.security.oauth2.resourceserver.jwt.public-key-location");
         if (StringUtils.hasText(jwkSetUri)) {
             return ConditionOutcome.noMatch(message.found("jwk-set-uri property").items(jwkSetUri));
         }

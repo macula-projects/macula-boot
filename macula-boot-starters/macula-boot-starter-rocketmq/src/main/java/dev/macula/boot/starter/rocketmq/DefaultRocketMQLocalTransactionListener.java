@@ -17,12 +17,11 @@
 
 package dev.macula.boot.starter.rocketmq;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
-import dev.macula.boot.starter.rocketmq.config.Constants;
 import dev.macula.boot.starter.rocketmq.annotation.TxMqCheck;
 import dev.macula.boot.starter.rocketmq.annotation.TxMqExecute;
+import dev.macula.boot.starter.rocketmq.config.Constants;
 import lombok.SneakyThrows;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
@@ -42,20 +41,17 @@ import java.util.Map;
  * <p>
  * <p>
  * <p>
- * {@code
- * // 发送半事务消息
- * public void createOrderWithMq(OrderVo order) {
- * TxMqMessage txMsg = new TxMqMessage(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
- * rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg, new Object[] { order });
- * }
- * }
+ * {@code // 发送半事务消息 public void createOrderWithMq(OrderVo order) { TxMqMessage txMsg = new TxMqMessage(order,
+ * this.getClass(), BIZ_NAME_ORDER, order.getOrderNo()); rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg,
+ * new Object[] { order }); } }
  *
  * @author rain
  * @since 2022/11/28 22:55
  */
 
 @RocketMQTransactionListener
-public class DefaultRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener, ApplicationContextAware {
+public class DefaultRocketMQLocalTransactionListener
+    implements RocketMQLocalTransactionListener, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     private Map<String, Object> cacheMap = new HashMap<>();
@@ -63,12 +59,12 @@ public class DefaultRocketMQLocalTransactionListener implements RocketMQLocalTra
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
         try {
-            String className = (String) msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
-            String bizName = (String) msg.getHeaders().get(Constants.BIZ_NAME);
+            String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
+            String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
 
             // 执行业务方法
             if (ArrayUtil.isArray(arg)) {
-                ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), (Object[]) arg);
+                ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), (Object[])arg);
             } else {
                 ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), arg);
             }
@@ -82,9 +78,9 @@ public class DefaultRocketMQLocalTransactionListener implements RocketMQLocalTra
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
         try {
-            String className = (String) msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
-            String bizName = (String) msg.getHeaders().get(Constants.BIZ_NAME);
-            String checkId = (String) msg.getHeaders().get(Constants.CHECK_ID);
+            String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
+            String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
+            String checkId = (String)msg.getHeaders().get(Constants.CHECK_ID);
 
             // 执行检查方法
             Boolean ret = ReflectUtil.invoke(getBean(className), findTxMqCheck(className, bizName), checkId);
@@ -109,13 +105,13 @@ public class DefaultRocketMQLocalTransactionListener implements RocketMQLocalTra
 
     @SneakyThrows
     private Method findTxMqExecute(String className, String bizName) {
-        Method method = (Method) cacheMap.get(className + bizName + "_execute");
+        Method method = (Method)cacheMap.get(className + bizName + "_execute");
         if (method == null) {
             Class<?> cls = Class.forName(className);
             Method[] methods = cls.getMethods();
             for (Method m : methods) {
-                if (m.isAnnotationPresent(TxMqExecute.class)
-                        && bizName.equals(m.getAnnotation(TxMqExecute.class).value())) {
+                if (m.isAnnotationPresent(TxMqExecute.class) && bizName.equals(
+                    m.getAnnotation(TxMqExecute.class).value())) {
                     cacheMap.put(className + bizName + "_execute", m);
                     method = m;
                     break;
@@ -127,13 +123,13 @@ public class DefaultRocketMQLocalTransactionListener implements RocketMQLocalTra
 
     @SneakyThrows
     private Method findTxMqCheck(String className, String bizName) {
-        Method method = (Method) cacheMap.get(className + bizName + "_check");
+        Method method = (Method)cacheMap.get(className + bizName + "_check");
         if (method == null) {
             Class<?> cls = Class.forName(className);
             Method[] methods = cls.getMethods();
             for (Method m : methods) {
-                if (m.isAnnotationPresent(TxMqCheck.class)
-                        && bizName.equals(m.getAnnotation(TxMqCheck.class).value())) {
+                if (m.isAnnotationPresent(TxMqCheck.class) && bizName.equals(
+                    m.getAnnotation(TxMqCheck.class).value())) {
                     cacheMap.put(className + bizName + "_check", m);
                     method = m;
                     break;

@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "ipaas-service", url = "https://ipaas-dev.infinitus.com.cn", configuration = IpaasConfiguration.class)
+@FeignClient(name = "ipaas-service", url = "https://ipaas-dev.infinitus.com.cn",
+    configuration = IpaasConfiguration.class)
 public interface IpaasService {
 
     @PostMapping("/openapi/product-api/companies")

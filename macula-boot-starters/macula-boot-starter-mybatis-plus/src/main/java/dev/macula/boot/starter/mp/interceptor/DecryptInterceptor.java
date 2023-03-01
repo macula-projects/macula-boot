@@ -35,9 +35,7 @@ import java.util.Set;
  * @author rain
  * @since 2022/8/22 11:47
  */
-@Intercepts({
-        @Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class}),
-})
+@Intercepts({@Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class}),})
 public class DecryptInterceptor extends AbstractCrypto implements Interceptor {
 
     public DecryptInterceptor(MyBatisPlusProperties properties) {
@@ -46,7 +44,7 @@ public class DecryptInterceptor extends AbstractCrypto implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        List<Object> result = (List<Object>) invocation.proceed();
+        List<Object> result = (List<Object>)invocation.proceed();
         if (result != null && !result.isEmpty()) {
             for (Object obj : result) {
                 Set<Field> cryptFields = CryptoFieldUtils.getCryptoFields(obj);
@@ -69,6 +67,5 @@ public class DecryptInterceptor extends AbstractCrypto implements Interceptor {
     @Override
     public void setProperties(Properties properties) {
     }
-
 
 }

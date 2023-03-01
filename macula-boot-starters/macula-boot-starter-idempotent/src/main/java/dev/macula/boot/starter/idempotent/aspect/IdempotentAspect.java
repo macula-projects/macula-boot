@@ -76,11 +76,11 @@ public class IdempotentAspect {
 
     @Before("pointCut()")
     public void beforePointCut(JoinPoint joinPoint) {
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder
-                .getRequestAttributes();
+        ServletRequestAttributes requestAttributes =
+            (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
 
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
         Method method = signature.getMethod();
         if (!method.isAnnotationPresent(Idempotent.class)) {
             return;
@@ -122,7 +122,7 @@ public class IdempotentAspect {
                 throw new IdempotentException(info);
             } else {
                 LOGGER.info("[idempotent]:has stored key={},value={},expireTime={}{},now={}", key, value, expireTime,
-                        timeUnit, LocalDateTime.now().toString());
+                    timeUnit, LocalDateTime.now().toString());
             }
         }
 
@@ -144,7 +144,7 @@ public class IdempotentAspect {
         }
 
         String key = map.get(KEY).toString();
-        boolean delKey = (boolean) map.get(DELKEY);
+        boolean delKey = (boolean)map.get(DELKEY);
 
         if (delKey) {
             mapCache.fastRemove(key);

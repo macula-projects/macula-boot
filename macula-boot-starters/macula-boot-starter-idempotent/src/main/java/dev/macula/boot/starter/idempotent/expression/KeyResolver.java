@@ -17,14 +17,14 @@
 
 package dev.macula.boot.starter.idempotent.expression;
 
-import org.aspectj.lang.JoinPoint;
 import dev.macula.boot.starter.idempotent.annotation.Idempotent;
+import org.aspectj.lang.JoinPoint;
 
 /**
  * @author lengleng
  * @since 2020/9/25
- * <p>
- * 唯一标志处理器
+ *     <p>
+ *     唯一标志处理器
  */
 public interface KeyResolver {
 

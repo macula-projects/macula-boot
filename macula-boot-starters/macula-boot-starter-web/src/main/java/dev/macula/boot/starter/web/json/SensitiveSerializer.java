@@ -84,7 +84,8 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
                     gen.writeString(SensitiveUtil.hide(value, startInclude, (value.length() - endExclude)));
                     break;
                 case CUSTOM_OVERLAY:
-                    gen.writeString(SensitiveUtil.overlay(value, SensitiveUtil.ASTERISK, overlayRepeat, startInclude, endExclude));
+                    gen.writeString(
+                        SensitiveUtil.overlay(value, SensitiveUtil.ASTERISK, overlayRepeat, startInclude, endExclude));
                     break;
                 default:
                     gen.writeString(value);
@@ -94,7 +95,8 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+        throws JsonMappingException {
         if (Objects.isNull(property)) {
             return prov.getDefaultNullValueSerializer();
         }

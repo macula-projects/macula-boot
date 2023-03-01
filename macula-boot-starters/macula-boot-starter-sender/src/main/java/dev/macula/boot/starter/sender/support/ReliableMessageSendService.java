@@ -40,8 +40,7 @@ public class ReliableMessageSendService {
     private final LocalMessageRepository localMessageRepository;
     private final MessageSender messageSender;
 
-    public ReliableMessageSendService(LocalMessageRepository localMessageRepository,
-                                      MessageSender messageSender) {
+    public ReliableMessageSendService(LocalMessageRepository localMessageRepository, MessageSender messageSender) {
         this.localMessageRepository = localMessageRepository;
         this.messageSender = messageSender;
     }
@@ -54,7 +53,8 @@ public class ReliableMessageSendService {
      */
     public void loadAndResend(Date startDate, int sizePreTask) {
         Date latestUpdateTime = startDate;
-        List<LocalMessage> localMessages = this.localMessageRepository.loadNotSuccessByUpdateGt(latestUpdateTime, sizePreTask);
+        List<LocalMessage> localMessages =
+            this.localMessageRepository.loadNotSuccessByUpdateGt(latestUpdateTime, sizePreTask);
         while (CollectionUtil.isNotEmpty(localMessages)) {
             log.info("load {} task by {} to resend", localMessages.size(), latestUpdateTime);
 
@@ -110,17 +110,14 @@ public class ReliableMessageSendService {
     }
 
     private Date calLatestUpdateTime(List<LocalMessage> localMessages) {
-        return localMessages.stream()
-                .map(localMessage -> localMessage.getUpdateTime())
-                .max(Comparator.naturalOrder())
-                .orElse(new Date());
+        return localMessages.stream().map(localMessage -> localMessage.getUpdateTime()).max(Comparator.naturalOrder())
+            .orElse(new Date());
     }
 
     private void retrySend(List<LocalMessage> localMessages) {
         Date now = new Date();
-        localMessages.stream()
-                .filter(message -> message.needRetry(now))
-                .map(localMessage -> new SendMessageTask(this.localMessageRepository, messageSender, localMessage))
-                .forEach(task -> task.run());
+        localMessages.stream().filter(message -> message.needRetry(now))
+            .map(localMessage -> new SendMessageTask(this.localMessageRepository, messageSender, localMessage))
+            .forEach(task -> task.run());
     }
 }

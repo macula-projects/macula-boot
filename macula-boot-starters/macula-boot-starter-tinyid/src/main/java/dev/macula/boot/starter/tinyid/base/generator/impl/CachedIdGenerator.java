@@ -17,11 +17,11 @@
 
 package dev.macula.boot.starter.tinyid.base.generator.impl;
 
-import dev.macula.boot.starter.tinyid.base.generator.IdGenerator;
 import dev.macula.boot.starter.tinyid.base.entity.Result;
 import dev.macula.boot.starter.tinyid.base.entity.ResultCode;
 import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
 import dev.macula.boot.starter.tinyid.base.exception.TinyIdSysException;
+import dev.macula.boot.starter.tinyid.base.generator.IdGenerator;
 import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
 import dev.macula.boot.starter.tinyid.base.util.NamedThreadFactory;
 
@@ -40,7 +40,8 @@ public class CachedIdGenerator implements IdGenerator {
     protected volatile SegmentId next;
     private volatile boolean isLoadingNext;
     private Object lock = new Object();
-    private ExecutorService executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("tinyid-generator"));
+    private ExecutorService executorService =
+        Executors.newSingleThreadExecutor(new NamedThreadFactory("tinyid-generator"));
 
     public CachedIdGenerator(String bizType, SegmentIdService segmentIdService) {
         this.bizType = bizType;

@@ -72,7 +72,8 @@ public class UserMapperTest {
         int i = userMapper.insert(user);
         Assertions.assertTrue(i > 0);
         Assertions.assertEquals(0, user.getVersion());
-        System.out.println("1=======" + user.getId() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
+        System.out.println(
+            "1=======" + user.getId() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
 
         User user2 = new User();
         user2.setName("rain02");
@@ -80,7 +81,8 @@ public class UserMapperTest {
         int r = userMapper.updateById(user2);
         Assertions.assertTrue(r > 0);
         Assertions.assertEquals(1, user2.getVersion());
-        System.out.println("2=======" + user2.getId() + " " + user2.getName() + " " + user2.getVersion() + " " + user2.getLastUpdateTime());
+        System.out.println(
+            "2=======" + user2.getId() + " " + user2.getName() + " " + user2.getVersion() + " " + user2.getLastUpdateTime());
 
         User user3 = new User();
         user3.setName("rain03");
@@ -89,9 +91,11 @@ public class UserMapperTest {
         int r2 = userMapper.updateById(user3);
         Assertions.assertTrue(r2 > 0);
         Assertions.assertEquals(2, user3.getVersion());
-        System.out.println("3=======" + user3.getId() + " " + user3.getName() + " " + user3.getVersion() + " " + user3.getLastUpdateTime());
+        System.out.println(
+            "3=======" + user3.getId() + " " + user3.getName() + " " + user3.getVersion() + " " + user3.getLastUpdateTime());
         User user4 = userMapper.selectById(6L);
-        System.out.println("4======" + user4.getId() + " " + user4.getName() + " " + user4.getVersion() + " " + user4.getLastUpdateTime());
+        System.out.println(
+            "4======" + user4.getId() + " " + user4.getName() + " " + user4.getVersion() + " " + user4.getLastUpdateTime());
     }
 
     @Test
@@ -116,6 +120,7 @@ public class UserMapperTest {
         user = userMapper.selectOne(queryWrapper);
 
         Assertions.assertEquals(email, user.getEmail());
-        System.out.println("1=======" + user.getId() + " " + user.getEmail() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
+        System.out.println(
+            "1=======" + user.getId() + " " + user.getEmail() + " " + user.getName() + " " + user.getVersion() + " " + user.getLastUpdateTime());
     }
 }

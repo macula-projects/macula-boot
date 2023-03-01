@@ -33,7 +33,9 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Cache manager to cover basic operations
+/**
+ * Cache manager to cover basic operations
+ *
  * @author Rain
  */
 
@@ -47,16 +49,11 @@ public class TwoLevelCacheManager implements CacheManager {
 
     private final Map<String, Cache> availableCaches;
 
-    public TwoLevelCacheManager(
-        ObjectProvider<CacheProperties> highLevelProperties,
-        TwoLevelCacheProperties properties,
-        RedisTemplate<Object, Object> redisTemplate,
-        CircuitBreaker circuitBreaker) {
+    public TwoLevelCacheManager(ObjectProvider<CacheProperties> highLevelProperties, TwoLevelCacheProperties properties,
+        RedisTemplate<Object, Object> redisTemplate, CircuitBreaker circuitBreaker) {
         CacheProperties hlp = highLevelProperties.getIfAvailable();
         this.requestedCacheNames =
-            hlp == null
-                ? Collections.emptySet()
-                : Collections.unmodifiableSet(new HashSet<>(hlp.getCacheNames()));
+            hlp == null ? Collections.emptySet() : Collections.unmodifiableSet(new HashSet<>(hlp.getCacheNames()));
 
         this.properties = properties;
         this.redisTemplate = redisTemplate;
@@ -82,8 +79,7 @@ public class TwoLevelCacheManager implements CacheManager {
      * Get or create the cache associated with the given name.
      *
      * @param name the cache identifier (must not be {@code null})
-     * @return the associated cache, or {@code null} if such a cache does not exist or could be not
-     *     created
+     * @return the associated cache, or {@code null} if such a cache does not exist or could be not created
      */
     @Override
     public Cache getCache(@NonNull String name) {
@@ -91,18 +87,9 @@ public class TwoLevelCacheManager implements CacheManager {
             return null;
         }
 
-        return availableCaches.computeIfAbsent(
-            name,
-            key ->
-                new TwoLevelCache(
-                    key,
-                    properties,
-                    redisTemplate,
-                    Caffeine.newBuilder()
-                        .maximumSize(properties.getLocal().getMaxSize())
-                        .expireAfter(new RandomizedLocalExpiryOnWrite(key, properties))
-                        .build(),
-                    circuitBreaker));
+        return availableCaches.computeIfAbsent(name, key -> new TwoLevelCache(key, properties, redisTemplate,
+            Caffeine.newBuilder().maximumSize(properties.getLocal().getMaxSize())
+                .expireAfter(new RandomizedLocalExpiryOnWrite(key, properties)).build(), circuitBreaker));
     }
 
     /**
@@ -148,25 +135,19 @@ public class TwoLevelCacheManager implements CacheManager {
         public long expireAfterCreate(@NonNull Object key, @NonNull Object value, long currentTime) {
             int jitterSign = random.nextBoolean() ? 1 : -1;
             double randomJitter = 1 + (jitterSign * (expiryJitter / 100) * random.nextDouble());
-            Duration expiry = timeToLive.multipliedBy((long) (100 * randomJitter)).dividedBy(200);
+            Duration expiry = timeToLive.multipliedBy((long)(100 * randomJitter)).dividedBy(200);
             log.trace("Key {} will expire in {}", key, expiry);
             return expiry.toNanos();
         }
 
         @Override
-        public long expireAfterUpdate(
-            @NonNull Object key,
-            @NonNull Object value,
-            long currentTime,
+        public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime,
             @NonNegative long currentDuration) {
             return currentDuration;
         }
 
         @Override
-        public long expireAfterRead(
-            @NonNull Object key,
-            @NonNull Object value,
-            long currentTime,
+        public long expireAfterRead(@NonNull Object key, @NonNull Object value, long currentTime,
             @NonNegative long currentDuration) {
             return currentDuration;
         }

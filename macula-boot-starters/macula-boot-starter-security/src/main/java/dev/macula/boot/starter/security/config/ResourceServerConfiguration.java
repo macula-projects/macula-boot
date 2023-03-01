@@ -92,32 +92,21 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
         // 添加默认忽略的路径
         ignoreUrls.addAll(GlobalConstants.DEFAULT_IGNORE_URLS);
 
-        http.oauth2ResourceServer()
-                .jwt()
-                .decoder(applicationContext.getBean(JwtDecoder.class))
-                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                .and()
-                .accessDeniedHandler(accessDeniedHandler())
-                .authenticationEntryPoint(authenticationEntryPoint());
+        http.oauth2ResourceServer().jwt().decoder(applicationContext.getBean(JwtDecoder.class))
+            .jwtAuthenticationConverter(jwtAuthenticationConverter()).and().accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint());
 
-        http.sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler())
-                .authenticationEntryPoint(authenticationEntryPoint());
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
+            .authorizeRequests().antMatchers(Convert.toStrArray(ignoreUrls)).permitAll().anyRequest().authenticated()
+            .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint());
         return http.build();
     }
 
     @Bean
     AccessDeniedHandler accessDeniedHandler() {
-        return (request, response, accessDeniedException) ->
-                ResponseUtils.writeErrorInfo(response, ApiResultCode.TOKEN_ACCESS_FORBIDDEN);
+        return (request, response, accessDeniedException) -> ResponseUtils.writeErrorInfo(response,
+            ApiResultCode.TOKEN_ACCESS_FORBIDDEN);
     }
 
     /**
@@ -125,15 +114,16 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
      */
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, accessDeniedException) ->
-                ResponseUtils.writeErrorInfo(response, ApiResultCode.TOKEN_INVALID_OR_EXPIRED);
+        return (request, response, accessDeniedException) -> ResponseUtils.writeErrorInfo(response,
+            ApiResultCode.TOKEN_INVALID_OR_EXPIRED);
     }
 
     @Bean
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         // 从JWT转换为Authentication
         return new Converter<Jwt, AbstractAuthenticationToken>() {
-            private JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+            private JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+                new JwtGrantedAuthoritiesConverter();
 
             @Override
             public final AbstractAuthenticationToken convert(Jwt jwt) {
@@ -159,7 +149,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     JwtDecoder jwtDecoderByJwkKeySetUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
         NimbusJwtDecoder nimbusJwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwt.getJwkSetUri())
-                .jwsAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
+            .jwsAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
         String issuerUri = jwt.getIssuerUri();
         if (issuerUri != null) {
             nimbusJwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuerUri));
@@ -171,10 +161,10 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Conditional(KeyValueCondition.class)
     JwtDecoder jwtDecoderByPublicKeyValue() throws Exception {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
-        RSAPublicKey publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
-                .generatePublic(new X509EncodedKeySpec(getKeySpec(jwt.readPublicKey())));
+        RSAPublicKey publicKey = (RSAPublicKey)KeyFactory.getInstance("RSA")
+            .generatePublic(new X509EncodedKeySpec(getKeySpec(jwt.readPublicKey())));
         return NimbusJwtDecoder.withPublicKey(publicKey)
-                .signatureAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
+            .signatureAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
     }
 
     private byte[] getKeySpec(String keyValue) {

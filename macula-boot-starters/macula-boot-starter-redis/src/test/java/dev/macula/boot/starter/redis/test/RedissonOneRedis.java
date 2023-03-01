@@ -17,10 +17,10 @@
 
 package dev.macula.boot.starter.redis.test;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import dev.macula.boot.starter.redis.config.RedissonConfigBuilder;
 import dev.macula.boot.starter.redis.config.RedissonProperties;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -45,7 +45,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 public class RedissonOneRedis {
     @Autowired
     private RedissonClient redissonClientOne;
-
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -73,7 +72,8 @@ public class RedissonOneRedis {
         }
 
         @Bean(name = "redissonClientOne", destroyMethod = "shutdown")
-        public RedissonClient redissonClientOne(ApplicationContext ctx, @Qualifier("redissonPropertiesOne") RedissonProperties redissonProperties) throws Exception {
+        public RedissonClient redissonClientOne(ApplicationContext ctx,
+            @Qualifier("redissonPropertiesOne") RedissonProperties redissonProperties) throws Exception {
             Config config = RedissonConfigBuilder.create().build(ctx, null, redissonProperties);
             return Redisson.create(config);
         }

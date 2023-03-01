@@ -32,7 +32,8 @@ import java.util.List;
  * @author rain
  * @since 2023/2/20 20:31
  */
-@FeignClient(url = "${macula.cloud.endpoint}", name = "systemFeignClient", configuration = FeignClientConfiguration.class)
+@FeignClient(url = "${macula.cloud.endpoint}", name = "systemFeignClient",
+    configuration = FeignClientConfiguration.class)
 public interface SystemFeignClient {
     @GetMapping("/system/api/v1/users/{username}/userinfo")
     UserLoginVO getUserInfoWithoutRoles(@PathVariable String username);

@@ -18,8 +18,7 @@
 package dev.macula.boot.starter.idempotent.exception;
 
 /**
- * Idempotent Exception If there is a custom global exception, you need to inherit the
- * custom global exception.
+ * Idempotent Exception If there is a custom global exception, you need to inherit the custom global exception.
  *
  * @author ITyunqing
  */

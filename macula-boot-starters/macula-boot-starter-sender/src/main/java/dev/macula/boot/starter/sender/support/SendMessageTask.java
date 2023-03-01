@@ -35,9 +35,8 @@ public class SendMessageTask implements Runnable {
     @Getter
     private final LocalMessage localMessage;
 
-    public SendMessageTask(LocalMessageRepository localMessageRepository,
-                           MessageSender messageSender,
-                           LocalMessage localMessage) {
+    public SendMessageTask(LocalMessageRepository localMessageRepository, MessageSender messageSender,
+        LocalMessage localMessage) {
         this.localMessageRepository = localMessageRepository;
         this.messageSender = messageSender;
         this.localMessage = localMessage;

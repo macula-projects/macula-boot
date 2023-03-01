@@ -86,7 +86,8 @@ public class RedissonTwoRedis {
 
         @Primary
         @Bean(name = "redissonClientOne", destroyMethod = "shutdown")
-        public RedissonClient redissonClientOne(ApplicationContext ctx, @Qualifier("redissonPropertiesOne") RedissonProperties redissonProperties) throws Exception {
+        public RedissonClient redissonClientOne(ApplicationContext ctx,
+            @Qualifier("redissonPropertiesOne") RedissonProperties redissonProperties) throws Exception {
             Config config = RedissonConfigBuilder.create().build(ctx, null, redissonProperties);
             return Redisson.create(config);
         }
@@ -98,7 +99,8 @@ public class RedissonTwoRedis {
         }
 
         @Bean(name = "redissonClientTwo", destroyMethod = "shutdown")
-        public RedissonClient redissonClientTwo(ApplicationContext ctx, @Qualifier("redissonPropertiesTwo") RedissonProperties redissonProperties) throws Exception {
+        public RedissonClient redissonClientTwo(ApplicationContext ctx,
+            @Qualifier("redissonPropertiesTwo") RedissonProperties redissonProperties) throws Exception {
             Config config = RedissonConfigBuilder.create().build(ctx, null, redissonProperties);
             return Redisson.create(config);
         }

@@ -40,8 +40,10 @@ import java.util.Date;
  */
 @AllArgsConstructor
 public class KongApiInterceptor implements RequestInterceptor {
-    @NonNull private String username;
-    @NonNull private String secret;
+    @NonNull
+    private String username;
+    @NonNull
+    private String secret;
     private String appKey;
 
     public KongApiInterceptor(@NonNull String username, @NonNull String secret) {
@@ -65,16 +67,22 @@ public class KongApiInterceptor implements RequestInterceptor {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            byte[] hash = messageDigest.digest(requestTemplate.body() == null ? new byte[]{} : requestTemplate.body());
+            byte[] hash = messageDigest.digest(requestTemplate.body() == null ? new byte[] {} : requestTemplate.body());
             String digest = "SHA-256=" + Base64.encode(hash);
             requestTemplate.header("Digest", digest);
             // 签名，计算方法为 hmac_sha_256(key, 日期 + 方法 + 路径 + 摘要)
-            String signature = hmacSha256.digestBase64("date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1\ndigest: " + digest, false);
-            authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line digest\", signature=\"" + signature + "\"";
-        } else if (Request.HttpMethod.GET.name().equals(method) || Request.HttpMethod.DELETE.toString().equals(method)) {
+            String signature = hmacSha256.digestBase64(
+                "date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1\ndigest: " + digest, false);
+            authorization =
+                "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line digest\", signature=\"" + signature + "\"";
+        } else if (Request.HttpMethod.GET.name().equals(method) || Request.HttpMethod.DELETE.toString()
+            .equals(method)) {
             // 签名，计算方法为 hmac_sha_256(key, 日期 + 方法 + 路径)
-            String signature = hmacSha256.digestBase64("date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1", false);
-            authorization = "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line\", signature=\"" + signature + "\"";
+            String signature =
+                hmacSha256.digestBase64("date: " + date + "\n" + method + " " + requestTemplate.url() + " HTTP/1.1",
+                    false);
+            authorization =
+                "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line\", signature=\"" + signature + "\"";
         }
         if (authorization != null) {
             requestTemplate.removeHeader(GlobalConstants.AUTHORIZATION_KEY);

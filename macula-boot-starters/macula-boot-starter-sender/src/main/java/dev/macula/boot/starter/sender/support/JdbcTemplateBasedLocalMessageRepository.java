@@ -41,29 +41,18 @@ import java.util.Map;
  * @since 2023/1/3 14:10
  */
 public class JdbcTemplateBasedLocalMessageRepository implements LocalMessageRepository {
-    private static final String SQL_INSERT = "insert into %s " +
-            "(orderly, topic, sharding_key, tag, msg_key, msg_id, msg, retry_time, status, create_time, update_time)" +
-            " values " +
-            "(:orderly, :topic, :shardingKey, :tag, :msgKey, :msgId, :msg, :retryTime, :status, :createTime, :updateTime)";
+    private static final String SQL_INSERT =
+        "insert into %s " + "(orderly, topic, sharding_key, tag, msg_key, msg_id, msg, retry_time, status, create_time, update_time)" + " values " + "(:orderly, :topic, :shardingKey, :tag, :msgKey, :msgId, :msg, :retryTime, :status, :createTime, :updateTime)";
 
-    private static final String SQL_UPDATE = "update %s " +
-            "set " +
-            " msg_id = :msgId, " +
-            " retry_time = :retryTime," +
-            " status = :status," +
-            " update_time = :updateTime " +
-            "where " +
-            " id = :id";
+    private static final String SQL_UPDATE =
+        "update %s " + "set " + " msg_id = :msgId, " + " retry_time = :retryTime," + " status = :status," + " update_time = :updateTime " + "where " + " id = :id";
 
-    private static final String SQL_LOAD_BY_UPDATE_TIME = "select " +
-            "id, orderly, topic, sharding_key, tag, msg_key, msg_id, msg, retry_time, status, create_time, update_time " +
-            "from %s " +
-            "where update_time > :updateTime and status in (:errorStatus, :noneStatus)";
+    private static final String SQL_LOAD_BY_UPDATE_TIME =
+        "select " + "id, orderly, topic, sharding_key, tag, msg_key, msg_id, msg, retry_time, status, create_time, update_time " + "from %s " + "where update_time > :updateTime and status in (:errorStatus, :noneStatus)";
 
     private final TransactionTemplate transactionTemplate;
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final String tableName;
-
 
     public JdbcTemplateBasedLocalMessageRepository(DataSource dataSource, String tableName) {
         DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager(dataSource);

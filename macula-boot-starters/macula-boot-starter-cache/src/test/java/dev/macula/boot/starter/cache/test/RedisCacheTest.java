@@ -17,10 +17,10 @@
 
 package dev.macula.boot.starter.cache.test;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import dev.macula.boot.starter.cache.test.service.UserService;
 import dev.macula.boot.starter.cache.test.vo.User;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
@@ -49,7 +49,7 @@ public class RedisCacheTest {
         Assertions.assertNotNull(cache);
         Cache.ValueWrapper value = cache.get("getUser:1111x");
         Assertions.assertNotNull(value);
-        User cacheUser = (User) value.get();
+        User cacheUser = (User)value.get();
         Assertions.assertEquals(user, cacheUser);
         System.out.println(cacheUser.getId() + ":" + cacheUser.getName());
 

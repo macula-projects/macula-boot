@@ -92,13 +92,13 @@ public class LeaderElectionTest {
 
         Thread.sleep(3000);
 
-
         for (LeaderElection leaderElection : elections.values()) {
             leaderElection.shutdown();
         }
     }
 
-    private void waitAndQuit(Map<String, Boolean> electionState, Map<String, LeaderElection> elections) throws Exception {
+    private void waitAndQuit(Map<String, Boolean> electionState, Map<String, LeaderElection> elections)
+        throws Exception {
         Thread.sleep(3000);
 
         for (Map.Entry<String, Boolean> entry : electionState.entrySet()) {
