@@ -21,6 +21,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -51,7 +52,7 @@ public class SecurityUtils {
      * @return nickname
      */
     public static String getNickname() {
-        String nickname = Convert.toStr(getTokenAttributes().get(GlobalConstants.JWT_NICKNAME_KEY));
+        String nickname = Convert.toStr(getTokenAttributes().get(SecurityConstants.JWT_NICKNAME_KEY));
         return nickname;
     }
 
@@ -77,7 +78,7 @@ public class SecurityUtils {
      * @return deptId
      */
     public static Long getDeptId() {
-        Long deptId = Convert.toLong(getTokenAttributes().get(GlobalConstants.JWT_DEPTID_KEY));
+        Long deptId = Convert.toLong(getTokenAttributes().get(SecurityConstants.JWT_DEPTID_KEY));
         return deptId;
     }
 
@@ -87,8 +88,18 @@ public class SecurityUtils {
      * @return DataScope
      */
     public static Integer getDataScope() {
-        Integer dataScope = Convert.toInt(getTokenAttributes().get(GlobalConstants.JWT_DATASCOPE_KEY));
+        Integer dataScope = Convert.toInt(getTokenAttributes().get(SecurityConstants.JWT_DATASCOPE_KEY));
         return dataScope;
+    }
+
+    /**
+     * 获取当前租户ID
+     *
+     * @return 租户ID
+     */
+    public static Long getTenantId() {
+        Long tenantId = Convert.toLong(getTokenAttributes().get(GlobalConstants.TENANT_ID_NAME));
+        return tenantId;
     }
 
     /**
@@ -97,7 +108,7 @@ public class SecurityUtils {
      * @return true/false
      */
     public static boolean isRoot() {
-        return getRoles().contains(GlobalConstants.ROOT_ROLE_CODE);
+        return getRoles().contains(SecurityConstants.ROOT_ROLE_CODE);
     }
 
     public static Map<String, Object> getTokenAttributes() {

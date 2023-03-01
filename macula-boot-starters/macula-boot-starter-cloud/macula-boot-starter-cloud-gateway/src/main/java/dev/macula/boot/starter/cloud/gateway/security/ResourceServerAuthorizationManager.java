@@ -20,7 +20,7 @@ package dev.macula.boot.starter.cloud.gateway.security;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.utils.GatewayConstant;
 import dev.macula.boot.starter.cloud.gateway.utils.HmacUtils;
@@ -69,10 +69,10 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         String restfulPath = method + ":" + path;
 
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
-        String token = request.getHeaders().getFirst(GlobalConstants.AUTHORIZATION_KEY);
+        String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
 
         // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
-        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GlobalConstants.TOKEN_PREFIX)) {
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {
             // 这里要可配置哪些路径仅认证，无需鉴权(比如前端API)
             if (onlyAuthUrls.stream().anyMatch(s -> pathMatcher.match(s, path))) {
                 // 不是需要鉴权的URL，直接放行
@@ -105,7 +105,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
 
         Map<String, Object> urlPermRolesRules =
-            redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_URL_PERM_ROLES_KEY);
+            redisTemplate.opsForHash().entries(SecurityConstants.SECURITY_URL_PERM_ROLES_KEY);
 
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色
@@ -132,8 +132,8 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         Mono<AuthorizationDecision> authorizationDecisionMono =
             mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
                 .map(GrantedAuthority::getAuthority).any(authority -> {
-                    String roleCode = authority.substring(GlobalConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
-                    if (GlobalConstants.ROOT_ROLE_CODE.equals(roleCode)) {
+                    String roleCode = authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
+                    if (SecurityConstants.ROOT_ROLE_CODE.equals(roleCode)) {
                         return true; // 如果是超级管理员则放行
                     }
                     boolean hasAuthorized =

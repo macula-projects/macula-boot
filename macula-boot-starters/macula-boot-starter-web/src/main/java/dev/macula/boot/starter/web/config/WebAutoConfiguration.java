@@ -19,6 +19,7 @@ package dev.macula.boot.starter.web.config;
 
 import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
 import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
+import dev.macula.boot.starter.web.filter.TenantFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -56,6 +57,11 @@ public class WebAutoConfiguration {
     @ConditionalOnProperty(name = "macula.web.response-advice", havingValue = "true", matchIfMissing = true)
     public ControllerResponseAdvice controllerResponseAdvice() {
         return new ControllerResponseAdvice();
+    }
+
+    @Bean
+    public TenantFilter tenantFilter() {
+        return new TenantFilter();
     }
 
 }

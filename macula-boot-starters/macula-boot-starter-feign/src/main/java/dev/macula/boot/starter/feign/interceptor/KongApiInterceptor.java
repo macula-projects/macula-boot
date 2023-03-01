@@ -21,7 +21,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.digest.HMac;
 import cn.hutool.crypto.digest.HmacAlgorithm;
-import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
@@ -85,8 +85,8 @@ public class KongApiInterceptor implements RequestInterceptor {
                 "hmac username=\"" + username + "\", algorithm=\"hmac-sha256\", headers=\"date request-line\", signature=\"" + signature + "\"";
         }
         if (authorization != null) {
-            requestTemplate.removeHeader(GlobalConstants.AUTHORIZATION_KEY);
-            requestTemplate.header(GlobalConstants.AUTHORIZATION_KEY, authorization);
+            requestTemplate.removeHeader(SecurityConstants.AUTHORIZATION_KEY);
+            requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
         }
         if (appKey != null) {
             requestTemplate.header("appkey", appKey);

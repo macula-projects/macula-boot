@@ -36,11 +36,6 @@ public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         // 默认String没有办法转为java.util.Date类型
-        registry.addConverter(new Converter<String, Date>() {
-            @Override
-            public Date convert(String source) {
-                return DateUtil.parse(source.trim()).toJdkDate();
-            }
-        });
+        registry.addConverter((Converter<String, Date>)source -> DateUtil.parse(source.trim()).toJdkDate());
     }
 }

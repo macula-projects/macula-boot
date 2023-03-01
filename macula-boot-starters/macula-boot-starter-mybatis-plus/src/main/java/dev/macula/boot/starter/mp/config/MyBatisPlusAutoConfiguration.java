@@ -23,10 +23,12 @@ import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.*;
+import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
 import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
 import dev.macula.boot.starter.mp.interceptor.DecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.EncryptInterceptor;
+import dev.macula.boot.starter.security.utils.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -36,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * <p>
@@ -62,7 +65,18 @@ public class MyBatisPlusAutoConfiguration {
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
             @Override
             public Expression getTenantId() {
-                // TODO 需要从上下文获取租户ID
+
+                // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID
+                if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
+                    return new LongValue(TenantContextHolder.getCurrentTenantId());
+                }
+
+                // 获取当前登录用户的租户上下文
+                if (Objects.nonNull(SecurityUtils.getTenantId())) {
+                    return new LongValue(SecurityUtils.getTenantId());
+                }
+
+                // 默认租户ID
                 return new LongValue(properties.getTenantId());
             }
 

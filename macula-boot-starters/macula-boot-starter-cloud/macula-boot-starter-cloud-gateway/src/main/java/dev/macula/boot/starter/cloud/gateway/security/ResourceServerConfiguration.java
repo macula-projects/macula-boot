@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import cn.hutool.core.convert.Convert;
-import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +79,7 @@ public class ResourceServerConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         // 添加默认忽略的路径
-        ignoreUrls.addAll(GlobalConstants.DEFAULT_IGNORE_URLS);
+        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
 
         http.oauth2ResourceServer().opaqueToken().introspector(opaqueTokenIntrospector()).and()
             .accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint())
@@ -110,10 +110,10 @@ public class ResourceServerConfiguration {
             private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
                 List<GrantedAuthority> result = new ArrayList<>(principal.getAuthorities());
 
-                List<String> authorities = principal.getAttribute(GlobalConstants.AUTHORITIES_KEY);
+                List<String> authorities = principal.getAttribute(SecurityConstants.AUTHORITIES_KEY);
                 if (authorities != null) {
                     result.addAll(authorities.stream()
-                        .map(role -> new SimpleGrantedAuthority(GlobalConstants.AUTHORITIES_PREFIX + role))
+                        .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
                         .collect(Collectors.toList()));
                 }
                 return result;

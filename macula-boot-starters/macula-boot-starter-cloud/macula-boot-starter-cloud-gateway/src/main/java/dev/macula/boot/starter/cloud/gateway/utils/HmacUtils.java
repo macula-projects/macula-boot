@@ -25,6 +25,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.HMac;
 import cn.hutool.crypto.digest.HmacAlgorithm;
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
+import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -58,7 +60,7 @@ public class HmacUtils {
         try {
             ServerHttpRequest request = exchange.getRequest();
 
-            String token = request.getHeaders().getFirst(GlobalConstants.AUTHORIZATION_KEY);
+            String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
 
             String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
             if (StrUtil.isBlank(username)) {
@@ -66,15 +68,22 @@ public class HmacUtils {
             }
 
             Map<String, String> apps =
-                redisTemplate.opsForHash().entries(GlobalConstants.SECURITY_SYSTEM_APPS + username);
+                redisTemplate.opsForHash().entries(SecurityConstants.SECURITY_SYSTEM_APPS + username);
+
             // 验证ak/sk
-            String secretKey = apps.get(GlobalConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
+            String secretKey = apps.get(SecurityConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
             if (StrUtil.isBlank(secretKey)) {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
             }
 
+            // 如果应用有租户ID，则设置到上下文给生成JWT时使用
+            String tenantId = apps.get(GlobalConstants.TENANT_ID_NAME);
+            if (StrUtil.isNotEmpty(tenantId)) {
+                TenantContextHolder.setCurrentTenantId(Long.parseLong(tenantId));
+            }
+
             // 检查URL是否允许，默认允许[多个URL表达式用逗号隔开，'GET:/i18n-base/v1/users/*, POST:/xxx/**']
-            String permitUrls = apps.get(GlobalConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
+            String permitUrls = apps.get(SecurityConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
             if (StrUtil.isNotBlank(permitUrls)) {
                 PathMatcher pathMatcher = new AntPathMatcher();
                 if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> pathMatcher.match(pattern, path))) {
