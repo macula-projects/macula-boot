@@ -66,12 +66,13 @@ public class MyBatisPlusAutoConfiguration {
             @Override
             public Expression getTenantId() {
 
-                // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID
+                // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
+                // TODO 需要检查当前用户是否可以访问该租户
                 if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
                     return new LongValue(TenantContextHolder.getCurrentTenantId());
                 }
 
-                // 获取当前登录用户的租户上下文
+                // 获取当前登录用户的租户上下文（aksk访问带租户信息）
                 if (Objects.nonNull(SecurityUtils.getTenantId())) {
                     return new LongValue(SecurityUtils.getTenantId());
                 }
