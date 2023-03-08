@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * {@code TenantFilter} 提取租户ID参数放入上下文
+ * {@code TenantFilter} 提取租户ID参数放入上下文，需要检验当前用户是否是租户负责人
  *
  * @author rain
  * @since 2023/3/1 18:47

@@ -37,7 +37,7 @@ public class MyBatisPlusProperties {
 
     private Audit audit = new Audit();
 
-    private long tenantId = 0L;
+    private long tenantId = 1L;
 
     private String[] tenantSuffixes = new String[] {"tenant", "TENANT"};
 
