@@ -28,6 +28,7 @@ import java.util.Date;
  * @since 2023/1/3 14:10
  */
 public class LocalTableBasedReliableMessageCompensator implements ReliableMessageCompensator {
+
     private final ReliableMessageSendService reliableMessageSendService;
 
     public LocalTableBasedReliableMessageCompensator(ReliableMessageSendService reliableMessageSendService) {

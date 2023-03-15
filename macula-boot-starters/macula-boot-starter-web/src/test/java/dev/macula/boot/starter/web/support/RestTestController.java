@@ -36,6 +36,7 @@ import java.util.Date;
  */
 @RestController
 public class RestTestController {
+
     @PostMapping("/test")
     public DemoDto test(@Valid @RequestBody DemoDto dto) {
         System.out.println("tests....................");

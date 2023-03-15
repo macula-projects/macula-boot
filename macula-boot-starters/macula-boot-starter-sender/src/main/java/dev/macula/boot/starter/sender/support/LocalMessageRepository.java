@@ -27,6 +27,7 @@ import java.util.List;
  * @since 2023/1/3 14:10
  */
 public interface LocalMessageRepository {
+
     void save(LocalMessage message);
 
     void update(LocalMessage message);

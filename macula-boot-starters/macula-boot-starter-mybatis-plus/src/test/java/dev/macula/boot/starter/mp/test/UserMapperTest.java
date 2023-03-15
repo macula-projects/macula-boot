@@ -41,6 +41,7 @@ import java.util.List;
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserMapperTest {
+
     @Resource
     private UserMapper userMapper;
 

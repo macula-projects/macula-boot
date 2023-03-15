@@ -28,6 +28,7 @@ import dev.macula.boot.result.ResultCode;
  * @since 2022/6/29 10:37
  */
 public class BizException extends MaculaException {
+
     private String code;
     private String msg;
 

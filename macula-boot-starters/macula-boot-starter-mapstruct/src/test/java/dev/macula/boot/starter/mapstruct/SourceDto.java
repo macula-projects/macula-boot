@@ -27,6 +27,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 public class SourceDto {
+
     private String username;
     private String password;
     private Date currentTime;

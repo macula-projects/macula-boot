@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @FeignClient(name = "macula-example-provider1", path = "/api/v1/provider1", contextId = "provider1Service")
 public interface Provider1Service {
+
     @GetMapping("/echo")
     String echo(@RequestParam("str") String str);
 

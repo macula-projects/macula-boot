@@ -37,6 +37,7 @@ import java.util.Objects;
  * @since 2022/7/28 23:53
  */
 public class SensitiveSerializer extends JsonSerializer<String> implements ContextualSerializer {
+
     private Sensitive.Type type;
     private int startInclude;
     private int endExclude;

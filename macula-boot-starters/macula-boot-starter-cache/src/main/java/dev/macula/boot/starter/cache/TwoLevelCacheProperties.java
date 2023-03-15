@@ -36,31 +36,45 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "spring.cache.two-level")
 public class TwoLevelCacheProperties {
 
-    /** Time to live for Redis entries */
+    /**
+     * Time to live for Redis entries
+     */
     private Duration defaultTimeToLive = Duration.ofHours(24L);
 
     private Map<String, Duration> timeToLive = new HashMap<>();
 
-    /** Key prefix. */
+    /**
+     * Key prefix.
+     */
     private String keyPrefix = "macula:cache:";
 
-    /** Whether to use the key prefix when writing to Redis. */
+    /**
+     * Whether to use the key prefix when writing to Redis.
+     */
     private boolean useKeyPrefix = true;
 
-    /** Topic to use in order to synchronize eviction of entries */
+    /**
+     * Topic to use in order to synchronize eviction of entries
+     */
     private String topic = "macula:cache:two-level:topic";
 
     private boolean openCircuitBreaker = true;
 
-    /** Small subset of local cache settings */
+    /**
+     * Small subset of local cache settings
+     */
     @NestedConfigurationProperty
     private LocalCacheProperties local = new LocalCacheProperties();
 
-    /** Circuit breaker capability to avoid issues during Redis querying */
+    /**
+     * Circuit breaker capability to avoid issues during Redis querying
+     */
     @NestedConfigurationProperty
     private CircuitBreakerProperties circuitBreaker = new CircuitBreakerProperties();
 
-    /** @return configuration for Redis cache */
+    /**
+     * @return configuration for Redis cache
+     */
     public RedisCacheConfiguration toRedisCacheConfiguration(String name) {
         RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()
             .entryTtl(timeToLive.getOrDefault(name, defaultTimeToLive));
@@ -75,10 +89,14 @@ public class TwoLevelCacheProperties {
     @Data
     public static class LocalCacheProperties {
 
-        /** Maximum amount of entities too store in local cache */
+        /**
+         * Maximum amount of entities too store in local cache
+         */
         private int maxSize = 2000;
 
-        /** Percent of time deviation for local cache entry expiration */
+        /**
+         * Percent of time deviation for local cache entry expiration
+         */
         private int expiryJitter = 50;
     }
 
@@ -93,7 +111,7 @@ public class TwoLevelCacheProperties {
      *   <li>{@code slowCallDurationThreshold}
      *   <li>{@code slidingWindowType}
      * </ul>
-     *
+     * <p>
      * To compute appropriate values for your properties - use your slow calls as a baseline and
      * consider sliding window type:
      *
@@ -111,34 +129,52 @@ public class TwoLevelCacheProperties {
     @Data
     public static class CircuitBreakerProperties {
 
-        /** Percent of call failures to prohibit further calls to Redis */
+        /**
+         * Percent of call failures to prohibit further calls to Redis
+         */
         private int failureRateThreshold = 25;
 
-        /** Percent of slow calls to prohibit further calls to Redis */
+        /**
+         * Percent of slow calls to prohibit further calls to Redis
+         */
         private int slowCallRateThreshold = 25;
 
-        /** Defines the duration after which Redis call considered to be slow */
+        /**
+         * Defines the duration after which Redis call considered to be slow
+         */
         private Duration slowCallDurationThreshold = Duration.ofMillis(250);
 
-        /** Sliding window type for connectivity analysis */
+        /**
+         * Sliding window type for connectivity analysis
+         */
         private CircuitBreakerConfig.SlidingWindowType slidingWindowType =
             CircuitBreakerConfig.SlidingWindowType.COUNT_BASED;
 
-        /** Amount of Redis calls to test if backend is responsive when circuit breaker closes */
+        /**
+         * Amount of Redis calls to test if backend is responsive when circuit breaker closes
+         */
         private int permittedNumberOfCallsInHalfOpenState =
             (int)(Duration.ofSeconds(5).toNanos() / slowCallDurationThreshold.toNanos());
 
-        /** Amount of time to wait before closing circuit breaker, 0 - wait for all permitted calls. */
+        /**
+         * Amount of time to wait before closing circuit breaker, 0 - wait for all permitted calls.
+         */
         private Duration maxWaitDurationInHalfOpenState =
             slowCallDurationThreshold.multipliedBy(permittedNumberOfCallsInHalfOpenState);
 
-        /** Sliding window size for Redis calls analysis (calls / seconds) */
+        /**
+         * Sliding window size for Redis calls analysis (calls / seconds)
+         */
         private int slidingWindowSize = permittedNumberOfCallsInHalfOpenState * 2;
 
-        /** Minimum number of calls which are required before calculating error or slow call rate */
+        /**
+         * Minimum number of calls which are required before calculating error or slow call rate
+         */
         private int minimumNumberOfCalls = permittedNumberOfCallsInHalfOpenState / 2;
 
-        /** Time to wait before permitting Redis calls to test backend connectivity. */
+        /**
+         * Time to wait before permitting Redis calls to test backend connectivity.
+         */
         private Duration waitDurationInOpenState = slowCallDurationThreshold.multipliedBy(minimumNumberOfCalls);
     }
 }

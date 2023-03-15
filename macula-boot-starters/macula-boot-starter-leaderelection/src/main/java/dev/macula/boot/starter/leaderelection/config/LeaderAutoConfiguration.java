@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 public class LeaderAutoConfiguration {
+
     @Value("${spring.application.name}")
     private String appName;
 

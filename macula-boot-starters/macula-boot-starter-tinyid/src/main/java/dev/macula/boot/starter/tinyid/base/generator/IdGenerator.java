@@ -23,6 +23,7 @@ import java.util.List;
  * @author du_imba
  */
 public interface IdGenerator {
+
     /**
      * get next id
      *

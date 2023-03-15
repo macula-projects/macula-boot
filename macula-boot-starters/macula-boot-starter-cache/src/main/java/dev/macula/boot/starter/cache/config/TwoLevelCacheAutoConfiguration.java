@@ -171,7 +171,8 @@ public class TwoLevelCacheAutoConfiguration {
                 cache.clearLocal(entryKey);
 
             } catch (ClassCastException e) {
-                log.error("Cannot cast cache instance returned by cache manager to " + TwoLevelCache.class.getName(), e);
+                log.error("Cannot cast cache instance returned by cache manager to " + TwoLevelCache.class.getName(),
+                    e);
             } catch (Exception e) {
                 log.debug("Unknown Redis message", e);
             }

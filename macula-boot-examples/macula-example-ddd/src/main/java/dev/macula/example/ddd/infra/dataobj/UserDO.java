@@ -26,4 +26,5 @@ import dev.macula.boot.starter.mp.entity.BaseEntity;
  * @since 2022/11/14 18:42
  */
 public class UserDO extends BaseEntity {
+
 }

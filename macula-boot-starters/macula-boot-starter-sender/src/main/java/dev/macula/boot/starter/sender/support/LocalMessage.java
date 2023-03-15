@@ -32,6 +32,7 @@ import java.util.Date;
  */
 @Data
 public class LocalMessage {
+
     public static final int STATUS_NONE = 0;
     public static final int STATUS_SUCCESS = 1;
     public static final int STATUS_ERROR = 2;

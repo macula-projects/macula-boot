@@ -34,6 +34,7 @@ import java.util.logging.Logger;
  * @author du_imba
  */
 public class HttpSegmentIdServiceImpl implements SegmentIdService {
+
     private static final Logger logger = Logger.getLogger(HttpSegmentIdServiceImpl.class.getName());
     private static String serverUrl = "http://{0}/tinyid/api/v1/id/nextSegmentIdSimple?token={1}&bizType=";
     private TinyIdProperties properties;

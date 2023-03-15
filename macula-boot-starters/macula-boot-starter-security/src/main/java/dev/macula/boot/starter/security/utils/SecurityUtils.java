@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  * @since 2022/7/25 15:16
  */
 public class SecurityUtils {
+
     public static String getCurrentUser() {
         if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext()
             .getAuthentication() != null && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {

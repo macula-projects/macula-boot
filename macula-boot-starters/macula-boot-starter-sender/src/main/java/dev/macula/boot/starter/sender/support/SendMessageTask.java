@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SendMessageTask implements Runnable {
+
     private final LocalMessageRepository localMessageRepository;
     private final MessageSender messageSender;
     @Getter

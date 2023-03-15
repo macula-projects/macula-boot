@@ -41,6 +41,7 @@ import java.util.Map;
 @RequestMapping(value = "swagger")
 @Tag(name = "swagger演示controller", description = "模拟添删改查接口,生成接口文档")
 public class Swagger3DemoController {
+
     public static Integer id = 1;
     public static Map<Integer, User> users = new HashMap();
 
@@ -88,6 +89,7 @@ public class Swagger3DemoController {
 @Data
 @Schema(description = "用户实体模型")
 class User {
+
     @Schema(description = "用户名")
     private String userName;
 

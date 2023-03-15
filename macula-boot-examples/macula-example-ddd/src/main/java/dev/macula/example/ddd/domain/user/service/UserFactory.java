@@ -24,4 +24,5 @@ package dev.macula.example.ddd.domain.user.service;
  * @since 2022/11/11 17:14
  */
 public class UserFactory {
+
 }

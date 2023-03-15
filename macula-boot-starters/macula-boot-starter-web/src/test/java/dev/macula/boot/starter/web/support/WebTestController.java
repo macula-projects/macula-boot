@@ -34,6 +34,7 @@ import java.util.Date;
 
 @Controller
 public class WebTestController {
+
     @PostMapping("/getdate")
     public String testDate(@RequestParam(value = "date", required = false) Date date,
         @RequestParam(value = "local", required = false) LocalDateTime local,

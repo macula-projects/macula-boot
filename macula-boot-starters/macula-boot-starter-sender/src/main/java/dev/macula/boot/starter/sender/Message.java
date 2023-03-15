@@ -33,6 +33,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Message {
+
     private boolean orderly;
 
     private String topic;

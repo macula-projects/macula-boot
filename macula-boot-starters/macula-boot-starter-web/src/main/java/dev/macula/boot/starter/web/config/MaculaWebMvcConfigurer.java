@@ -33,6 +33,7 @@ import java.util.Date;
  */
 @AllArgsConstructor
 public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
+
     @Override
     public void addFormatters(FormatterRegistry registry) {
         // 默认String没有办法转为java.util.Date类型

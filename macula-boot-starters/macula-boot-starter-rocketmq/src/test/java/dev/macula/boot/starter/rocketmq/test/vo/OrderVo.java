@@ -29,6 +29,7 @@ import java.math.BigDecimal;
  */
 @Data
 public class OrderVo {
+
     private String orderNo;
     private String mainOrderNo;
     private BigDecimal totalAmount;

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/provider1")
 @Tag(name = "提供方演示接口", description = "提供方演示")
 public class Provider1Controller {
+
     @GetMapping("/echo")
     @Operation(summary = "echo方法", description = "用于演示")
     @Parameter(name = "字符串", description = "用于回声")

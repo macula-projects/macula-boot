@@ -29,6 +29,7 @@ import java.util.List;
  * @since 2023/2/23 17:18
  */
 public interface SystemService {
+
     UserLoginVO getUseInfo();
 
     List<RouteVO> listRoutes();

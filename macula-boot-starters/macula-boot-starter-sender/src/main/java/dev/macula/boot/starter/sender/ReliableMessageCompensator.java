@@ -26,5 +26,6 @@ import java.util.Date;
  * @since 2023/1/3 14:10
  */
 public interface ReliableMessageCompensator {
+
     void compensate(Date startDate, int sizePreTask);
 }

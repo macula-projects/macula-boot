@@ -27,6 +27,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 2023/2/20 14:09
  */
 public class RequestBodyUtils {
+
     public static byte[] getBody(ServerWebExchange exchange) {
         // 如果没有缓存过，获取字节数组存入 exchange 的自定义属性中
         Object cachedRequestBodyObject =

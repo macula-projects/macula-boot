@@ -21,6 +21,7 @@ import lombok.Data;
 
 @Data
 public class PoBaseResult<T> {
+
     private boolean success;
     private String errCode;
     private String errDesc;

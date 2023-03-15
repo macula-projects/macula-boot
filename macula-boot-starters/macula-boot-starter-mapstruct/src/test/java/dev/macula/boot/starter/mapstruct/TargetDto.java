@@ -24,6 +24,7 @@ import java.util.Date;
 
 @Data
 public class TargetDto {
+
     private String user;
     private String password;
     private LocalDateTime currentTime;

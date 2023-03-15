@@ -52,6 +52,7 @@ import java.util.Objects;
 @EnableTransactionManagement
 @EnableConfigurationProperties(MyBatisPlusProperties.class)
 public class MyBatisPlusAutoConfiguration {
+
     /**
      * 分页时允许每页最大记录数
      */

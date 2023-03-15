@@ -24,5 +24,6 @@ package dev.macula.boot.starter.sender;
  * @since 2023/1/3 14:10
  */
 public interface MessageSender {
+
     String send(Message message);
 }

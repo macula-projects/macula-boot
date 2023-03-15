@@ -29,6 +29,7 @@ import java.io.Serializable;
  */
 @Data
 public class Result<T> implements Serializable {
+
     private boolean success;
 
     private String code;
