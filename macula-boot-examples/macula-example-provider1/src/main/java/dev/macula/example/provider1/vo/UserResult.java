@@ -32,6 +32,7 @@ import java.util.Date;
 @Data
 @Schema(name = "用户信息")
 public class UserResult {
+
     @Schema(name = "用户名", description = "用户名称，用于登陆")
     String userName;
     @Schema(name = "密码", description = "MD5加密")

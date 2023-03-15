@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
 @Configuration
 @RequiredArgsConstructor
 public class ResourceServerConfiguration {
+
     @Setter
     private List<String> ignoreUrls = new ArrayList<>();
 

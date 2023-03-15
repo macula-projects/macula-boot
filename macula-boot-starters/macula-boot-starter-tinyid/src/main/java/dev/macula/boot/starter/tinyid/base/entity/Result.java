@@ -21,6 +21,7 @@ package dev.macula.boot.starter.tinyid.base.entity;
  * @author du_imba
  */
 public class Result {
+
     private int code;
     private long id;
 

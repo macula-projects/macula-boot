@@ -39,6 +39,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionService {
+
     private final SystemService systemService;
 
     public boolean hasPermission(String perm) {

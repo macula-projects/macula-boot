@@ -102,7 +102,9 @@ public class TwoLevelCacheManager implements CacheManager {
         return Collections.unmodifiableSet(availableCaches.keySet());
     }
 
-    /** Expiry policy enabling randomized expiry on write for local entities */
+    /**
+     * Expiry policy enabling randomized expiry on write for local entities
+     */
     static class RandomizedLocalExpiryOnWrite implements Expiry<Object, Object> {
 
         private final Random random;

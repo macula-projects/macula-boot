@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2022/6/29 21:09
  */
 public class JacksonConfiguration {
+
     @Bean
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {

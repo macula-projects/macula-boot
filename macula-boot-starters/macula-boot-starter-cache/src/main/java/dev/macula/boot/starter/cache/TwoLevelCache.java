@@ -51,11 +51,15 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class TwoLevelCache extends RedisCache {
 
-    /** Error messages */
+    /**
+     * Error messages
+     */
     private static final String NO_REDIS_CONNECTION = "Redis connection factory was not found for RedisCacheWriter";
     private static final String LOCK_WAS_NOT_INITIALIZED = "Lock was not initialized";
 
-    /** These are local non-overridable properties for ReentrantLocks cache to provide atomicity */
+    /**
+     * These are local non-overridable properties for ReentrantLocks cache to provide atomicity
+     */
     private static final Object CACHE_WIDE_LOCK_OBJECT = new Object();
     private static final long LOCKS_CACHE_MAXIMUM_SIZE = 1000;
     private static final Duration LOCKS_CACHE_EXPIRE_AFTER_ACCESS = Duration.ofSeconds(15);
@@ -207,7 +211,7 @@ public class TwoLevelCache extends RedisCache {
      * }
      * return existingValue;
      * </code></pre>
-     *
+     * <p>
      * except that the action performed atomically for current cache.
      *
      * <p>If value is {@code null} specified key will be evicted.
@@ -293,7 +297,9 @@ public class TwoLevelCache extends RedisCache {
         }
     }
 
-    /** @param call to Redis */
+    /**
+     * @param call to Redis
+     */
     private void callRedis(@NonNull Runnable call) {
         if (properties.isOpenCircuitBreaker()) {
             Try.runRunnable(cacheCircuitBreaker.decorateRunnable(call));
@@ -314,7 +320,9 @@ public class TwoLevelCache extends RedisCache {
         }
     }
 
-    /** @param key to send notification about eviction. Can be {@code null}. */
+    /**
+     * @param key to send notification about eviction. Can be {@code null}.
+     */
     private void sendViaRedis(@Nullable String key) {
         if (properties.isOpenCircuitBreaker()) {
             Try.runRunnable(cacheCircuitBreaker.decorateRunnable(

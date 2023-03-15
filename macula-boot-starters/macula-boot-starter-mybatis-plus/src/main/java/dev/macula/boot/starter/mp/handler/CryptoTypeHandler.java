@@ -36,6 +36,7 @@ import java.sql.SQLException;
  * @since 2022/8/18 17:46
  */
 public class CryptoTypeHandler extends BaseTypeHandler<String> {
+
     private MyBatisPlusProperties properties;
     private AES aes;
 

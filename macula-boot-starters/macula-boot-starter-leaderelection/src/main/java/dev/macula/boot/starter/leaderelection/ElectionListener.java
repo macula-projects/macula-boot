@@ -24,6 +24,7 @@ package dev.macula.boot.starter.leaderelection;
  * @since 2022/12/2 19:07
  */
 public interface ElectionListener {
+
     /**
      * 被选中为领导时触发
      */

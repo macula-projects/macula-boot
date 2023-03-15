@@ -52,6 +52,7 @@ import java.util.Map;
 @RocketMQTransactionListener
 public class DefaultRocketMQLocalTransactionListener
     implements RocketMQLocalTransactionListener, ApplicationContextAware {
+
     private ApplicationContext applicationContext;
 
     private Map<String, Object> cacheMap = new HashMap<>();

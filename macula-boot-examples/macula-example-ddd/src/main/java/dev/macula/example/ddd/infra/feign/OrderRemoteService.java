@@ -24,4 +24,5 @@ package dev.macula.example.ddd.infra.feign;
  * @since 2022/11/15 11:18
  */
 public class OrderRemoteService {
+
 }

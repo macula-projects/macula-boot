@@ -23,6 +23,7 @@ package dev.macula.boot.starter.idempotent.exception;
  * @author ITyunqing
  */
 public class IdempotentException extends RuntimeException {
+
     public IdempotentException(String message) {
         super(message);
     }

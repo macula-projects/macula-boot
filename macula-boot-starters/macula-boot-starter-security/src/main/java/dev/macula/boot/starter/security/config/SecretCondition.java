@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
  * @since 2022/7/25 13:42
  */
 public class SecretCondition extends SpringBootCondition {
+
     @Override
     public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
         ConditionMessage.Builder message = ConditionMessage.forCondition("Secret Key Condition");

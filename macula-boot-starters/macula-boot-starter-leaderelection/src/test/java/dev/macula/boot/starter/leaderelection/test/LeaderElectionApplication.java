@@ -30,12 +30,14 @@ import org.springframework.stereotype.Component;
  */
 @SpringBootApplication
 public class LeaderElectionApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(LeaderElectionApplication.class, args);
     }
 
     @Component
     public class Service {
+
         public Service(LeaderElection leaderElection) {
             leaderElection.addElectionListener(() -> System.out.println("master selected"));
         }

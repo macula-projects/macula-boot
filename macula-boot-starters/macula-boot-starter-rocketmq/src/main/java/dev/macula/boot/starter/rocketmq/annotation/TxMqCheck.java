@@ -29,5 +29,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface TxMqCheck {
+
     String value() default "";
 }

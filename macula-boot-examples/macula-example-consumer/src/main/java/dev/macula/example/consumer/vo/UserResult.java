@@ -30,6 +30,7 @@ import java.util.Date;
 
 @Data
 public class UserResult {
+
     String userName;
     String password;
     Date birthday = new Date();

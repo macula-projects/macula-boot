@@ -24,6 +24,7 @@ package dev.macula.boot.constants;
  * @since 2023/3/1 19:18
  */
 public interface GlobalConstants {
+
     String FEIGN_REQ_ID = "FEIGN_REQ_ID";
 
     String TENANT_ID_NAME = "tenantId";

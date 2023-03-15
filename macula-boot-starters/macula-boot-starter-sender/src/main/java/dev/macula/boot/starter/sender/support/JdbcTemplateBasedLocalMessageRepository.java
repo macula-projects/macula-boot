@@ -41,6 +41,7 @@ import java.util.Map;
  * @since 2023/1/3 14:10
  */
 public class JdbcTemplateBasedLocalMessageRepository implements LocalMessageRepository {
+
     private static final String SQL_INSERT =
         "insert into %s " + "(orderly, topic, sharding_key, tag, msg_key, msg_id, msg, retry_time, status, create_time, update_time)" + " values " + "(:orderly, :topic, :shardingKey, :tag, :msgKey, :msgId, :msg, :retryTime, :status, :createTime, :updateTime)";
 

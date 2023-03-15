@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2023/2/21 17:49
  */
 public class FeignClientConfiguration {
+
     @Value("${macula.cloud.app-key}")
     private String username;
     @Value("${macula.cloud.secret-key}")

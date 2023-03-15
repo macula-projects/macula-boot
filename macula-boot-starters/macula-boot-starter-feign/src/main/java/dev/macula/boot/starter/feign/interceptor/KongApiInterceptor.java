@@ -40,6 +40,7 @@ import java.util.Date;
  */
 @AllArgsConstructor
 public class KongApiInterceptor implements RequestInterceptor {
+
     @NonNull
     private String username;
     @NonNull

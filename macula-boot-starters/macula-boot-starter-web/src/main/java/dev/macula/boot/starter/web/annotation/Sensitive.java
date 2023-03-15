@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
 @JacksonAnnotationsInside
 @JsonSerialize(using = SensitiveSerializer.class)
 public @interface Sensitive {
+
     /**
      * 脱敏的类型,默认手机号
      *

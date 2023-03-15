@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Bean;
 @EnableFeignClients(clients = {SystemFeignClient.class})
 @RequiredArgsConstructor
 public class SystemAutoConfiguration {
+
     private final SystemFeignClient client;
 
     @Bean

@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrderServiceImpl {
+
     private final String BIZ_NAME_ORDER = "BIZ_ORDER";
     private final String TOPIC_ORDER = "TOPIC_ORDER_TX";
     private RocketMQTemplate rocketMQTemplate;

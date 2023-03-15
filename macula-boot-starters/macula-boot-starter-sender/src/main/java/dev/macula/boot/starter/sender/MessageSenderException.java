@@ -26,6 +26,7 @@ import org.apache.rocketmq.client.producer.SendStatus;
  * @since 2023/1/3 18:13
  */
 public class MessageSenderException extends RuntimeException {
+
     private SendStatus sendStatus;
 
     public MessageSenderException(SendStatus status) {

@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 public class FeignAutoConfiguration {
+
     @Bean
     public RequestInterceptor headerRelayInterceptor() {
         return new HeaderRelayInterceptor();

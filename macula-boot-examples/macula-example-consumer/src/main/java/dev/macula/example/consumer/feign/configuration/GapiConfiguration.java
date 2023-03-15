@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
 public class GapiConfiguration {
+
     @Value("${gapi.username}")
     private String username;
     @Value("${gapi.secret}")

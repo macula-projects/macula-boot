@@ -26,5 +26,6 @@ import dev.macula.example.ddd.domain.user.entity.User;
  * @since 2022/11/11 17:13
  */
 public interface UserRepository {
+
     void saveUser(User user);
 }

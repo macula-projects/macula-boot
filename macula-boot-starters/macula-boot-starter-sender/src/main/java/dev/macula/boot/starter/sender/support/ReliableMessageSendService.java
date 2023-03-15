@@ -37,6 +37,7 @@ import java.util.List;
  */
 @Slf4j
 public class ReliableMessageSendService {
+
     private final LocalMessageRepository localMessageRepository;
     private final MessageSender messageSender;
 

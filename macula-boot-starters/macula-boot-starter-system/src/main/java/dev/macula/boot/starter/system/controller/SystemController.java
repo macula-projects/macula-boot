@@ -39,6 +39,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class SystemController {
+
     private final SystemService systemService;
 
     @Operation(summary = "获取登录用户信息")

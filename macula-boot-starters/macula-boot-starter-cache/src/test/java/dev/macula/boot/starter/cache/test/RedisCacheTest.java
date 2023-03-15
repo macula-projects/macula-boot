@@ -36,6 +36,7 @@ import org.springframework.cache.CacheManager;
  */
 @SpringBootTest
 public class RedisCacheTest {
+
     @Autowired
     private UserService userService;
 

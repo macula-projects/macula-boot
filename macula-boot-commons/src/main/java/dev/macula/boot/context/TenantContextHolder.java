@@ -26,6 +26,7 @@ import cn.hutool.core.thread.threadlocal.NamedThreadLocal;
  * @since 2023/3/1 15:42
  */
 public class TenantContextHolder {
+
     private static final ThreadLocal<Long> TENANT_CONTEXT = new NamedThreadLocal<>("Tenant Context ID");
 
     /**

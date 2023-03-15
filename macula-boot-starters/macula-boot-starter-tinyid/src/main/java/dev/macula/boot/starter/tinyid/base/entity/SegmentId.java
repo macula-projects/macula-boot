@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author du_imba nextId: (currentId, maxId]
  */
 public class SegmentId {
+
     private long maxId;
     private long loadingId;
     private AtomicLong currentId;

@@ -43,6 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 @SpringBootTest
 public class RedissonOneRedis {
+
     @Autowired
     private RedissonClient redissonClientOne;
 
@@ -65,6 +66,7 @@ public class RedissonOneRedis {
 
     @TestConfiguration
     public static class RedisConfig {
+
         @Bean(name = "redissonPropertiesOne")
         @ConfigurationProperties(prefix = "spring.redis.redisson.one")
         public RedissonProperties redissonPropertiesOne() {

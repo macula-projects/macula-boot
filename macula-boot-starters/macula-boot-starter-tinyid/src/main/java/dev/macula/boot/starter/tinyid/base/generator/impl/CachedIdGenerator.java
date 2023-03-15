@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
  * @author du_imba
  */
 public class CachedIdGenerator implements IdGenerator {
+
     protected String bizType;
     protected SegmentIdService segmentIdService;
     protected volatile SegmentId current;

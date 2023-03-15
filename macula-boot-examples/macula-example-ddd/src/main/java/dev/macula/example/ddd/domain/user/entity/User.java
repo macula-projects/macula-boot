@@ -24,4 +24,5 @@ package dev.macula.example.ddd.domain.user.entity;
  * @since 2022/11/11 17:13
  */
 public class User {
+
 }

@@ -24,6 +24,7 @@ package dev.macula.boot.starter.cloud.gateway.utils;
  * @since 2023/2/20 11:52
  */
 public interface GatewayConstant {
+
     String CACHED_REQUEST_BODY_OBJECT_KEY = "CACHED_REQUEST_BODY_OBJECT_KEY";
 
     String HMAC_AUTH_PREFIX = "hmac username";
