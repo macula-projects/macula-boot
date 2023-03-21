@@ -34,8 +34,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class MyBatisPlusProperties {
 
-    private Aes aes = new Aes();
-
     private Audit audit = new Audit();
 
     private long tenantId = 1L;
@@ -50,15 +48,5 @@ public class MyBatisPlusProperties {
         private String createByName = "createBy";
         private String lastUpdateTimeName = "lastUpdateTime";
         private String lastUpdateByName = "lastUpdateBy";
-    }
-
-    @Getter
-    @Setter
-    public static class Aes {
-
-        private String mode = "ECB";
-        private String padding = "PKCS5Padding";
-        private String key = "0CoJUm6Qyw8W8jud";
-        private String iv;
     }
 }

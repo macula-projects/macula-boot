@@ -19,39 +19,29 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>macula-boot-examples</artifactId>
         <groupId>dev.macula.boot</groupId>
+        <artifactId>macula-boot-starters</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>macula-example-provider1</artifactId>
+    <artifactId>macula-boot-starter-crypto</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-crypto</artifactId>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-springdoc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
         </dependency>
     </dependencies>
 

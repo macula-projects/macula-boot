@@ -24,14 +24,17 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.*;
 import dev.macula.boot.context.TenantContextHolder;
+import dev.macula.boot.starter.crypto.config.CryptoProperties;
+import dev.macula.boot.starter.crypto.core.CryptoManager;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
 import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
-import dev.macula.boot.starter.mp.interceptor.DecryptInterceptor;
-import dev.macula.boot.starter.mp.interceptor.EncryptInterceptor;
+import dev.macula.boot.starter.mp.interceptor.MybatisDecryptInterceptor;
+import dev.macula.boot.starter.mp.interceptor.MybatisEncryptInterceptor;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -109,13 +112,17 @@ public class MyBatisPlusAutoConfiguration {
     }
 
     @Bean
-    public EncryptInterceptor encryptInterceptor(MyBatisPlusProperties properties) {
-        return new EncryptInterceptor(properties);
+    @ConditionalOnBean({CryptoManager.class, CryptoProperties.class})
+    public MybatisEncryptInterceptor mybatisEncryptInterceptor(CryptoManager encryptorManager,
+        CryptoProperties properties) {
+        return new MybatisEncryptInterceptor(encryptorManager, properties);
     }
 
     @Bean
-    public DecryptInterceptor decryptInterceptor(MyBatisPlusProperties properties) {
-        return new DecryptInterceptor(properties);
+    @ConditionalOnBean({CryptoManager.class, CryptoProperties.class})
+    public MybatisDecryptInterceptor mybatisDecryptInterceptor(CryptoManager encryptorManager,
+        CryptoProperties properties) {
+        return new MybatisDecryptInterceptor(encryptorManager, properties);
     }
 
     @Bean

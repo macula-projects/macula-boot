@@ -19,7 +19,7 @@ package dev.macula.boot.starter.mp.test.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
-import dev.macula.boot.starter.mp.annotation.CryptoField;
+import dev.macula.boot.starter.crypto.annotation.CryptoField;
 import dev.macula.boot.starter.mp.entity.BaseEntity;
 import dev.macula.boot.starter.mp.test.entity.enums.SexEnum;
 import lombok.Getter;

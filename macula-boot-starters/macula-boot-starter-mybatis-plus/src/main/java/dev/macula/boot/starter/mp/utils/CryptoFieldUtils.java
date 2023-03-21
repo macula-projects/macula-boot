@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.mp.utils;
 
-import dev.macula.boot.starter.mp.annotation.CryptoField;
+import dev.macula.boot.starter.crypto.annotation.CryptoField;
 
 import java.lang.reflect.Field;
 import java.util.*;

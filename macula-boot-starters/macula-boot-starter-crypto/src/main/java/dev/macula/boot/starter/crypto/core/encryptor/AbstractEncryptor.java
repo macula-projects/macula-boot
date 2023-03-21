@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.mp.annotation;
+package dev.macula.boot.starter.crypto.core.encryptor;
 
-import java.lang.annotation.*;
+import dev.macula.boot.starter.crypto.core.CryptoContext;
+import dev.macula.boot.starter.crypto.core.IEncryptor;
 
 /**
- * {@code CryptoField} 秘密字段注解
+ * 所有加密执行者的基类
  *
- * @author rain
- * @since 2022/8/22 11:44
+ * @author 老马
+ * @version 4.6.0
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-public @interface CryptoField {
+public abstract class AbstractEncryptor implements IEncryptor {
 
+    public AbstractEncryptor(CryptoContext context) {
+        // 用户配置校验与配置注入
+    }
 }
