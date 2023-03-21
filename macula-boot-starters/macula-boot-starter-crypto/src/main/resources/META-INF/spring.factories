@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  dev.macula.boot.starter.crypto.config.CryptoPostProcessor

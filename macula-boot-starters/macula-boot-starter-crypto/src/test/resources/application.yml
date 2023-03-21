@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: test-crypto
+
+macula:
+  crypto:
+    password: abcdef1234567890 # 生产要放到启动命令行
+test:
+  encrypt: mpw:Or0wNwIcctnekUyDfeN8cw==

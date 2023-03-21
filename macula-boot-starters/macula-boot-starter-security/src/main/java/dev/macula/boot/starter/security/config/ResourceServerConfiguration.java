@@ -90,17 +90,28 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 添加默认忽略的路径
+        // @formatter:off
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
 
-        http.oauth2ResourceServer().jwt().decoder(applicationContext.getBean(JwtDecoder.class))
-            .jwtAuthenticationConverter(jwtAuthenticationConverter()).and().accessDeniedHandler(accessDeniedHandler())
+        http.oauth2ResourceServer()
+            .jwt()
+            .decoder(applicationContext.getBean(JwtDecoder.class))
+            .jwtAuthenticationConverter(jwtAuthenticationConverter())
+            .and()
+            .accessDeniedHandler(accessDeniedHandler())
             .authenticationEntryPoint(authenticationEntryPoint());
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
-            .authorizeRequests().antMatchers(Convert.toStrArray(ignoreUrls)).permitAll().anyRequest().authenticated()
-            .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+        http.sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .csrf().disable()
+            .authorizeRequests().antMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
             .authenticationEntryPoint(authenticationEntryPoint());
         return http.build();
+        // @formatter:on
     }
 
     @Bean

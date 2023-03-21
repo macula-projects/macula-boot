@@ -36,6 +36,11 @@
             <artifactId>macula-boot-commons</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-crypto</artifactId>
+        </dependency>
+
         <!-- MySql -->
         <dependency>
             <groupId>mysql</groupId>
