@@ -1,19 +1,32 @@
 # Macula Boot Starter Crypto
 
-### 加解密模块
+### 配置文件加密
+
+配置文件加密只支持AES（AES/ECB/PKCS5Padding）方式加密，密钥只能通过命令行的方式设置
+
+```
+在启动的时候加入密钥
+--macula.crypto.key=password
+```
+
+***注意：配置文件的密文属性需要以 "mpw:" 开头***
+
+### MyBatis的数据库字段加密
+
+配置加密方式
 
 ```yaml
 macula:
   crypto:
     enabled: true   # 默认为true
     algorithm: AES  # BASE64, AES, RSA, SM2, SM4 
+    encode: HEX     # BASE64, HEX
     password: xxx   # 对称加密的密钥
     publicKey: xxx  # 非对称加密公钥
     privateKey: xxx # 非对称解密私钥
-    encode: HEX     # BASE64, HEX
 ```
 
-### 对于mybatis的数据库字段加密，配合下述注解使用
+配合下述注解使用
 
 ```java
 @Documented
@@ -49,14 +62,3 @@ public @interface CryptoField {
 
 }
 ```
-
-### 对于配置文件
-
-配置文件加密只支持AES（AES/ECB/PKCS5Padding）方式加密，密钥只能通过命令行的方式设置
-
-```
-在启动的时候加入密钥
---macula.crypto.key=password
-```
-
-配置文件的密文属性需要以 "mpw:" 开头

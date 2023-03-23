@@ -39,7 +39,7 @@ import java.util.HashMap;
 public class CryptoPostProcessor implements EnvironmentPostProcessor {
 
     private static final String PREFIX = "mpw:";
-    private static final String PASSWORD_KEY = "macula.crypto.password";
+    private static final String PASSWORD_KEY = "macula.crypto.key";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {

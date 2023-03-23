@@ -15,19 +15,21 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.constants;
+package dev.macula.boot.starter.web.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * {@code GlobalConstants} 全局常量
+ * {@code CryptoMethod} 标识方法的请求和响应要加解密
  *
  * @author rain
- * @since 2023/3/1 19:18
+ * @since 2023/3/21 23:55
  */
-public interface GlobalConstants {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.PARAMETER})
+public @interface CryptoMethod {
 
-    String FEIGN_REQ_ID = "FEIGN_REQ_ID";
-
-    String TENANT_ID_NAME = "tenantId";
-
-    String CRYPTO_ENDPOINT = "/gateway/crypto/urls";
 }

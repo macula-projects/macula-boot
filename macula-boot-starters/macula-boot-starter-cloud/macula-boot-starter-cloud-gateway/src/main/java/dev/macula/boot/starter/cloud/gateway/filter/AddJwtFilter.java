@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.cloud.gateway.security;
+package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -29,7 +29,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
-import dev.macula.boot.starter.cloud.gateway.utils.GatewayConstant;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +89,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
             }
 
             // AK/SK转JWT
-            if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstant.HMAC_AUTH_PREFIX)) {
+            if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
                 ServerHttpRequest request = exchange.getRequest();
 
                 String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
@@ -124,7 +124,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
         // 先看缓存，有则直接返回JWT
         // TODO 需要处理重新登录后清除缓存
-        String jwtStr = (String)redisTemplate.opsForValue().get(GatewayConstant.JWT_CACHE_KEY + principal.getName());
+        String jwtStr = (String)redisTemplate.opsForValue().get(GatewayConstants.JWT_CACHE_KEY + principal.getName());
         if (StrUtil.isNotBlank(jwtStr)) {
             return jwtStr;
         }
@@ -160,7 +160,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
         jwtStr = jwt.serialize();
 
         // 缓存JWT一天
-        redisTemplate.opsForValue().set(GatewayConstant.JWT_CACHE_KEY + principal.getName(), jwtStr, 1, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(GatewayConstants.JWT_CACHE_KEY + principal.getName(), jwtStr, 1, TimeUnit.DAYS);
 
         return jwtStr;
     }

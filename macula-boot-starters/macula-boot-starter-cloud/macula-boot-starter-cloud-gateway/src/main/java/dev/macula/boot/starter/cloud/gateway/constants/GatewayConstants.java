@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.cloud.gateway.utils;
+package dev.macula.boot.starter.cloud.gateway.constants;
 
 /**
  * {@code GatewayConstant} 网关常量
@@ -23,11 +23,17 @@ package dev.macula.boot.starter.cloud.gateway.utils;
  * @author rain
  * @since 2023/2/20 11:52
  */
-public interface GatewayConstant {
+public interface GatewayConstants {
 
     String CACHED_REQUEST_BODY_OBJECT_KEY = "CACHED_REQUEST_BODY_OBJECT_KEY";
 
     String HMAC_AUTH_PREFIX = "hmac username";
 
     String JWT_CACHE_KEY = "gateway:jwt:";
+
+    String SM4_KEY = "sm4-key";
+
+    String CRYPTO_SWITCH = "crypto-switch";
+
+    String CRYPTO_DATA_KEY = "data";
 }
