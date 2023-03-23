@@ -17,9 +17,16 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
+import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
+import dev.macula.boot.starter.cloud.gateway.filter.CryptoUrlsEndpointFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.GlobalCacheRequestBodyFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.ProcessCryptoReqResFilter;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -32,7 +39,24 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @RequiredArgsConstructor
+@EnableConfigurationProperties(GatewayProperties.class)
 @Import(ResourceServerConfiguration.class)
 public class GatewayAutoConfiguration {
 
+    @Bean
+    public GlobalCacheRequestBodyFilter globalCacheRequestBodyFilter() {
+        return new GlobalCacheRequestBodyFilter();
+    }
+
+    @Bean
+    @ConditionalOnBean(CryptoService.class)
+    public ProcessCryptoReqResFilter processCryptoReqResFilter(CryptoService cryptoService,
+        GatewayProperties properties) {
+        return new ProcessCryptoReqResFilter(cryptoService, properties);
+    }
+
+    @Bean
+    public CryptoUrlsEndpointFilter createCryptoUrlsEndpointFilter(GatewayProperties properties) {
+        return new CryptoUrlsEndpointFilter(properties);
+    }
 }

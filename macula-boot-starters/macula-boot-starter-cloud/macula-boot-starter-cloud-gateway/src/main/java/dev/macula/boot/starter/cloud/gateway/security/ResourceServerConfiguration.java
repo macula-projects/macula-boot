@@ -20,6 +20,7 @@ package dev.macula.boot.starter.cloud.gateway.security;
 import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.starter.cloud.gateway.filter.AddJwtFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -79,17 +80,28 @@ public class ResourceServerConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        //@formatter:off
         // 添加默认忽略的路径
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
-
-        http.oauth2ResourceServer().opaqueToken().introspector(opaqueTokenIntrospector()).and()
-            .accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint())
-
-            .and().authorizeExchange().pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll().anyExchange()
-            .access(authorizationManager()).and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
-            .authenticationEntryPoint(authenticationEntryPoint()).and().csrf().disable();
-
+        http.oauth2ResourceServer()
+            .opaqueToken()
+            .introspector(opaqueTokenIntrospector())
+            .and()
+            .accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint())
+            .and()
+            .authorizeExchange()
+            .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
+            .anyExchange()
+            .access(authorizationManager())
+            .and()
+            .exceptionHandling()
+            .accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint())
+            .and()
+            .csrf().disable();
         return http.build();
+        //@formatter:on
     }
 
     @Bean

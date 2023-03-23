@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.cloud.gateway.security;
+package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.util.StrUtil;
-import dev.macula.boot.starter.cloud.gateway.utils.GatewayConstant;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -50,7 +50,7 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
 
         // 将 request body 中的内容 copy 一份，记录到 exchange 的一个自定义属性中
         Object cachedRequestBodyObject =
-            exchange.getAttributeOrDefault(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, null);
+            exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
         // 如果已经缓存过，略过
         if (cachedRequestBodyObject != null) {
             return chain.filter(exchange);
@@ -64,7 +64,7 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
                 log.debug("请求缓存的body为：{}", requestBody);
                 return bytes;
             }).defaultIfEmpty(new byte[0])
-            .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstant.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
+            .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
             .then(chain.filter(exchange));
     }
 

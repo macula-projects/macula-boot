@@ -31,8 +31,8 @@ import java.util.List;
 public interface SecurityConstants {
 
     List<String> DEFAULT_IGNORE_URLS =
-        Arrays.asList("/favicon**", "/webjars/**", "/doc.html", "/swagger-ui/**", "/swagger-resources/**",
-            "/v2/api-docs", "/v3/api-docs");
+        Arrays.asList("/actuator/**", "/favicon*", "/webjars/**", "/doc.html", "/swagger-ui/**",
+            "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs");
 
     /**
      * 认证请求头key
