@@ -56,7 +56,9 @@ public class GatewayAutoConfiguration {
     }
 
     @Bean
-    public CryptoUrlsEndpointFilter createCryptoUrlsEndpointFilter(GatewayProperties properties) {
-        return new CryptoUrlsEndpointFilter(properties);
+    @ConditionalOnBean(CryptoService.class)
+    public CryptoUrlsEndpointFilter createCryptoUrlsEndpointFilter(CryptoService cryptoService,
+        GatewayProperties properties) {
+        return new CryptoUrlsEndpointFilter(cryptoService, properties);
     }
 }

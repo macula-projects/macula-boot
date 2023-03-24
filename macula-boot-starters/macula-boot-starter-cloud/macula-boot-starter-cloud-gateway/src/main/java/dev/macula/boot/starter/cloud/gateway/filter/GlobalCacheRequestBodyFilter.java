@@ -42,10 +42,11 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         // 判断是否有加密参数，有则进行加解密操作，无则跳过
-        String aesKeys = exchange.getRequest().getHeaders().getFirst("aesKey");
-        if (StrUtil.isBlank(aesKeys)) {
+        String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
+        if (StrUtil.isBlank(sm4Key)) {
             return chain.filter(exchange);
         }
+
         log.debug("GlobalCacheRequestBodyFilter start...");
 
         // 将 request body 中的内容 copy 一份，记录到 exchange 的一个自定义属性中
