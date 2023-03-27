@@ -38,7 +38,7 @@
     <url>https://macula.dev</url>
 
     <properties>
-        <revision>5.0.0-SNAPSHOT</revision>
+        <revision>5.0.0-RC3</revision>
     </properties>
 
     <modules>
