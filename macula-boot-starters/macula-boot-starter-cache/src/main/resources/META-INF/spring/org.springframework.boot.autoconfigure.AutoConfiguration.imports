@@ -1,1 +1,2 @@
 dev.macula.boot.starter.cache.config.TwoLevelCacheAutoConfiguration
+dev.macula.boot.starter.cache.config.TwoLevelCacheMeterAutoConfiguration

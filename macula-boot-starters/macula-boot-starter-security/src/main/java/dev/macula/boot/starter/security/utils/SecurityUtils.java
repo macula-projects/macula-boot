@@ -53,8 +53,7 @@ public class SecurityUtils {
      * @return nickname
      */
     public static String getNickname() {
-        String nickname = Convert.toStr(getTokenAttributes().get(SecurityConstants.JWT_NICKNAME_KEY));
-        return nickname;
+        return Convert.toStr(getTokenAttributes().get(SecurityConstants.JWT_NICKNAME_KEY));
     }
 
     /**
@@ -79,8 +78,7 @@ public class SecurityUtils {
      * @return deptId
      */
     public static Long getDeptId() {
-        Long deptId = Convert.toLong(getTokenAttributes().get(SecurityConstants.JWT_DEPTID_KEY));
-        return deptId;
+        return Convert.toLong(getTokenAttributes().get(SecurityConstants.JWT_DEPTID_KEY));
     }
 
     /**
@@ -89,8 +87,7 @@ public class SecurityUtils {
      * @return DataScope
      */
     public static Integer getDataScope() {
-        Integer dataScope = Convert.toInt(getTokenAttributes().get(SecurityConstants.JWT_DATASCOPE_KEY));
-        return dataScope;
+        return Convert.toInt(getTokenAttributes().get(SecurityConstants.JWT_DATASCOPE_KEY));
     }
 
     /**
@@ -99,8 +96,7 @@ public class SecurityUtils {
      * @return 租户ID
      */
     public static Long getTenantId() {
-        Long tenantId = Convert.toLong(getTokenAttributes().get(GlobalConstants.TENANT_ID_NAME));
-        return tenantId;
+        return Convert.toLong(getTokenAttributes().get(GlobalConstants.TENANT_ID_NAME));
     }
 
     /**
@@ -117,8 +113,7 @@ public class SecurityUtils {
         if (authentication != null) {
             if (authentication instanceof JwtAuthenticationToken) {
                 JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
-                return tokenAttributes;
+                return jwtAuthenticationToken.getTokenAttributes();
             }
         }
         return Collections.EMPTY_MAP;

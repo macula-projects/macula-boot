@@ -63,7 +63,7 @@ public interface SecurityConstants {
     /**
      * 根部门ID
      */
-    Long ROOT_NODE_ID = 0l;
+    Long ROOT_NODE_ID = 0L;
 
     /**
      * 系统默认密码
@@ -75,17 +75,6 @@ public interface SecurityConstants {
      */
     String ROOT_ROLE_CODE = "ROOT";
 
-    /**
-     * [ {接口路径:[角色编码]},...]
-     */
-    String SECURITY_URL_PERM_ROLES_KEY = "system:security:url_perm_roles";
-
-    String SECURITY_USER_BTN_PERMS_KEY = "system:security:user_btn_perms:";
-
-    String SECURITY_SYSTEM_APPS = "system:security:system_apps:";
-
-    String SECURITY_SYSTEM_APPS_SECRIT_KEY = "secretKey";
-
-    String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
+    String NOOP = "{noop}";
 
 }

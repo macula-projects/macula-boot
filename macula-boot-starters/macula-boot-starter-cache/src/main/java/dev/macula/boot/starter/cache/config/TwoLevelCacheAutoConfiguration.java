@@ -24,15 +24,14 @@ import dev.macula.boot.starter.cache.TwoLevelCacheProperties;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.micrometer.core.instrument.binder.MeterBinder;
-import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
@@ -126,16 +125,6 @@ public class TwoLevelCacheAutoConfiguration {
                 event.getCircuitBreakerName(), event.getStateTransition().getFromState(),
                 event.getStateTransition().getToState()));
         return cb;
-    }
-
-    /**
-     * @return cache meter binder for local level of multi level cache
-     */
-    @Bean
-    @ConditionalOnBean(TwoLevelCacheManager.class)
-    @ConditionalOnClass({MeterBinder.class, CacheMeterBinderProvider.class})
-    public CacheMeterBinderProvider<TwoLevelCache> twoLevelCacheCacheMeterBinderProvider() {
-        return (cache, tags) -> new CaffeineCacheMetrics(cache.getLocalCache(), cache.getName(), tags);
     }
 
     /**

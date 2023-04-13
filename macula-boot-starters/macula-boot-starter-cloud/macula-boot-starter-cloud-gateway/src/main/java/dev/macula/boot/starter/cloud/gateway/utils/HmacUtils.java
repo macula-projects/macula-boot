@@ -24,6 +24,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.HMac;
 import cn.hutool.crypto.digest.HmacAlgorithm;
+import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
@@ -57,7 +58,8 @@ public class HmacUtils {
      * @param redisTemplate 秘钥提取Redis
      * @return 错误信息或者200，200表示成功
      */
-    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate redisTemplate, String path) {
+    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> redisTemplate,
+        String path) {
         try {
             ServerHttpRequest request = exchange.getRequest();
 
@@ -69,10 +71,10 @@ public class HmacUtils {
             }
 
             Map<String, String> apps =
-                redisTemplate.opsForHash().entries(SecurityConstants.SECURITY_SYSTEM_APPS + username);
+                redisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
 
             // 验证ak/sk
-            String secretKey = apps.get(SecurityConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
+            String secretKey = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
             if (StrUtil.isBlank(secretKey)) {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
             }
@@ -84,7 +86,7 @@ public class HmacUtils {
             }
 
             // 检查URL是否允许，默认允许[多个URL表达式用逗号隔开，'GET:/i18n-base/v1/users/*, POST:/xxx/**']
-            String permitUrls = apps.get(SecurityConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
+            String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
             if (StrUtil.isNotBlank(permitUrls)) {
                 PathMatcher pathMatcher = new AntPathMatcher();
                 if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> pathMatcher.match(pattern, path))) {

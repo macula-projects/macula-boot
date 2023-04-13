@@ -20,6 +20,7 @@ package dev.macula.boot.starter.cloud.gateway.security;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
@@ -51,7 +52,7 @@ import java.util.Map;
 @Slf4j
 public class ResourceServerAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 给前端个人的API（只认证Token，不鉴权)
     private final List<String> onlyAuthUrls;
@@ -85,7 +86,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // Hmac Token，属于系统访问的API
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-            Result result = HmacUtils.checkSign(authorizationContext.getExchange(), redisTemplate, restfulPath);
+            Result<String> result = HmacUtils.checkSign(authorizationContext.getExchange(), redisTemplate, restfulPath);
             if (result.isSuccess()) {
                 return Mono.just(new AuthorizationDecision(true));
             } else {
@@ -105,7 +106,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
 
         Map<String, Object> urlPermRolesRules =
-            redisTemplate.opsForHash().entries(SecurityConstants.SECURITY_URL_PERM_ROLES_KEY);
+            redisTemplate.<String, Object>opsForHash().entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY);
 
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色
@@ -129,17 +130,13 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         }
 
         // 判断Token中携带的用户角色是否有权限访问
-        Mono<AuthorizationDecision> authorizationDecisionMono =
-            mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
-                .map(GrantedAuthority::getAuthority).any(authority -> {
-                    String roleCode = authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
-                    if (SecurityConstants.ROOT_ROLE_CODE.equals(roleCode)) {
-                        return true; // 如果是超级管理员则放行
-                    }
-                    boolean hasAuthorized =
-                        CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
-                    return hasAuthorized;
-                }).map(AuthorizationDecision::new).defaultIfEmpty(new AuthorizationDecision(false));
-        return authorizationDecisionMono;
+        return mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
+            .map(GrantedAuthority::getAuthority).any(authority -> {
+                String roleCode = authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
+                if (SecurityConstants.ROOT_ROLE_CODE.equals(roleCode)) {
+                    return true; // 如果是超级管理员则放行
+                }
+                return CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
+            }).map(AuthorizationDecision::new).defaultIfEmpty(new AuthorizationDecision(false));
     }
 }

@@ -28,7 +28,6 @@
         <relativePath>macula-boot-parent</relativePath>
     </parent>
 
-    <groupId>dev.macula.boot</groupId>
     <artifactId>macula-boot</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
