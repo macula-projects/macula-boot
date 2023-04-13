@@ -66,7 +66,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
 
     private final String jwtSecret;
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @SneakyThrows
     @Override

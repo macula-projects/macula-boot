@@ -28,6 +28,11 @@
 
     <artifactId>macula-boot-examples</artifactId>
     <packaging>pom</packaging>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <modules>
         <module>macula-example-gateway</module>
         <module>macula-example-consumer</module>
@@ -36,28 +41,5 @@
         <module>macula-example-provider3</module>
         <module>macula-example-ddd</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-mybatis-plus</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

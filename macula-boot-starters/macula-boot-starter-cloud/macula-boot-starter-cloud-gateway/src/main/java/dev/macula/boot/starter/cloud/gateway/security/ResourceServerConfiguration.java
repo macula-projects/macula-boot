@@ -76,7 +76,7 @@ public class ResourceServerConfiguration {
     private final OAuth2ResourceServerProperties properties;
 
     @NotNull
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {

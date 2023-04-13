@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.mp.config;
 
+import cn.hutool.core.util.ClassUtil;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
@@ -39,6 +40,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.ClassUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -94,7 +96,10 @@ public class MyBatisPlusAutoConfiguration {
         }));
 
         // 数据权限
-        interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
+        if (ClassUtils.isPresent("dev.macula.boot.starter.security.utils.SecurityUtils",
+            this.getClass().getClassLoader())) {
+            interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
+        }
 
         // 分页插件
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();

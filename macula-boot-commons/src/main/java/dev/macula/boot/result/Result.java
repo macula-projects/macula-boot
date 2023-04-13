@@ -43,10 +43,14 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> success(T data) {
+        return success(data, ApiResultCode.SUCCESS.getMsg());
+    }
+
+    public static <T> Result<T> success(T data, String msg) {
         Result<T> result = new Result<>();
         result.setSuccess(true);
         result.setCode(ApiResultCode.SUCCESS.getCode());
-        result.setMsg(ApiResultCode.SUCCESS.getMsg());
+        result.setMsg(msg);
         result.setData(data);
         return result;
     }
