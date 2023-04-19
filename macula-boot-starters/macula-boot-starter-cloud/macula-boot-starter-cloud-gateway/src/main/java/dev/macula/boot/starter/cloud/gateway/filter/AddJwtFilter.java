@@ -26,13 +26,16 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
+import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -44,10 +47,15 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -64,9 +72,12 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AddJwtFilter implements GlobalFilter, Ordered {
 
-    private final String jwtSecret;
+    private final JwtEncoder jwtEncoder;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:http://127.0.0.1:9010}")
+    private String issuer;
 
     @SneakyThrows
     @Override
@@ -122,45 +133,56 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
      */
     @SneakyThrows
     private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
-        // 先看缓存，有则直接返回JWT
-        // TODO 需要处理重新登录后清除缓存
-        String jwtStr = (String)redisTemplate.opsForValue().get(GatewayConstants.JWT_CACHE_KEY + principal.getName());
-        if (StrUtil.isNotBlank(jwtStr)) {
-            return jwtStr;
+        // 先看缓存，有则直接返回JWT（需要认证服务器每次登录返回不同的JTI）
+        String jwtStr;
+        if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
+            jwtStr = (String)redisTemplate.opsForValue().get(buildKey(principal));
+            if (StrUtil.isNotBlank(jwtStr)) {
+                return jwtStr;
+            }
         }
 
-        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder().jwtID(UUID.randomUUID().toString());
-
+        JwtClaimsSet.Builder jwtClaimBuilder = JwtClaimsSet.builder();
         // copy oauth2服务器返回的attribute
-        principal.getAttributes().forEach(builder::claim);
+        principal.getAttributes().forEach(jwtClaimBuilder::claim);
 
+        Instant issuedAt = Instant.now();
         // 处理时间
-        builder.expirationTime(DateUtil.offsetMonth(new Date(), 12));
-        builder.issueTime(new Date());
+        jwtClaimBuilder.expiresAt(issuedAt.plus(30, ChronoUnit.DAYS));
+        jwtClaimBuilder.issuedAt(issuedAt);
 
-        // 如果缺少deptId、dataScope、nickname，设置默认值
+        // 如果缺少jti、deptId、dataScope、nickname，设置默认值
+        if (!principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
+            jwtClaimBuilder.id(UUID.randomUUID().toString());
+        }
         if (!principal.getAttributes().containsKey(SecurityConstants.JWT_NICKNAME_KEY)) {
-            builder.claim(SecurityConstants.JWT_NICKNAME_KEY, principal.getName());
+            jwtClaimBuilder.claim(SecurityConstants.JWT_NICKNAME_KEY, principal.getName());
         }
         if (!principal.getAttributes().containsKey(SecurityConstants.JWT_DEPTID_KEY)) {
-            builder.claim(SecurityConstants.JWT_DEPTID_KEY, SecurityConstants.ROOT_NODE_ID);
+            jwtClaimBuilder.claim(SecurityConstants.JWT_DEPTID_KEY, SecurityConstants.ROOT_NODE_ID);
         }
         if (!principal.getAttributes().containsKey(SecurityConstants.JWT_DATASCOPE_KEY)) {
-            builder.claim(SecurityConstants.JWT_DATASCOPE_KEY, 0);
+            jwtClaimBuilder.claim(SecurityConstants.JWT_DATASCOPE_KEY, 0);
+        }
+        // 如果principal没有issue，需要设置jwt的issue
+        if (!principal.getAttributes().containsKey(JWTClaimNames.ISSUER)) {
+            jwtClaimBuilder.claim(JWTClaimNames.ISSUER, issuer);
         }
 
-        JWTClaimsSet claimsSet = builder.build();
+        JwsAlgorithm jwsAlgorithm = SignatureAlgorithm.RS256;
+        JwsHeader.Builder jwsHeaderBuilder = JwsHeader.with(jwsAlgorithm);
 
-        JWSObject jwt = new JWSObject(new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT).build(),
-            claimsSet.toPayload());
+        JwtClaimsSet claims = jwtClaimBuilder.build();
+        JwsHeader jwsHeader = jwsHeaderBuilder.build();
 
-        MACSigner signer = new MACSigner(jwtSecret);
-        jwt.sign(signer);
+        Jwt jwt = this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims));
+        jwtStr = jwt.getTokenValue();
 
-        jwtStr = jwt.serialize();
-
-        // 缓存JWT一天
-        redisTemplate.opsForValue().set(GatewayConstants.JWT_CACHE_KEY + principal.getName(), jwtStr, 1, TimeUnit.DAYS);
+        if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
+            long between = ChronoUnit.MINUTES.between(claims.getIssuedAt(), claims.getExpiresAt());
+            // 有效期内缓存JWT
+            redisTemplate.opsForValue().set(buildKey(principal), jwtStr, between, TimeUnit.MINUTES);
+        }
 
         return jwtStr;
     }
@@ -168,5 +190,12 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return 0;
+    }
+
+    private String buildKey(OAuth2AuthenticatedPrincipal principal) {
+        if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
+            return CacheConstants.GATEWAY_JWT_CACHE_KEY + principal.getAttribute(JWTClaimNames.JWT_ID);
+        }
+        return CacheConstants.GATEWAY_JWT_CACHE_KEY + principal.getName();
     }
 }

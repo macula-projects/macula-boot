@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.macula.boot.starter.redis.utils.RedisSerializerUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.RedissonReactiveClient;
@@ -100,36 +102,14 @@ public class RedissonAutoConfiguration {
         //设置连接工厂（Jedis或Lettuce）
         template.setConnectionFactory(redisConnectionFactory);
 
-        /*
-        自定义JSON序列化设置
-         */
-        //创建JSON序列化工具
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        //创建序列化规则objectMapper 工具将会遵循objectMapper中定义的规则
-        ObjectMapper objectMapper = new ObjectMapper();
-        //设置序列化可见度(PropertyAccessor表示序列化的范围 Visibility用于设置访问权限（访问修饰符）)
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        //启动"自行在JSON中添加类型信息" 并进行相关设置（若无需反序列化可不设置）
-        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), //多态类型验证程序（必须参数）
-            ObjectMapper.DefaultTyping.NON_FINAL,       //允许序列化的类型（此处表示类不可被final修饰 但String, Boolean, Integer, Double除外）
-            JsonTypeInfo.As.WRAPPER_ARRAY);             /*
-                                                                类型信息在JSON中的形式（默认为WRAPPER_ARRAY）
-                                                                WRAPPER_ARRAY
-                                                                WRAPPER_Object
-                                                                PROPERTY
-                                                                若不需要反序列化 即不需要类的类型信息 则可使用EXISTING_PROPERTY
-                                                                下文中会详细说明不同参数对类型信息在JSON中的形式的影响
-                                                            */
-        //将objectMapper传入工具
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);//JSON序列化与反序列化将会遵循objectMapper中定义的规则
-
         //设置key的序列化方式---String
         template.setKeySerializer(RedisSerializer.string());
         template.setHashKeySerializer(RedisSerializer.string());
 
         //设置value的序列化方式---JSON(上方自定义的JSON序列化设置)
-        template.setValueSerializer(jackson2JsonRedisSerializer);
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);
+        Jackson2JsonRedisSerializer<Object> jsonRedisSerializer = RedisSerializerUtil.getJsonRedisSerializer();
+        template.setValueSerializer(jsonRedisSerializer);
+        template.setHashValueSerializer(jsonRedisSerializer);
 
         //初始化RedisTemplate的参数设置
         template.afterPropertiesSet();
