@@ -77,6 +77,7 @@ public class TwoLevelCacheAutoConfiguration {
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
         return template;
     }
 

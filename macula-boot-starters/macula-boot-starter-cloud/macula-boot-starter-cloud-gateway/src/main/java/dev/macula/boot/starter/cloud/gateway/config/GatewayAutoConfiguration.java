@@ -17,17 +17,27 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoUrlsEndpointFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.GlobalCacheRequestBodyFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.ProcessCryptoReqResFilter;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+
+import java.security.KeyStore;
 
 /**
  * <p>
@@ -40,7 +50,7 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(GatewayProperties.class)
-@Import(ResourceServerConfiguration.class)
+@Import({ResourceServerConfiguration.class, JwtConfiguration.class})
 public class GatewayAutoConfiguration {
 
     @Bean

@@ -15,23 +15,24 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.cloud.gateway.constants;
+/*
+ * 爱组搭 http://aizuda.com 低代码组件化开发平台
+ * ------------------------------------------
+ * 受知识产权保护，请勿删除版权申明
+ */
+package dev.macula.boot.starter.oss.exception;
 
 /**
- * {@code GatewayConstant} 网关常量
+ * oss 媒体类型异常
+ * <p>
+ * 尊重知识产权，CV 请保留版权，爱组搭 http://aizuda.com 出品
  *
- * @author rain
- * @since 2023/2/20 11:52
+ * @author 青苗
+ * @since 2022-06-30
  */
-public interface GatewayConstants {
+public class MediaTypeException extends Exception {
 
-    String CACHED_REQUEST_BODY_OBJECT_KEY = "CACHED_REQUEST_BODY_OBJECT_KEY";
-
-    String HMAC_AUTH_PREFIX = "hmac username";
-
-    String SM4_KEY = "sm4-key";
-
-    String CRYPTO_SWITCH = "crypto-switch";
-
-    String CRYPTO_DATA_KEY = "data";
+    public MediaTypeException(String message) {
+        super(message);
+    }
 }

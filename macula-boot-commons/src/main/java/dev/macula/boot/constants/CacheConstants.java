@@ -18,7 +18,7 @@
 package dev.macula.boot.constants;
 
 /**
- * {@code CacheConstants} is
+ * {@code CacheConstants} 缓存KEY的常量
  *
  * @author rain
  * @since 2023/4/10 23:41
@@ -26,13 +26,13 @@ package dev.macula.boot.constants;
 public interface CacheConstants {
 
     /** URL与角色关系缓存KEY [{接口路径:[角色编码]},...] */
-    String SECURITY_URL_PERM_ROLES_KEY = "system:security:url_perm_roles";
+    String SECURITY_URL_PERM_ROLES_KEY = "macula:system:security:url_perm_roles";
 
     /** 用户与按钮权限缓存KEY前缀 */
-    String SECURITY_USER_BTN_PERMS_KEY = "system:security:user_btn_perms:";
+    String SECURITY_USER_BTN_PERMS_KEY = "macula:system:security:user_btn_perms:";
 
     /** 用户对应的应用缓存前缀 */
-    String SECURITY_SYSTEM_APPS = "system:security:system_apps:";
+    String SECURITY_SYSTEM_APPS = "macula:system:security:system_apps:";
 
     /** 应用缓存里面的密钥KEY */
     String SECURITY_SYSTEM_APPS_SECRIT_KEY = "secretKey";
@@ -41,9 +41,13 @@ public interface CacheConstants {
     String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
 
     /** oauth 客户端信息 */
-    String OAUTH2_CLIENT_KEY = "iam:oauth2:client";
+    String OAUTH2_CLIENT_KEY = "macula:iam:oauth2:client";
 
-    String OAUTH2_CONSENT_KEY = "iam:oauth2:consent:";
+    String OAUTH2_CONSENT_KEY = "macula:iam:oauth2:consent:";
 
-    String OAUTH2_TOKEN_KEY = "iam:oauth2:token";
+    String OAUTH2_TOKEN_KEY = "macula:iam:oauth2:token";
+
+    String OAUTH2_TOKEN_WEAPP_SESSION_KEY = "macula:iam:oauth2:session-key";
+
+    String GATEWAY_JWT_CACHE_KEY = "macula:gateway:jwt:";
 }

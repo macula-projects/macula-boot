@@ -29,15 +29,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -69,17 +72,12 @@ public class ResourceServerConfiguration {
     @Setter
     private List<String> onlyAuthUrls = Collections.emptyList();
 
-    @Setter
-    String jwtSecret = "macula_secret$terces_alucam$123456";
-
     @NotNull
     private final OAuth2ResourceServerProperties properties;
 
-    @NotNull
-    private final RedisTemplate<String, Object> redisTemplate;
-
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
+        ReactiveAuthorizationManager<AuthorizationContext> authorizationManager) {
         //@formatter:off
         // 添加默认忽略的路径
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
@@ -93,11 +91,11 @@ public class ResourceServerConfiguration {
             .authorizeExchange()
             .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
             .anyExchange()
-            .access(authorizationManager())
+            .access(authorizationManager)
             .and()
             .exceptionHandling()
-            .accessDeniedHandler(accessDeniedHandler())
-            .authenticationEntryPoint(authenticationEntryPoint())
+                .accessDeniedHandler(accessDeniedHandler())
+                .authenticationEntryPoint(authenticationEntryPoint())
             .and()
             .csrf().disable();
         return http.build();
@@ -135,7 +133,7 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    public ResourceServerAuthorizationManager authorizationManager() {
+    public ResourceServerAuthorizationManager authorizationManager(RedisTemplate<String, Object> redisTemplate) {
         return new ResourceServerAuthorizationManager(redisTemplate, onlyAuthUrls);
     }
 
@@ -158,8 +156,8 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    AddJwtFilter addJwtFilter() {
-        return new AddJwtFilter(jwtSecret, redisTemplate);
+    AddJwtFilter addJwtFilter(JwtEncoder jwtEncoder, RedisTemplate<String, Object> redisTemplate) {
+        return new AddJwtFilter(jwtEncoder, redisTemplate);
     }
 
     @Bean

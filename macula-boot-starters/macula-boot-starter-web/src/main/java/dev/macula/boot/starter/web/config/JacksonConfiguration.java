@@ -18,8 +18,10 @@
 package dev.macula.boot.starter.web.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,7 @@ public class JacksonConfiguration {
             builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             builder.serializerByType(Long.class, ToStringSerializer.instance);
+            builder.modulesToInstall(new JavaTimeModule());
         };
     }
 }

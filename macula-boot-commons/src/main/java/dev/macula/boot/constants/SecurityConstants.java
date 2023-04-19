@@ -77,4 +77,6 @@ public interface SecurityConstants {
 
     String NOOP = "{noop}";
 
+    String GRANT_TYPE_SMS = "sms";
+
 }
