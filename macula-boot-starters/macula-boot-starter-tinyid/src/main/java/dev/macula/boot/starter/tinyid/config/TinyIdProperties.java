@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author du_imba
  */
-@ConfigurationProperties(prefix = "macula.tinyid")
+@ConfigurationProperties(prefix = "macula.cloud.tinyid")
 @Data
 public class TinyIdProperties {
 
