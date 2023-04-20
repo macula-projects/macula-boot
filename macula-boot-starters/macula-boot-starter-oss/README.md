@@ -1,4 +1,4 @@
-# 接入Macula Cloud的Oss模块
+# 接入Oss模块
 
 对象存储访问，目前支持 Minio ，阿里云 OSS ，腾讯 COS ，亚马逊 AWSS3 ，本地存储，基于aizuda
 
@@ -21,7 +21,6 @@ public class Main {
 ```yaml
 # 配置存储平台 ，第一位 test-minio 为默认存储平台
 macula:
-  cloud:
     oss:
       test-minio:
         platform: minio
