@@ -150,4 +150,5 @@ public class Config {
 }
 ```
 
-`注意，如果定义多个RedisConnectonFactory，需要标识其中一个为@Primary，否则会报错。`
+> 注意，如果定义多个RedisConnectonFactory，需要标识其中一个为@Primary，否则会报错。
+> 你的配置需要保证在RedissonAutoConfiguration配置前，可以使用@AutoConfigureBefore注解

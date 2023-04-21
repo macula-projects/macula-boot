@@ -133,7 +133,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         // 从JWT转换为Authentication
         return new Converter<Jwt, AbstractAuthenticationToken>() {
-            private JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+            private final JwtGrantedAuthoritiesConverter jwtScopeAuthoritiesConverter =
+                new JwtGrantedAuthoritiesConverter();
+            private final JwtGrantedAuthoritiesConverter jwtAuthoritiesAuthoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
 
             @Override
@@ -145,11 +147,11 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
             // 从JWT的authorities属性中读取权限
             private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
                 // 先把SCOPE变成authorities
-                Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
+                Collection<GrantedAuthority> authorities = jwtScopeAuthoritiesConverter.convert(jwt);
                 // 再把authorities属性转换过来，相加
-                jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_KEY);
-                jwtGrantedAuthoritiesConverter.setAuthorityPrefix(SecurityConstants.AUTHORITIES_PREFIX);
-                authorities.addAll(jwtGrantedAuthoritiesConverter.convert(jwt));
+                jwtAuthoritiesAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_KEY);
+                jwtAuthoritiesAuthoritiesConverter.setAuthorityPrefix(SecurityConstants.AUTHORITIES_PREFIX);
+                authorities.addAll(jwtAuthoritiesAuthoritiesConverter.convert(jwt));
                 return authorities;
             }
         };

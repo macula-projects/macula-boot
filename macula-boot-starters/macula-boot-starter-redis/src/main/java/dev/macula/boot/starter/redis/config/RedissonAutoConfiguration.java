@@ -17,12 +17,6 @@
 
 package dev.macula.boot.starter.redis.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.macula.boot.starter.redis.utils.RedisSerializerUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.RedissonReactiveClient;
@@ -41,7 +35,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.io.IOException;
@@ -105,12 +98,6 @@ public class RedissonAutoConfiguration {
         //设置key的序列化方式---String
         template.setKeySerializer(RedisSerializer.string());
         template.setHashKeySerializer(RedisSerializer.string());
-
-        //设置value的序列化方式---JSON(上方自定义的JSON序列化设置)
-        Jackson2JsonRedisSerializer<Object> jsonRedisSerializer = RedisSerializerUtil.getJsonRedisSerializer();
-        template.setValueSerializer(jsonRedisSerializer);
-        template.setHashValueSerializer(jsonRedisSerializer);
-
         //初始化RedisTemplate的参数设置
         template.afterPropertiesSet();
 

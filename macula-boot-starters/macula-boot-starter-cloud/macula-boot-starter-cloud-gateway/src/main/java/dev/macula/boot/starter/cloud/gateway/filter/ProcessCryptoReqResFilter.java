@@ -17,8 +17,9 @@
 
 package dev.macula.boot.starter.cloud.gateway.filter;
 
+import cn.hutool.core.codec.PercentCodec;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.net.URLEncoder;
+import cn.hutool.core.net.RFC3986;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
@@ -74,7 +75,7 @@ public class ProcessCryptoReqResFilter implements GlobalFilter, Ordered {
 
     private final CryptoService cryptoService;
     private final GatewayProperties properties;
-    private URLEncoder urlEncoder = URLEncoder.createQuery();
+    private final PercentCodec urlEncoder = RFC3986.QUERY;
 
     @SneakyThrows
     @Override
@@ -170,11 +171,10 @@ public class ProcessCryptoReqResFilter implements GlobalFilter, Ordered {
             if (StringUtil.isNotBlank(uriStr) && StrUtil.isNotBlank(replace)) {
                 String[] split = uriStr.split("\\?");
                 String encodePath = urlEncoder.encode(replace, CharsetUtil.CHARSET_UTF_8);
-                String newPath = new StringBuilder(split[0]).append("?").append(encodePath).toString();
+                String newPath = split[0] + "?" + encodePath;
                 log.debug("======editGetParam new path:{}", newPath);
                 URI newUri = uri.resolve(newPath);
-                ServerHttpRequest request = serverHttpRequest.mutate().uri(newUri).build();
-                return request;
+                return serverHttpRequest.mutate().uri(newUri).build();
             }
         }
         return serverHttpRequest;

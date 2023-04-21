@@ -54,11 +54,11 @@ public class HmacUtils {
     /**
      * 校验请求的签名是否正确，并验证URL是否匹配
      *
-     * @param exchange      请求Exchagne
-     * @param redisTemplate 秘钥提取Redis
+     * @param exchange         请求Exchagne
+     * @param sysRedisTemplate 秘钥提取Redis
      * @return 错误信息或者200，200表示成功
      */
-    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> redisTemplate,
+    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
         String path) {
         try {
             ServerHttpRequest request = exchange.getRequest();
@@ -70,8 +70,13 @@ public class HmacUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
             }
 
+            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "example");
+            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+                .put(GlobalConstants.TENANT_ID_NAME, "0");
+
             Map<String, String> apps =
-                redisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
+                sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
 
             // 验证ak/sk
             String secretKey = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);

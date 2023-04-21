@@ -12,7 +12,11 @@ spring:
         server-addr: 127.0.0.1:8848
         # namespace:
         # group:
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://127.0.0.1:9010
 feign:
   okhttp:
     enabled: true

@@ -17,12 +17,14 @@
 
 package dev.macula.boot.starter.system.remote;
 
+import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.starter.system.config.FeignClientConfiguration;
 import dev.macula.boot.starter.system.dto.RouteVO;
 import dev.macula.boot.starter.system.dto.UserLoginVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -36,8 +38,9 @@ import java.util.List;
     configuration = FeignClientConfiguration.class)
 public interface SystemFeignClient {
 
-    @GetMapping("/system/api/v1/users/{username}/userinfo")
-    UserLoginVO getUserInfoWithoutRoles(@PathVariable String username);
+    @GetMapping("/system/api/v1/users/{username}/loginUserinfo")
+    UserLoginVO getUserInfoWithoutRoles(@PathVariable String username,
+        @RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);
 
     @GetMapping("/system/api/v1/menus/routes")
     List<RouteVO> listRoutes();

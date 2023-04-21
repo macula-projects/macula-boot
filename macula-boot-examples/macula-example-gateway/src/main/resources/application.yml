@@ -20,10 +20,12 @@ spring:
   security:
     oauth2:
       resourceserver:
+        jwt:
+          issuer-uri: http://127.0.0.1:9010
         opaquetoken:
-          client-id: ${spring.application.name}
-          client-secret: password
-          introspection-uri: https://goauth-dev.infinitus.com.cn/introspect
+          client-id: e4da4a32-592b-46f0-ae1d-784310e88423
+          client-secret: secret
+          introspection-uri: http://127.0.0.1:9010/oauth2/introspect
 macula:
   gateway:
     security:
