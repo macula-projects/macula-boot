@@ -29,6 +29,8 @@ public interface GlobalConstants {
 
     String TENANT_ID_NAME = "tenantId";
 
+    String TOKEN_ID_NAME = "tokenId";
+
     String CRYPTO_URLS_ENDPOINT = "/gateway/crypto/urls";
 
     String CRYPTO_KEY_ENDPOINT = "/gateway/crypto/key";

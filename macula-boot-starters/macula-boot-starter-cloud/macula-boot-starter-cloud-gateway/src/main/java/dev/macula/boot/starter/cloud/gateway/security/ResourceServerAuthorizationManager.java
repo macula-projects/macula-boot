@@ -52,7 +52,7 @@ import java.util.Map;
 @Slf4j
 public class ResourceServerAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> sysRedisTemplate;
 
     // 给前端个人的API（只认证Token，不鉴权)
     private final List<String> onlyAuthUrls;
@@ -86,7 +86,8 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // Hmac Token，属于系统访问的API
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-            Result<String> result = HmacUtils.checkSign(authorizationContext.getExchange(), redisTemplate, restfulPath);
+            Result<String> result =
+                HmacUtils.checkSign(authorizationContext.getExchange(), sysRedisTemplate, restfulPath);
             if (result.isSuccess()) {
                 return Mono.just(new AuthorizationDecision(true));
             } else {
@@ -106,7 +107,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
 
         Map<String, Object> urlPermRolesRules =
-            redisTemplate.<String, Object>opsForHash().entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY);
+            sysRedisTemplate.<String, Object>opsForHash().entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY);
 
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色

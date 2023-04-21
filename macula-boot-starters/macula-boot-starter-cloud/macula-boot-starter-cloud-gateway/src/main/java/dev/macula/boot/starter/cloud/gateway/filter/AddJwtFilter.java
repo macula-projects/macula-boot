@@ -17,22 +17,14 @@
 
 package dev.macula.boot.starter.cloud.gateway.filter;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimNames;
-import com.nimbusds.jwt.JWTClaimsSet;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +48,10 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -77,7 +72,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:http://127.0.0.1:9010}")
-    private String issuer;
+    private String issuerUri;
 
     @SneakyThrows
     @Override
@@ -104,13 +99,17 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
                 ServerHttpRequest request = exchange.getRequest();
 
                 String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
-                Long tenantId = TenantContextHolder.getCurrentTenantId(); // TODO
+                Long tenantId = TenantContextHolder.getCurrentTenantId();
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put(JWTClaimNames.SUBJECT, username);
 
                 // JWT携带租户ID
                 if (Objects.nonNull(tenantId)) {
                     attributes.put(GlobalConstants.TENANT_ID_NAME, tenantId);
+                }
+                String tokenId = request.getQueryParams().getFirst(GlobalConstants.TOKEN_ID_NAME);
+                if (StrUtil.isNotBlank(tokenId)) {
+                    attributes.put(JWTClaimNames.JWT_ID, tokenId);
                 }
 
                 OAuth2AuthenticatedPrincipal principal =
@@ -135,11 +134,9 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
         // 先看缓存，有则直接返回JWT（需要认证服务器每次登录返回不同的JTI）
         String jwtStr;
-        if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            jwtStr = (String)redisTemplate.opsForValue().get(buildKey(principal));
-            if (StrUtil.isNotBlank(jwtStr)) {
-                return jwtStr;
-            }
+        jwtStr = (String)redisTemplate.opsForValue().get(buildKey(principal));
+        if (StrUtil.isNotBlank(jwtStr)) {
+            return jwtStr;
         }
 
         JwtClaimsSet.Builder jwtClaimBuilder = JwtClaimsSet.builder();
@@ -166,7 +163,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
         }
         // 如果principal没有issue，需要设置jwt的issue
         if (!principal.getAttributes().containsKey(JWTClaimNames.ISSUER)) {
-            jwtClaimBuilder.claim(JWTClaimNames.ISSUER, issuer);
+            jwtClaimBuilder.claim(JWTClaimNames.ISSUER, issuerUri);
         }
 
         JwsAlgorithm jwsAlgorithm = SignatureAlgorithm.RS256;
@@ -178,11 +175,9 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
         Jwt jwt = this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims));
         jwtStr = jwt.getTokenValue();
 
-        if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            long between = ChronoUnit.MINUTES.between(claims.getIssuedAt(), claims.getExpiresAt());
-            // 有效期内缓存JWT
-            redisTemplate.opsForValue().set(buildKey(principal), jwtStr, between, TimeUnit.MINUTES);
-        }
+        long between = ChronoUnit.MINUTES.between(claims.getIssuedAt(), claims.getExpiresAt());
+        // 有效期内缓存JWT
+        redisTemplate.opsForValue().set(buildKey(principal), jwtStr, between, TimeUnit.MINUTES);
 
         return jwtStr;
     }
@@ -194,7 +189,11 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
 
     private String buildKey(OAuth2AuthenticatedPrincipal principal) {
         if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            return CacheConstants.GATEWAY_JWT_CACHE_KEY + principal.getAttribute(JWTClaimNames.JWT_ID);
+            String app = "";
+            if (principal.getAttributes().containsKey(GlobalConstants.TENANT_ID_NAME)) {
+                app = "a:";
+            }
+            return CacheConstants.GATEWAY_JWT_CACHE_KEY + app + principal.getAttribute(JWTClaimNames.JWT_ID);
         }
         return CacheConstants.GATEWAY_JWT_CACHE_KEY + principal.getName();
     }

@@ -24,6 +24,7 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Collections;
@@ -64,12 +65,10 @@ public class SecurityUtils {
     public static Set<String> getRoles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && CollectionUtil.isNotEmpty(authentication.getAuthorities())) {
-            Set<String> roles =
-                authentication.getAuthorities().stream().map(item -> StrUtil.removePrefix(item.getAuthority(), "ROLE_"))
-                    .collect(Collectors.toSet());
-            return roles;
+            return authentication.getAuthorities().stream()
+                .map(item -> StrUtil.removePrefix(item.getAuthority(), "ROLE_")).collect(Collectors.toSet());
         }
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
     /**
@@ -99,6 +98,18 @@ public class SecurityUtils {
         return Convert.toLong(getTokenAttributes().get(GlobalConstants.TENANT_ID_NAME));
     }
 
+    public static String getTokenId() {
+        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext()
+            .getAuthentication() instanceof JwtAuthenticationToken) {
+            JwtAuthenticationToken token =
+                (JwtAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+            if (token != null && token.getToken() != null) {
+                return token.getToken().getId();
+            }
+        }
+        return null;
+    }
+
     /**
      * 判断用户是否为超级管理员
      *
@@ -111,11 +122,12 @@ public class SecurityUtils {
     public static Map<String, Object> getTokenAttributes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            if (authentication instanceof JwtAuthenticationToken) {
-                JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                return jwtAuthenticationToken.getTokenAttributes();
+            if (authentication instanceof AbstractOAuth2TokenAuthenticationToken) {
+                AbstractOAuth2TokenAuthenticationToken<?> tokenAuthenticationToken =
+                    (AbstractOAuth2TokenAuthenticationToken<?>)authentication;
+                return tokenAuthenticationToken.getTokenAttributes();
             }
         }
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 }

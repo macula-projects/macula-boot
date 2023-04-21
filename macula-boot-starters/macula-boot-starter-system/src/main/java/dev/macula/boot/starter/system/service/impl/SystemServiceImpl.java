@@ -41,8 +41,8 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public UserLoginVO getUseInfo() {
-        // TODO 根据当前登录会话应该做缓存
-        UserLoginVO user = systemFeignClient.getUserInfoWithoutRoles(SecurityUtils.getCurrentUser());
+        UserLoginVO user =
+            systemFeignClient.getUserInfoWithoutRoles(SecurityUtils.getCurrentUser(), SecurityUtils.getTokenId());
         if (user != null) {
             user.setRoles(SecurityUtils.getRoles());
         }
