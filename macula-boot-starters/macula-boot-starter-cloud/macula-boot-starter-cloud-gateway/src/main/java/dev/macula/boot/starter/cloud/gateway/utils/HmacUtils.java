@@ -70,10 +70,10 @@ public class HmacUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
             }
 
-            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "example");
-            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-                .put(GlobalConstants.TENANT_ID_NAME, "0");
+            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+            //                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "example");
+            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+            //                .put(GlobalConstants.TENANT_ID_NAME, "0");
 
             Map<String, String> apps =
                 sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
