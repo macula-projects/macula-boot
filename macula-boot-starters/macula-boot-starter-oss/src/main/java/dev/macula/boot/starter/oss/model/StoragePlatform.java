@@ -37,10 +37,9 @@ import lombok.Getter;
 public enum StoragePlatform {
     minio(Minio.class), aliyun(AliyunOss.class), tencentCos(TencentCos.class), awss3(AWSS3.class), local(Local.class);
 
-    private final Class strategyClass;
+    private final Class<?> strategyClass;
 
-    StoragePlatform(Class strategyClass) {
+    StoragePlatform(Class<?> strategyClass) {
         this.strategyClass = strategyClass;
     }
-
 }

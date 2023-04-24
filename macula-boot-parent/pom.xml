@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>2.7.11</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -43,7 +43,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-boot.version>2.7.10</spring-boot.version>
+        <spring-boot.version>2.7.11</spring-boot.version>
         <spring-cloud.version>2021.0.6</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.4.0</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.9.1-2021.0.5</spring-cloud-tencent.version>
@@ -118,6 +118,7 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- 该依赖又引入了spring-boot，导致spring版本不对，暂时屏蔽
             <dependency>
                 <groupId>com.tencent.tsf</groupId>
                 <artifactId>spring-cloud-tsf-dependencies</artifactId>
@@ -125,6 +126,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
 
             <!-- macula -->
             <dependency>
