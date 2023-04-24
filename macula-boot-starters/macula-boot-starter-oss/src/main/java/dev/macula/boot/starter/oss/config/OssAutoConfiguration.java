@@ -66,7 +66,7 @@ public class OssAutoConfiguration {
                     OssProperties.DEFAULT_PLATFORM = k;
                 }
                 Class<?> clazz = v.getPlatform().getStrategyClass();
-                Constructor constructor = clazz.getConstructor(OssProperty.class);
+                Constructor<?> constructor = clazz.getConstructor(OssProperty.class);
                 SpringUtils.registerSingletonBean(k, constructor.newInstance(v));
             } catch (Exception e) {
                 throw new BeanInitializationException("register bean error", e);

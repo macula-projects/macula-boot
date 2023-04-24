@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AWSS3 extends AbstractFileStorage {
 
-    private AmazonS3 s3Client;
+    private final AmazonS3 s3Client;
 
     public AWSS3(OssProperty ossProperty) {
         this.ossProperty = ossProperty;

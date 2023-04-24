@@ -53,6 +53,7 @@
         <module>macula-boot-starter-system</module>
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-crypto</module>
+        <module>macula-boot-starter-seata</module>
     </modules>
 
     <dependencies>

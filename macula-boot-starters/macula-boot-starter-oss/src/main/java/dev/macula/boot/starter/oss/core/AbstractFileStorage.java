@@ -103,7 +103,7 @@ public abstract class AbstractFileStorage implements IFileStorage {
         if (null == function) {
             List<String> allowMediaType = this.ossProperty.getAllowMediaType();
             if (null != allowMediaType) {
-                legal = allowMediaType.stream().anyMatch(t -> mediaType.startsWith(t));
+                legal = allowMediaType.stream().anyMatch(mediaType::startsWith);
             }
         } else {
             legal = function.apply(mediaType);

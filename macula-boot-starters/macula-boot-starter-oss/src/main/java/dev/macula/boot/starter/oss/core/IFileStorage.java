@@ -55,7 +55,7 @@ public interface IFileStorage {
      * 指定文件桶名称，为空使用默认桶
      *
      * @param bucketName 桶名称
-     * @return
+     * @return IFileStorage
      */
     IFileStorage bucket(String bucketName);
 
@@ -63,7 +63,7 @@ public interface IFileStorage {
      * 允许媒体类型判断，该方法使用配置 allowMediaType 媒体类型
      *
      * @param is 文件流 {@link InputStream} 子类需要支持 mark reset 方法例如 ByteArrayInputStream
-     * @return
+     * @return IFileStorage
      */
     default IFileStorage allowMediaType(InputStream is) throws Exception {
         return this.allowMediaType(is, null);
@@ -74,7 +74,7 @@ public interface IFileStorage {
      *
      * @param is       文件流 {@link InputStream} 子类需要支持 mark reset 方法例如 ByteArrayInputStream
      * @param function 文件类型合法判断函数
-     * @return
+     * @return IFileStorage
      */
     IFileStorage allowMediaType(InputStream is, Function<String, Boolean> function) throws Exception;
 
@@ -171,7 +171,6 @@ public interface IFileStorage {
      * 删除文件
      *
      * @param objectNameList 文件对象名列表
-     * @throws Exception
      */
     boolean delete(List<String> objectNameList) throws Exception;
 
@@ -179,7 +178,6 @@ public interface IFileStorage {
      * 删除文件
      *
      * @param objectName 文件对象名
-     * @throws Exception
      */
     boolean delete(String objectName) throws Exception;
 
@@ -189,7 +187,7 @@ public interface IFileStorage {
      * @param objectName 文件对象名
      * @param duration   期间
      * @param unit       时间单位 {@link TimeUnit}
-     * @return
+     * @return 文件地址URL
      */
     String getUrl(String objectName, int duration, TimeUnit unit) throws Exception;
 
@@ -197,7 +195,7 @@ public interface IFileStorage {
      * 获取文件地址，默认 3 小时有效期
      *
      * @param objectName 文件对象名
-     * @return
+     * @return URL
      */
     default String getUrl(String objectName) throws Exception {
         return this.getUrl(objectName, 3, TimeUnit.HOURS);
@@ -207,7 +205,7 @@ public interface IFileStorage {
      * 根据文件名获取 ContentType
      *
      * @param filename 文件名
-     * @return
+     * @return ContentType
      */
     default String getContentType(String filename) {
         return MediaTypeFactory.getMediaType(filename).orElse(APPLICATION_OCTET_STREAM).toString();
@@ -217,7 +215,7 @@ public interface IFileStorage {
      * 获取上传签名地址
      *
      * @param filename 文件名
-     * @return
+     * @return MultipartUploadResponse
      */
     MultipartUploadResponse getUploadSignedUrl(String filename);
 }

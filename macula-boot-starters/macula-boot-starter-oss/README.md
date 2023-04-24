@@ -75,12 +75,12 @@ OSS.fileStorage(platform).bucket(bucketName).upload(fis,filename);
 
 ## 配置属性说明
 
-| 属性                | 说明                                          |
-|-------------------|---------------------------------------------|
-| platform          | 存储平台，目前支持 Minio，阿里云OSS，腾讯COS，亚马逊AWSS3 ，本地存储 |
-| endpoint          | 域名                                          |
-| accessKey         | 访问 KEY                                      |
-| secretKey         | 密钥                                          |
-| bucketName        | 存储空间桶名                                      |
-| connectionTimeout | 连接超时，阿里云 OSS 有效                             |
+| 属性                | 说明                                               |
+|-------------------|--------------------------------------------------|
+| platform          | 存储平台，目前支持 Minio，阿里云OSS，腾讯COS，亚马逊AWSS3 ，资源中心，本地存储 |
+| endpoint          | 域名                                               |
+| accessKey         | 访问 KEY                                           |
+| secretKey         | 密钥                                               |
+| bucketName        | 存储空间桶名                                           |
+| connectionTimeout | 连接超时，阿里云 OSS 有效                                  |
 

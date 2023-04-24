@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2022-08-15 01:09
  */
 public class TencentCos extends AbstractFileStorage {
-    private COSClient cosClient;
+    private final COSClient cosClient;
 
     public TencentCos(OssProperty ossProperty) {
         this.ossProperty = ossProperty;

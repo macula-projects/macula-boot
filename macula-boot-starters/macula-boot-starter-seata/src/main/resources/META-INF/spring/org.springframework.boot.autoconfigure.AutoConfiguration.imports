@@ -1,0 +1,3 @@
+dev.macula.boot.starter.seata.rest.SeataRestTemplateAutoConfiguration
+dev.macula.boot.starter.seata.feign.SeataFeignClientAutoConfiguration
+dev.macula.boot.starter.seata.web.SeataHandlerInterceptorAutoConfiguration

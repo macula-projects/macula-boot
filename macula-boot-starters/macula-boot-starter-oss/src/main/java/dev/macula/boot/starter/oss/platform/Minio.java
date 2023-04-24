@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Minio extends AbstractFileStorage {
 
-    private MinioClient minioClient;
+    private final MinioClient minioClient;
 
     public Minio(OssProperty ossProperty) {
         this.ossProperty = ossProperty;
