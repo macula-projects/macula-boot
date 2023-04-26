@@ -1,4 +1,4 @@
-# Sender Starter
+# Macula Boot Starter Sender
 
 通过本地表发送事务消息
 

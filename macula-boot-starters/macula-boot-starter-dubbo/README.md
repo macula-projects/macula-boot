@@ -1,4 +1,4 @@
-# Dubbo模块
+# Macula Boot Starter Dubbo
 
 已经不建议使用Dubbo，该模块只适用于作为消费者调用dubbo接口
 

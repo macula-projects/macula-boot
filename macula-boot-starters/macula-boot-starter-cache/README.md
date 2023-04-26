@@ -1,4 +1,4 @@
-# 缓存模块
+# Macula Boot Starter Cache 缓存模块
 
 两级缓存功能，第一级是本地缓存，使用Caffeine支持，第二级是Redis缓存，使用Redis支持。
 

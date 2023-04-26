@@ -61,12 +61,13 @@
         <resilience4j.version>1.7.1</resilience4j.version>
         <swagger2.version>1.6.2</swagger2.version>
         <swagger3.version>2.2.0</swagger3.version>
-        <mapstruct.version>1.5.2.Final</mapstruct.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mapstruct-plus.version>1.2.3</mapstruct-plus.version>
         <lock4j.version>2.2.1</lock4j.version>
         <skywalking.version>8.11.0</skywalking.version>
         <rocketmq-spring.version>2.2.2</rocketmq-spring.version>
         <springdoc.version>1.6.9</springdoc.version>
-        <powerjob.version>4.3.0</powerjob.version>
+        <powerjob.version>4.3.2</powerjob.version>
         <dubbo.version>2.7.16</dubbo.version>
         <bouncycastle.version>1.71.1</bouncycastle.version>
         <aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
@@ -252,15 +253,14 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-cloud-tsf</artifactId>
+                <artifactId>macula-boot-starter-retry</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-cloud-tsf-scg</artifactId>
+                <artifactId>macula-boot-starter-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-tinyid</artifactId>
@@ -391,6 +391,12 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.linpeilie</groupId>
+                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
+                <version>${mapstruct-plus.version}</version>
             </dependency>
 
             <!-- skywalking -->

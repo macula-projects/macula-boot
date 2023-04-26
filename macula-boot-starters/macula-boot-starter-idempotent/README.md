@@ -1,4 +1,4 @@
-# idempotent 幂等处理方案
+# Macula Boot Starter Idempotent
 
 是对原有 [idempotent](https://github.com/it4alla/idempotent) 代码重构和功能增强。
 

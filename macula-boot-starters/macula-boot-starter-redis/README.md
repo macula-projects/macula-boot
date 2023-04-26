@@ -1,4 +1,4 @@
-# Redis
+# Macula Boot Starter Redis
 
 提供连接Redis的相关配置，使用了[redisson库](https://redisson.pro/)
 

@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.mapstruct;
 
+import io.github.linpeilie.Converter;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -24,11 +25,36 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 public class SourceTargetMapperTest {
+    private static final Converter converter = new Converter();
 
     @Test
     public void testMapper() {
         SourceDto s = new SourceDto("rain", "123456", new Date(), LocalDateTime.now(), ZonedDateTime.now().now(), 90);
         TargetDto t = SourceTargetMapper.MAPPER.toTarget(s);
         System.out.println(t);
+    }
+
+    @Test
+    public void testAutoMapper() {
+        User user = new User();
+        user.setUsername("jack");
+        user.setAge(23);
+        user.setYoung(false);
+
+        UserDto userDto = converter.convert(user, UserDto.class);
+
+        System.out.println(userDto);    // UserDto{username='jack', age=23, young=false}
+
+        assert user.getUsername().equals(userDto.getUsername());
+        assert user.getAge() == userDto.getAge();
+        assert user.isYoung() == userDto.isYoung();
+
+        User newUser = converter.convert(userDto, User.class);
+
+        System.out.println(newUser);    // User{username='jack', age=23, young=false}
+
+        assert user.getUsername().equals(newUser.getUsername());
+        assert user.getAge() == newUser.getAge();
+        assert user.isYoung() == newUser.isYoung();
     }
 }

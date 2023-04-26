@@ -1,4 +1,4 @@
-# 接入Macula Cloud的System模块
+# Macula Boot Starter System
 
 通过接入system模块，让你的系统用户系统管理的功能。只需要给xxx-admin模块依赖，提供加载菜单的url
 

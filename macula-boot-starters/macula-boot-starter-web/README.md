@@ -1,4 +1,4 @@
-# Web模块
+# Macula Boot Starter Web
 
 ## 配置
 
