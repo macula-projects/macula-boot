@@ -1,4 +1,4 @@
-# macula-boot-starter-security
+# Macula Boot Starter Security
 
 安全模块，支持WEB安全、基于OAUTH2的安全接入等
 

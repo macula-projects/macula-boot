@@ -1,4 +1,4 @@
-# Leader Election
+# Macula Boot Starter LeaderElection
 
 借助redis选择master
 

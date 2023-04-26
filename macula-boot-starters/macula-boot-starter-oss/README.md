@@ -1,4 +1,4 @@
-# 接入Oss模块
+# Macula Boot Starter OSS
 
 对象存储访问，目前支持 Minio ，阿里云 OSS ，腾讯 COS ，亚马逊 AWSS3 ，本地存储，基于aizuda
 

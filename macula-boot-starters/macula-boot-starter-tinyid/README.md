@@ -1,4 +1,4 @@
-# ID生成器
+# Macula Boot Starter TinyID
 
 macula-cloud-tinyid服务的starter，通过如下配置使用：
 

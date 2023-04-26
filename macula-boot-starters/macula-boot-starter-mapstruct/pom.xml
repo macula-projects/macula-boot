@@ -29,14 +29,12 @@
     <artifactId>macula-boot-starter-mapstruct</artifactId>
 
     <properties>
-        <mapstruct.version>1.5.2.Final</mapstruct.version>
-        <lombok.version>1.18.22</lombok.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
+            <groupId>io.github.linpeilie</groupId>
+            <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -58,9 +56,9 @@
                         <!-- According to this documentation, the provided dependency processor is not considered!   -->
                         <annotationProcessorPaths>
                             <path>
-                                <groupId>org.mapstruct</groupId>
-                                <artifactId>mapstruct-processor</artifactId>
-                                <version>${mapstruct.version}</version>
+                                <groupId>io.github.linpeilie</groupId>
+                                <artifactId>mapstruct-plus-processor</artifactId>
+                                <version>${mapstruct-plus.version}</version>
                             </path>
                             <path>
                                 <groupId>org.projectlombok</groupId>

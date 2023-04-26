@@ -54,6 +54,7 @@
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-crypto</module>
         <module>macula-boot-starter-seata</module>
+        <module>macula-boot-starter-retry</module>
     </modules>
 
     <dependencies>
