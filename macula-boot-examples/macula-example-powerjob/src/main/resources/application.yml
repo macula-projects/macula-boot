@@ -1,0 +1,24 @@
+server:
+  port: 7087
+spring:
+  application:
+    name: macula-example-powerjob
+powerjob:
+  worker:
+    enabled: true
+    # Turn on test mode and do not force the server connection to be verified
+    enable-test-mode: false
+    # Transport port, default is 27777
+    port: 27777
+    # Application name, used for grouping applications. Recommend to set the same value as project name.
+    app-name: ${spring.application.name}
+    # Address of PowerJob-server node(s). Ip:port or domain. Multiple addresses should be separated with comma.
+    server-address: 127.0.0.1:7700
+    # transport protocol between server and worker
+    protocol: http
+    # Store strategy of H2 database. disk or memory. Default value is disk.
+    store-strategy: disk
+    # Max length of result. Results that are longer than the value will be truncated.
+    max-result-length: 4096
+    # Max length of appended workflow context . Appended workflow context value that is longer than the value will be ignore.
+    max-appended-wf-context-length: 4096
