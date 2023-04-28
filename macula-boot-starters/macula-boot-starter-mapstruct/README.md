@@ -1,5 +1,6 @@
 # Macula Boot Starter Mapstruct
 
+### 基于原始mapstruct
 MapStruct是类型转换工具，主要通过定义如下的转换接口，然后编译的时候自动生成实现类来工作。对于使用到mapstruct的应用来说，需要在parent或则自己的pom中定义如下的build插件
 
 ```java
@@ -54,3 +55,7 @@ public interface SourceTargetMapper {
         </pluginManagement>
     </build>
 ```
+
+### 基于mapstruct plus
+
+[参考官方文档](https://mapstruct.plus/)
