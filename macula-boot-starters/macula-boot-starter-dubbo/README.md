@@ -1,6 +1,6 @@
 # Macula Boot Starter Dubbo
 
-已经不建议使用Dubbo，该模块只适用于作为消费者调用dubbo接口
+### 使用Dubbo开发微服务
 
 ```yaml
 dubbo:
@@ -19,3 +19,7 @@ dubbo:
 ```
 
 具体可以参考 [Dubbo Samples](https://dubbo.apache.org/zh/docs3-v2/java-sdk/quick-start/spring-boot/)
+
+### Dubbo与Spring Cloud互通
+
+具体示例可以参考[dubbo-samples-cloud-native](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/README.md)
