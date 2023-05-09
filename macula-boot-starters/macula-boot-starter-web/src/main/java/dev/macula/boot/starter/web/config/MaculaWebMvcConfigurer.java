@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Date;
 
 /**
- * {@code WebAutoConfiguration} is
+ * {@code MaculaWebMvcConfigurer} WebMvc配置器
  *
  * @author rain
  * @since 2022/6/29 15:04
