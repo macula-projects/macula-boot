@@ -1,24 +1,16 @@
 package dev.macula.boot.starter.cloud.gateway.config;
 
-import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import lombok.SneakyThrows;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 
 import java.security.KeyStore;
 
@@ -54,24 +46,11 @@ public class JwtConfiguration {
     }
 
     /**
-     * Jwt decoder jwt decoder.
+     * JWT编码器，这个是网关自己生成的JWT给下游的微服务，与IAM无关
      *
-     * @return the jwt decoder
+     * @param jwkSource
+     * @return
      */
-    @SneakyThrows
-    @Bean
-    @ConditionalOnMissingBean(JwtDecoder.class)
-    JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-        JWSVerificationKeySelector<SecurityContext> keySelector =
-            new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, jwkSource);
-        jwtProcessor.setJWSKeySelector(keySelector);
-        // Spring Security validates the claim set independent from Nimbus
-        jwtProcessor.setJWTClaimsSetVerifier((claims, context) -> {
-        });
-        return new NimbusJwtDecoder(jwtProcessor);
-    }
-
     @Bean
     @ConditionalOnMissingBean(JwtEncoder.class)
     JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
