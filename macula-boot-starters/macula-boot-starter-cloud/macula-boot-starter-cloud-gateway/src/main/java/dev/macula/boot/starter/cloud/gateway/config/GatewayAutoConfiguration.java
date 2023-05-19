@@ -17,9 +17,12 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoUrlsEndpointFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.GlobalCacheRequestBodyFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.ProcessCryptoReqResFilter;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +60,14 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(CryptoService.class)
-    public CryptoUrlsEndpointFilter createCryptoUrlsEndpointFilter(CryptoService cryptoService,
+    public CryptoUrlsEndpointFilter cryptoUrlsEndpointFilter(CryptoService cryptoService,
         GatewayProperties properties) {
         return new CryptoUrlsEndpointFilter(cryptoService, properties);
+    }
+
+    @ConditionalOnBean(JWKSource.class)
+    @Bean
+    public NimbusJwkSetEndpointFilter nimbusJwkSetEndpointFilter(JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwkSetEndpointFilter(jwkSource);
     }
 }
