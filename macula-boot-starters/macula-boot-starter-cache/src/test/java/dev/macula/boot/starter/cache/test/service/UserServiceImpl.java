@@ -18,6 +18,8 @@
 package dev.macula.boot.starter.cache.test.service;
 
 import dev.macula.boot.starter.cache.test.vo.User;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,16 +32,20 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
+@CacheConfig(cacheNames = "user-service")
 public class UserServiceImpl implements UserService {
 
+    @Cacheable(key = "#root.methodName + ':' + #userId")
     public User getUser(String userId) {
         return new User(userId, "Rain", "password");
     }
 
+    @Cacheable
     public User getUser2(String userId) {
         return new User(userId, "Rain2", "password2");
     }
 
+    @Cacheable
     public User getUser3() {
         return new User("3333x", "Rain3", "password3");
     }

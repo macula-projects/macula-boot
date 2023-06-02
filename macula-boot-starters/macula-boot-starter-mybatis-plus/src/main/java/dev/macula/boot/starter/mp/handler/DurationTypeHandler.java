@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 
 /**
- * {@code DurationTypeHandler} 讲数据库中的BIGINT映射为Duration，数据库中的单位是秒
+ * {@code DurationTypeHandler} 将数据库中的BIGINT映射为Duration，数据库中的单位是秒
  *
  * @author rain
  * @since 2023/4/13 17:30
