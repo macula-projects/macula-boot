@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -49,8 +50,8 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result ValidExceptionHandler(BindException e) {
-        // 从异常对象中拿到ObjectError对象
+    public Result<String> ValidExceptionHandler(BindException e) {
+        // 处理 form data方式调用接口校验失败抛出的异常
         log.error("BindException:" + ApiResultCode.VALIDATE_ERROR, e);
 
         StringBuilder validateMsg = new StringBuilder();
@@ -65,10 +66,27 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
         return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<String> ValidExceptionHandler(MethodArgumentNotValidException e) {
+        // <2> 处理 json 请求体调用接口校验失败抛出的异常
+        log.error("MethodArgumentNotValidException:" + ApiResultCode.VALIDATE_ERROR, e);
+
+        StringBuilder validateMsg = new StringBuilder();
+        for (ObjectError error : e.getAllErrors()) {
+            validateMsg.append("[");
+            validateMsg.append(((FieldError)error).getField());
+            validateMsg.append(" ");
+            validateMsg.append(error.getDefaultMessage());
+            validateMsg.append("]");
+        }
+        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
+    }
+
     @ExceptionHandler({ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result ValidExceptionHandler(ConstraintViolationException e) {
-        // 从异常对象中拿到ObjectError对象
+    public Result<String> ValidExceptionHandler(ConstraintViolationException e) {
+        // 处理单个参数校验失败抛出的异常
         log.error("ConstraintViolationException:" + ApiResultCode.VALIDATE_ERROR, e);
 
         StringBuilder validateMsg = new StringBuilder();
@@ -87,7 +105,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result ApiExceptionHandler(BizException e) {
+    public Result<String> ApiExceptionHandler(BizException e) {
         log.error("ApiException:" + e.getCode(), e);
         return Result.failed(e.getCode(), e.getMsg(),
             messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale()));
@@ -95,14 +113,14 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result NullPointExceptionHandler(Exception e) {
+    public Result<String> NullPointExceptionHandler(Exception e) {
         log.error("NullPointException: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, "空指针异常");
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result ExceptionHandler(Exception e) {
+    public Result<String> ExceptionHandler(Exception e) {
         log.error("Exception: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());
     }

@@ -43,7 +43,6 @@
         <module>macula-boot-starter-statemachine</module>
         <module>macula-boot-starter-web</module>
         <module>macula-boot-starter-security</module>
-        <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-springdoc</module>
         <module>macula-boot-starter-dubbo</module>
         <module>macula-boot-starter-feign</module>

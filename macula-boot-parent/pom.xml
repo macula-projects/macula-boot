@@ -56,7 +56,7 @@
         <redisson.version>3.18.1</redisson.version>
         <kryo.version>5.3.0</kryo.version>
         <hutool.version>5.8.15</hutool.version>
-        <liteflow.version>2.10.0</liteflow.version>
+        <liteflow.version>2.10.3</liteflow.version>
         <oauth2-oidc-sdk.version>9.19</oauth2-oidc-sdk.version>
         <resilience4j.version>1.7.1</resilience4j.version>
         <swagger2.version>1.6.2</swagger2.version>
@@ -64,7 +64,6 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mapstruct-plus.version>1.2.3</mapstruct-plus.version>
         <lock4j.version>2.2.1</lock4j.version>
-        <skywalking.version>8.11.0</skywalking.version>
         <rocketmq-spring.version>2.2.2</rocketmq-spring.version>
         <springdoc.version>1.6.9</springdoc.version>
         <powerjob.version>4.3.2</powerjob.version>
@@ -82,6 +81,7 @@
         <jsch.version>0.1.55</jsch.version>
         <tika.version>2.4.1</tika.version>
         <thumbnailator.version>0.4.19</thumbnailator.version>
+        <cola.version>4.3.2</cola.version>
 
         <mysql-binlog-connector.version>0.27.1</mysql-binlog-connector.version>
         <redis-replicator.version>3.6.4</redis-replicator.version>
@@ -90,15 +90,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- spring-statemachine -->
-            <dependency>
-                <groupId>org.springframework.statemachine</groupId>
-                <artifactId>spring-statemachine-bom</artifactId>
-                <version>${spring-statemachine.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <!-- spring-cloud -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -200,22 +191,12 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-statemachine</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-web</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-skywalking</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -342,6 +323,11 @@
                 <artifactId>liteflow-spring-boot-starter</artifactId>
                 <version>${liteflow.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-rule-nacos</artifactId>
+                <version>${liteflow.version}</version>
+            </dependency>
 
             <!-- redisson -->
             <dependency>
@@ -405,18 +391,6 @@
                 <groupId>io.github.linpeilie</groupId>
                 <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
                 <version>${mapstruct-plus.version}</version>
-            </dependency>
-
-            <!-- skywalking -->
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-trace</artifactId>
-                <version>${skywalking.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-logback-1.x</artifactId>
-                <version>${skywalking.version}</version>
             </dependency>
 
             <dependency>
@@ -523,6 +497,12 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>
                 <version>${easyexcel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.cola</groupId>
+                <artifactId>cola-component-statemachine</artifactId>
+                <version>${cola.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
