@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.system.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import dev.macula.boot.enums.MenuTypeEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -51,6 +52,8 @@ public class RouteVO {
         private String icon;
 
         private Boolean hidden;
+
+        private MenuTypeEnum type; //菜单类型[菜单/目录等]
 
         /**
          * 如果设置为 true，目录没有子节点也会显示
