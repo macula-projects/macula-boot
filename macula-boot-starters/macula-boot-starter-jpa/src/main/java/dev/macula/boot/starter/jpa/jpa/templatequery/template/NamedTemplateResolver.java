@@ -44,7 +44,7 @@ public interface NamedTemplateResolver {
      *
      * @param resource 模板资源
      * @param callback 回调函数，对应一个SQL
-     * @throws Exception
+     * @throws Exception 异常
      */
     void doInTemplateResource(Resource resource, final NamedTemplateCallback callback) throws Exception;
 }

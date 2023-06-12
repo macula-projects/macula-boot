@@ -24,7 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 
 /**
- * .
+ * 获取被代理对象的原始目标对象
  * <p>
  *
  * @author <a href="mailto:stormning@163.com">stormning</a>
@@ -33,9 +33,10 @@ import java.lang.reflect.Proxy;
 public class AopTargetUtils {
 
     /**
-     * 获取 目标对象
+     * 获取目标对象
      *
-     * @param proxy 代理对象
+     * @param proxy 被代理对象
+     * @param <T>   目标类型
      * @return 目标对象
      */
     @SuppressWarnings("unchecked")

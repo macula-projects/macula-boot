@@ -39,8 +39,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * .
- * <p/>
+ * BeanTransformerAdapter
  *
  * @author <a href="mailto:stormning@163.com">stormning</a>
  * @version V1.0, 15/11/24.
@@ -213,6 +212,8 @@ public class BeanTransformerAdapter<T> implements ResultTransformer {
      * fields.
      * <p>Default is {@code false}, accepting unpopulated properties in the
      * target bean.
+     *
+     * @param checkFullyPopulated 标志
      */
     public void setCheckFullyPopulated(boolean checkFullyPopulated) {
         this.checkFullyPopulated = checkFullyPopulated;
@@ -221,6 +222,7 @@ public class BeanTransformerAdapter<T> implements ResultTransformer {
     /**
      * Return whether we're defaulting Java primitives in the case of mapping a null value from corresponding database
      * fields.
+     * @return isPrimitivesDefaultedForNullValue
      */
     public boolean isPrimitivesDefaultedForNullValue() {
         return primitivesDefaultedForNullValue;
@@ -230,6 +232,8 @@ public class BeanTransformerAdapter<T> implements ResultTransformer {
      * Set whether we're defaulting Java primitives in the case of mapping a null value from corresponding database
      * fields.
      * <p>Default is {@code false}, throwing an exception when nulls are mapped to Java primitives.
+     *
+     * @param primitivesDefaultedForNullValue 默认值
      */
     public void setPrimitivesDefaultedForNullValue(boolean primitivesDefaultedForNullValue) {
         this.primitivesDefaultedForNullValue = primitivesDefaultedForNullValue;

@@ -33,7 +33,7 @@ public class MaculaJpaRepositoryFactoryBean<T extends JpaRepository<Object, Seri
     extends JpaRepositoryFactoryBean<T, Object, Serializable> {
 
     /**
-     * @param repositoryInterface
+     * @param repositoryInterface 接口
      */
     public MaculaJpaRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
         super(repositoryInterface);

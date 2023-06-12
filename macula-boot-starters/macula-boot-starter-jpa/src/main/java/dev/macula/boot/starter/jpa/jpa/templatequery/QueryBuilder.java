@@ -37,8 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * .
- * <p/>
+ * QueryBuilder
  *
  * @author <a href="mailto:stormning@163.com">stormning</a>
  * @version V1.0, 2015/8/11.
@@ -97,8 +96,8 @@ public class QueryBuilder {
     /**
      * 给Hibernate查询参数设置值
      *
-     * @param query
-     * @param params
+     * @param query  NativeQuery
+     * @param params 参数
      */
     @SuppressWarnings("rawtypes")
     public static void setParams(NativeQuery<?> query, Map<String, Object> params) {
@@ -126,9 +125,9 @@ public class QueryBuilder {
     /**
      * 将接口中定义的查询方法参数转换为Map，直接使用参数名称作为KEY
      *
-     * @param parameters
-     * @param values
-     * @return
+     * @param parameters JPA参数
+     * @param values 对应的值
+     * @return DataModel
      */
     public static Map<String, Object> transValuesToDataModel(JpaParameters parameters, Object[] values) {
         // gen model
@@ -145,7 +144,7 @@ public class QueryBuilder {
     }
 
     /**
-     * 将接口中定义的查询方法参数转换为Map，原子类型直接放入map，Bean或者Map转换为Map后放入<BR/> 为了防止不同的bean或者map属性重名，最终的MAP的KEY是参数名称.属性名称
+     * 将接口中定义的查询方法参数转换为Map，原子类型直接放入map，Bean或者Map转换为Map后放入， 为了防止不同的bean或者map属性重名，最终的MAP的KEY是参数名称.属性名称
      *
      * @param parameters 参数定义
      * @param values     参数值

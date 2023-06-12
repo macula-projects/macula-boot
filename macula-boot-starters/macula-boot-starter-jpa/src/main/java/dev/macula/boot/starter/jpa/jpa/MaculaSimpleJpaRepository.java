@@ -36,8 +36,8 @@ public class MaculaSimpleJpaRepository<T, ID extends Serializable> extends Simpl
     private EntityManager em;
 
     /**
-     * @param entityMetadata
-     * @param entityManager
+     * @param entityMetadata metadata
+     * @param entityManager  entity manager
      */
     public MaculaSimpleJpaRepository(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
         super(entityMetadata, entityManager);

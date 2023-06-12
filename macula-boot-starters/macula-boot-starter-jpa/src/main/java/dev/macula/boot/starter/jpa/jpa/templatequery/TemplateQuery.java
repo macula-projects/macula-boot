@@ -34,8 +34,7 @@ import javax.persistence.TypedQuery;
 import java.util.Map;
 
 /**
- * .
- * <p/>
+ * TemplateQuery
  *
  * @author <a href="mailto:stormning@163.com">stormning</a>
  * @version V1.0, 2015/8/9.
