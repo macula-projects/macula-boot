@@ -44,7 +44,6 @@ import java.util.Map;
  * JPA配置的基类
  *
  * @author Rain
- * @see 2019-2-15
  */
 
 @EnableJpaAuditing(auditorAwareRef = "auditorAwareStub", dateTimeProviderRef = "dbDateTimeProvider")

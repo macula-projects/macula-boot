@@ -36,7 +36,7 @@ public abstract class AbstractAuditChangedListener implements ApplicationListene
     /**
      * 实现该方法，获取所需的数据变化实体，以便做进一步操作
      *
-     * @param auditChanged
+     * @param auditChanged 变化对象
      */
     protected abstract void onAuditChanged(AuditChanged auditChanged);
 

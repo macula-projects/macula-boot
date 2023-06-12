@@ -42,10 +42,10 @@ public class TemplateQueryMethod extends JpaQueryMethod {
     private Method method;
 
     /**
-     * @param method
-     * @param metadata
-     * @param factory
-     * @param extractor
+     * @param method    方法
+     * @param metadata  元数据
+     * @param factory   工厂
+     * @param extractor 抽取器
      */
     public TemplateQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
         QueryExtractor extractor) {

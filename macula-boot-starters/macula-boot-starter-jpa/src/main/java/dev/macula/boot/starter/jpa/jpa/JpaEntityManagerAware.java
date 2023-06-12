@@ -31,7 +31,7 @@ public interface JpaEntityManagerAware {
     /**
      * 设置EntityManager
      *
-     * @param entityManager
+     * @param entityManager EntityManager
      */
     void setEntityManager(EntityManager entityManager);
 }

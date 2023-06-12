@@ -31,7 +31,7 @@ public class AuditChangedEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param source
+     * @param source 变化对象
      */
     public AuditChangedEvent(AuditChanged source) {
         super(source);
