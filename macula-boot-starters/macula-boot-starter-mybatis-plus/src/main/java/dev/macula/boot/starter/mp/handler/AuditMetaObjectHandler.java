@@ -17,7 +17,9 @@
 
 package dev.macula.boot.starter.mp.handler;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.mp.config.MyBatisPlusProperties;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +57,9 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         log.debug("start insert fill ....");
         this.strictInsertFill(metaObject, createTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictInsertFill(metaObject, createByName, String.class, SecurityUtils.getCurrentUser());
+        this.strictInsertFill(metaObject, createByName, String.class, getCurrentUser());
         this.strictInsertFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictInsertFill(metaObject, lastUpdateByName, String.class, SecurityUtils.getCurrentUser());
+        this.strictInsertFill(metaObject, lastUpdateByName, String.class, getCurrentUser());
     }
 
     @Override
@@ -65,7 +67,7 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
         log.debug("start update fill ....");
 
         this.strictUpdateFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
-        this.strictUpdateFill(metaObject, lastUpdateByName, String.class, SecurityUtils.getCurrentUser());
+        this.strictUpdateFill(metaObject, lastUpdateByName, String.class, getCurrentUser());
     }
 
     @Override
@@ -80,5 +82,13 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
             return this;
         }
         return MetaObjectHandler.super.strictFillStrategy(metaObject, fieldName, fieldVal);
+    }
+
+    private String getCurrentUser() {
+        String name = SecurityUtils.getCurrentUser();
+        if (StrUtil.isEmpty(name)) {
+            name = SecurityConstants.BACKGROUND_USER;
+        }
+        return name;
     }
 }

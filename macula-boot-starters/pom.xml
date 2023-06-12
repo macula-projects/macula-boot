@@ -32,6 +32,7 @@
     <modules>
         <module>macula-boot-starter-mapstruct</module>
         <module>macula-boot-starter-mybatis-plus</module>
+        <module>macula-boot-starter-jpa</module>
         <module>macula-boot-starter-rocketmq</module>
         <module>macula-boot-starter-sender</module>
         <module>macula-boot-starter-redis</module>
