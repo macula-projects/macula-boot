@@ -79,4 +79,6 @@ public interface SecurityConstants {
 
     String GRANT_TYPE_SMS = "sms";
 
+    String BACKGROUND_USER = "*SYSADM";
+
 }
