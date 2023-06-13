@@ -22,8 +22,8 @@ macula:
     tencent-cos: # 腾讯云 COS
       platform: tencent-cos-1 # 存储平台标识
       enable-storage: true  # 启用存储
-      secret-id: AKIDGPL3auzoMdcKlvnOilW0EBsIQIsBDzUi
-      secret-key: yg7G8j47uQfdKjskKdfQu73j8G7i25qK
+      secret-id: test
+      secret-key: test
       region: ap-guangzhou #存仓库所在地域
       bucket-name: jxh-cos-dev-1303039456
       domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
