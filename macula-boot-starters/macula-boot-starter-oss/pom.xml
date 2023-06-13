@@ -50,7 +50,7 @@
         <!-- 腾讯云COS -->
         <dependency>
             <groupId>com.qcloud</groupId>
-            <artifactId>cos_api</artifactId>
+            <artifactId>cos_api-bundle</artifactId>
             <optional>true</optional>
         </dependency>
 
