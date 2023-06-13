@@ -15,6 +15,20 @@ spring:
 seata:
   enabled: false
 
+macula:
+  oss: #文件存储配置
+    default-platform: tencent-cos-1 #默认使用的存储平台
+    thumbnail-suffix: ".min.jpg" #缩略图后缀，例如【.min.jpg】【.png】
+    tencent-cos: # 腾讯云 COS
+      platform: tencent-cos-1 # 存储平台标识
+      enable-storage: true  # 启用存储
+      secret-id: AKIDGPL3auzoMdcKlvnOilW0EBsIQIsBDzUi
+      secret-key: yg7G8j47uQfdKjskKdfQu73j8G7i25qK
+      region: ap-guangzhou #存仓库所在地域
+      bucket-name: jxh-cos-dev-1303039456
+      domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
+      base-path: jxh/ # 基础路径
+
 springdoc:
   api-docs:
     enabled: true  # 默认是true，用于开关API文档
