@@ -34,7 +34,7 @@ import java.util.List;
  * @author rain
  * @since 2023/2/20 20:31
  */
-@FeignClient(url = "${macula.cloud.endpoint}", contextId = "systemFeignClient",
+@FeignClient(value = "macula-cloud-system", url = "${macula.cloud.endpoint}", contextId = "systemFeignClient",
     configuration = FeignClientConfiguration.class)
 public interface SystemFeignClient {
 
