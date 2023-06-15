@@ -20,8 +20,6 @@ spring:
   security:
     oauth2:
       resourceserver:
-        jwt:
-          issuer-uri: http://127.0.0.1:9010
         opaquetoken:
           client-id: e4da4a32-592b-46f0-ae1d-784310e88423
           client-secret: secret
