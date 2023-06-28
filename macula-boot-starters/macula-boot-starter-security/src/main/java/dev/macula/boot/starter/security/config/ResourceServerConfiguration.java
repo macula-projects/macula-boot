@@ -105,6 +105,8 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .csrf().disable()
+            .headers().frameOptions().disable()
+            .and()
             .authorizeRequests().antMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
             .anyRequest().authenticated()
             .and()
