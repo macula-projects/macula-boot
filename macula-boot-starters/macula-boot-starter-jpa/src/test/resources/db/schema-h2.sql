@@ -15,29 +15,19 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.enums;
 
-import dev.macula.boot.base.IBaseEnum;
-import lombok.Getter;
-
-/**
- * 状态枚举
- *
- * @author haoxr
- * @since 2022/10/14
- */
-public enum StatusEnum implements IBaseEnum<Integer> {
-
-    ENABLE(1, "启用"), DISABLE(0, "禁用");
-
-    @Getter
-    private final Integer value;
-
-    @Getter
-    private final String label;
-
-    StatusEnum(Integer value, String label) {
-        this.value = value;
-        this.label = label;
-    }
-}
+-- 创建数据库表.
+DROP TABLE IF EXISTS T_BLOG;
+CREATE TABLE T_BLOG
+(
+    id               varchar(32) NOT NULL,
+    c_user_id        varchar(255),
+    c_author         varchar(255),
+    c_title          varchar(255),
+    c_content        varchar(255),
+    create_by        VARCHAR(50) NOT NULL COMMENT '创建人',
+    create_time      TIMESTAMP   NOT NULL COMMENT '创建时间',
+    last_update_by   VARCHAR(50) NOT NULL COMMENT '最后更新人',
+    last_update_time VARCHAR(50) NOT NULL COMMENT '最后更新时间',
+    PRIMARY KEY (id)
+);

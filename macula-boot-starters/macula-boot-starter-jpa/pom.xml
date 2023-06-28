@@ -45,6 +45,12 @@
             </exclusions>
         </dependency>
 
+        <!-- fenix -->
+        <dependency>
+            <groupId>com.blinkfox</groupId>
+            <artifactId>fenix-spring-boot-starter</artifactId>
+        </dependency>
+
         <!-- MySql -->
         <dependency>
             <groupId>mysql</groupId>
@@ -62,11 +68,6 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-security</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
         </dependency>
 
         <!-- For Test -->

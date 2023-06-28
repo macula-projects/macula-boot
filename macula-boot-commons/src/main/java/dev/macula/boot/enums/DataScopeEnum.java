@@ -10,20 +10,13 @@ public enum DataScopeEnum implements IBaseEnum<Integer> {
 
     @Getter
     @EnumValue //  Mybatis-Plus 提供注解表示插入数据库时插入该值
-    private Integer value;
+    private final Integer value;
+
     @Getter
-    private String label;
+    private final String label;
 
     DataScopeEnum(Integer value, String label) {
         this.value = value;
         this.label = label;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getLabel() {
-        return this.label;
     }
 }
