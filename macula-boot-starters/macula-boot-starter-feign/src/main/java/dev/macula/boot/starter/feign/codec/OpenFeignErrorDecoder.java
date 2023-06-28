@@ -60,7 +60,7 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
                     } else {
                         errMsg += resultData.getMsg();
                     }
-                    return new BizException(errMsg);
+                    return new BizException(resultData.getCode(), resultData.getMsg(), errMsg);
                 }
             } catch (Exception ex) {
                 return new BizException(body);
