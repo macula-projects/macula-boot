@@ -53,8 +53,7 @@
         <druid.version>1.2.18</druid.version>
         <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
         <fenix.version>2.7.0</fenix.version>
-        <redisson.version>3.18.1</redisson.version>
-        <kryo.version>5.3.0</kryo.version>
+        <redisson.version>3.22.1</redisson.version>
         <hutool.version>5.8.20</hutool.version>
         <liteflow.version>2.10.3</liteflow.version>
         <oauth2-oidc-sdk.version>9.19</oauth2-oidc-sdk.version>
@@ -341,12 +340,6 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-data-26</artifactId>
                 <version>${redisson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.esotericsoftware</groupId>
-                <artifactId>kryo</artifactId>
-                <version>${kryo.version}</version>
             </dependency>
 
             <dependency>
