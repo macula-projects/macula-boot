@@ -23,7 +23,7 @@ spring:
           dnsMonitoringInterval: 5000
         threads: 16
         nettyThreads: 32
-        codec: !<org.redisson.codec.JsonJacksonCodec> {}
+        codec: !<org.redisson.codec.Kryo5Codec> {}
         transportMode: "NIO"
       one:
         config: |
@@ -45,7 +45,7 @@ spring:
             dnsMonitoringInterval: 5000
           threads: 4
           nettyThreads: 8
-          codec: !<org.redisson.codec.JsonJacksonCodec> {}
+          codec: !<org.redisson.codec.Kryo5Codec> {}
           transportMode: "NIO"
       tow:
         config: |
@@ -67,5 +67,5 @@ spring:
             dnsMonitoringInterval: 5000
           threads: 8
           nettyThreads: 16
-          codec: !<org.redisson.codec.JsonJacksonCodec> {}
+          codec: !<org.redisson.codec.Kryo5Codec> {}
           transportMode: "NIO"

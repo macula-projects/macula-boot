@@ -42,7 +42,7 @@ public class RedissonTest {
     private RedissonClient redissonClient;
 
     @Autowired
-    private RedisTemplate<Object, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     public void testRedisTemplate() {

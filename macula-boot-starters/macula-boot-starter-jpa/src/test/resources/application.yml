@@ -17,9 +17,6 @@ logging:
   level:
     dev.macula.boot.starter.mp.test: debug
 
-macula:
-
-
 # Fenix 的几个配置项、默认值及详细说明，通常情况下你不需要填写这些配置信息（下面的配置代码也都可以删掉）.
 fenix:
   # v2.4.1 版本新增，表示是否开启 debug 调试模式，默认 false。
