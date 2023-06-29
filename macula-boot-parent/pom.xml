@@ -53,7 +53,7 @@
         <druid.version>1.2.18</druid.version>
         <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
         <fenix.version>2.7.0</fenix.version>
-        <redisson.version>3.22.1</redisson.version>
+        <redisson.version>3.18.1</redisson.version>
         <kryo.version>5.3.0</kryo.version>
         <hutool.version>5.8.20</hutool.version>
         <liteflow.version>2.10.3</liteflow.version>
@@ -248,11 +248,6 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-retry</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
