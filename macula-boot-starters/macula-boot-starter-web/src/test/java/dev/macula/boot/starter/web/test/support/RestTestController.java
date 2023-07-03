@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.support;
+package dev.macula.boot.starter.web.test.support;
 
-import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
+import dev.macula.boot.starter.web.test.annotation.NotControllerResponseAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -37,13 +38,18 @@ import java.util.Date;
 @RestController
 public class RestTestController {
 
-    @PostMapping("/test")
+    @PostMapping(value = "/test")
     public DemoDto test(@Valid @RequestBody DemoDto dto) {
         System.out.println("tests....................");
         System.out.println(dto);
-        dto.setDateTime(new Date());
-        dto.setLocalDateTime(LocalDateTime.now());
-        dto.setZonedDateTime(ZonedDateTime.now());
+        if (dto.getDateTime() == null)
+            dto.setDateTime(new Date());
+        if (dto.getLocalDateTime() == null)
+            dto.setLocalDateTime(LocalDateTime.now());
+        if (dto.getLocalDate() == null)
+            dto.setLocalDate(LocalDate.now());
+        if (dto.getZonedDateTime() == null)
+            dto.setZonedDateTime(ZonedDateTime.now());
         dto.setMobile("13822132359");
         return dto;
     }

@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.support;
+package dev.macula.boot.starter.web.test.support;
 
-import dev.macula.boot.starter.web.annotation.Sensitive;
+import dev.macula.boot.starter.web.test.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -35,7 +36,7 @@ import java.util.Date;
  * @since 2022/6/29 14:34
  */
 @Data
-public class DemoDto {
+public class DemoDto implements Serializable {
 
     @NotEmpty(message = "{name.notempty}")
     private String name;
