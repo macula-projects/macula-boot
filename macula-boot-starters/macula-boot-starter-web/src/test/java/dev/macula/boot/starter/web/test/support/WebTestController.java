@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.web.test.support;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +39,7 @@ public class WebTestController {
     @PostMapping("/getdate")
     public String testDate(@RequestParam(value = "date", required = false) Date date,
         @RequestParam(value = "local", required = false) LocalDateTime local,
-        @RequestParam(value = "zoned", required = false) ZonedDateTime zoned) {
+        @DateTimeFormat @RequestParam(value = "zoned", required = false) ZonedDateTime zoned) {
         System.out.println("date=" + date + ", local=" + local + ", zoned=" + zoned);
         return "";
     }
