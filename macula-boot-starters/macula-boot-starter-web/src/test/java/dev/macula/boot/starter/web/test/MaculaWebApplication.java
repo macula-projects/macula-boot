@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.annotation;
+package dev.macula.boot.starter.web.test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * {@code NotControllerResponseAdvice} 是不封装
+ * {@code MaculaWebApplication} is
  *
  * @author rain
- * @since 2022/6/29 16:05
+ * @since 2022/6/29 14:31
  */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface NotControllerResponseAdvice {
+@SpringBootApplication
+public class MaculaWebApplication {
 
+    public static void main(String[] args) {
+        SpringApplication.run(MaculaWebApplication.class, args);
+    }
 }

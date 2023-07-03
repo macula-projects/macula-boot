@@ -8,5 +8,7 @@ spring:
       date: iso
       time: iso
       date-time: iso-offset
-#  jackson:
-#    date-format: com.fasterxml.jackson.databind.util.StdDateFormat
+  jackson:
+    #date-format: com.fasterxml.jackson.databind.util.StdDateFormat
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.json;
+package dev.macula.boot.starter.web.test.json;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import dev.macula.boot.starter.web.annotation.Sensitive;
-import dev.macula.boot.starter.web.utils.SensitiveUtil;
+import dev.macula.boot.starter.web.test.annotation.Sensitive;
+import dev.macula.boot.starter.web.test.utils.SensitiveUtil;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -42,6 +42,10 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     private int startInclude;
     private int endExclude;
     private int overlayRepeat;
+
+    public SensitiveSerializer() {
+
+    }
 
     public SensitiveSerializer(final Sensitive sensitive) {
         this.type = sensitive.value();

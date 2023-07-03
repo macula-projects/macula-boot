@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.utils;
+package dev.macula.boot.starter.web.test.utils;
 
 import cn.hutool.core.util.StrUtil;
 
