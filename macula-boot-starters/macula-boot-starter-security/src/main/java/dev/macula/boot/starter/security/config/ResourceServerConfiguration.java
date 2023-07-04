@@ -22,15 +22,13 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.security.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -53,13 +51,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * <p>
@@ -72,18 +69,14 @@ import java.util.List;
  */
 
 @RequiredArgsConstructor
-@ConfigurationProperties(prefix = "macula.security")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableConfigurationProperties(SecurityProperties.class)
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.secret:macula_secret$terces_alucam$123456}")
-    String jwtSecret;
-
-    @Setter
-    List<String> ignoreUrls = new ArrayList<>();
-
     private final OAuth2ResourceServerProperties properties;
+
+    private final SecurityProperties securityProperties;
 
     private ApplicationContext applicationContext;
 
@@ -91,8 +84,6 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 添加默认忽略的路径
         // @formatter:off
-        ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
-
         http.oauth2ResourceServer()
             .jwt()
             .decoder(applicationContext.getBean(JwtDecoder.class))
@@ -107,7 +98,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
             .csrf().disable()
             .headers().frameOptions().disable()
             .and()
-            .authorizeRequests().antMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
+            .authorizeRequests().antMatchers(Convert.toStrArray(securityProperties.getIgnoreUrls())).permitAll()
             .anyRequest().authenticated()
             .and()
             .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
@@ -199,10 +190,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Conditional(SecretCondition.class)
     JwtDecoder jwtDecoderBySecret() throws UnsupportedEncodingException {
         // 根据给定的字节数组使用AES加密算法构造一个密钥
-        byte[] secrets = jwtSecret.getBytes("UTF-8");
+        byte[] secrets = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(secrets, 0, secrets.length, "HMACSHA256");
-        JwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(secretKey).build();
-        return jwtDecoder;
+        return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
 
     @Override

@@ -81,4 +81,19 @@ public interface SecurityConstants {
 
     String BACKGROUND_USER = "*SYSADM";
 
+    /**
+     * 内部
+     */
+    String FROM_IN = "Y";
+
+    /**
+     * 标志
+     */
+    String FROM = "from";
+
+    /**
+     * 请求header
+     */
+    String HEADER_FROM_IN = FROM + "=" + FROM_IN;
+
 }
