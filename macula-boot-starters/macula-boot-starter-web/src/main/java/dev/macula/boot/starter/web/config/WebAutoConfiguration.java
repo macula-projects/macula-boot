@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.config;
+package dev.macula.boot.starter.web.config;
 
-import dev.macula.boot.starter.web.test.advice.ControllerExceptionAdvice;
-import dev.macula.boot.starter.web.test.advice.ControllerResponseAdvice;
-import dev.macula.boot.starter.web.test.filter.TenantFilter;
+import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
+import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
+import dev.macula.boot.starter.web.filter.TenantFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

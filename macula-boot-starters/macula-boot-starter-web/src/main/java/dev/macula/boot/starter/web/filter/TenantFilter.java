@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.filter;
+package dev.macula.boot.starter.web.filter;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;

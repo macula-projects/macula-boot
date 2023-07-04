@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.advice;
+package dev.macula.boot.starter.web.advice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
-import dev.macula.boot.starter.web.test.annotation.NotControllerResponseAdvice;
+import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
