@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.web.test.support;
 
-import dev.macula.boot.starter.web.test.annotation.Sensitive;
+import dev.macula.boot.starter.web.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 

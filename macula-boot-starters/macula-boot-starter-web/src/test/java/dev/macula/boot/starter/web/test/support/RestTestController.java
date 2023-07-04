@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.web.test.support;
 
-import dev.macula.boot.starter.web.test.annotation.NotControllerResponseAdvice;
+import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

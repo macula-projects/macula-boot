@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.annotation;
+package dev.macula.boot.starter.web.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

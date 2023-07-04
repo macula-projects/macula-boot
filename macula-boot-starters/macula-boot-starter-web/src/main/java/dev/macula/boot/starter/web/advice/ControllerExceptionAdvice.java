@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.advice;
+package dev.macula.boot.starter.web.advice;
 
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;

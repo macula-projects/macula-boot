@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.web.test.config;
+package dev.macula.boot.starter.web.config;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.AllArgsConstructor;
