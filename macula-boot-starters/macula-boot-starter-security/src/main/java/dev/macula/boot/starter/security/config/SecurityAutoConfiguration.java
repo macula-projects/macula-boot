@@ -17,8 +17,12 @@
 
 package dev.macula.boot.starter.security.config;
 
+import dev.macula.boot.starter.security.aspect.SecurityInnerAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -31,5 +35,8 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration
 @Import({ResourceServerConfiguration.class})
 public class SecurityAutoConfiguration {
-
+    @Bean
+    SecurityInnerAspect securityInnerAspect(HttpServletRequest request) {
+        return new SecurityInnerAspect(request);
+    }
 }

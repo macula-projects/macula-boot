@@ -35,7 +35,7 @@ public class Option<T> {
     private T value;
     private String label;
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    private List<Option> children;
+    private List<Option<T>> children;
 
     @Default
     public Option(T value, String label) {
@@ -43,7 +43,7 @@ public class Option<T> {
         this.label = label;
     }
 
-    public Option(T value, String label, List<Option> children) {
+    public Option(T value, String label, List<Option<T>> children) {
         this.value = value;
         this.label = label;
         this.children = children;
