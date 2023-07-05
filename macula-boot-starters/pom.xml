@@ -48,8 +48,8 @@
         <module>macula-boot-starter-dubbo</module>
         <module>macula-boot-starter-feign</module>
         <module>macula-boot-starter-cloud</module>
+        <module>macula-boot-starter-task</module>
         <module>macula-boot-starter-tinyid</module>
-        <module>macula-boot-starter-powerjob</module>
         <module>macula-boot-starter-system</module>
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-crypto</module>

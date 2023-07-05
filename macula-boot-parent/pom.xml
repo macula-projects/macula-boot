@@ -51,7 +51,8 @@
         <spring-statemachine.version>3.2.0</spring-statemachine.version>
         <mysql.connector.version>8.0.29</mysql.connector.version>
         <druid.version>1.2.18</druid.version>
-        <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
+        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
+        <mybatis-spring-boot-starter.version>2.3.1</mybatis-spring-boot-starter.version>
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.22.1</redisson.version>
         <hutool.version>5.8.20</hutool.version>
@@ -66,6 +67,7 @@
         <rocketmq-spring.version>2.2.2</rocketmq-spring.version>
         <springdoc.version>1.6.9</springdoc.version>
         <powerjob.version>4.3.2</powerjob.version>
+        <xxl-job.version>2.4.0</xxl-job.version>
         <dubbo.version>3.2.0</dubbo.version>
         <bouncycastle.version>1.71.1</bouncycastle.version>
         <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
@@ -261,7 +263,7 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-powerjob</artifactId>
+                <artifactId>macula-boot-starter-task</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -288,13 +290,19 @@
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>${mybatis.plus.version}</version>
+                <version>${mybatis-plus.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-annotation</artifactId>
-                <version>${mybatis.plus.version}</version>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
             </dependency>
 
             <!-- fenix for jpa -->
@@ -404,6 +412,13 @@
                 <groupId>tech.powerjob</groupId>
                 <artifactId>powerjob-worker-spring-boot-starter</artifactId>
                 <version>${powerjob.version}</version>
+            </dependency>
+
+            <!-- xxl-job -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-job-core</artifactId>
+                <version>${xxl-job.version}</version>
             </dependency>
 
             <!-- Dubbo -->
