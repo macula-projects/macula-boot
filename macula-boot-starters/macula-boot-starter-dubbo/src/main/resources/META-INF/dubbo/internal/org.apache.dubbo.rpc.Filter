@@ -1,0 +1,2 @@
+consumerAttachmentFilter=dev.macula.boot.starter.dubbo.rpc.filter.ConsumerAttachmentFilter
+providerAttachmentFilter=dev.macula.boot.starter.dubbo.rpc.filter.ProviderAttachmentFilter
