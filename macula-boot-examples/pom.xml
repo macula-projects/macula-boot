@@ -40,7 +40,7 @@
         <module>macula-example-provider2</module>
         <module>macula-example-provider3</module>
         <module>macula-example-ddd</module>
-        <module>macula-example-powerjob</module>
+        <module>macula-example-task</module>
     </modules>
 
 </project>

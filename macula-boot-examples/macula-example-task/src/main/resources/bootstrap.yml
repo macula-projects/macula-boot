@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: macula-example-task
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      config:
+        server-addr: 127.0.0.1:8848
+        # namespace:
+        # group:
+        refresh-enabled: true

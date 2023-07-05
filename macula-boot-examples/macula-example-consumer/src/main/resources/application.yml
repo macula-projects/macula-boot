@@ -51,5 +51,8 @@ ipaas:
 
 logging:
   level:
+    root: info
     com.alibaba.nacos.client: error
     dev.macula.example.consumer: debug
+  file:
+    name: /var/logs/${spring.application.name}/${spring.application.name}.log
