@@ -46,7 +46,7 @@
         <spring-boot.version>2.7.13</spring-boot.version>
         <spring-cloud.version>2021.0.6</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
-        <spring-cloud-tencent.version>1.11.2-2021.0.6</spring-cloud-tencent.version>
+        <spring-cloud-tencent.version>1.11.7-2021.0.6</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.40.0-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <spring-statemachine.version>3.2.0</spring-statemachine.version>
         <mysql.connector.version>8.0.29</mysql.connector.version>
