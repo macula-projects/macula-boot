@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  * xxl-job配置
  *
  * @author lishangbu
- * @date 2020/9/14
+ * @since 2020/9/14
  */
 @Data
 @ConfigurationProperties(prefix = "xxl.job")

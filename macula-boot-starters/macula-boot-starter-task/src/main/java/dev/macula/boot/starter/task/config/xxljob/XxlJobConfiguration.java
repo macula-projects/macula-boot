@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * xxl-job自动装配
  *
  * @author lishangbu
- * @date 2020/9/14
+ * @since 2020/9/14
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(XxlJobProperties.class)

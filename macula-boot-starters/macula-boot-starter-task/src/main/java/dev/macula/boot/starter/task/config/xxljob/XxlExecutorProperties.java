@@ -23,7 +23,7 @@ import lombok.Data;
  * xxl-job执行器配置
  *
  * @author lishangbu
- * @date 2020/9/14
+ * @since 2020/9/14
  */
 @Data
 public class XxlExecutorProperties {
