@@ -12,6 +12,33 @@ spring:
         server-addr: 127.0.0.1:8848
         # namespace:
         # group:
+    sentinel:
+      enabled: true
+      #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
+      eager: true
+      transport:
+        # 控制台地址
+        dashboard: localhost:8080
+        # 客户端监控API的端口，默认8719，与Sentinel控制台做交互。有规则变化会把规则数据push给这个Http Server接收,然后注册到sentinel中
+        port: 8719
+      # Sentinel Nacos数据源配置，Nacos中的规则会⾃动同步到sentinel控制台的流控规则中
+      # com.alibaba.cloud.sentinel.SentinelProperties.datasource
+      # 配置了数据源后，在nacos修改中会自动同步到sentinel
+      # ⾃定义数据源名,随意不重复即可；可多个
+      # The following values are valid:
+      # AUTHORITY,DEGRADE,FLOW,GW_API_GROUP,GW_FLOW,PARAM_FLOW,SYSTEM
+      datasource:
+        flow:
+          # 指定数据源类型
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: ${spring.application.name}-flow-rules
+            namespace: SENTINEL
+            # 默认分组：DEFAULT_GROUP
+            #group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+
   security:
     oauth2:
       resourceserver:
@@ -21,6 +48,9 @@ seata:
   enabled: false
 
 macula:
+  security:
+    ignore-urls:
+      - /api/v1/provider1/echo
   oss: #文件存储配置
     default-platform: tencent-cos-1 #默认使用的存储平台
     thumbnail-suffix: ".min.jpg" #缩略图后缀，例如【.min.jpg】【.png】
@@ -33,6 +63,7 @@ macula:
       bucket-name: jxh-cos-dev-1303039456
       domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
       base-path: jxh/ # 基础路径
+
 
 springdoc:
   api-docs:
