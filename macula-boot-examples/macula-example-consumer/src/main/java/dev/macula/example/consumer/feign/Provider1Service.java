@@ -17,6 +17,7 @@
 
 package dev.macula.example.consumer.feign;
 
+import dev.macula.example.consumer.feign.fallback.AbstractProviderFallbackFactory;
 import dev.macula.example.consumer.vo.UserResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author rain
  * @since 2022/7/22 22:33
  */
-@FeignClient(name = "macula-example-provider1", path = "/api/v1/provider1", contextId = "provider1Service")
+@FeignClient(name = "macula-example-provider1", path = "/api/v1/provider1", contextId = "provider1Service",
+    fallbackFactory = AbstractProviderFallbackFactory.class)
 public interface Provider1Service {
 
     @GetMapping("/echo")

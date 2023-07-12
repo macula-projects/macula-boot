@@ -17,6 +17,7 @@
 
 package dev.macula.example.provider1.controller;
 
+import cn.hutool.core.date.DateUtil;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import dev.macula.example.provider1.vo.UserResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +41,12 @@ public class Provider1Controller {
     @Operation(summary = "echo方法", description = "用于演示")
     @Parameter(name = "字符串", description = "用于回声")
     public String echo(@RequestParam("str") String str) {
-        return "Hello " + str + ", by " + SecurityUtils.getCurrentUser();
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return "Hello " + str + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
     }
 
     @PostMapping("/user")

@@ -9,21 +9,62 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: 127.0.0.1:8848
-        # namespace:
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace}
         # group:
+    sentinel:
+      #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
+      eager: true
+      transport:
+        # 控制台地址
+        dashboard: localhost:8080
+        # 客户端监控API的端口，默认8719，与Sentinel控制台做交互。有规则变化会把规则数据push给这个Http Server接收,然后注册到sentinel中
+        port: 8719
+      # Sentinel Nacos数据源配置，Nacos中的规则会⾃动同步到sentinel控制台的流控规则中
+      # com.alibaba.cloud.sentinel.SentinelProperties.datasource
+      # 配置了数据源后，在nacos修改中会自动同步到sentinel
+      # ⾃定义数据源名,随意不重复即可；可多个
+      # The following values are valid:
+      # AUTHORITY,DEGRADE,FLOW,GW_API_GROUP,GW_FLOW,PARAM_FLOW,SYSTEM
+      datasource:
+        flow:
+          # 指定数据源类型
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: ${spring.application.name}-flow-rules
+            namespace: SENTINEL
+            # 默认分组：DEFAULT_GROUP
+            #group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+        degrade:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: ${spring.application.name}-degrade-rules
+            namespace: SENTINEL
+            # 默认分组：DEFAULT_GROUP
+            #group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: degrade
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:8000/oauth2/jwks
+          jwk-set-uri: http://127.0.0.1:8000/oauth2/jwks    # 网关地址
 feign:
+  httpclient:
+    enabled: false
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
+    disable-ssl-validation: false # 是否禁止SSL检查， 默认false
+    okhttp:
+      read-timeout: 60s # 请求超时时间，Duration配置方式
   okhttp:
     enabled: true
-  client:
-    config:
-      default:
-        logger-level: FULL
+  sentinel:
+    enabled: true
 
 seata:
   enabled: false
@@ -36,7 +77,7 @@ springdoc:
 
 macula:
   cloud:
-    endpoint: http://127.0.0.1:9000
+    endpoint: http://127.0.0.1:9000                   # macula cloud网关地址
     app-key: example
     secret-key: example
 
