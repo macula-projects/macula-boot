@@ -41,11 +41,6 @@ public class Provider1Controller {
     @Operation(summary = "echo方法", description = "用于演示")
     @Parameter(name = "字符串", description = "用于回声")
     public String echo(@RequestParam("str") String str) {
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         return "Hello " + str + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
     }
 
