@@ -47,6 +47,8 @@ public class KongApiInterceptor implements RequestInterceptor {
     private String secret;
     private String appKey;
 
+    public static final String APP_KEY_NAME = "appKey";
+
     public KongApiInterceptor(@NonNull String username, @NonNull String secret) {
         this.username = username;
         this.secret = secret;
@@ -90,7 +92,7 @@ public class KongApiInterceptor implements RequestInterceptor {
             requestTemplate.header(SecurityConstants.AUTHORIZATION_KEY, authorization);
         }
         if (appKey != null) {
-            requestTemplate.header("appkey", appKey);
+            requestTemplate.header(APP_KEY_NAME, appKey);
         }
     }
 }

@@ -17,16 +17,18 @@
 
 package dev.macula.boot.starter.feign.interceptor;
 
+import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
+
+import static dev.macula.boot.starter.feign.interceptor.KongApiInterceptor.APP_KEY_NAME;
 
 /**
  * {@code HeaderRelayInterceptor} 将请求头传递到下面的微服务
@@ -44,14 +46,15 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
 
             // 微服务之间传递的唯一标识,区分大小写所以通过httpServletRequest获取
             String sid = request.getHeader(GlobalConstants.FEIGN_REQ_ID);
-            if (!StringUtils.hasText(sid)) {
+            if (StrUtil.isEmpty(sid)) {
                 sid = String.valueOf(UUID.randomUUID());
             }
             template.header(GlobalConstants.FEIGN_REQ_ID, sid);
 
             // 传递Gateway生成的Authorization头
             String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
-            if (StringUtils.hasText(token)) {
+            // 如果feign client不是调用第三方才把上下文的token relay下去
+            if (StrUtil.isNotEmpty(token) && StrUtil.isEmpty(request.getHeader(APP_KEY_NAME))) {
                 template.header(SecurityConstants.AUTHORIZATION_KEY, token);
             }
         }
