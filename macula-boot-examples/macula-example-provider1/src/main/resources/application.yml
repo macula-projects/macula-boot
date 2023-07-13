@@ -97,6 +97,7 @@ springdoc:
 
 logging:
   level:
-    com.alibaba.nacos.client: error
+    root: info
     dev.macula.example: debug
-    org.springframework: info
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

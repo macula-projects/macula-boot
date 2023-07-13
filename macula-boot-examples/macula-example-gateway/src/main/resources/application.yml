@@ -56,5 +56,7 @@ macula:
 
 logging:
   level:
-    com.alibaba.nacos.client: error
+    root: info
     dev.macula.example.gateway: debug
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

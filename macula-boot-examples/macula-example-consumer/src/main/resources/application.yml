@@ -96,4 +96,4 @@ logging:
     com.alibaba.nacos.client: error
     dev.macula.example.consumer: debug
   file:
-    name: /var/logs/${spring.application.name}/${spring.application.name}.log
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
