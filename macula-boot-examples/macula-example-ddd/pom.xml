@@ -34,4 +34,5 @@
             <artifactId>macula-boot-starter-mybatis-plus</artifactId>
         </dependency>
     </dependencies>
+
 </project>
