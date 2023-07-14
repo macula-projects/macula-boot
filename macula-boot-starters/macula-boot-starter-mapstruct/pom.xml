@@ -37,49 +37,4 @@
             <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
-                        <!-- Classpath elements to supply as annotation processor path. If specified, the compiler   -->
-                        <!-- will detect annotation processors only in those classpath elements. If omitted, the     -->
-                        <!-- default classpath is used to detect annotation processors. The detection itself depends -->
-                        <!-- on the configuration of annotationProcessors.                                           -->
-                        <!--                                                                                         -->
-                        <!-- According to this documentation, the provided dependency processor is not considered!   -->
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                            <path>
-                                <groupId>io.github.linpeilie</groupId>
-                                <artifactId>mapstruct-plus-processor</artifactId>
-                                <version>${mapstruct-plus.version}</version>
-                            </path>
-                            <!-- additional annotation processor required as of Lombok 1.18.16 -->
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>0.2.0</version>
-                            </path>
-                        </annotationProcessorPaths>
-                        <compilerArgs>
-                            <compilerArg>
-                                -Amapstruct.defaultComponentModel=spring
-                            </compilerArg>
-                        </compilerArgs>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

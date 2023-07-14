@@ -32,7 +32,12 @@
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-client-starter</artifactId>
-            <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
