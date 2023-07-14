@@ -54,7 +54,7 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
             // 传递Gateway生成的Authorization头
             String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
             // 如果feign client不是调用第三方才把上下文的token relay下去
-            if (StrUtil.isNotEmpty(token) && StrUtil.isEmpty(request.getHeader(APP_KEY_NAME))) {
+            if (StrUtil.isNotEmpty(token) && !template.headers().containsKey(APP_KEY_NAME)) {
                 template.header(SecurityConstants.AUTHORIZATION_KEY, token);
             }
         }
