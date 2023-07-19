@@ -1,4 +1,9 @@
+server:
+  port: 8000
+
 spring:
+  profiles:
+    active: @profile.active@
   application:
     name: macula-example-gateway
   cloud:

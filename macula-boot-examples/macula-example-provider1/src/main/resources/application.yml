@@ -1,5 +1,4 @@
 server:
-  port: 7081
   servlet:
     encoding:
       force: true
