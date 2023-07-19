@@ -51,6 +51,6 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public List<RouteVO> listRoutes() {
-        return systemFeignClient.listRoutes();
+        return systemFeignClient.listRoutes(SecurityUtils.getTokenId());
     }
 }
