@@ -1,4 +1,9 @@
+server:
+  port: 7090
+
 spring:
+  profiles:
+    active: @profile.active@
   application:
     name: macula-example-consumer
   cloud:
