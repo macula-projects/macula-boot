@@ -43,5 +43,5 @@ public interface SystemFeignClient {
         @RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);
 
     @GetMapping("/system/api/v1/menus/routes")
-    List<RouteVO> listRoutes();
+    List<RouteVO> listRoutes(@RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);
 }
