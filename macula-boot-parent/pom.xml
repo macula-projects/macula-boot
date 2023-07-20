@@ -62,7 +62,7 @@
         <xxl-job.version>2.4.0</xxl-job.version>
         <easy-retry.version>2.0.1</easy-retry.version>
         <dubbo.version>3.2.3</dubbo.version>
-        <bouncycastle.version>1.71.1</bouncycastle.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
         <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
         <qcloud-sdk-oss.version>5.6.62</qcloud-sdk-oss.version>
         <aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
@@ -441,7 +441,7 @@
             <!-- Bouncy Castle -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk18on</artifactId>
+                <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
 
