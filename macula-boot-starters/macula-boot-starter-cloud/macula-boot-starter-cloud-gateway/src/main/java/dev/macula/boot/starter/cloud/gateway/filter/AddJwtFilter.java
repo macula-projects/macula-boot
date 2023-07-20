@@ -188,13 +188,18 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
     }
 
     private String buildKey(OAuth2AuthenticatedPrincipal principal) {
+        // 生成缓存JWT的KEY
+        // 当有租户ID时，加上a{tenantId}作为KEY，以防止应用的租户会修改
+        String app = "";
+        if (principal.getAttributes().containsKey(GlobalConstants.TENANT_ID_NAME)) {
+            app = "a" + principal.getAttributes().get(GlobalConstants.TENANT_ID_NAME) + ":";
+        }
+
+        // 当有JWT_ID的时候，以JWT_ID作为KEY缓存
         if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            String app = "";
-            if (principal.getAttributes().containsKey(GlobalConstants.TENANT_ID_NAME)) {
-                app = "a:";
-            }
             return CacheConstants.GATEWAY_JWT_CACHE_KEY + app + principal.getAttribute(JWTClaimNames.JWT_ID);
         }
-        return CacheConstants.GATEWAY_JWT_CACHE_KEY + principal.getName();
+
+        return CacheConstants.GATEWAY_JWT_CACHE_KEY + app + principal.getName();
     }
 }
