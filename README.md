@@ -15,12 +15,12 @@ macula-boot-starter
     06. macula-boot-starter-idempotent               幂等
     07. macula-boot-starter-leaderelection           基于Redis的Leader选择器
     08. macula-boot-starter-mybatis-plus             MyBatis Plus
-    09. macula-boot-starter-sender                   基于本地数据库发送MQ消息（先落库再异步发MQ）
-    10. macula-boot-starter-rocketmq                 RocketMQ
-    11. macula-boot-starter-liteflow                 可编排的组件引擎
-    12. macula-boot-starter-statemachine             基于Spring StateMachine的状态机
-    13. macula-boot-starter-security                 基于Token的安全校验
-    14. macula-boot-starter-skywalking               Skywalking集成
+    09. macula-boot-starter-jpa                      Spring Data JPA集成
+    10. macula-boot-starter-sender                   基于本地数据库发送MQ消息（先落库再异步发MQ）
+    11. macula-boot-starter-rocketmq                 RocketMQ
+    12. macula-boot-starter-liteflow                 可编排的组件引擎
+    13. macula-boot-starter-statemachine             基于Spring StateMachine的状态机
+    14. macula-boot-starter-security                 基于Token的安全校验
     15. macula-boot-starter-springdoc                Swagger Doc v3
     16. macula-boot-starter-web                      WEB
     17. macula-boot-starter-feign                    Feign定制，使用OkHTTP
