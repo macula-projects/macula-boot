@@ -28,9 +28,10 @@ macula-boot-starter
     19. macula-boot-starter-oss                      资源中心(minio/aliyun/cos/aws s3/本地)
     20. macula-boot-starter-tinyid                   ID生产
     21. macula-boot-starter-system                   接入菜单和权限等系统服务
-    22. macula-boot-starter-powerjob                 基于PowerJob的定时任务（类似阿里云的ScheduleX）
-    23. macula-boot-starter-dubbo                    基于Dubbo的RPC服务
-    24. macula-boot-starter-cloud                    基于Spring Cloud的RPC服务
+    22. macula-boot-starter-task                     基于xxljob等的定时任务（类似阿里云的ScheduleX）
+    23. macula-boot-starter-retry                    重试框架
+    24. macula-boot-starter-dubbo                    基于Dubbo的RPC服务
+    25. macula-boot-starter-cloud                    基于Spring Cloud的RPC服务
         1. macula-boot-starter-gateway               网关定制，基于Oauth2认证，权限控制也集中在网关
         2. macula-boot-starter-alibaba               基于alibaba spring cloud体系（nacos、sentinel、seata）
         3. macula-boot-starter-alibaba-scg           基于slibaba的gateway定制
