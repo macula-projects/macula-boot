@@ -60,7 +60,7 @@
         <springdoc.version>1.6.9</springdoc.version>
         <powerjob.version>4.3.2</powerjob.version>
         <xxl-job.version>2.4.0</xxl-job.version>
-        <easy-retry.version>2.0.1</easy-retry.version>
+        <easy-retry.version>2.0.2</easy-retry.version>
         <dubbo.version>3.2.3</dubbo.version>
         <bouncycastle.version>1.69</bouncycastle.version>
         <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
@@ -434,7 +434,7 @@
             <!-- easy-retry -->
             <dependency>
                 <groupId>com.aizuda</groupId>
-                <artifactId>easy-retry-client-starter</artifactId>
+                <artifactId>easy-retry-client-core</artifactId>
                 <version>${easy-retry.version}</version>
             </dependency>
 

@@ -1,0 +1,42 @@
+server:
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace}
+        # group:
+
+seata:
+  enabled: false
+
+feign:
+  httpclient:
+    enabled: false
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
+    disable-ssl-validation: false # 是否禁止SSL检查， 默认false
+    okhttp:
+      read-timeout: 60s # 请求超时时间，Duration配置方式
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: false
+
+easy-retry:
+  server:
+    name: macula-cloud-retry
+
+logging:
+  level:
+    root: INFO
+    dev.macula.example.retry: DEBUG
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

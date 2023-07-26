@@ -44,7 +44,17 @@
         <module>macula-example-provider3</module>
         <module>macula-example-ddd</module>
         <module>macula-example-task</module>
+        <module>macula-example-retry</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>

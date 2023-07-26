@@ -23,6 +23,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class XxlJobConfiguration {
      */
     @Bean
     public XxlJobSpringExecutor xxlJobSpringExecutor(XxlJobProperties xxlJobProperties, Environment environment,
-        DiscoveryClient discoveryClient) {
+        @Nullable DiscoveryClient discoveryClient) {
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         XxlExecutorProperties executor = xxlJobProperties.getExecutor();
         // 应用名默认为服务名
@@ -79,11 +80,13 @@ public class XxlJobConfiguration {
                 : XXL_JOB_ADMIN;
 
         if (!StringUtils.hasText(xxlJobProperties.getAdmin().getAddresses())) {
-            String serverList = discoveryClient.getServices().stream().filter(s -> s.contains(xxlJobAdminName))
-                .flatMap(s -> discoveryClient.getInstances(s).stream()).map(
-                    instance -> String.format("http://%s:%s/%s", instance.getHost(), instance.getPort(),
-                        xxlJobAdminName)).collect(Collectors.joining(","));
-            xxlJobSpringExecutor.setAdminAddresses(serverList);
+            if (discoveryClient != null) {
+                String serverList = discoveryClient.getServices().stream().filter(s -> s.contains(xxlJobAdminName))
+                    .flatMap(s -> discoveryClient.getInstances(s).stream()).map(
+                        instance -> String.format("http://%s:%s/%s", instance.getHost(), instance.getPort(),
+                            xxlJobAdminName)).collect(Collectors.joining(","));
+                xxlJobSpringExecutor.setAdminAddresses(serverList);
+            }
         } else {
             xxlJobSpringExecutor.setAdminAddresses(xxlJobProperties.getAdmin().getAddresses());
         }
