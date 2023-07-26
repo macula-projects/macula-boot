@@ -27,14 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * @author xiaojing
+ * Seata HandlerInterceptor, Convert Seata information into RootContext from http request's header
  *
- *     Seata HandlerInterceptor, Convert Seata information into
- * @see io.seata.core.context.RootContext from http request's header in
- *     {@link org.springframework.web.servlet.HandlerInterceptor#preHandle(HttpServletRequest, HttpServletResponse,
- *     Object)}, And clean up Seata information after servlet method invocation in
- *     {@link org.springframework.web.servlet.HandlerInterceptor#afterCompletion(HttpServletRequest,
- *     HttpServletResponse, Object, Exception)}
+ * @author xiaojing
+ * @since 2023/4/23 13:49
  */
 public class SeataHandlerInterceptor implements HandlerInterceptor {
 
