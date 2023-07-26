@@ -22,29 +22,31 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.macula.boot</groupId>
-        <artifactId>macula-boot-starters</artifactId>
+        <artifactId>macula-boot-examples</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>macula-boot-starter-retry</artifactId>
+    <artifactId>macula-example-retry</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>easy-retry-client-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-retry</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-            <optional>true</optional>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-feign</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
         </dependency>
     </dependencies>
-
 </project>
