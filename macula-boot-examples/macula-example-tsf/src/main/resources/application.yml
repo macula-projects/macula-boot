@@ -1,0 +1,41 @@
+server:
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://127.0.0.1:8000/oauth2/jwks        # 网关地址
+
+seata:
+  enabled: false
+
+feign:
+  httpclient:
+    enabled: false
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
+    disable-ssl-validation: false # 是否禁止SSL检查， 默认false
+    okhttp:
+      read-timeout: 60s # 请求超时时间，Duration配置方式
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+
+macula:
+  security:
+    ignore-urls:
+      - /api/v1/tsf/echo
+
+logging:
+  level:
+    root: info
+    dev.macula.example: debug
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

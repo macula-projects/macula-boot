@@ -46,6 +46,7 @@
         <module>macula-example-ddd</module>
         <module>macula-example-task</module>
         <module>macula-example-retry</module>
+        <module>macula-example-tsf</module>
     </modules>
 
     <build>

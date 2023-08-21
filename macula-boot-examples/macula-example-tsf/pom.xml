@@ -19,25 +19,30 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>macula-boot-starter-cloud</artifactId>
         <groupId>dev.macula.boot</groupId>
+        <artifactId>macula-boot-examples</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>macula-boot-starter-cloud-tsf</artifactId>
+    <artifactId>macula-example-tsf</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-feign</artifactId>
+            <artifactId>macula-boot-starter-cloud-tsf</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.tsf</groupId>
-            <artifactId>spring-cloud-tsf-starter</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-security</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-web</artifactId>
+        </dependency>
     </dependencies>
+
 </project>

@@ -40,7 +40,7 @@
         <spring-cloud.version>2021.0.6</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.11.7-2021.0.6</spring-cloud-tencent.version>
-        <spring-cloud-tsf.version>1.40.0-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
+        <spring-cloud-tsf.version>1.40.4-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.29</mysql.connector.version>
         <druid.version>1.2.18</druid.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
@@ -86,6 +86,15 @@
                 <version>${spring-boot.version}</version>
             </dependency>
 
+            <!-- TSF -->
+            <dependency>
+                <groupId>com.tencent.tsf</groupId>
+                <artifactId>spring-cloud-tsf-dependencies</artifactId>
+                <version>${spring-cloud-tsf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- spring-cloud -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -113,16 +122,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <!-- 该依赖又引入了spring-boot，导致spring版本不对，暂时屏蔽
-            <dependency>
-                <groupId>com.tencent.tsf</groupId>
-                <artifactId>spring-cloud-tsf-dependencies</artifactId>
-                <version>${spring-cloud-tsf.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            -->
 
             <!-- Dubbo -->
             <dependency>
@@ -248,6 +247,16 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tencent-scg</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-cloud-tsf</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-cloud-tsf-scg</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

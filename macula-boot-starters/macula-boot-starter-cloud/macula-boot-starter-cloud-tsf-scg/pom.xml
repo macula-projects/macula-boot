@@ -33,12 +33,10 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-gateway</artifactId>
         </dependency>
-        <!--
+
         <dependency>
             <groupId>com.tencent.tsf</groupId>
             <artifactId>spring-cloud-tsf-msgw-scg</artifactId>
         </dependency>
-        -->
     </dependencies>
-
 </project>
