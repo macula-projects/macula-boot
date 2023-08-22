@@ -34,4 +34,6 @@ public interface GatewayConstants {
     String CRYPTO_SWITCH = "crypto-switch";
 
     String CRYPTO_DATA_KEY = "data";
+
+    String REMOTE_INVOKE_NAME = "invoke";
 }

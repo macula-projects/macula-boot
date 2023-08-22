@@ -99,6 +99,14 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
                 ServerHttpRequest request = exchange.getRequest();
 
                 String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
+
+                // 如果有invoke头，表示上游访问名称
+                String invokeUsername =
+                    exchange.getRequest().getHeaders().getFirst(GatewayConstants.REMOTE_INVOKE_NAME);
+                if (StrUtil.isNotBlank(invokeUsername)) {
+                    username = invokeUsername;
+                }
+
                 Long tenantId = TenantContextHolder.getCurrentTenantId();
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put(JWTClaimNames.SUBJECT, username);
