@@ -89,6 +89,11 @@ ipaas:
   secret: xx
   appKey: xx
 
+gateway:
+  username: gateway
+  secret: xx
+  appKey: xx
+
 logging:
   level:
     root: info

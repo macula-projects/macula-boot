@@ -46,6 +46,7 @@ public class ResponseUtils {
             case TOKEN_INVALID_OR_EXPIRED:
                 response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 break;
+            case AKSK_ACCESS_FORBIDDEN:
             case TOKEN_ACCESS_FORBIDDEN:
                 response.setStatusCode(HttpStatus.FORBIDDEN);
                 break;

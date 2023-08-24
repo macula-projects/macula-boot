@@ -20,10 +20,10 @@ package dev.macula.boot.starter.cloud.gateway.config;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
+import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoUrlsEndpointFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.GlobalCacheRequestBodyFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.ProcessCryptoReqResFilter;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -47,15 +47,15 @@ import org.springframework.context.annotation.Import;
 public class GatewayAutoConfiguration {
 
     @Bean
-    public GlobalCacheRequestBodyFilter globalCacheRequestBodyFilter() {
-        return new GlobalCacheRequestBodyFilter();
+    public BodyGlobalFilter bodyGlobalFilter() {
+        return new BodyGlobalFilter();
     }
 
     @Bean
     @ConditionalOnBean(CryptoService.class)
-    public ProcessCryptoReqResFilter processCryptoReqResFilter(CryptoService cryptoService,
+    public CryptoGlobalFilter cryptoGlobalFilter(CryptoService cryptoService,
         GatewayProperties properties) {
-        return new ProcessCryptoReqResFilter(cryptoService, properties);
+        return new CryptoGlobalFilter(cryptoService, properties);
     }
 
     @Bean

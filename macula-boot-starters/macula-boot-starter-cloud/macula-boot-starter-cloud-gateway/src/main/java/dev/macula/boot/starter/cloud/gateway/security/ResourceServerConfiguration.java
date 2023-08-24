@@ -21,7 +21,8 @@ import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
-import dev.macula.boot.starter.cloud.gateway.filter.AddJwtFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.AddJwtGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.HmacGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -181,8 +182,13 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    AddJwtFilter addJwtFilter(JwtEncoder jwtEncoder, RedisTemplate<String, Object> redisTemplate) {
-        return new AddJwtFilter(jwtEncoder, redisTemplate);
+    AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, RedisTemplate<String, Object> redisTemplate) {
+        return new AddJwtGlobalFilter(jwtEncoder, redisTemplate);
+    }
+
+    @Bean
+    HmacGlobalFilter hmacGlobalFilter(RedisTemplate<String, Object> sysRedisTemplate) {
+        return new HmacGlobalFilter(sysRedisTemplate);
     }
 
     @Bean

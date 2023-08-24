@@ -25,6 +25,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+
 /**
  * {@code Provider1Controller} REST 接口
  *
@@ -46,10 +48,9 @@ public class Provider1Controller {
 
     @PostMapping("/user")
     @Operation(summary = "获取用户信息", description = "用于获取用户信息")
-    public UserResult getUser() {
-        UserResult result = new UserResult();
-        result.setUserName("Rain");
-        result.setPassword("password");
+    public UserResult getUser(@RequestBody UserResult result) {
+        result.setBirthday(new Date());
+        result.setPassword("provider1_pass");
         return result;
     }
 }

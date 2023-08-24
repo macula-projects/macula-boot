@@ -22,9 +22,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
-import dev.macula.boot.starter.cloud.gateway.utils.HmacUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -86,13 +84,8 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // Hmac Token，属于系统访问的API
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-            Result<String> result =
-                HmacUtils.checkSign(authorizationContext.getExchange(), sysRedisTemplate, restfulPath);
-            if (result.isSuccess()) {
-                return Mono.just(new AuthorizationDecision(true));
-            } else {
-                log.error(result.getCode() + ":" + result.getMsg() + ", cause:" + result.getData());
-            }
+            // 放行，由后面的HmacGlobalFilter校验签名
+            return Mono.just(new AuthorizationDecision(true));
         }
 
         // 没有 Token不放行

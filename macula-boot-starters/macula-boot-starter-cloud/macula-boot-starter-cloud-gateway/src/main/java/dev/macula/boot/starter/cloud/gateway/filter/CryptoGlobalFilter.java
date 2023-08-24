@@ -30,6 +30,7 @@ import dev.macula.boot.result.ResultCode;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestBodyUtils;
 import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -63,7 +64,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * {@code ProcessCryptoReqResFilter} 加密或解密请求响应处理拦截器
+ * {@code CryptoGlobalFilter} 加密或解密请求响应处理拦截器
  *
  * @author rain
  * @since 2023/3/22 23:17
@@ -71,7 +72,7 @@ import java.util.List;
 @Slf4j
 @RefreshScope
 @RequiredArgsConstructor
-public class ProcessCryptoReqResFilter implements GlobalFilter, Ordered {
+public class CryptoGlobalFilter implements GlobalFilter, Ordered {
 
     private final CryptoService cryptoService;
     private final GatewayProperties properties;
@@ -184,13 +185,11 @@ public class ProcessCryptoReqResFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         URI uri = request.getURI();
         // 尝试从 exchange 的自定义属性中取出缓存到的 body
-        Object cachedRequestBodyObject =
-            exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
+        byte[] body = RequestBodyUtils.getBody(exchange);
 
-        if (cachedRequestBodyObject != null) {
+        if (body != null) {
             byte[] decrypBytes;
             try {
-                byte[] body = (byte[])cachedRequestBodyObject;
                 String rootData = new String(body, StandardCharsets.UTF_8);
                 decrypBytes = body;
                 JSONObject jsonObject = JSONUtil.parseObj(rootData);
@@ -297,6 +296,6 @@ public class ProcessCryptoReqResFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -50;
+        return 100;
     }
 }

@@ -18,6 +18,7 @@
 package dev.macula.example.consumer.controller;
 
 import dev.macula.example.consumer.feign.GapiService;
+import dev.macula.example.consumer.feign.GatewayService;
 import dev.macula.example.consumer.feign.IpaasService;
 import dev.macula.example.consumer.feign.Provider1Service;
 import dev.macula.example.consumer.vo.CompanyDto;
@@ -49,14 +50,17 @@ public class ConsumerController {
     @Autowired
     private IpaasService ipaasService;
 
+    @Autowired
+    private GatewayService gatewayService;
+
     @GetMapping("/echo")
     public String echo() {
         return provider1Service.echo("consumer");
     }
 
     @PostMapping("/user")
-    public UserResult getUser() {
-        return provider1Service.getUser();
+    public UserResult getUser(@RequestBody UserResult result) {
+        return provider1Service.getUser(result);
     }
 
     @PostMapping("/updateEvaluationStatus")
@@ -79,4 +83,8 @@ public class ConsumerController {
         return ipaasService.listSkus(sku);
     }
 
+    @PostMapping("/gatewayUser")
+    public UserResult getGatewayUser(@RequestBody UserResult result) {
+        return gatewayService.getUser(result);
+    }
 }

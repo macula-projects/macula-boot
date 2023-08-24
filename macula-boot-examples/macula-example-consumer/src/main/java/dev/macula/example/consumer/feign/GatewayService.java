@@ -17,27 +17,21 @@
 
 package dev.macula.example.consumer.feign;
 
-import dev.macula.example.consumer.feign.fallback.AbstractProviderFallbackFactory;
+import dev.macula.example.consumer.feign.configuration.GatewayConfiguration;
 import dev.macula.example.consumer.vo.UserResult;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * {@code Provider1Service} 调用Provider1服务
+ * {@code GatewayService} 测试AK/SK请求
  *
  * @author rain
- * @since 2022/7/22 22:33
+ * @since 2023/8/24 21:28
  */
-@FeignClient(name = "macula-example-provider1", path = "/api/v1/provider1", contextId = "provider1Service",
-    fallbackFactory = AbstractProviderFallbackFactory.class)
-public interface Provider1Service {
-
-    @GetMapping("/echo")
-    String echo(@RequestParam("str") String str);
-
-    @PostMapping("/user")
+@FeignClient(name = "gateway-service", url = "http://127.0.0.1:8000/consumer",
+    configuration = GatewayConfiguration.class)
+public interface GatewayService {
+    @PostMapping("/api/v1/consumer/user")
     UserResult getUser(@RequestBody UserResult result);
 }

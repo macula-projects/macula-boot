@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
- * AddJwtFilter 给请求头添加JWT认证头，后续的微服务透过资源服务器验证JWT
+ * AddJwtGlobalFilter 给请求头添加JWT认证头，后续的微服务透过资源服务器验证JWT
  * </p>
  * 将网关认证信息转为微服务能够识别的安全信息，在 ResourceServerManager#check 鉴权之后执行
  *
@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class AddJwtFilter implements GlobalFilter, Ordered {
+public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
 
     private final JwtEncoder jwtEncoder;
 
@@ -192,7 +192,7 @@ public class AddJwtFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return 0;
+        return 1000;
     }
 
     private String buildKey(OAuth2AuthenticatedPrincipal principal) {

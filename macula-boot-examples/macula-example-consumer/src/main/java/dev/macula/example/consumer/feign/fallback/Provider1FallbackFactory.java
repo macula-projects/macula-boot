@@ -42,7 +42,7 @@ public class Provider1FallbackFactory extends AbstractProviderFallbackFactory {
             }
 
             @Override
-            public UserResult getUser() {
+            public UserResult getUser(UserResult result) {
                 return null;
             }
         };

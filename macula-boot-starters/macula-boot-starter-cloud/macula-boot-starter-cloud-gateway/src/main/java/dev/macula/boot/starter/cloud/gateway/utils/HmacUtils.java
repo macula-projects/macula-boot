@@ -77,10 +77,11 @@ public class HmacUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
             }
 
-            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-            //                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "example");
-            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-            //                .put(GlobalConstants.TENANT_ID_NAME, "0");
+            // 演示用的应用配置（正式环境要删除）
+            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "xx");
+            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+                .put(GlobalConstants.TENANT_ID_NAME, "0");
 
             Map<String, String> apps =
                 sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
@@ -150,6 +151,7 @@ public class HmacUtils {
                 if (body == null) {
                     body = new byte[0];
                 }
+
                 byte[] hash = messageDigest.digest(body);
                 String digest = "SHA-256=" + Base64.encode(hash);
                 signatureNew =
