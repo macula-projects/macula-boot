@@ -78,10 +78,10 @@ public class HmacUtils {
             }
 
             // 演示用的应用配置（正式环境要删除）
-            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "xx");
-            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-                .put(GlobalConstants.TENANT_ID_NAME, "0");
+            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+            //                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "xx");
+            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
+            //                .put(GlobalConstants.TENANT_ID_NAME, "0");
 
             Map<String, String> apps =
                 sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
