@@ -19,12 +19,13 @@ package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import dev.macula.boot.starter.cloud.gateway.utils.HmacUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 /**
@@ -36,14 +37,15 @@ import reactor.core.publisher.Mono;
  * @since 2023/2/20 11:50
  */
 @Slf4j
-public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
+public class GlobalCacheRequestBodyFilter implements WebFilter, Ordered {
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
         // 判断是否有加密参数，有则进行加解密操作，无则跳过
+        // 判断是否是HMAC请求，不是也不缓存
         String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
-        if (StrUtil.isBlank(sm4Key)) {
+        if (StrUtil.isBlank(sm4Key) && !HmacUtils.isHmacRequest(exchange)) {
             return chain.filter(exchange);
         }
 
@@ -61,8 +63,10 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
                 byte[] bytes = new byte[dataBuffer.readableByteCount()];
                 dataBuffer.read(bytes);
                 DataBufferUtils.release(dataBuffer);
-                String requestBody = new String(bytes);
-                log.debug("请求缓存的body为：{}", requestBody);
+                if (log.isDebugEnabled()) {
+                    String requestBody = new String(bytes);
+                    log.debug("请求缓存的body为：{}", requestBody);
+                }
                 return bytes;
             }).defaultIfEmpty(new byte[0])
             .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
@@ -71,6 +75,6 @@ public class GlobalCacheRequestBodyFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -100;
+        return Integer.MIN_VALUE + 10;
     }
 }

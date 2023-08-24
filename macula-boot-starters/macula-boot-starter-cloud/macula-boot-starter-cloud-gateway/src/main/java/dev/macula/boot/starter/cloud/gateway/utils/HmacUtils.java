@@ -51,6 +51,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class HmacUtils {
 
+    public static boolean isHmacRequest(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
+        String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
+        return StrUtil.isNotBlank(username);
+    }
+
     /**
      * 校验请求的签名是否正确，并验证URL是否匹配
      *

@@ -55,5 +55,6 @@ logging:
   level:
     root: info
     dev.macula.example.gateway: debug
+    dev.macula.boot.starter.cloud.gateway: debug
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

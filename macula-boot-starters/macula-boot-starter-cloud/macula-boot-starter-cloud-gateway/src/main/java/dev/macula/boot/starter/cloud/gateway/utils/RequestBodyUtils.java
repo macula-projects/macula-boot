@@ -18,11 +18,10 @@
 package dev.macula.boot.starter.cloud.gateway.utils;
 
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code RequestBodyUtils} is
+ * {@code RequestBodyUtils} 读取ServerWebExchange的Body并缓存
  *
  * @author rain
  * @since 2023/2/20 14:09
@@ -30,19 +29,6 @@ import org.springframework.web.server.ServerWebExchange;
 public class RequestBodyUtils {
 
     public static byte[] getBody(ServerWebExchange exchange) {
-        // 如果没有缓存过，获取字节数组存入 exchange 的自定义属性中
-        Object cachedRequestBodyObject =
-            exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
-        if (cachedRequestBodyObject == null) {
-            DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
-                byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                dataBuffer.read(bytes);
-                DataBufferUtils.release(dataBuffer);
-                return bytes;
-            }).defaultIfEmpty(new byte[0]).doOnNext(
-                bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes));
-
-        }
         return exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
     }
 }
