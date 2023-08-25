@@ -34,14 +34,14 @@ import java.util.List;
  * @author rain
  * @since 2023/2/20 20:31
  */
-@FeignClient(value = "macula-cloud-system", url = "${macula.cloud.endpoint}", contextId = "systemFeignClient",
+@FeignClient(value = "macula-cloud-system", url = "${macula.cloud.endpoint}/system", contextId = "systemFeignClient",
     configuration = FeignClientConfiguration.class)
 public interface SystemFeignClient {
 
-    @GetMapping("/system/api/v1/users/{username}/loginUserinfo")
+    @GetMapping("/api/v1/users/{username}/loginUserinfo")
     UserLoginVO getUserInfoWithoutRoles(@PathVariable String username,
         @RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);
 
-    @GetMapping("/system/api/v1/menus/routes")
+    @GetMapping("/api/v1/menus/routes")
     List<RouteVO> listRoutes(@RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);
 }
