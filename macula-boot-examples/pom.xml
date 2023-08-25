@@ -81,6 +81,12 @@
             </properties>
         </profile>
         <profile>
+            <id>pet</id>
+            <properties>
+                <profile.active>pet</profile.active>
+            </properties>
+        </profile>
+        <profile>
             <id>prd</id>
             <properties>
                 <profile.active>prd</profile.active>
