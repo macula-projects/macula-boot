@@ -55,6 +55,7 @@
         <module>macula-boot-starter-crypto</module>
         <module>macula-boot-starter-seata</module>
         <module>macula-boot-starter-retry</module>
+        <module>macula-boot-starter-binlog</module>
     </modules>
 
     <dependencies>
