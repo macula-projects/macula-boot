@@ -75,9 +75,9 @@
             </properties>
         </profile>
         <profile>
-            <id>staging</id>
+            <id>stg</id>
             <properties>
-                <profile.active>staging</profile.active>
+                <profile.active>stg</profile.active>
             </properties>
         </profile>
         <profile>
