@@ -1,0 +1,40 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace}
+        # group:
+    sentinel:
+      enabled: false
+    gateway:
+      routes:
+        - id: ${rootArtifactId}-admin-bff
+          uri: lb://${rootArtifactId}-admin-bff
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1
+        - id: ${rootArtifactId}-openapi
+          uri: lb://${rootArtifactId}-openapi
+          predicates:
+            - Path=/openapi/**
+          filters:
+            - StripPrefix=1
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: e4da4a32-592b-46f0-ae1d-784310e88423
+          client-secret: secret
+          introspection-uri: http://127.0.0.1:9010/oauth2/introspect
+macula:
+  gateway:
+    security:
+      only-auth-urls: /api/**
+
+logging:
+  level:
+    root: info
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

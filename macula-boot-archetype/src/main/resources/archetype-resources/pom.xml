@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <revision>${version}</revision>
+    </properties>
+
+    <modules>
+        <module>${rootArtifactId}-parent</module>
+        <module>${rootArtifactId}-admin-bff</module>
+        <module>${rootArtifactId}-openapi</module>
+        <module>${rootArtifactId}-gateway</module>
+        <module>${rootArtifactId}-thirdparty</module>
+        <module>${rootArtifactId}-basic</module>
+        <module>${rootArtifactId}-service1</module>
+        <module>${rootArtifactId}-api</module>
+    </modules>
+
+</project>

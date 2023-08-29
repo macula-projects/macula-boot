@@ -1,0 +1,24 @@
+<!--
+  - Copyright (c) 2023 Macula
+  -   macula.dev, China
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -    http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<template>
+  <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+    <path
+        d="M640 128a42.666667 42.666667 0 0 1 42.666667 42.666667v170.666666a42.666667 42.666667 0 0 1-42.666667 42.666667h-85.333333v85.333333h170.666666a42.666667 42.666667 0 0 1 42.666667 42.666667v128h85.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v170.666666a42.666667 42.666667 0 0 1-42.666667 42.666667h-256a42.666667 42.666667 0 0 1-42.666666-42.666667v-170.666666a42.666667 42.666667 0 0 1 42.666666-42.666667h85.333334v-85.333333H341.333333v85.333333h85.333334a42.666667 42.666667 0 0 1 42.666666 42.666667v170.666666a42.666667 42.666667 0 0 1-42.666666 42.666667H170.666667a42.666667 42.666667 0 0 1-42.666667-42.666667v-170.666666a42.666667 42.666667 0 0 1 42.666667-42.666667h85.333333v-128a42.666667 42.666667 0 0 1 42.666667-42.666667h170.666666V384H384a42.666667 42.666667 0 0 1-42.666667-42.666667V170.666667a42.666667 42.666667 0 0 1 42.666667-42.666667h256zM384 725.333333H213.333333v85.333334h170.666667v-85.333334z m426.666667 0h-170.666667v85.333334h170.666667v-85.333334zM597.333333 213.333333h-170.666666v85.333334h170.666666V213.333333z"
+        p-id="51975"></path>
+  </svg>
+</template>

@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2023 Macula
+ *   macula.dev, China
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+body.tox-dialog__disable-scroll {
+    overflow: hidden;
+}
+
+.tox-fullscreen {
+    border: 0;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    padding: 0;
+    touch-action: pinch-zoom;
+    width: 100%;
+}
+
+.tox.tox-tinymce.tox-fullscreen .tox-statusbar__resize-handle {
+    display: none;
+}
+
+.tox.tox-tinymce.tox-fullscreen,
+.tox-shadowhost.tox-fullscreen {
+    left: 0;
+    position: fixed;
+    top: 0;
+    z-index: 1200;
+}
+
+.tox.tox-tinymce.tox-fullscreen {
+    background-color: transparent;
+}
+
+.tox-fullscreen .tox.tox-tinymce-aux,
+.tox-fullscreen ~ .tox.tox-tinymce-aux {
+    z-index: 1201;
+}

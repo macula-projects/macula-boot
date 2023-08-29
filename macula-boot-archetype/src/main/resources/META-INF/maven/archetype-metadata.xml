@@ -15,38 +15,57 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<archetype-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+                      xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 http://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+                      name="macula-boot-archetype">
+    <requiredProperties>
+        <requiredProperty key="gitignore">
+            <defaultValue>.gitignore</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
 
-<archetype-descriptor
-        xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
-        name="macula-cart"
-        xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <fileSets>
         <fileSet filtered="true" encoding="UTF-8">
             <directory/>
             <includes>
                 <include>**/*.md</include>
-                <include>LICENSE</include>
-            </includes>
-        </fileSet>
-        <fileSet encoding="UTF-8">
-            <directory>src/main/javadoc</directory>
-            <includes>
-                <include>**/*.css</include>
-                <include>**/*.png</include>
-                <include>**/*.html</include>
+                <include>**/LICENSE</include>
+                <include>**/Dockerfile</include>
+                <include>__gitignore__</include>
             </includes>
         </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
-            <directory>src/assembly</directory>
+            <directory>__rootArtifactId__-admin</directory>
             <includes>
-                <include>**/*.xml</include>
+                <include>*</include>
+            </includes>
+            <excludes>
+                <exclude>*.md</exclude>
+                <exclude>Dockerfile</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/cypress</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/src</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/public</directory>
+            <includes>
+                <include>**/*</include>
             </includes>
         </fileSet>
     </fileSets>
     <modules>
-        <module id="${rootArtifactId}-repository" dir="__rootArtifactId__-repository"
-                name="${rootArtifactId}-repository">
+        <module id="${rootArtifactId}-admin-bff" dir="__rootArtifactId__-admin-bff" name="${rootArtifactId}-admin-bff">
             <fileSets>
                 <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
@@ -57,13 +76,13 @@
                 <fileSet filtered="true" encoding="UTF-8">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.xml</include>
+                        <include>**/*.yml</include>
                         <include>**/*.properties</include>
                     </includes>
                 </fileSet>
             </fileSets>
         </module>
-        <module id="${rootArtifactId}-service" dir="__rootArtifactId__-service" name="${rootArtifactId}-service">
+        <module id="${rootArtifactId}-basic" dir="__rootArtifactId__-basic" name="${rootArtifactId}-basic">
             <fileSets>
                 <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
@@ -74,13 +93,13 @@
                 <fileSet filtered="true" encoding="UTF-8">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.xml</include>
+                        <include>**/*.yml</include>
                         <include>**/*.properties</include>
                     </includes>
                 </fileSet>
             </fileSets>
         </module>
-        <module id="${rootArtifactId}-admin" dir="__rootArtifactId__-admin" name="${rootArtifactId}-admin">
+        <module id="${rootArtifactId}-gateway" dir="__rootArtifactId__-gateway" name="${rootArtifactId}-gateway">
             <fileSets>
                 <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
@@ -91,142 +110,109 @@
                 <fileSet filtered="true" encoding="UTF-8">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.xml</include>
+                        <include>**/*.yml</include>
                         <include>**/*.properties</include>
                     </includes>
                 </fileSet>
-                <fileSet encoding="UTF-8">
+                <fileSet filtered="false">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.js</include>
-                        <include>**/*.ftl</include>
+                        <include>**/*.jks</include>
                     </includes>
                 </fileSet>
             </fileSets>
         </module>
-        <module id="${rootArtifactId}-front" dir="__rootArtifactId__-front" name="${rootArtifactId}-front">
-            <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/resources</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
-                    </includes>
-                </fileSet>
-            </fileSets>
-        </module>
-        <module id="${rootArtifactId}-mobile" dir="__rootArtifactId__-mobile" name="${rootArtifactId}-mobile">
-            <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/resources</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
-                    </includes>
-                </fileSet>
-            </fileSets>
-        </module>
-        <module id="${rootArtifactId}-webapp" dir="__rootArtifactId__-webapp" name="${rootArtifactId}-webapp">
+        <module id="${rootArtifactId}-openapi" dir="__rootArtifactId__-openapi" name="${rootArtifactId}-openapi">
             <fileSets>
                 <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.java</include>
                     </includes>
-                    <excludes>
-                        <exclude>org/springframework/core/io/ClassPathResource.java</exclude>
-                    </excludes>
                 </fileSet>
                 <fileSet filtered="true" encoding="UTF-8">
+                    <directory>src/main/resources</directory>
+                    <includes>
+                        <include>**/*.yml</include>
+                        <include>**/*.properties</include>
+                    </includes>
+                </fileSet>
+            </fileSets>
+        </module>
+        <module id="${rootArtifactId}-service1" dir="__rootArtifactId__-service1" name="${rootArtifactId}-service1">
+            <fileSets>
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
-                        <include>org/springframework/core/io/ClassPathResource.java</include>
-                    </includes>
-                </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/deploy</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
+                        <include>**/*.java</include>
                     </includes>
                 </fileSet>
                 <fileSet filtered="true" encoding="UTF-8">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.xml</include>
+                        <include>**/*.yml</include>
                         <include>**/*.properties</include>
                     </includes>
                 </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/webapp</directory>
+            </fileSets>
+        </module>
+        <module id="${rootArtifactId}-thirdparty" dir="__rootArtifactId__-thirdparty"
+                name="${rootArtifactId}-thirdparty">
+            <fileSets>
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
+                    <directory>src/main/java</directory>
                     <includes>
-                        <include>**/*.jsp</include>
-                        <include>**/*.xml</include>
+                        <include>**/*.java</include>
                     </includes>
                 </fileSet>
-                <fileSet encoding="UTF-8">
+                <fileSet filtered="true" encoding="UTF-8">
                     <directory>src/main/resources</directory>
                     <includes>
-                        <include>**/*.js</include>
-                        <include>**/*.ftl</include>
-                    </includes>
-                </fileSet>
-                <fileSet encoding="UTF-8">
-                    <directory>src/main/webapp</directory>
-                    <includes>
-                        <include>**/*.css</include>
-                        <include>**/*.ico</include>
-                        <include>**/*.MF</include>
-                        <include>**/*.js</include>
+                        <include>**/*.yml</include>
+                        <include>**/*.properties</include>
                     </includes>
                 </fileSet>
             </fileSets>
         </module>
         <module id="${rootArtifactId}-api" dir="__rootArtifactId__-api" name="${rootArtifactId}-api">
-            <fileSets>
-                <fileSet filtered="true" packaged="true" encoding="UTF-8">
-                    <directory>src/main/java</directory>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/resources</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                    </includes>
-                </fileSet>
-            </fileSets>
-        </module>
-        <module id="${rootArtifactId}-api-impl" dir="__rootArtifactId__-api-impl" name="${rootArtifactId}-api-impl">
-            <fileSets>
-                <fileSet filtered="true" packaged="true" encoding="UTF-8">
-                    <directory>src/main/java</directory>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/main/resources</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
-                    </includes>
-                </fileSet>
-                <fileSet filtered="true" packaged="true" encoding="UTF-8">
-                    <directory>src/test/java</directory>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>src/test/resources</directory>
-                    <includes>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
-                    </includes>
-                </fileSet>
-            </fileSets>
+            <modules>
+                <module id="${rootArtifactId}-basic-api" dir="__rootArtifactId__-basic-api"
+                        name="${rootArtifactId}-basic-api">
+                    <fileSets>
+                        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+                            <directory>src/main/java</directory>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </fileSet>
+                        <fileSet filtered="true" encoding="UTF-8">
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>**/*.yml</include>
+                                <include>**/*.properties</include>
+                            </includes>
+                        </fileSet>
+                    </fileSets>
+                </module>
+                <module id="${rootArtifactId}-service1-api" dir="__rootArtifactId__-service1-api"
+                        name="${rootArtifactId}-service1-api">
+                    <fileSets>
+                        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+                            <directory>src/main/java</directory>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </fileSet>
+                        <fileSet filtered="true" encoding="UTF-8">
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>**/*.yml</include>
+                                <include>**/*.properties</include>
+                            </includes>
+                        </fileSet>
+                    </fileSets>
+                </module>
+            </modules>
         </module>
         <module id="${rootArtifactId}-parent" dir="__rootArtifactId__-parent" name="${rootArtifactId}-parent">
             <fileSets>
