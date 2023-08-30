@@ -15,7 +15,7 @@ MaculaCloud是一个微服务架构的通用技术服务体系，一方面可集
 
 Macula的整体架构如下图所示：
 
-[image](https://macula.dev/img/structure-diagram.png)
+![image](https://macula.dev/img/structure-diagram.png)
 
 ## 主要功能
 
@@ -46,7 +46,7 @@ Macula的整体架构如下图所示：
 
 Macula整体的技术交互与应用原理如下图所示：
 
-[image](https://macula.dev/docs/00_introduce/%E6%A6%82%E8%BF%B0/images/macula-tech-diagram.png)
+![image](https://macula.dev/docs/00_introduce/%E6%A6%82%E8%BF%B0/images/macula-tech-diagram.png)
 
 
 > 说明：Macula特别适用于多产品线（一个产品线对应一个应用平台）的研发团队。
