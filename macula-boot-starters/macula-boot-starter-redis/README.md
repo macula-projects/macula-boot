@@ -1,36 +1,20 @@
-# Macula Boot Starter Redis
+## 概述
 
-提供连接Redis的相关配置，使用了[redisson库](https://redisson.pro/)
+该模块提供连接Redis的相关配置，使用了[redisson库](https://redisson.pro/)
 
-## 默认依赖如下：
+## 组件坐标
 
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>org.redisson</groupId>
-        <artifactId>redisson-spring-data-26</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>io.lettuce</groupId>
-                <artifactId>lettuce-core</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>dev.macula.boot</groupId>
+    <artifactId>macula-boot-starter-redis</artifactId>
+    <version>${macula.version}</version>
+</dependency>
 ```
 
-## 配置方式
+## 使用配置
 
-使用时可以通过两种方式配置，一种是spring-boot默认的配置形式，另一种是redisson的配置形式：
+使用时有两种方式配置，一种是spring-boot默认的配置形式，另一种是redisson的配置形式。如下所示：
 
 ```yaml
 spring:
@@ -86,11 +70,13 @@ spring:
           tcpNoDelay: false
         threads: 16
         nettyThreads: 32
-        codec: !<org.redisson.codec.MarshallingCodec> {}
+        codec: !<org.redisson.codec.Kryo5Codec> {}
         transportMode: "NIO"
 ```
 
-## 默认提供了如下的Bean：
+## 核心功能
+
+### 默认提供的Bean
 
 - RedissonClient
 - RedissonRxClient
@@ -101,7 +87,7 @@ spring:
 - ReactiveRedisTemplate
 - ReactiveStringRedisTemplate
 
-## 多Redis源的配置
+### 多Redis源的配置-Redisson方式
 
 首先需要在配置文件中添加：
 
@@ -117,38 +103,126 @@ spring:
         file: classpath:redisson.yaml
         config: |
           xxxxx
-``` 
+```
 
 然后添加配置Bean，注意其中一个要设置@Primary注解，以便给默认的RedisConnectionFactory使用
 
 ```java
 public class Config {
-    @Bean(name = "redissonPropertiesOne")
+    @Bean
     @ConfigurationProperties(prefix = "spring.redis.redisson.one")
     public RedissonProperties redissonPropertiesOne() {
         return new RedissonProperties();
     }
 
     @Primary
-    @Bean(name = "redissonClientOne", destroyMethod = "shutdown")
-    public RedissonClient redissonClientOne(ApplicationContext ctx, @Qualifier("redissonPropertiesOne") RedissonProperties redissonProperties) throws Exception {
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClientOne(ApplicationContext ctx, RedissonProperties redissonPropertiesOne) throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, null, redissonProperties);
         return Redisson.create(config);
     }
 
-    @Bean(name = "redissonPropertiesTwo")
+    @Bean
     @ConfigurationProperties(prefix = "spring.redis.redisson.tow")
-    public RedissonProperties redissonProperties() {
+    public RedissonProperties redissonPropertiesTwo() {
         return new RedissonProperties();
     }
 
-    @Bean(name = "redissonClientTwo", destroyMethod = "shutdown")
-    public RedissonClient redissonClientTwo(ApplicationContext ctx, @Qualifier("redissonPropertiesTwo") RedissonProperties redissonProperties) throws Exception {
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClientTwo(ApplicationContext ctx, RedissonProperties redissonPropertiesTwo) throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, null, redissonProperties);
         return Redisson.create(config);
     }
 }
 ```
 
-> 注意，如果定义多个RedisConnectonFactory，需要标识其中一个为@Primary，否则会报错。
-> 你的配置需要保证在RedissonAutoConfiguration配置前，可以使用@AutoConfigureBefore注解
+### 多Redis源的配置-Redis方式
+
+首先在配置文件中添加
+
+```yaml
+spring:
+  redis:
+    one:
+    xxx
+    two:
+      xxx
+```
+
+然后添加配置Bean，注意其中一个要设置@Primary注解，以便给默认的RedisConnectionFactory使用
+
+```java
+
+@Configuration
+public class Config {
+    @Bean
+    @ConfigurationProperties(prefix = "spring.redis.one")
+    public RedisProperties redisPropertiesOne() {
+        return new RedisProperties();
+    }
+
+    @Primary
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClientOne(ApplicationContext ctx, RedisProperties redisPropertiesOne)
+        throws Exception {
+        Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesOne, new RedissonProperties());
+        return Redisson.create(config);
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.redis.two")
+    public RedisProperties redisPropertiesTwo() {
+        return new RedisProperties();
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClientTwo(ApplicationContext ctx, RedisProperties redisPropertiesTwo)
+        throws Exception {
+        Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesTwo, new RedissonProperties());
+        return Redisson.create(config);
+    }
+}
+```
+
+{{% alert title="提示" color="primary" %}}
+
+注意：如果定义多个RedisConnectonFactory，需要标识其中一个为@Primary，否则会报错。你的配置需要保证在RedissonAutoConfiguration配置前，可以使用@AutoConfigureBefore注解。同时要注意bean的方法命名与构造注入时参数名称要一致。
+
+{{% /alert %}}
+
+## 依赖引入
+
+```xml
+
+<dependencies>
+    <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-spring-data-26</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+</dependencies>
+```
+
+## 版权说明
+
+- redisson：https://github.com/redisson/redisson/blob/master/LICENSE.txt
+- jackson：https://github.com/FasterXML/jackson-core/blob/master/LICENSE

@@ -1,11 +1,36 @@
-# Macula Boot Starter Sender
+## 概述
 
-通过本地表发送事务消息
+该模块实现了通过本地表发送事务消息到RocketMQ的功能。
 
-要在你的业务库中创建如下表，最好定期归档。
+## 组件坐标
+
+```xml
+<dependency>
+    <groupId>dev.macula.boot</groupId>
+    <artifactId>macula-boot-starter-sender</artifactId>
+    <version>${macula.version}</version>
+</dependency>
+```
+
+## 使用配置
+
+```yaml
+macula:
+  sender:
+    message-table: 你的表名 # 默认是MACULA_MSG
+```
+
+RocketMQ的配置可以参考 macula-boot-starter-rocketmq
+
+## 核心功能
+
+​ 事件消息首先和业务的事务一起存储到本地数据库表，然后再发送给RocketMQ，具体原理如下图：
+
+![image-20230601195034276](../images/image-20230601195034276.png)
+
+使用前，需要在你的业务库中创建如下表（建议定期归档）：
 
 ```sql
-
 create table MACULA_MSG
 (
     id           bigint auto_increment primary key,
@@ -26,19 +51,8 @@ create table MACULA_MSG
 
 可以使用相关API进行消息处理：
 
-- ReliableMessageSender#send 在业务方法中使用，执行可靠消息发送；
-- ReliableMessageCompensator#compensate 周期性调度，对未发送或发送失败的消息进行补充；
-  ![img.png](src/main/docs/img.png)
-
-使用方法
-
-```yaml
-macula:
-  sender:
-    message-table: 你的表名 # 默认是MACULA_MSG
-```
-
-RocketMQ的配置可以参考 macula-boot-starter-rocketmq
+- ReliableMessageSender#send 在业务方法中使用，执行可靠消息发送
+- ReliableMessageCompensator#compensate 周期性调度，对未发送或发送失败的消息进行补充
 
 ```java
 import cn.hutool.core.date.DateUtil;
@@ -70,9 +84,34 @@ public class OrderService {
         return message;
     }
 
-    // 下面方法应该定时调度，用户未成功发送消息的补充发送
+    // 下面方法应该由任务系统定时调度，用户未成功发送消息的补充发送
     public void compensator() {
         compensator.compensator(DateUtil.addSeconds(new Date(), -120), 100);
     }
 }
 ```
+
+## 依赖引入
+
+```xml
+
+<dependencies>
+  <dependency>
+    <groupId>dev.macula.boot</groupId>
+    <artifactId>macula-boot-commons</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+  </dependency>
+
+  <dependency>
+    <groupId>org.apache.rocketmq</groupId>
+    <artifactId>rocketmq-spring-boot-starter</artifactId>
+  </dependency>
+</dependencies>
+```
+
+## 版权说明
+
+- 本模块代码主要来源于[lego](

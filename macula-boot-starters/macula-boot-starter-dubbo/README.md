@@ -1,25 +1,39 @@
-# Macula Boot Starter Dubbo
+## 概述
 
-### 使用Dubbo开发微服务
+引入基于Dubbo的微服务框架。
 
-```yaml
-dubbo:
-  application:
-    name: dubbo-springboot-demo-provider
-  protocol:
-    name: dubbo
-    port: -1
-  registry:
-    id: zk-registry
-    address: zookeeper://127.0.0.1:2181
-  config-center:
-    address: zookeeper://127.0.0.1:2181
-  metadata-report:
-    address: zookeeper://127.0.0.1:2181
+## 组件坐标
+
+```xml
+<dependency>
+    <groupId>dev.macula.boot</groupId>
+    <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
+    <version>${macula.version}</version>
+</dependency>
 ```
 
-具体可以参考 [Dubbo Samples](https://dubbo.apache.org/zh/docs3-v2/java-sdk/quick-start/spring-boot/)
+## 核心功能
 
-### Dubbo与Spring Cloud互通
+### 基于springboot使用dubbo
 
-具体示例可以参考[dubbo-samples-cloud-native](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/README.md)
+请参考[官方文档](https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/spring-boot/)
+
+### dubbo与spring cloud互通
+
+TODO
+
+## 依赖引入
+
+```xml
+
+<dependencies>
+    <dependency>
+        <groupId>org.apache.dubbo</groupId>
+        <artifactId>dubbo-spring-boot-starter</artifactId>
+    </dependency>
+</dependencies>
+```
+
+## 版权说明
+
+- dubbo：https://github.com/apache/dubbo/blob/3.2/LICENSE
