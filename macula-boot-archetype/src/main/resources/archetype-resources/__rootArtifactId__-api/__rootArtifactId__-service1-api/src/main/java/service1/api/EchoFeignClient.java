@@ -35,5 +35,5 @@ import org.springframework.web.bind.annotation.RequestParam;
     fallbackFactory = AbstractEchoFeignFallbackFactory.class)
 public interface EchoFeignClient {
     @GetMapping(name = "/api/v1/echo/hello")
-    public String hello(@RequestParam("echo") String echo);
+    String hello(@RequestParam("echo") String echo);
 }
