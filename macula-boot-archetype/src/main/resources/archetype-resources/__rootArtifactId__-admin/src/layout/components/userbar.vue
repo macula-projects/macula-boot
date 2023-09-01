@@ -59,7 +59,7 @@ export default {
   },
   created() {
     var userInfo = this.$TOOL.data.get("USER_INFO");
-    this.userName = userInfo.userName;
+    this.userName = userInfo.username;
     this.userNameF = this.userName.substring(0, 1);
   },
   methods: {
@@ -88,6 +88,8 @@ export default {
           confirmButtonText: '退出',
           confirmButtonClass: 'el-button--danger'
         }).then(() => {
+          this.$TOOL.data.clear()
+          this.clearTenantOptions()
           this.$router.replace({path: '/login'});
         }).catch(() => {
           //取消退出

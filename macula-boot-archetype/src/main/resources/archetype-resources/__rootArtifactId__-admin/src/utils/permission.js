@@ -31,10 +31,10 @@ export function rolePermission(data) {
     if (!userInfo) {
         return false;
     }
-    let role = userInfo.role;
-    if (!role) {
+    let roles = userInfo.roles;
+    if (!roles) {
         return false;
     }
-    let isHave = role.includes(data);
+    let isHave = roles.includes(data);
     return isHave;
 }

@@ -28,7 +28,7 @@
 // 		meta: {
 // 			icon: "el-icon-eleme-filled",
 // 			title: "演示",
-// 			role: ["SA"]
+// 			roles: ["SA"]
 // 		},
 // 		children: [{
 // 			name: "demopage",
@@ -37,7 +37,7 @@
 // 			meta: {
 // 				icon: "el-icon-menu",
 // 				title: "演示页面",
-// 				role: ["SA"]
+// 				roles: ["SA"]
 // 			}
 // 		}]
 // 	}

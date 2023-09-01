@@ -241,7 +241,7 @@ import NavMenu from './components/navMenu.vue';
 import userbar from './components/userbar.vue';
 import setting from './components/setting.vue';
 import iframeView from './components/iframeView.vue';
-import {mapState, mapActions} from 'pinia';
+import {mapActions, mapState} from 'pinia';
 import {useGlobalStore} from '../stores/global';
 import {useKeepAliveStore} from '../stores/keepAlive';
 
@@ -328,6 +328,8 @@ export default {
         if (item.children && item.children.length > 0) {
           item.children = this.filterUrl(item.children)
         }
+
+
         newMap.push(item)
       })
       return newMap;

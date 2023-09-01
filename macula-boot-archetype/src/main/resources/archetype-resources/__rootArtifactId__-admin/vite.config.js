@@ -70,7 +70,7 @@ export default defineConfig({
         proxy: {
             // https://cn.vitejs.dev/config/#server-proxy
             '/api': {
-                target: 'https://www.fastmock.site/mock/5039c4361c39a7e3252c5b55971f1bd3/api',
+                target: 'http://localhost:8080',
                 changeOrigin: true,
                 rewrite: (p) => p.replace(/^\/api/, '')
             }

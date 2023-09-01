@@ -235,4 +235,11 @@ tool.crypto = {
     }
 }
 
+tool.treeFilter = function (tree, func) {
+    return tree.map(node => ({...node})).filter(node => {
+        node.children = node.children && tool.treeFilter(node.children, func)
+        return func(node) || (node.children && node.children.length)
+    })
+}
+
 export default tool

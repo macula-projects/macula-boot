@@ -23,7 +23,7 @@ import 'nprogress/nprogress.css'
 import tool from '@/utils/tool';
 import systemRouter from './systemRouter';
 import userRoutes from '@/config/route';
-import {beforeEach, afterEach} from './scrollBehavior';
+import {afterEach, beforeEach} from './scrollBehavior';
 
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('./../views/**/*.vue')
@@ -34,19 +34,6 @@ const otherModules = {
 
 //系统路由
 const routes = systemRouter
-
-//首页面板路由
-const routes_dashboard_name = "dashboard"
-const routes_dashboard = {
-    name: routes_dashboard_name,
-    path: "/dashboard",
-    meta: {
-        title: "控制台",
-        icon: "el-icon-menu",
-        affix: true
-    },
-    component: () => import("@/views/common/home")
-}
 
 //系统特殊路由
 const routes_404 = {
@@ -81,8 +68,6 @@ router.beforeEach(async (to, from, next) => {
         router.addRoute(routes[0])
         //删除路由(404)
         routes_404_r()
-        //删除首页面板路由
-        router.removeRoute(routes_dashboard_name)
         isGetRouter = false;
         next();
         return false;
@@ -109,7 +94,7 @@ router.beforeEach(async (to, from, next) => {
         let apiMenu = tool.data.get("MENU") || []
         let userInfo = tool.data.get("USER_INFO")
         let userMenu = treeFilter(userRoutes, node => {
-            return node.meta.role ? node.meta.role.filter(item => userInfo.role.indexOf(item) > -1).length > 0 : true
+            return node.meta.roles ? node.meta.roles.filter(item => userInfo.roles.indexOf(item) > -1).length > 0 : true
         })
         let menu = [...userMenu, ...apiMenu]
         var menuRouter = filterAsyncRouter(menu)
@@ -118,7 +103,6 @@ router.beforeEach(async (to, from, next) => {
             router.addRoute("layout", item)
         })
         routes_404_r = router.addRoute(routes_404)
-        router.addRoute("layout", routes_dashboard)
         if (to.matched.length == 0) {
             router.push(to.fullPath);
         }
@@ -146,7 +130,7 @@ router.sc_getMenu = () => {
     var apiMenu = tool.data.get("MENU") || []
     let userInfo = tool.data.get("USER_INFO")
     let userMenu = treeFilter(userRoutes, node => {
-        return node.meta.role ? node.meta.role.filter(item => userInfo.role.indexOf(item) > -1).length > 0 : true
+        return node.meta.roles ? node.meta.roles.filter(item => userInfo.roles.indexOf(item) > -1).length > 0 : true
     })
     var menu = [...userMenu, ...apiMenu]
     return menu

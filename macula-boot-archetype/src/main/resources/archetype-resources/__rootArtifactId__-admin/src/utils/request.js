@@ -38,7 +38,7 @@ axios.interceptors.request.use(
             config.params = config.params || {};
             config.params['_'] = new Date().getTime();
         }
-        if (tool.data.get(sysConfig.TENANT_ID)) {
+        if (config.url && (!config.url.endsWith(import.meta.env.VITE_APP_MENU_PATH)) && tool.data.get(sysConfig.TENANT_ID)) {
             // tool.cookie含有tenantId, 则遍历config的参数，如果包含tenantId则不添加，不包含则从tool.cookie中获取并添加到header属下
             config.headers[sysConfig.TENANT_ID] = tool.data.get(sysConfig.TENANT_ID)
         }

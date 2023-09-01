@@ -42,12 +42,6 @@ springdoc:
   swagger-ui:
     enabled: true # 默认是true，用于开关API UI
 
-macula:
-  cloud:
-    endpoint: http://127.0.0.1:9000                   # macula cloud网关地址
-    app-key: example
-    secret-key: example
-
 logging:
   level:
     root: info

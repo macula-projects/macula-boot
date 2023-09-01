@@ -40,7 +40,9 @@
       </el-col>
     </el-form-item>
     <el-form-item>
-      <el-button :loading="islogin" round style="width: 100%;" type="primary" @click="login">{{ $t('login.signIn') }}
+      <el-button :loading="islogin" round style="width: 100%;" type="primary" @click="login">{{
+          $t('login.signIn')
+        }}
       </el-button>
     </el-form-item>
     <div class="login-reg">
@@ -101,17 +103,23 @@ export default {
       this.islogin = true
       var data = {
         username: this.form.user,
-        password: this.$TOOL.crypto.MD5(this.form.password)
+        password: this.form.password,
+        grant_type: 'password',
+        client_id: 'e4da4a32-592b-46f0-ae1d-784310e88423',
+        client_secret: 'secret',
+        scope: 'message.read message.write userinfo'
       }
       //获取token
-      var user = await this.$API.common_auth.systemToken.post(data)
-      if (user.code && user.code === '00000') {
-        this.$TOOL.cookie.set("TOKEN", user.data.access_token, {
+      var user = await this.$API.common_auth.systemToken.post({}, {
+        params: data
+      })
+      if (user.access_token) {
+        this.$TOOL.cookie.set("TOKEN", user.access_token, {
           expires: 24 * 60 * 60
         })
       } else {
         this.islogin = false
-        ElMessage.warning(user.message)
+        ElMessage.warning(user.msg || user.error_description || user.error)
         return false
       }
 
@@ -120,55 +128,26 @@ export default {
         this.$TOOL.data.set("USER_INFO", userInfo.data)
       } else {
         this.islogin = false
-        ElMessage.warning(userInfo.message)
+        ElMessage.warning(userInfo.msg)
         return false
       }
-      //获取我的租户列表
-      var tenantOptionsRes = await this.$API.system_tenant.tenant.options.get()
-      if (tenantOptionsRes.code && tenantOptionsRes.code === '00000') {
-        if (tenantOptionsRes.data.length == 0) {
-          this.islogin = false
-          ElMessageBox.alert("当前用户无任何菜单权限，请联系系统管理员", "无权限访问", {
-            type: 'error',
-            center: true
-          })
-          return false
-        }
-        this.clearTenantOptions()
-        this.pushTenantOptions(tenantOptionsRes.data)
-        this.updateTenantId(tenantOptionsRes.data[0].value)
-        this.updateTenantLabel(tenantOptionsRes.data[0].label)
-      }
+
       // 处理菜单
       // 用户的角色是否包含路由返回菜单对应的角色
-      var res = await this.$API.system_menu.menu.routes.get()
-      var menu = []
+      var res = await this.$API.common_auth.getRoutes.get()
       if (res.code && res.code === '00000') {
         var routes = res.data
-        var roles = userInfo.data.role
-        var perms = userInfo.data.perm
-        roles.forEach((item) => {
-          routes.forEach((route) => {
-            var newChild = []
-            var isInclude = route.meta.roles.includes(item)
-            if (isInclude) {
-              var child = route.children
-              child.forEach((ch, index) => {
-                var result = ch.meta.roles.includes(item)
-                if (result) {
-                  newChild.push(ch)
-                }
-              })
-              route.children = newChild
-              menu.push(route)
-            }
+        var roles = userInfo.data.roles
+        var perms = userInfo.data.perms
+        var menu = this.$TOOL.treeFilter(routes, node => {
+          return node.meta.roles ? node.meta.roles.filter(item => roles.indexOf(item) > -1).length > 0 : true
           })
-        })
+
         this.$TOOL.data.set("MENU", menu)
         this.$TOOL.data.set("PERMISSIONS", perms)
       } else {
         this.islogin = false
-        ElMessage.warning(res.message)
+        ElMessage.warning(res.msg)
         return false
       }
 
@@ -177,10 +156,10 @@ export default {
       })
       ElMessage.success("Login Success 登录成功")
       this.islogin = false
-    },
+    }
   }
 }
+
 </script>
 
-<style>
-</style>
+<style></style>

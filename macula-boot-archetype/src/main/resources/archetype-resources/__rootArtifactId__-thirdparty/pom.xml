@@ -32,10 +32,5 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-system</artifactId>
-        </dependency>
     </dependencies>
 </project>
