@@ -33,6 +33,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class RouteVO {
 
+    private long id;
+
+    private Integer sort;
+
+    private long parentId;
+
     private String path;
 
     private String component;
@@ -47,13 +53,15 @@ public class RouteVO {
     @Data
     public static class Meta {
 
+        private Boolean visible;
+
+        private MenuTypeEnum type;
+
         private String title;
 
         private String icon;
 
         private Boolean hidden;
-
-        private MenuTypeEnum type; //菜单类型[菜单/目录等]
 
         /**
          * 如果设置为 true，目录没有子节点也会显示

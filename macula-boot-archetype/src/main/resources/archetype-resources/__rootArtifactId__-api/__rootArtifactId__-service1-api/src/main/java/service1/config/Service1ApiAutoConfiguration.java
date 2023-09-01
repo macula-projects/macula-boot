@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-package dev.macula.samples.service1.config;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package}.service1.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
