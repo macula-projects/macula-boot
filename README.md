@@ -1,7 +1,7 @@
 <h2 align="center">Macula Boot</h2>
 
 <p align="center">
-	<strong>基于开源产品进行甄选轻度封装而成的微服务应用开发框架</strong>
+	<strong>基于Spring Boot、Spring Cloud Alibaba的微服务开发框架</strong>
 </p>
 
 <p align="center">
@@ -41,39 +41,7 @@ Macula的整体架构如下图所示：
 
 ## 主要功能
 
-### MaculaBoot
-
-- Feign：统一使用Feign进行HTTP远程调用
-- Lock4j：统一使用Lock4j进行分布式锁控制
-- Idempotent：统一使用Idempotent进行幂等控制
-- Seata：统一使用Seata进行分布式事务控制
-- SpringCloudGateway：统一使用SCG作为应用网关
-- SpringCloudAlibaba:阿里开源的SpringCloud版本（按需选择）
-- SpringCloudTecent：腾讯开源的SpringCloud版本（按需选择）
-- SpringCloudTsf：腾讯TSF需要依赖的包（按需选择）
-- 其他（Election、Statemachine、retry、mapstruct、mybatis、redis、web等）
-
-### MaculaCloud
-
-- 统一网关：所有请求的入口，负责统一的认证、鉴权、路由、限流、降级
-- 统一认证：即IAM服务，提供多种认证协议（Oauth2、OIDC、SAML2、CAS等），集成多种身份源（企微、钉钉等）
-- 系统服务：包括菜单管理、角色管理、用户管理、租户管理、应用管理、客户端管理、字典管理与审计日志等通用系统功能
-- 消息推送：集成个微消息、企微消息、腾讯推送等消息渠道
-- 资源存储：集成七牛云存储、阿里云存储与腾讯云存储
-- ID生成：集成滴滴开源的TinyID服务
-- 任务调度：集成powerjob服务
-- 其他（如审批流、短链、数据源版本管理）
-
-## 技术原理
-
-Macula整体的技术交互与应用原理如下图所示：
-
-![image](https://macula.dev/docs/00_introduce/%E6%A6%82%E8%BF%B0/images/macula-tech-diagram.png)
-
-
-> 说明：Macula特别适用于多产品线（一个产品线对应一个应用平台）的研发团队。
-
-## 代码结构
+### Macula Boot
 ```
 macula-boot-parent                                   POM父模块，所有项目的parent
 macula-boot-commons                                  通用模块，提供返回结构体、助手类、异常封装、常量等
@@ -112,6 +80,23 @@ macula-boot-starter
         6. macula-boot-starter-tsf                   基于TSF的服务治理体系
         7. macula-boot-starter-tsf-scg               基于TSF的网关定制
 ```
+
+### Macula Cloud
+
+详见[Macula Cloud](https://github.com/macula-projects/macula-cloud)项目
+
+### Macula Cloud
+
+详见[Macula Cloud Admin](https://github.com/macula-projects/macula-cloud-admin)项目
+
+## 技术原理
+
+Macula整体的技术交互与应用原理如下图所示：
+
+![image](https://macula.dev/docs/00_introduce/%E6%A6%82%E8%BF%B0/images/macula-tech-diagram.png)
+
+
+> 说明：Macula特别适用于多产品线（一个产品线对应一个应用平台）的研发团队。
 
 ## License
 
