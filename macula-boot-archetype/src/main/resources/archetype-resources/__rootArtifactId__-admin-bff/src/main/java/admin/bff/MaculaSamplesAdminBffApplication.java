@@ -36,6 +36,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class MaculaSamplesAdminBffApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AdminBffApplication.class, args);
+        SpringApplication.run(MaculaSamplesAdminBffApplication.class, args);
     }
 }
