@@ -42,6 +42,7 @@
         <spring-cloud-tencent.version>1.11.7-2021.0.6</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.40.4-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.29</mysql.connector.version>
+        <mysql.binlog.version>0.28.0</mysql.binlog.version>
         <druid.version>1.2.18</druid.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>2.3.1</mybatis-spring-boot-starter.version>
@@ -292,6 +293,12 @@
                 <version>${mysql.connector.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.zendesk</groupId>
+                <artifactId>mysql-binlog-connector-java</artifactId>
+                <version>${mysql.binlog.version}</version>
+            </dependency>
+
             <!-- Druid -->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -366,6 +373,12 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-data-26</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
 
