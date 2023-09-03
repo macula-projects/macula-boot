@@ -1,12 +1,22 @@
 package dev.macula.boot.starter.binlog.position;
 
-import com.alibaba.fastjson.JSON;
 import dev.macula.boot.starter.binlog.config.RedisConfig;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 public class RedisBinlogPositionHandler implements BinlogPositionHandler {
+    public RedisBinlogPositionHandler(RedisConfig redisConfig) {
+
+    }
+
+    @Override
+    public BinlogPosition loadPosition(Long serverId) {
+        return null;
+    }
+
+    @Override
+    public void savePosition(BinlogPosition position) {
+
+    }
+    /**
     private JedisPool jedisPool;
 
     public RedisBinlogPositionHandler(RedisConfig redisConfig) {
@@ -32,4 +42,5 @@ public class RedisBinlogPositionHandler implements BinlogPositionHandler {
             jedis.set(position.getServerId().toString(), JSON.toJSONString(position));
         }
     }
+     */
 }

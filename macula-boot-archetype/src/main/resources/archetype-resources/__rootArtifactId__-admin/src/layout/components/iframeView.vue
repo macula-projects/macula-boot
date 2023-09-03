@@ -26,13 +26,14 @@
 
 <template>
   <div v-show="$route.meta.type=='IFRAME'" class="iframe-pages">
-    <iframe v-for="item in iframeList" v-show="$route.meta.url==item.meta.url" :key="item.meta.url" :src="item.meta.url"
+    <iframe v-for="item in this.iframeStore.iframeList" v-show="$route.meta.url==item.meta.url" :key="item.meta.url"
+            :src="item.meta.url"
             frameborder='0'></iframe>
   </div>
 </template>
 
 <script>
-import {mapStores, mapActions} from 'pinia';
+import {mapActions, mapStores} from 'pinia';
 import {useGlobalStore} from '../../stores/global';
 import {useIframeStore} from '../../stores/iframe';
 

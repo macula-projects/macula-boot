@@ -1,7 +1,5 @@
 package dev.macula.boot.starter.binlog.utils;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import dev.macula.boot.starter.binlog.BinlogClientConfig;
 import lombok.SneakyThrows;
 
@@ -31,17 +29,18 @@ public class JDBCUtils {
     /**
      * 创建数据源
      *
-     * @return {@link HikariDataSource}
      */
-    public static HikariDataSource createDataSource(BinlogClientConfig dataSourceProperties) {
-        HikariConfig hikariConfig = new HikariConfig();
-        String serverAddress = dataSourceProperties.getHost() + ":" + dataSourceProperties.getPort();
-        hikariConfig.setJdbcUrl(
-            "jdbc:mysql://" + serverAddress + "/INFORMATION_SCHEMA?useUnicode=true&characterEncoding=UTF-8&useSSL=false");
-        hikariConfig.setUsername(dataSourceProperties.getUsername());
-        hikariConfig.setPassword(dataSourceProperties.getPassword());
-        hikariConfig.setMaximumPoolSize(20);
-        return new HikariDataSource(hikariConfig);
+    public static DataSource createDataSource(BinlogClientConfig dataSourceProperties) {
+        //        HikariConfig hikariConfig = new HikariConfig();
+        //        String serverAddress = dataSourceProperties.getHost() + ":" + dataSourceProperties.getPort();
+        //        hikariConfig.setJdbcUrl(
+        //            "jdbc:mysql://" + serverAddress + "/INFORMATION_SCHEMA?useUnicode=true&characterEncoding=UTF-8&useSSL=false");
+        //        hikariConfig.setUsername(dataSourceProperties.getUsername());
+        //        hikariConfig.setPassword(dataSourceProperties.getPassword());
+        //        hikariConfig.setMaximumPoolSize(20);
+        //        return new HikariDataSource(hikariConfig);
+        // TODO 要改
+        return null;
     }
 
     /**

@@ -1,9 +1,9 @@
 package dev.macula.boot.starter.binlog.config;
 
-import com.gitee.Jmysy.binlog4j.springboot.starter.annotation.BinlogSubscriber;
 import dev.macula.boot.starter.binlog.BinlogClient;
 import dev.macula.boot.starter.binlog.BinlogClientConfig;
 import dev.macula.boot.starter.binlog.IBinlogEventHandler;
+import dev.macula.boot.starter.binlog.config.annotation.BinlogSubscriber;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;

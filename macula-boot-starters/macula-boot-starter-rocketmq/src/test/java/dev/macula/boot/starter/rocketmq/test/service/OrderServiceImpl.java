@@ -43,7 +43,7 @@ public class OrderServiceImpl {
     }
 
     public void createOrderWithMq(OrderVo order) {
-        TxMqMessage txMsg = new TxMqMessage(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
+        TxMqMessage<OrderVo> txMsg = new TxMqMessage<>(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
         rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg, new Object[] {order});
     }
 

@@ -19,7 +19,7 @@
   <div class="adminui-topbar">
     <div class="left-panel">
       <el-breadcrumb class="hidden-sm-and-down" separator-icon="el-icon-arrow-right">
-        <transition-group mode="out-in" name="breadcrumb">
+        <transition-group name="breadcrumb">
           <template v-for="item in breadList" :key="item.title">
             <el-breadcrumb-item v-if="item.path!='/' &&  !item.meta.hiddenBreadcrumb" :to="toPath(item)">
               <el-icon v-if="item.meta.icon" class="icon">
