@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: macula-example-binlog4j
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+binlog4j:
+  client-configs:
+    master:
+      username: root
+      password:
+      host: 127.0.0.1
+      port: 3306
+      serverId: 1990
+      persistence: true
+      mode: cluster

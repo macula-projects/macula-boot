@@ -49,6 +49,7 @@
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.22.1</redisson.version>
         <hutool.version>5.8.20</hutool.version>
+        <fastjson2.version>2.0.40</fastjson2.version>
         <liteflow.version>2.10.3</liteflow.version>
         <oauth2-oidc-sdk.version>9.19</oauth2-oidc-sdk.version>
         <resilience4j.version>1.7.1</resilience4j.version>
@@ -137,6 +138,11 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-commons</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-binlog4j</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -356,6 +362,13 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- fastjson2 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
             </dependency>
 
             <dependency>

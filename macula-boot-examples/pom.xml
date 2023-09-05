@@ -47,6 +47,7 @@
         <module>macula-example-task</module>
         <module>macula-example-retry</module>
         <module>macula-example-tsf</module>
+        <module>macula-example-binlog4j</module>
     </modules>
 
     <build>
