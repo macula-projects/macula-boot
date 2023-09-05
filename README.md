@@ -8,6 +8,7 @@
     <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">
         <img src="http://img.shields.io/:license-apache-brightgreen.svg" >
     </a>
+	[![CI Status](https://github.com/macula-projects/macula-boot/actions/workflows/snapshot.yml/badge.svg)]
     <a href="https://central.sonatype.com/search?q=macula&smo=true" target="_blank">
         <img src="https://img.shields.io/maven-central/v/dev.macula.boot/macula-boot-starters" />
     </a>
