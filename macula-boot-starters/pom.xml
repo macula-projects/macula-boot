@@ -56,6 +56,10 @@
         <module>macula-boot-starter-seata</module>
         <module>macula-boot-starter-retry</module>
         <module>macula-boot-starter-binlog4j</module>
+        <module>macula-boot-starter-auditlog</module>
+        <module>macula-boot-starter-logstash</module>
+        <module>macula-boot-starter-skylog</module>
+        <module>macula-boot-starter-prometheus</module>
     </modules>
 
     <dependencies>

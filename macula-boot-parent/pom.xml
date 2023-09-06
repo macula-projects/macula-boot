@@ -78,6 +78,8 @@
         <tika.version>2.4.1</tika.version>
         <thumbnailator.version>0.4.19</thumbnailator.version>
         <cola.version>4.3.2</cola.version>
+        <logstash.version>7.2</logstash.version>
+        <skywalking-toolkit.version>8.14.0</skywalking-toolkit.version>
     </properties>
 
     <dependencyManagement>
@@ -218,6 +220,26 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-springdoc</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-skylog</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-logstash</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-auditlog</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-prometheus</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -557,6 +579,25 @@
                 <groupId>net.coobird</groupId>
                 <artifactId>thumbnailator</artifactId>
                 <version>${thumbnailator.version}</version>
+            </dependency>
+
+            <!-- logstash -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash.version}</version>
+            </dependency>
+
+            <!-- skywalking 整合 logback -->
+            <dependency>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-toolkit-logback-1.x</artifactId>
+                <version>${skywalking-toolkit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-toolkit-trace</artifactId>
+                <version>${skywalking-toolkit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
