@@ -18,7 +18,6 @@
   -->
 
 <included>
-
     <!-- 控制台输出 tid -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">

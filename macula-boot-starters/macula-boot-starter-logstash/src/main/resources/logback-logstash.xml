@@ -18,15 +18,16 @@
   -->
 
 <included>
-
-    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <!-- logstash地址，从 application.yml 中获取-->
+    <springProperty scope="context" name="LOGSTASH_ADDRESS" source="logstash.address"/>
+    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name"/>
 
     <!--输出到logstash的appender-->
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <!--可以访问的logstash日志收集端口-->
-        <destination>${logstash.address}</destination>
+        <destination>${LOGSTASH_ADDRESS}</destination>
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"spring.application.name":"${appName}"}</customFields>
+            <customFields>{"spring.application.name":"${APPLICATION_NAME}"}</customFields>
         </encoder>
     </appender>
 
