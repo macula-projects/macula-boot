@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUri
 import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -57,6 +58,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * <p>
@@ -154,8 +156,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
     JwtDecoder jwtDecoderByJwkKeySetUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
-        NimbusJwtDecoder nimbusJwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwt.getJwkSetUri())
-            .jwsAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
+        NimbusJwtDecoder nimbusJwtDecoder =
+            NimbusJwtDecoder.withJwkSetUri(jwt.getJwkSetUri()).cache(new ConcurrentMapCache("macula-jwk-set-cache"))
+                .jwsAlgorithms(this::jwsAlgorithms).build();
         String issuerUri = jwt.getIssuerUri();
         if (issuerUri != null) {
             nimbusJwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuerUri));
@@ -198,5 +201,11 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    private void jwsAlgorithms(Set<SignatureAlgorithm> signatureAlgorithms) {
+        for (String algorithm : this.properties.getJwt().getJwsAlgorithms()) {
+            signatureAlgorithms.add(SignatureAlgorithm.from(algorithm));
+        }
     }
 }
