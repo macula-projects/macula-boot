@@ -23,6 +23,7 @@ import dev.macula.boot.starter.sender.ReliableMessageSender;
 import dev.macula.boot.starter.sender.rocketmq.RocketMQMessageSender;
 import dev.macula.boot.starter.sender.support.*;
 import lombok.Setter;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +66,7 @@ public class SenderAutoConfiguration {
     }
 
     @Bean
-    public MessageSender messageSender() {
-        return new RocketMQMessageSender();
+    public MessageSender messageSender(RocketMQTemplate rocketMQTemplate) {
+        return new RocketMQMessageSender(rocketMQTemplate);
     }
 }
