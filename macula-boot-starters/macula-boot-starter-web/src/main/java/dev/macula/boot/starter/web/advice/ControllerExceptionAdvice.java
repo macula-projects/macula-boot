@@ -63,7 +63,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append("]");
         }
 
-        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -80,7 +80,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append(error.getDefaultMessage());
             validateMsg.append("]");
         }
-        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -100,29 +100,29 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append("]");
         }
 
-        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
     }
 
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<?> ApiExceptionHandler(BizException e) {
         log.error("ApiException:" + e.getCode(), e);
-        return Result.failed(e.getCode(),
-            messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale()));
+        return Result.failed(e.getCode(), e.getMsg(),
+            messageSource.getMessage(e.getMsg(), null, e.getMessage(), LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<?> NullPointExceptionHandler(Exception e) {
         log.error("NullPointException: ", e);
-        return Result.failed(ApiResultCode.SYS_ERROR.getCode(), "空指针异常");
+        return Result.failed(ApiResultCode.SYS_ERROR, "空指针异常");
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<?> ExceptionHandler(Exception e) {
         log.error("Exception: ", e);
-        return Result.failed(ApiResultCode.SYS_ERROR.getCode(), e.getMessage());
+        return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());
     }
 
     @Override

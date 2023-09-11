@@ -36,6 +36,8 @@ public class Result<T> implements Serializable {
 
     private String msg;
 
+    private String cause;
+
     private T data;
 
     public static <T> Result<T> success() {
@@ -63,22 +65,22 @@ public class Result<T> implements Serializable {
         return failed(resultCode, null);
     }
 
-    public static <T> Result<T> failed(ResultCode resultCode, T data) {
+    public static <T> Result<T> failed(ResultCode resultCode, String cause) {
         // data是错误原因
-        return failed(resultCode.getCode(), resultCode.getMsg(), data);
+        return failed(resultCode.getCode(), resultCode.getMsg(), cause);
     }
 
-    public static <T> Result<T> failed(String code, String msg, T data) {
+    public static <T> Result<T> failed(String code, String msg, String cause) {
         // data是错误原因
         Result<T> result = new Result<>();
         result.setSuccess(false);
         result.setCode(code);
         result.setMsg(msg);
-        result.setData(data);
+        result.setCause(cause);
         return result;
     }
 
-    public static Result<?> failed(String code, String msg) {
+    public static <T> Result<T> failed(String code, String msg) {
         return failed(code, msg, null);
     }
 
