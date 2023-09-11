@@ -18,9 +18,19 @@
 package dev.macula.boot.starter.rocketmq.config;
 
 import dev.macula.boot.starter.rocketmq.DefaultRocketMQLocalTransactionListener;
+import dev.macula.boot.starter.rocketmq.instrument.GrayFilterMessageHookImpl;
+import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQConsumerPostProcessor;
+import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQProducerAspect;
+import org.apache.rocketmq.client.consumer.MQConsumer;
+import org.apache.rocketmq.client.producer.MQProducer;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * {@code RocketMQAutoConfiguration} RocketMQ自动配置
@@ -29,11 +39,38 @@ import org.springframework.context.annotation.Bean;
  * @since 2022/11/30 14:02
  */
 @AutoConfiguration
+@EnableConfigurationProperties(GrayRocketMQProperties.class)
 public class RocketMQAutoConfiguration {
 
     @Bean
     public RocketMQLocalTransactionListener rocketMQTransactionListener() {
         return new DefaultRocketMQLocalTransactionListener();
+    }
+
+    @Configuration
+    @ConditionalOnProperty(value = {"macula.gray.rocketmq.gray-on"}, matchIfMissing = false)
+    @ConditionalOnClass({MQConsumer.class})
+    static class RocketConsumerConfiguration {
+        @Bean
+        public GrayFilterMessageHookImpl grayFilterMessageHookImpl(GrayRocketMQProperties grayRocketMQProperties) {
+            return new GrayFilterMessageHookImpl(grayRocketMQProperties);
+        }
+
+        @Bean
+        public BeanPostProcessor grayRocketMQConsumerPostProcessor(
+            GrayFilterMessageHookImpl grayFilterMessageHookImpl) {
+            return new GrayRocketMQConsumerPostProcessor(grayFilterMessageHookImpl);
+        }
+    }
+
+    @Configuration
+    @ConditionalOnProperty(value = {"macula.gray.rocketmq.gray-on"}, matchIfMissing = false)
+    @ConditionalOnClass({MQProducer.class})
+    static class RocketMQProducerConfiguration {
+        @Bean
+        public GrayRocketMQProducerAspect grayRocketMQProducerAspect(GrayRocketMQProperties grayRocketMQProperties) {
+            return new GrayRocketMQProducerAspect(grayRocketMQProperties);
+        }
     }
 
 }

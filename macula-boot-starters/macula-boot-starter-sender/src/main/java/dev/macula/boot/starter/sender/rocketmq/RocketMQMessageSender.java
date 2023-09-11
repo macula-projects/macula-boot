@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class RocketMQMessageSender implements MessageSender {
 
-    private RocketMQTemplate template;
+    private final RocketMQTemplate template;
 
     @Override
     public String send(Message message) {

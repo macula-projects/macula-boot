@@ -15,25 +15,13 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.constants;
+package dev.macula.boot.context;
 
 /**
- * {@code GlobalConstants} 全局常量
+ * {@code GrayVersionContextHolder} 请求上下文的grayVersion标识
  *
  * @author rain
- * @since 2023/3/1 19:18
+ * @since 2023/9/11 12:41
  */
-public interface GlobalConstants {
-
-    String FEIGN_REQ_ID = "FEIGN_REQ_ID";
-
-    String TENANT_ID_NAME = "tenantId";
-
-    String TOKEN_ID_NAME = "tokenId";
-
-    String CRYPTO_URLS_ENDPOINT = "/gateway/crypto/urls";
-
-    String CRYPTO_KEY_ENDPOINT = "/gateway/crypto/key";
-
-    String GRAY_VERSION_TAG = "grayversion";
+public class GrayVersionContextHolder {
 }

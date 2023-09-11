@@ -20,37 +20,36 @@ package dev.macula.boot.context;
 import com.alibaba.ttl.TransmittableThreadLocal;
 
 /**
- * {@code TenantContextHolder} 租户ID的上下文
+ * {@code VersionMetaHolder} 注册中心Meta定义的gray_version信息
  *
  * @author rain
- * @since 2023/3/1 15:42
+ * @since 2023/9/11 12:05
  */
-public class TenantContextHolder {
-
-    private final static ThreadLocal<Long> THREAD_LOCAL_VERSION = new TransmittableThreadLocal<>();
+public class GrayVersionMetaHolder {
+    private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new TransmittableThreadLocal<>();
 
     /**
-     * 获取当前上下文租户ID
+     * 获取TTL中的灰度版本
      *
-     * @return 租户ID
+     * @return 灰度版本号
      */
-    public static Long getCurrentTenantId() {
-        return THREAD_LOCAL_VERSION.get();
+    public static String getGrayVersion() {
+        return THREAD_LOCAL_GRAY_VERSION.get();
     }
 
     /**
-     * 设置当前租户ID
+     * TTL 设置灰度版本
      *
-     * @param tenantId 租户ID
+     * @param version 灰度版本号
      */
-    public static void setCurrentTenantId(Long tenantId) {
-        THREAD_LOCAL_VERSION.set(tenantId);
+    public static void setGrayVersion(String version) {
+        THREAD_LOCAL_GRAY_VERSION.set(version);
     }
 
     /**
-     * 清除当前租户ID
+     * 清除灰度版本号
      */
-    public static void clearCurrentTenantId() {
-        THREAD_LOCAL_VERSION.remove();
+    public static void clear() {
+        THREAD_LOCAL_GRAY_VERSION.remove();
     }
 }

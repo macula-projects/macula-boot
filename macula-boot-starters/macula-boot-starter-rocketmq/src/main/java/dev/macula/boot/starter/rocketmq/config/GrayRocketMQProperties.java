@@ -15,25 +15,27 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.constants;
+package dev.macula.boot.starter.rocketmq.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * {@code GlobalConstants} 全局常量
+ * {@code RocketMQProperties} RocketMQ自定义配置
  *
  * @author rain
- * @since 2023/3/1 19:18
+ * @since 2023/9/9 00:51
  */
-public interface GlobalConstants {
+@ConfigurationProperties(prefix = "macula.gray.rocketmq")
+@Data
+public class GrayRocketMQProperties {
 
-    String FEIGN_REQ_ID = "FEIGN_REQ_ID";
+    /** 是否开启按泳道生产和消费MQ消息 */
+    private boolean grayOn = false;
 
-    String TENANT_ID_NAME = "tenantId";
+    /** 灰度实例是否消费基线实例消息 */
+    private boolean grayConsumeMain = false;
 
-    String TOKEN_ID_NAME = "tokenId";
-
-    String CRYPTO_URLS_ENDPOINT = "/gateway/crypto/urls";
-
-    String CRYPTO_KEY_ENDPOINT = "/gateway/crypto/key";
-
-    String GRAY_VERSION_TAG = "grayversion";
+    /** 基线实例是否消费灰度消息 */
+    private boolean mainConsumeGray = false;
 }

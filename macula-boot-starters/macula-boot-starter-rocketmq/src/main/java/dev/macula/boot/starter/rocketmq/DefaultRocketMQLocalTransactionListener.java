@@ -55,7 +55,7 @@ public class DefaultRocketMQLocalTransactionListener
 
     private ApplicationContext applicationContext;
 
-    private Map<String, Object> cacheMap = new HashMap<>();
+    private final Map<String, Object> cacheMap = new HashMap<>();
 
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
@@ -86,7 +86,7 @@ public class DefaultRocketMQLocalTransactionListener
             // 执行检查方法
             Boolean ret = ReflectUtil.invoke(getBean(className), findTxMqCheck(className, bizName), checkId);
 
-            if (ret.booleanValue()) {
+            if (ret) {
                 return RocketMQLocalTransactionState.COMMIT;
             }
 
