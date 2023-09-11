@@ -78,6 +78,10 @@ public class Result<T> implements Serializable {
         return result;
     }
 
+    public static Result<?> failed(String code, String msg) {
+        return failed(code, msg, null);
+    }
+
     public static <T> Result<T> judge(boolean status) {
         if (status) {
             return success();

@@ -50,7 +50,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> ValidExceptionHandler(BindException e) {
+    public Result<?> ValidExceptionHandler(BindException e) {
         // 处理 form data方式调用接口校验失败抛出的异常
         log.error("BindException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -63,12 +63,12 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append("]");
         }
 
-        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> ValidExceptionHandler(MethodArgumentNotValidException e) {
+    public Result<?> ValidExceptionHandler(MethodArgumentNotValidException e) {
         // <2> 处理 json 请求体调用接口校验失败抛出的异常
         log.error("MethodArgumentNotValidException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -80,12 +80,12 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append(error.getDefaultMessage());
             validateMsg.append("]");
         }
-        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> ValidExceptionHandler(ConstraintViolationException e) {
+    public Result<?> ValidExceptionHandler(ConstraintViolationException e) {
         // 处理单个参数校验失败抛出的异常
         log.error("ConstraintViolationException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -100,29 +100,29 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
             validateMsg.append("]");
         }
 
-        return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
+        return Result.failed(ApiResultCode.VALIDATE_ERROR.getCode(), validateMsg.toString());
     }
 
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> ApiExceptionHandler(BizException e) {
+    public Result<?> ApiExceptionHandler(BizException e) {
         log.error("ApiException:" + e.getCode(), e);
-        return Result.failed(e.getCode(), e.getMsg(),
+        return Result.failed(e.getCode(),
             messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> NullPointExceptionHandler(Exception e) {
+    public Result<?> NullPointExceptionHandler(Exception e) {
         log.error("NullPointException: ", e);
-        return Result.failed(ApiResultCode.SYS_ERROR, "空指针异常");
+        return Result.failed(ApiResultCode.SYS_ERROR.getCode(), "空指针异常");
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<String> ExceptionHandler(Exception e) {
+    public Result<?> ExceptionHandler(Exception e) {
         log.error("Exception: ", e);
-        return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());
+        return Result.failed(ApiResultCode.SYS_ERROR.getCode(), e.getMessage());
     }
 
     @Override
