@@ -29,7 +29,7 @@ public class SourceTargetMapperTest {
 
     @Test
     public void testMapper() {
-        SourceDto s = new SourceDto("rain", "123456", new Date(), LocalDateTime.now(), ZonedDateTime.now().now(), 90);
+        SourceDto s = new SourceDto("rain", "123456", new Date(), LocalDateTime.now(), ZonedDateTime.now(), 90);
         TargetDto t = SourceTargetMapper.MAPPER.toTarget(s);
         System.out.println(t);
     }

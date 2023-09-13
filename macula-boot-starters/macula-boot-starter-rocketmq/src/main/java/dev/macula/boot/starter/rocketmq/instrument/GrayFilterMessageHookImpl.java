@@ -46,7 +46,7 @@ public class GrayFilterMessageHookImpl implements FilterMessageHook {
     }
 
     public void filterMessage(FilterMessageContext context) {
-        if (!this.grayRocketMQProperties.isGrayOn())
+        if (!this.grayRocketMQProperties.isEnabled())
             return;
 
         String grayVersion = GrayVersionMetaHolder.getGrayVersion();

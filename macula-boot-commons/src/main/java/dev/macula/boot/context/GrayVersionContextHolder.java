@@ -17,11 +17,41 @@
 
 package dev.macula.boot.context;
 
+import com.alibaba.ttl.TransmittableThreadLocal;
+
 /**
  * {@code GrayVersionContextHolder} 请求上下文的grayVersion标识
+ *
+ * // TODO 需要再网关提取http请求头，设置到这里，feign要传递，在灰度路由选择时过滤灰度提供者（NacosLoadBalancer扩展choose，引入灰度标识)
  *
  * @author rain
  * @since 2023/9/11 12:41
  */
 public class GrayVersionContextHolder {
+    private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new TransmittableThreadLocal<>();
+
+    /**
+     * 获取TTL中的灰度版本
+     *
+     * @return 灰度版本号
+     */
+    public static String getGrayVersion() {
+        return THREAD_LOCAL_GRAY_VERSION.get();
+    }
+
+    /**
+     * TTL 设置灰度版本
+     *
+     * @param version 灰度版本号
+     */
+    public static void setGrayVersion(String version) {
+        THREAD_LOCAL_GRAY_VERSION.set(version);
+    }
+
+    /**
+     * 清除灰度版本号
+     */
+    public static void clear() {
+        THREAD_LOCAL_GRAY_VERSION.remove();
+    }
 }

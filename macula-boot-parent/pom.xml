@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.13</version>
+        <version>2.7.15</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -39,12 +39,12 @@
         <spring-boot.version>2.7.13</spring-boot.version>
         <spring-cloud.version>2021.0.6</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
-        <spring-cloud-tencent.version>1.11.7-2021.0.6</spring-cloud-tencent.version>
+        <spring-cloud-tencent.version>1.12.1-2021.0.8</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.40.4-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.29</mysql.connector.version>
         <mysql.binlog.version>0.28.0</mysql.binlog.version>
         <druid.version>1.2.18</druid.version>
-        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
+        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>2.3.1</mybatis-spring-boot-starter.version>
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.22.1</redisson.version>

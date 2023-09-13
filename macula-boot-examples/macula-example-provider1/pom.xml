@@ -66,8 +66,8 @@
 
         <!-- 默认开放 /actuator/health 返回健康状态 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-prometheus</artifactId>
         </dependency>
 
         <dependency>

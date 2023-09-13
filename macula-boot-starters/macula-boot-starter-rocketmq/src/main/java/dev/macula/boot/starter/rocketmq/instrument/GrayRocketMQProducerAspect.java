@@ -55,7 +55,7 @@ public class GrayRocketMQProducerAspect {
     @Around("normalProducerPointcut()")
     public Object aroundNormalProducerMessage(ProceedingJoinPoint pjp) throws Throwable {
         Object[] args = pjp.getArgs();
-        if (!this.grayRocketMQProperties.isGrayOn())
+        if (!this.grayRocketMQProperties.isEnabled())
             return pjp.proceed(args);
         String grayVersion = GrayVersionMetaHolder.getGrayVersion();
         if (StringUtils.isBlank(grayVersion)) {
@@ -81,7 +81,7 @@ public class GrayRocketMQProducerAspect {
     @Around("transactionProducerPointcut()")
     public Object aroundTransactionProducerMessage(ProceedingJoinPoint pjp) throws Throwable {
         Object[] args = pjp.getArgs();
-        if (!this.grayRocketMQProperties.isGrayOn())
+        if (!this.grayRocketMQProperties.isEnabled())
             return pjp.proceed(args);
         String grayVersion = GrayVersionMetaHolder.getGrayVersion();
         if (StringUtils.isBlank(grayVersion))

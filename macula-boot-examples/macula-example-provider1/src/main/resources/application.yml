@@ -94,6 +94,16 @@ springdoc:
   swagger-ui:
     enabled: true # 默认是true，用于开关API UI
 
+# 监控配置
+management:
+  endpoint:
+    metrics:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+
 logging:
   level:
     root: info

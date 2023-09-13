@@ -17,13 +17,18 @@
 
 package dev.macula.boot.starter.rocketmq.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.macula.boot.starter.rocketmq.DefaultRocketMQLocalTransactionListener;
 import dev.macula.boot.starter.rocketmq.instrument.GrayFilterMessageHookImpl;
 import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQConsumerPostProcessor;
 import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQProducerAspect;
+import dev.macula.boot.starter.rocketmq.instrument.RocketMQConsumerNSPostProcessor;
 import org.apache.rocketmq.client.consumer.MQConsumer;
 import org.apache.rocketmq.client.producer.MQProducer;
+import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,6 +36,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+
+import java.util.List;
 
 /**
  * {@code RocketMQAutoConfiguration} RocketMQ自动配置
@@ -42,13 +53,42 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(GrayRocketMQProperties.class)
 public class RocketMQAutoConfiguration {
 
+    /**
+     * 解决RocketMQ Jackson不支持Java时间类型配置
+     * 源码参考：{@link org.apache.rocketmq.spring.autoconfigure.MessageConverterConfiguration}
+     */
+    @Bean
+    @Primary
+    public RocketMQMessageConverter createRocketMQMessageConverter() {
+        RocketMQMessageConverter converter = new RocketMQMessageConverter();
+        CompositeMessageConverter compositeMessageConverter =
+            (CompositeMessageConverter)converter.getMessageConverter();
+        List<MessageConverter> messageConverterList = compositeMessageConverter.getConverters();
+        for (MessageConverter messageConverter : messageConverterList) {
+            if (messageConverter instanceof MappingJackson2MessageConverter) {
+                MappingJackson2MessageConverter jackson2MessageConverter =
+                    (MappingJackson2MessageConverter)messageConverter;
+                ObjectMapper objectMapper = jackson2MessageConverter.getObjectMapper();
+                // 增加Java8时间模块支持，实体类可以传递LocalDate/LocalDateTime
+                objectMapper.registerModules(new JavaTimeModule());
+            }
+        }
+        return converter;
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = {"macula.rocketmq.namespace.enabled"}, matchIfMissing = false)
+    public RocketMQConsumerNSPostProcessor rocketMQConsumerNSPostProcessor(RocketMQProperties rocketMQProperties) {
+        return new RocketMQConsumerNSPostProcessor(rocketMQProperties);
+    }
+
     @Bean
     public RocketMQLocalTransactionListener rocketMQTransactionListener() {
         return new DefaultRocketMQLocalTransactionListener();
     }
 
     @Configuration
-    @ConditionalOnProperty(value = {"macula.gray.rocketmq.gray-on"}, matchIfMissing = false)
+    @ConditionalOnProperty(value = {"macula.rocketmq.gray.enabled"}, matchIfMissing = false)
     @ConditionalOnClass({MQConsumer.class})
     static class RocketConsumerConfiguration {
         @Bean
@@ -64,7 +104,7 @@ public class RocketMQAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(value = {"macula.gray.rocketmq.gray-on"}, matchIfMissing = false)
+    @ConditionalOnProperty(value = {"macula.rocketmq.gray.enabled"}, matchIfMissing = false)
     @ConditionalOnClass({MQProducer.class})
     static class RocketMQProducerConfiguration {
         @Bean
@@ -72,5 +112,4 @@ public class RocketMQAutoConfiguration {
             return new GrayRocketMQProducerAspect(grayRocketMQProperties);
         }
     }
-
 }

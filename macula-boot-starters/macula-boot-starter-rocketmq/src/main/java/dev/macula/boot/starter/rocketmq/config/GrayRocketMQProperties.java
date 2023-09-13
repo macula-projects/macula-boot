@@ -26,12 +26,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author rain
  * @since 2023/9/9 00:51
  */
-@ConfigurationProperties(prefix = "macula.gray.rocketmq")
+@ConfigurationProperties(prefix = "macula.rocketmq.gray")
 @Data
 public class GrayRocketMQProperties {
 
     /** 是否开启按泳道生产和消费MQ消息 */
-    private boolean grayOn = false;
+    private boolean enabled = false;
 
     /** 灰度实例是否消费基线实例消息 */
     private boolean grayConsumeMain = false;
