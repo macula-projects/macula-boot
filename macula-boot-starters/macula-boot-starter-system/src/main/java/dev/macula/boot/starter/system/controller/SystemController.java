@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.system.controller;
 
-import dev.macula.boot.starter.security.utils.SecurityUtils;
 import dev.macula.boot.starter.system.dto.RouteVO;
 import dev.macula.boot.starter.system.dto.UserLoginVO;
 import dev.macula.boot.starter.system.service.SystemService;
@@ -46,9 +45,7 @@ public class SystemController {
     @GetMapping("/api/v1/users/me")
     public UserLoginVO getLoginUserInfo() {
         // 从macula-cloud获取用户信息
-        UserLoginVO userLoginVO = systemService.getUseInfo();
-        userLoginVO.setRoles(SecurityUtils.getRoles());
-        return userLoginVO;
+        return systemService.getUseInfo();
     }
 
     @Operation(summary = "路由列表")

@@ -20,6 +20,7 @@ package dev.macula.boot.starter.system.service.impl;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import dev.macula.boot.starter.system.dto.RouteVO;
 import dev.macula.boot.starter.system.dto.UserLoginVO;
+import dev.macula.boot.starter.system.dto.UserTokenRolesDTO;
 import dev.macula.boot.starter.system.remote.SystemFeignClient;
 import dev.macula.boot.starter.system.service.SystemService;
 import lombok.RequiredArgsConstructor;
@@ -41,12 +42,10 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public UserLoginVO getUseInfo() {
-        UserLoginVO user =
-            systemFeignClient.getUserInfoWithoutRoles(SecurityUtils.getCurrentUser(), SecurityUtils.getTokenId());
-        if (user != null) {
-            user.setRoles(SecurityUtils.getRoles());
-        }
-        return user;
+        UserTokenRolesDTO tokenRoles = new UserTokenRolesDTO();
+        tokenRoles.setRoles(SecurityUtils.getRoles());
+        tokenRoles.setTokenId(SecurityUtils.getTokenId());
+        return systemFeignClient.getLoginUserInfo(SecurityUtils.getCurrentUser(), tokenRoles);
     }
 
     @Override
