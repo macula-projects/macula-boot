@@ -32,6 +32,7 @@ import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -74,14 +75,15 @@ public class RocketMQAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(value = {"macula.rocketmq.namespace.enabled"}, matchIfMissing = false)
-    public RocketMQConsumerNSPostProcessor rocketMQConsumerNSPostProcessor(RocketMQProperties rocketMQProperties) {
-        return new RocketMQConsumerNSPostProcessor(rocketMQProperties);
+    @ConditionalOnMissingBean
+    public RocketMQLocalTransactionListener rocketMQTransactionListener() {
+        return new DefaultRocketMQLocalTransactionListener();
     }
 
     @Bean
-    public RocketMQLocalTransactionListener rocketMQTransactionListener() {
-        return new DefaultRocketMQLocalTransactionListener();
+    @ConditionalOnProperty(value = {"macula.rocketmq.namespace.enabled"}, matchIfMissing = false)
+    public RocketMQConsumerNSPostProcessor rocketMQConsumerNSPostProcessor(RocketMQProperties rocketMQProperties) {
+        return new RocketMQConsumerNSPostProcessor(rocketMQProperties);
     }
 
     @Configuration

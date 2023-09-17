@@ -36,14 +36,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@code DefaultRocketMQLocalTransactionListener} 默认事务消息本地监听器，调用RocketMQTemplate.sendMessageInTransaction
+ * {@code DefaultRocketMQLocalTransactionListener} 是默认事务消息本地监听器，调用RocketMQTemplate.sendMessageInTransaction
  * 方法的时候，会调用该类的executeLocalTransaction方法。如果失败，会调用checkLocalTransaction以确定事务消息是否提交
- * <p/>
- * <p/>
- * <p/>
- * {@code // 发送半事务消息 public void createOrderWithMq(OrderVo order) { TxMqMessage txMsg = new TxMqMessage(order,
- * this.getClass(), BIZ_NAME_ORDER, order.getOrderNo()); rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg,
- * new Object[] { order }); } }
+ *
+ * <pre>
+ * {@code
+ * // 发送半事务消息
+ * public void createOrderWithMq(OrderVo order) {
+ *      TxMqMessage txMsg = new TxMqMessage(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
+ *      rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg, new Object[] { order });
+ * }
+ * }
+ * </pre>
  *
  * @author rain
  * @since 2022/11/28 22:55
@@ -60,16 +64,17 @@ public class DefaultRocketMQLocalTransactionListener
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
         try {
-            String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
-            String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
+            if (msg instanceof TxMqMessage) {
+                String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
+                String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
 
-            // 执行业务方法
-            if (ArrayUtil.isArray(arg)) {
-                ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), (Object[])arg);
-            } else {
-                ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), arg);
+                // 执行业务方法
+                if (ArrayUtil.isArray(arg)) {
+                    ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), (Object[])arg);
+                } else {
+                    ReflectUtil.invoke(getBean(className), findTxMqExecute(className, bizName), arg);
+                }
             }
-
             return RocketMQLocalTransactionState.COMMIT;
         } catch (Exception e) {
             return RocketMQLocalTransactionState.ROLLBACK;
@@ -79,17 +84,18 @@ public class DefaultRocketMQLocalTransactionListener
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
         try {
-            String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
-            String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
-            String checkId = (String)msg.getHeaders().get(Constants.CHECK_ID);
+            if (msg instanceof TxMqMessage) {
+                String className = (String)msg.getHeaders().get(Constants.BEAN_CLASS_NAME);
+                String bizName = (String)msg.getHeaders().get(Constants.BIZ_NAME);
+                String checkId = (String)msg.getHeaders().get(Constants.CHECK_ID);
 
-            // 执行检查方法
-            Boolean ret = ReflectUtil.invoke(getBean(className), findTxMqCheck(className, bizName), checkId);
+                // 执行检查方法
+                Boolean ret = ReflectUtil.invoke(getBean(className), findTxMqCheck(className, bizName), checkId);
 
-            if (ret) {
-                return RocketMQLocalTransactionState.COMMIT;
+                if (ret) {
+                    return RocketMQLocalTransactionState.COMMIT;
+                }
             }
-
             return RocketMQLocalTransactionState.UNKNOWN;
         } catch (Exception e) {
             return RocketMQLocalTransactionState.UNKNOWN;

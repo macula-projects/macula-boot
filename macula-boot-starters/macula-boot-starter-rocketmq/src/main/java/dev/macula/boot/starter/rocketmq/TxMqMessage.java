@@ -23,6 +23,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ObjectUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,12 +33,12 @@ import java.util.Map;
  * @author rain
  * @since 2022/12/1 09:55
  */
-public class TxMqMessage<T> implements Message<T> {
+public class TxMqMessage<T> implements Message<T>, Serializable {
 
     private static final long serialVersionUID = 1L;
-    private T payload;
+    private final T payload;
 
-    private MessageHeaders headers;
+    private final MessageHeaders headers;
 
     public TxMqMessage(T payload, Class<?> beanClass, String bizName, String checkId) {
         this.payload = payload;
@@ -66,7 +67,7 @@ public class TxMqMessage<T> implements Message<T> {
         } else if (!(other instanceof TxMqMessage)) {
             return false;
         } else {
-            TxMqMessage<?> otherMsg = (TxMqMessage)other;
+            TxMqMessage<?> otherMsg = (TxMqMessage<?>)other;
             return ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers);
         }
     }

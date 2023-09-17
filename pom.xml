@@ -38,6 +38,7 @@
 
     <properties>
         <revision>5.0.2-SNAPSHOT</revision>
+
     </properties>
 
     <modules>
