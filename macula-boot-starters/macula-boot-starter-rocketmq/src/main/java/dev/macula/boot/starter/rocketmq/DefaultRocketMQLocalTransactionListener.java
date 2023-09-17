@@ -38,9 +38,9 @@ import java.util.Map;
 /**
  * {@code DefaultRocketMQLocalTransactionListener} 默认事务消息本地监听器，调用RocketMQTemplate.sendMessageInTransaction
  * 方法的时候，会调用该类的executeLocalTransaction方法。如果失败，会调用checkLocalTransaction以确定事务消息是否提交
- * <p>
- * <p>
- * <p>
+ * <p/>
+ * <p/>
+ * <p/>
  * {@code // 发送半事务消息 public void createOrderWithMq(OrderVo order) { TxMqMessage txMsg = new TxMqMessage(order,
  * this.getClass(), BIZ_NAME_ORDER, order.getOrderNo()); rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg,
  * new Object[] { order }); } }

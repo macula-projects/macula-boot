@@ -53,10 +53,6 @@ import java.util.List;
 @EnableConfigurationProperties(GrayRocketMQProperties.class)
 public class RocketMQAutoConfiguration {
 
-    /**
-     * 解决RocketMQ Jackson不支持Java时间类型配置
-     * 源码参考：{@link org.apache.rocketmq.spring.autoconfigure.MessageConverterConfiguration}
-     */
     @Bean
     @Primary
     public RocketMQMessageConverter createRocketMQMessageConverter() {
@@ -64,6 +60,7 @@ public class RocketMQAutoConfiguration {
         CompositeMessageConverter compositeMessageConverter =
             (CompositeMessageConverter)converter.getMessageConverter();
         List<MessageConverter> messageConverterList = compositeMessageConverter.getConverters();
+        // 解决RocketMQ Jackson不支持Java时间类型配置
         for (MessageConverter messageConverter : messageConverterList) {
             if (messageConverter instanceof MappingJackson2MessageConverter) {
                 MappingJackson2MessageConverter jackson2MessageConverter =
