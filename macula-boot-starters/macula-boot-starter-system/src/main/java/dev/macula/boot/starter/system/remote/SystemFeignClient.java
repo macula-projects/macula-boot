@@ -23,10 +23,7 @@ import dev.macula.boot.starter.system.dto.RouteVO;
 import dev.macula.boot.starter.system.dto.UserLoginVO;
 import dev.macula.boot.starter.system.dto.UserTokenRolesDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,8 +37,8 @@ import java.util.List;
     configuration = FeignClientConfiguration.class)
 public interface SystemFeignClient {
 
-    @PostMapping("/{username}/loginUserinfo")
-    UserLoginVO getLoginUserInfo(@PathVariable String username, UserTokenRolesDTO roles);
+    @PostMapping("/api/v1/users/{username}/loginUserinfo")
+    UserLoginVO getLoginUserInfo(@PathVariable String username, @RequestBody UserTokenRolesDTO roles);
 
     @GetMapping("/api/v1/menus/routes")
     List<RouteVO> listRoutes(@RequestParam(value = GlobalConstants.TOKEN_ID_NAME, required = false) String tokenId);

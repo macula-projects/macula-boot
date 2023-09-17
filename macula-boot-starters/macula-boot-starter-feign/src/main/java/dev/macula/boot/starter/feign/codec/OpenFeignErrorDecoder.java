@@ -52,15 +52,19 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
             String body = Util.toString(response.body().asReader(Charset.defaultCharset()));
 
             try {
-                Result<?> resultData = JSONUtil.toBean(body, Result.class);
-                if (!resultData.isSuccess()) {
-                    String errMsg = "Feign提供方异常：";
-                    if (resultData.getData() != null && !"null".equals(resultData.getData().toString())) {
-                        errMsg = resultData.getData().toString();
-                    } else {
-                        errMsg += resultData.getMsg();
+                if (response.status() == 500) {
+                    Result<?> resultData = JSONUtil.toBean(body, Result.class);
+                    if (!resultData.isSuccess()) {
+                        String errMsg = "Feign提供方异常：";
+                        if (resultData.getData() != null && !"null".equals(resultData.getData().toString())) {
+                            errMsg = resultData.getData().toString();
+                        } else {
+                            errMsg += resultData.getMsg();
+                        }
+                        return new BizException(resultData.getCode(), resultData.getMsg(), errMsg);
                     }
-                    return new BizException(resultData.getCode(), resultData.getMsg(), errMsg);
+                } else {
+                    return new BizException("Feign提供方异常：" + response.reason());
                 }
             } catch (Exception ex) {
                 return new BizException(body);
