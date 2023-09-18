@@ -56,8 +56,8 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
                     Result<?> resultData = JSONUtil.toBean(body, Result.class);
                     if (!resultData.isSuccess()) {
                         String errMsg = "Feign提供方异常：";
-                        if (resultData.getData() != null && !"null".equals(resultData.getData().toString())) {
-                            errMsg = resultData.getData().toString();
+                        if (resultData.getCause() != null && !"null".equals(resultData.getCause())) {
+                            errMsg = resultData.getCause();
                         } else {
                             errMsg += resultData.getMsg();
                         }

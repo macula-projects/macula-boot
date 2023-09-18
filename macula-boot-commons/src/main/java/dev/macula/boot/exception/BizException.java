@@ -20,6 +20,7 @@ package dev.macula.boot.exception;
 
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.ResultCode;
+import lombok.Getter;
 
 /**
  * {@code ApiException} 是服务层对外的统一异常
@@ -27,10 +28,11 @@ import dev.macula.boot.result.ResultCode;
  * @author rain
  * @since 2022/6/29 10:37
  */
+@Getter
 public class BizException extends MaculaException {
 
-    private String code;
-    private String msg;
+    private final String code;
+    private final String msg;
 
     public BizException(ResultCode resultCode, String exceptionMessage) {
         this(resultCode.getCode(), resultCode.getMsg(), exceptionMessage);
@@ -47,11 +49,4 @@ public class BizException extends MaculaException {
         this(ApiResultCode.BIZ_ERROR, exceptionMessage);
     }
 
-    public String getCode() {
-        return this.code;
-    }
-
-    public String getMsg() {
-        return this.msg;
-    }
 }
