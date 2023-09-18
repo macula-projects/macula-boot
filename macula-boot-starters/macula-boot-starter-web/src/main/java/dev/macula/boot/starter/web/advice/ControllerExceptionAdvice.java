@@ -50,7 +50,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> ValidExceptionHandler(BindException e) {
+    public Result<?> validExceptionHandler(BindException e) {
         // 处理 form data方式调用接口校验失败抛出的异常
         log.error("BindException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -68,7 +68,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> ValidExceptionHandler(MethodArgumentNotValidException e) {
+    public Result<?> validExceptionHandler(MethodArgumentNotValidException e) {
         // <2> 处理 json 请求体调用接口校验失败抛出的异常
         log.error("MethodArgumentNotValidException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -83,9 +83,15 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
         return Result.failed(ApiResultCode.VALIDATE_ERROR, validateMsg.toString());
     }
 
+    @ExceptionHandler({IllegalArgumentException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<?> validExceptionHandler(IllegalArgumentException e) {
+        return Result.failed(ApiResultCode.VALIDATE_ERROR, e.getMessage());
+    }
+
     @ExceptionHandler({ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> ValidExceptionHandler(ConstraintViolationException e) {
+    public Result<?> validExceptionHandler(ConstraintViolationException e) {
         // 处理单个参数校验失败抛出的异常
         log.error("ConstraintViolationException:" + ApiResultCode.VALIDATE_ERROR, e);
 
@@ -105,7 +111,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> ApiExceptionHandler(BizException e) {
+    public Result<?> apiExceptionHandler(BizException e) {
         log.error("ApiException:" + e.getCode(), e);
         return Result.failed(e.getCode(), e.getMsg(),
             messageSource.getMessage(e.getMsg(), null, e.getMessage(), LocaleContextHolder.getLocale()));
@@ -113,14 +119,14 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> NullPointExceptionHandler(Exception e) {
+    public Result<?> nullPointExceptionHandler(Exception e) {
         log.error("NullPointException: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, "空指针异常");
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> ExceptionHandler(Exception e) {
+    public Result<?> exceptionHandler(Exception e) {
         log.error("Exception: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());
     }
