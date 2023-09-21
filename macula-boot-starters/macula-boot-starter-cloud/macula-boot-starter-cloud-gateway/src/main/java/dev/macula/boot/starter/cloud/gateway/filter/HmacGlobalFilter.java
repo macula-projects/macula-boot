@@ -62,7 +62,8 @@ public class HmacGlobalFilter implements GlobalFilter, Ordered {
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
             Result<String> result = HmacUtils.checkSign(exchange, sysRedisTemplate, restfulPath);
             if (!result.isSuccess()) {
-                return ResponseUtils.writeErrorInfo(exchange.getResponse(), ApiResultCode.AKSK_ACCESS_FORBIDDEN);
+                return ResponseUtils.writeErrorInfo(exchange.getResponse(), ApiResultCode.AKSK_ACCESS_FORBIDDEN,
+                    result);
             }
 
             if ("POST".equals(method) || "PUT".equals(method)) {

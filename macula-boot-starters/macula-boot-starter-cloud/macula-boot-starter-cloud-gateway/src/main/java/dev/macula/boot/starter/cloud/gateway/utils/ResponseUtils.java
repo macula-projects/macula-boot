@@ -41,6 +41,10 @@ import java.nio.charset.StandardCharsets;
 public class ResponseUtils {
 
     public static Mono<Void> writeErrorInfo(ServerHttpResponse response, ApiResultCode resultCode) {
+        return writeErrorInfo(response, resultCode, null);
+    }
+
+    public static Mono<Void> writeErrorInfo(ServerHttpResponse response, ApiResultCode resultCode, Result<?> result) {
         switch (resultCode) {
             case ACCESS_UNAUTHORIZED:
             case TOKEN_INVALID_OR_EXPIRED:
@@ -57,9 +61,8 @@ public class ResponseUtils {
         response.getHeaders().set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.getHeaders().set("Access-Control-Allow-Origin", "*");
         response.getHeaders().set("Cache-Control", "no-cache");
-        String body = JSONUtil.toJsonStr(Result.failed(resultCode));
+        String body = JSONUtil.toJsonStr(result == null ? Result.failed(resultCode) : result);
         DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
         return response.writeWith(Mono.just(buffer)).doOnError(error -> DataBufferUtils.release(buffer));
     }
-
 }

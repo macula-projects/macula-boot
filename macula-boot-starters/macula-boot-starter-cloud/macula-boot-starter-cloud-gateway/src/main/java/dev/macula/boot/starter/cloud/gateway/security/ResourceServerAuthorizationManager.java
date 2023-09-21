@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.cloud.gateway.security;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.CacheConstants;
@@ -123,14 +122,27 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
             return Mono.just(new AuthorizationDecision(true));
         }
 
-        // 判断Token中携带的用户角色是否有权限访问
+        // 判断正向角色是否包含，反向角色是否包含，取其and结果
+        // 注意：Authentication中的authorities的ROLE的CODE以ROLE_开头，如果是反向角色会是ROLE_!xxx这种形式
         return mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
-            .map(GrantedAuthority::getAuthority).any(authority -> {
-                String roleCode = authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length()); // 用户的角色
-                if (SecurityConstants.ROOT_ROLE_CODE.equals(roleCode)) {
-                    return true; // 如果是超级管理员则放行
+            .map(GrantedAuthority::getAuthority)
+            .map(authority -> authority.substring(SecurityConstants.AUTHORITIES_PREFIX.length())) // 去掉ROLE_前缀
+            .collectList().map(authorities -> {
+                // 如果是超级管理员直接放行
+                if (authorities.contains(SecurityConstants.ROOT_ROLE_CODE)) {
+                    return true;
                 }
-                return CollectionUtil.isNotEmpty(authorizedRoles) && authorizedRoles.contains(roleCode);
+
+                boolean containsRoles =
+                    authorities.stream().filter(role -> !role.startsWith(SecurityConstants.NEGATED_ROLE_PREFIX))
+                        .anyMatch(authorizedRoles::contains);
+
+                boolean containsNegatedRoles =
+                    authorities.stream().filter(role -> role.startsWith(SecurityConstants.NEGATED_ROLE_PREFIX))
+                        .anyMatch(role -> authorizedRoles.contains(
+                            role.substring(SecurityConstants.NEGATED_ROLE_PREFIX.length())));
+
+                return containsRoles && !containsNegatedRoles;
             }).map(AuthorizationDecision::new).defaultIfEmpty(new AuthorizationDecision(false));
     }
 }

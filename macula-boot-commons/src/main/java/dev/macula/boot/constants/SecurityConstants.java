@@ -56,6 +56,11 @@ public interface SecurityConstants {
     String AUTHORITIES_PREFIX = "ROLE_";
 
     /**
+     * 反向角色前缀
+     */
+    String NEGATED_ROLE_PREFIX = "!";
+
+    /**
      * JWT存储权限属性
      */
     String AUTHORITIES_KEY = "authorities";
