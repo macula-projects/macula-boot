@@ -78,6 +78,9 @@ public class ResourceServerConfiguration {
     @Setter
     private List<String> onlyAuthUrls = Collections.emptyList();
 
+    @Setter
+    private boolean defaultUrlRequireCheck = false;
+
     @NotNull
     private final OAuth2ResourceServerProperties properties;
 
@@ -160,7 +163,7 @@ public class ResourceServerConfiguration {
 
     @Bean
     public ResourceServerAuthorizationManager authorizationManager(RedisTemplate<String, Object> sysRedisTemplate) {
-        return new ResourceServerAuthorizationManager(sysRedisTemplate, onlyAuthUrls);
+        return new ResourceServerAuthorizationManager(sysRedisTemplate, onlyAuthUrls, defaultUrlRequireCheck);
     }
 
     /**

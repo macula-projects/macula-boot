@@ -54,6 +54,9 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     // 给前端个人的API（只认证Token，不鉴权)
     private final List<String> onlyAuthUrls;
 
+    // 默认URL是否需要检查权限
+    private final boolean defaultUrlRequireCheck;
+
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
         ServerHttpRequest request = authorizationContext.getExchange().getRequest();
@@ -64,6 +67,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         PathMatcher pathMatcher = new AntPathMatcher();
         String method = request.getMethodValue();
         String path = request.getURI().getPath();
+
         String restfulPath = method + ":" + path;
 
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
@@ -104,11 +108,14 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         // 根据请求路径获取有访问权限的角色列表
         // 拥有访问权限的角色
         List<String> authorizedRoles = new ArrayList<>();
+
         // 是否需要鉴权，默认未设置拦截规则不需鉴权
-        boolean requireCheck = false;
+        boolean requireCheck = defaultUrlRequireCheck;
+
         PathMatcher pathMatcher = new AntPathMatcher();
         for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
+            perm = perm.replace(":", ":/**");
             if (pathMatcher.match(perm, restfulPath)) {
                 List<String> roles = Convert.toList(String.class, permRoles.getValue());
                 authorizedRoles.addAll(Convert.toList(String.class, roles));
@@ -117,6 +124,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
                 }
             }
         }
+
         // 没有设置拦截规则放行
         if (!requireCheck) {
             return Mono.just(new AuthorizationDecision(true));
