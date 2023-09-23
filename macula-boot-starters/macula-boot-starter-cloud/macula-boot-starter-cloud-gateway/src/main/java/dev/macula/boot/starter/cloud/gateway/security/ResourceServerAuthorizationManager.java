@@ -24,6 +24,7 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -57,6 +58,9 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     // 默认URL是否需要检查权限
     private final boolean defaultUrlRequireCheck;
 
+    @Value("${spring.application.name}")
+    private String appName;
+
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
         ServerHttpRequest request = authorizationContext.getExchange().getRequest();
@@ -68,7 +72,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         String method = request.getMethodValue();
         String path = request.getURI().getPath();
 
-        String restfulPath = method + ":" + path;
+        String restfulPath = appName + ":" + method + ":" + path;
 
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
         String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
@@ -115,7 +119,6 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         PathMatcher pathMatcher = new AntPathMatcher();
         for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
-            perm = perm.replace(":", ":/**");
             if (pathMatcher.match(perm, restfulPath)) {
                 List<String> roles = Convert.toList(String.class, permRoles.getValue());
                 authorizedRoles.addAll(Convert.toList(String.class, roles));
