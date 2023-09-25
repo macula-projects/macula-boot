@@ -17,7 +17,9 @@
 
 package dev.macula.boot.starter.rocketmq.instrument;
 
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
+import dev.macula.boot.context.GrayVersionMetaHolder;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
@@ -43,7 +45,14 @@ public class RocketMQConsumerNSPostProcessor implements BeanPostProcessor {
         // DefaultRocketMQListenerContainer是监听器实现类
         if (bean instanceof DefaultRocketMQListenerContainer) {
             DefaultRocketMQListenerContainer container = (DefaultRocketMQListenerContainer)bean;
-            // 开启消息隔离情况下获取隔离配置，此处隔离topic，根据自己的需求隔离group或者tag
+
+            // 灰度环境下需要隔离consumerGroup
+            if (StrUtil.isNotEmpty(GrayVersionMetaHolder.getGrayVersion())) {
+                container.setConsumerGroup(
+                    container.getConsumerGroup() + CharPool.DASHED + GrayVersionMetaHolder.getGrayVersion());
+            }
+
+            // 配置默认命名空间
             if (StringUtils.hasText(properties.getConsumer().getNamespace())) {
                 if (StrUtil.isEmpty(container.getNamespace())) {
                     container.setNamespace(properties.getConsumer().getNamespace());

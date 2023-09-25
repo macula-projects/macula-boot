@@ -47,6 +47,7 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
+    @SuppressWarnings("deprecation")
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DefaultMQPushConsumer)
             return createDefaultMQPushConsumerProxy(bean);
@@ -59,10 +60,10 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
 
     private Object createDefaultMQLitePullConsumerProxy(Object bean) {
         try {
-            DefaultLitePullConsumer defaultMQPushConsumer = (DefaultLitePullConsumer)bean;
-            Field field = defaultMQPushConsumer.getClass().getDeclaredField("defaultLitePullConsumerImpl");
+            DefaultLitePullConsumer defaultMQPullConsumer = (DefaultLitePullConsumer)bean;
+            Field field = defaultMQPullConsumer.getClass().getDeclaredField("defaultLitePullConsumerImpl");
             field.setAccessible(true);
-            Object defaultLitePullConsumerImplObj = field.get(defaultMQPushConsumer);
+            Object defaultLitePullConsumerImplObj = field.get(defaultMQPullConsumer);
             DefaultLitePullConsumerImpl defaultMQPushConsumerImpl =
                 (DefaultLitePullConsumerImpl)defaultLitePullConsumerImplObj;
             reflectToAddFilterMessageHook(defaultMQPushConsumerImpl);
@@ -77,7 +78,12 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
     private Object createDefaultMQPushConsumerProxy(Object bean) {
         try {
             DefaultMQPushConsumer defaultMQPushConsumer = (DefaultMQPushConsumer)bean;
-            DefaultMQPushConsumerImpl defaultMQPushConsumerImpl = defaultMQPushConsumer.getDefaultMQPushConsumerImpl();
+            // defaultMQPushConsumer.getDefaultMQPushConsumerImpl();
+            Field field = defaultMQPushConsumer.getClass().getDeclaredField("defaultMQPushConsumerImpl");
+            field.setAccessible(true);
+            Object defaultMQPushConsumerImplObj = field.get(defaultMQPushConsumer);
+            DefaultMQPushConsumerImpl defaultMQPushConsumerImpl =
+                (DefaultMQPushConsumerImpl)defaultMQPushConsumerImplObj;
             reflectToAddFilterMessageHook(defaultMQPushConsumerImpl);
             return bean;
         } catch (Exception e) {
@@ -87,6 +93,7 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private Object createDefaultMQPullConsumerProxy(Object bean) {
         try {
             DefaultMQPullConsumer defaultMQPullConsumer = (DefaultMQPullConsumer)bean;
@@ -100,6 +107,7 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void reflectToAddFilterMessageHook(MQConsumerInner consumerInner)
         throws NoSuchFieldException, IllegalAccessException {
         Field field = consumerInner.getClass().getDeclaredField("filterMessageHookList");
