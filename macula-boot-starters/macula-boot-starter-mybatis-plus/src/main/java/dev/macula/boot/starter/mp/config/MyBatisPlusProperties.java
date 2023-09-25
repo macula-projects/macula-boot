@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.mp.config;
 
+import dev.macula.boot.constants.GlobalConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,7 +37,7 @@ public class MyBatisPlusProperties {
 
     private Audit audit = new Audit();
 
-    private long tenantId = 1L;
+    private long tenantId = GlobalConstants.DEFAULT_TENANT_ID;
 
     private String[] tenantSuffixes = new String[] {"tenant", "TENANT"};
 

@@ -15,27 +15,24 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.constants;
+package dev.macula.boot.starter.springfox;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
- * {@code GlobalConstants} 全局常量
+ * {@code User} 用户
  *
  * @author rain
- * @since 2023/3/1 19:18
+ * @since 2023/9/25 13:38
  */
-public interface GlobalConstants {
+@Data
+@Schema(description = "用户实体模型")
+public class User {
 
-    String FEIGN_REQ_ID = "FEIGN_REQ_ID";
+    @Schema(description = "用户名")
+    private String userName;
 
-    String TENANT_ID_NAME = "tenantId";
-
-    String TOKEN_ID_NAME = "tokenId";
-
-    Long DEFAULT_TENANT_ID = 1L;
-
-    String CRYPTO_URLS_ENDPOINT = "/gateway/crypto/urls";
-
-    String CRYPTO_KEY_ENDPOINT = "/gateway/crypto/key";
-
-    String GRAY_VERSION_TAG = "grayversion";
+    @Schema(description = "密码")
+    private String passWord;
 }

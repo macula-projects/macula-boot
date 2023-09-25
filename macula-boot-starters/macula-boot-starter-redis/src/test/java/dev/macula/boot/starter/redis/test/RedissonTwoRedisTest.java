@@ -43,7 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @since 2022-01-29
  */
 @SpringBootTest
-public class RedissonTwoRedis {
+public class RedissonTwoRedisTest {
 
     @Autowired
     @Qualifier("redissonClientOne")
@@ -54,7 +54,7 @@ public class RedissonTwoRedis {
     private RedissonClient redissonClientTwo;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     public void testRedisTemplate() {

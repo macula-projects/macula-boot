@@ -49,7 +49,7 @@ public class ConsumerAttachmentFilter implements Filter {
 			name = authentication.getName();
 		}
 
-		RpcContext.getContext().setAttachment(USER_NAME, name);
+		RpcContext.getClientAttachment().setAttachment(USER_NAME, name);
 		return invoker.invoke(invocation);
 	}
 }

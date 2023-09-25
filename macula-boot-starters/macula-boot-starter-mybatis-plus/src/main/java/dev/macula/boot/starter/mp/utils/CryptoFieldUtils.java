@@ -40,7 +40,7 @@ public class CryptoFieldUtils {
         if (prefix == null) {
             prefix = "";
         }
-        if (prefix != "") {
+        if (!prefix.isEmpty()) {
             prefix = prefix + ".";
         }
         Map<String, String> cryptFieldMap = new HashMap<>();
@@ -67,7 +67,7 @@ public class CryptoFieldUtils {
         }
         String className = params.getClass().getName();
         if (!CRYPT_FIELDS.contains(className)) {
-            Field fields[] = params.getClass().getDeclaredFields();
+            Field[] fields = params.getClass().getDeclaredFields();
             for (Field field : fields) {
                 CryptoField cryptFieldAnnotation = field.getAnnotation(CryptoField.class);
                 if (cryptFieldAnnotation != null) {

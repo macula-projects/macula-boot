@@ -22,9 +22,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,12 +41,12 @@ import java.util.Map;
 public class Swagger3DemoController {
 
     public static Integer id = 1;
-    public static Map<Integer, User> users = new HashMap();
+    public static Map<Integer, User> users = new HashMap<>();
 
     @PostMapping("add")
     @Operation(summary = "添加用户接口", description = "可以用来新增用户")
     @Parameter(name = "user", description = "用户实体模型")
-    public ResponseEntity<Map> addUser(@RequestBody User user) {
+    public ResponseEntity<Map<Integer, User>> addUser(@RequestBody User user) {
         users.put(id++, user);
         return ResponseEntity.ok(users);
     }
@@ -56,7 +54,7 @@ public class Swagger3DemoController {
     @DeleteMapping("delete/{id}")
     @Operation(summary = "删除用户接口", description = "可以用来删除用户")
     @Parameter(name = "id", description = "用户ID")
-    public ResponseEntity<Map> deleteUserById(@PathVariable(name = "id") Integer id) {
+    public ResponseEntity<Map<Integer, User>> deleteUserById(@PathVariable(name = "id") Integer id) {
         users.remove(id);
         return ResponseEntity.ok(users);
     }
@@ -68,7 +66,7 @@ public class Swagger3DemoController {
         @Parameter(name = "passWord", description = "密码", in = ParameterIn.QUERY)})
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
         content = {@Content(mediaType = "application/x-www-form-urlencoded")})
-    public ResponseEntity<Map> updateUser(Integer id, String userName, String passWord) {
+    public ResponseEntity<Map<Integer, User>> updateUser(Integer id, String userName, String passWord) {
         User user = users.get(id);
         user.setUserName(userName);
         user.setPassWord(passWord);
@@ -83,16 +81,6 @@ public class Swagger3DemoController {
         User user = users.get(id);
         return ResponseEntity.ok(user);
     }
-
 }
 
-@Data
-@Schema(description = "用户实体模型")
-class User {
 
-    @Schema(description = "用户名")
-    private String userName;
-
-    @Schema(description = "密码")
-    private String passWord;
-}

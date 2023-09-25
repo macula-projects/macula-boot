@@ -41,7 +41,7 @@ public class ProviderAttachmentFilter implements Filter {
 	@Override
 	public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
 		// 消费方的用户名
-		String userName = RpcContext.getContext().getAttachment(ConsumerAttachmentFilter.USER_NAME);
+		String userName = RpcContext.getServerAttachment().getAttachment(ConsumerAttachmentFilter.USER_NAME);
 
 		// 提供给后台更新lastUpdatedBy和createBy
 		if (StringUtils.isNotEmpty(userName)) {

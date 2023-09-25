@@ -116,7 +116,7 @@ public class UserMapperTest {
         int i = userMapper.insert(user);
         Assertions.assertTrue(i > 0);
 
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper();
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getName, "rain.wang");
         user = userMapper.selectOne(queryWrapper);
 

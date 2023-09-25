@@ -22,7 +22,6 @@ import dev.macula.boot.starter.sender.Message;
 import dev.macula.boot.starter.sender.MessageSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Comparator;
@@ -32,7 +31,7 @@ import java.util.List;
 /**
  * {@code ReliableMessageSendService} 本地消息发送服务
  *
- * @author https://gitee.com/litao851025/lego
+ * @author <a href="https://gitee.com/litao851025/lego">lego</a>
  * @since 2023/1/3 14:10
  */
 @Slf4j
@@ -82,7 +81,7 @@ public class ReliableMessageSendService {
     private void addCallbackOrRunTask(SendMessageTask sendMessageTask) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             // 添加监听器，在事务提交后触发后续任务
-            TransactionSynchronization transactionSynchronization = new TransactionSynchronizationAdapter() {
+            TransactionSynchronization transactionSynchronization = new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
                     sendMessageTask.run();
@@ -111,7 +110,7 @@ public class ReliableMessageSendService {
     }
 
     private Date calLatestUpdateTime(List<LocalMessage> localMessages) {
-        return localMessages.stream().map(localMessage -> localMessage.getUpdateTime()).max(Comparator.naturalOrder())
+        return localMessages.stream().map(LocalMessage::getUpdateTime).max(Comparator.naturalOrder())
             .orElse(new Date());
     }
 
@@ -119,6 +118,6 @@ public class ReliableMessageSendService {
         Date now = new Date();
         localMessages.stream().filter(message -> message.needRetry(now))
             .map(localMessage -> new SendMessageTask(this.localMessageRepository, messageSender, localMessage))
-            .forEach(task -> task.run());
+            .forEach(SendMessageTask::run);
     }
 }
