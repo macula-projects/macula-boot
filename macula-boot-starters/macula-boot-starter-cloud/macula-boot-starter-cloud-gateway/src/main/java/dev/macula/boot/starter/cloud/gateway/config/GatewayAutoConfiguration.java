@@ -20,10 +20,7 @@ package dev.macula.boot.starter.cloud.gateway.config;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
-import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.CryptoUrlsEndpointFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.*;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -69,5 +66,10 @@ public class GatewayAutoConfiguration {
     @Bean
     public NimbusJwkSetEndpointFilter nimbusJwkSetEndpointFilter(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwkSetEndpointFilter(jwkSource);
+    }
+
+    @Bean
+    public GrayscalePublishFilter grayscalePublishFilter(GatewayProperties gatewayProperties) {
+        return new GrayscalePublishFilter(gatewayProperties);
     }
 }

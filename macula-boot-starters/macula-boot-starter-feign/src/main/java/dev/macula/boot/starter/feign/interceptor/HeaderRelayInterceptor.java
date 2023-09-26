@@ -20,6 +20,7 @@ package dev.macula.boot.starter.feign.interceptor;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
+import dev.macula.boot.context.GrayVersionContextHolder;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -54,6 +55,12 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
             // 如果feign client不是调用第三方才把上下文的token relay下去
             if (StrUtil.isNotEmpty(token) && !template.headers().containsKey(SecurityConstants.AUTHORIZATION_KEY)) {
                 template.header(SecurityConstants.AUTHORIZATION_KEY, token);
+            }
+
+            // 传递灰度头给下游提供方(在SpringMVC的拦截器中设置了灰度上下文@see GrayHandlerInterceptor)
+            String grayVersion = GrayVersionContextHolder.getGrayVersion();
+            if (StrUtil.isNotEmpty(grayVersion)) {
+                template.header(GlobalConstants.GRAY_VERSION_TAG, grayVersion);
             }
         }
     }

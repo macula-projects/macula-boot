@@ -40,6 +40,7 @@
 
         <module>macula-boot-starter-cloud-tsf</module>
         <module>macula-boot-starter-cloud-tsf-scg</module>
+        <module>macula-boot-starter-cloud-alibaba-gray</module>
     </modules>
 
 </project>

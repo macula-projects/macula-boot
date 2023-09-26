@@ -271,6 +271,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-cloud-alibaba-gray</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tencent</artifactId>
                 <version>${revision}</version>
             </dependency>

@@ -46,4 +46,12 @@ public class GatewayProperties {
      * 需要加解密的接口清单
      */
     private List<String> cryptoUrls = new ArrayList<>();
+
+    private Gray gray = new Gray();
+
+    @Data
+    public static final class Gray {
+        /** 灰度开关 */
+        private boolean enabled;
+    }
 }

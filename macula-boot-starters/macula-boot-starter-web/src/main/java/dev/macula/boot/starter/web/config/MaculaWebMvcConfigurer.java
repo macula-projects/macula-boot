@@ -18,10 +18,12 @@
 package dev.macula.boot.starter.web.config;
 
 import cn.hutool.core.date.DateUtil;
+import dev.macula.boot.starter.web.interceptor.GrayHandlerInterceptor;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Date;
@@ -49,5 +51,10 @@ public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setUseIsoFormat(true);
         registrar.registerFormatters(registry);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new GrayHandlerInterceptor());
     }
 }
