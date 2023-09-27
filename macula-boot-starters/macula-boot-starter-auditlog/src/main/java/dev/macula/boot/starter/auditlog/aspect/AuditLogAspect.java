@@ -186,14 +186,19 @@ public class AuditLogAspect implements ApplicationContextAware {
         if (ArrayUtil.isEmpty(paramsArray)) {
             return params.toString();
         }
+
+        int i = 0;
         for (Object o : paramsArray) {
             if (ObjectUtil.isNotNull(o) && !isFilterObject(o)) {
                 String str = JSONUtil.toJsonStr(o);
-                Dict dict = JSONUtil.toBean(str, Dict.class);
-                if (MapUtil.isNotEmpty(dict)) {
-                    MapUtil.removeAny(dict, EXCLUDE_PROPERTIES);
-                    MapUtil.removeAny(dict, excludeParamNames);
-                    str = JSONUtil.toJsonStr(dict);
+                if (!o.getClass().isPrimitive() && !Collection.class.isAssignableFrom(o.getClass()) && !o.getClass()
+                    .isArray()) {
+                    Dict dict = JSONUtil.toBean(str, Dict.class);
+                    if (MapUtil.isNotEmpty(dict)) {
+                        MapUtil.removeAny(dict, EXCLUDE_PROPERTIES);
+                        MapUtil.removeAny(dict, excludeParamNames);
+                        str = JSONUtil.toJsonStr(dict);
+                    }
                 }
                 params.add(str);
             }
