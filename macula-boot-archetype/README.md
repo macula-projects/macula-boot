@@ -3,7 +3,7 @@
 脚手架工程
 
 ```shell
-mvn archetype:generate \
+mvn archetype:generate 
     -DgroupId=com.infintius.xxp
     -DartifactId=xxp
     -Dversion=1.0.0-SNAPSHOT 
