@@ -23,7 +23,7 @@ import 'nprogress/nprogress.css'
 import tool from '@/utils/tool';
 import systemRouter from './systemRouter';
 import userRoutes from '@/config/route';
-import {afterEach, beforeEach} from './scrollBehavior';
+import {beforeEach, afterEach} from './scrollBehavior';
 
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('./../views/**/*.vue')

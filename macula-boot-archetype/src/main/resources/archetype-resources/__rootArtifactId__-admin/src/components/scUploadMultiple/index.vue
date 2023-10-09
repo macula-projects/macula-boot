@@ -18,21 +18,21 @@
 <template>
   <div class="sc-upload-multiple">
     <el-upload ref="uploader" v-model:file-list="defaultFileList"
+               :auto-upload="autoUpload"
+               :disabled="disabled"
                :accept="accept"
                :action="action"
-               :auto-upload="autoUpload"
                :before-upload="before"
-               :data="data"
-               :disabled="disabled"
                :http-request="request"
+               :data="data"
                :limit="limit"
-               :multiple="multiple"
                :name="name"
-               :on-error="error"
+               :multiple="multiple"
                :on-exceed="handleExceed"
-               :on-preview="handlePreview"
                :on-success="success"
                :show-file-list="showFileList"
+               :on-error="error"
+               :on-preview="handlePreview"
                list-type="picture-card">
       <slot>
         <el-icon>

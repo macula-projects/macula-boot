@@ -43,14 +43,10 @@
 </template>
 
 <script>
-import tenant from './tenant'
 import {useTenantStore} from '@/stores/tenant';
 import {mapActions} from 'pinia';
 
 export default {
-  components: {
-    tenant
-  },
   data() {
     return {
       userName: "",
@@ -194,3 +190,4 @@ export default {
   background: #383838;
 }
 </style>
+    

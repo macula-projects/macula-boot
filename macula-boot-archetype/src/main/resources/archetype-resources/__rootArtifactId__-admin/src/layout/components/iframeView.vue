@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import {mapActions, mapStores} from 'pinia';
+import {mapStores, mapActions} from 'pinia';
 import {useGlobalStore} from '../../stores/global';
 import {useIframeStore} from '../../stores/iframe';
 

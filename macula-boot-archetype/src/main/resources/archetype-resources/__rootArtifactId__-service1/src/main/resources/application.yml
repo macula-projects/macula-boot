@@ -1,9 +1,22 @@
-server:
-  servlet:
-    encoding:
-      force: true
-
 spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/${rootArtifactId}?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&autoReconnect=true
+    username: root
+    password:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+  cache:
+    # 缓存类型 redis、none(不使用缓存)
+    type: redis
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://127.0.0.1:8080/oauth2/jwks
   cloud:
     nacos:
       discovery:
@@ -13,25 +26,29 @@ spring:
         # group:
     sentinel:
       enabled: false
+macula:
   security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://127.0.0.1:9000/oauth2/jwks    # 网关地址
+    ignore-urls:
+      - /api/v1/echo/**
+
+mybatis-plus:
+  type-handlers-package: dev.macula.boot.starter.mp.handler
+  #configuration:
+  # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+  #  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 feign:
   httpclient:
     enabled: false
-    max-connections: 200          # 线程池最大连接数，默认200
-    time-to-live: 900             # 线程存活时间，单位秒，默认900
-    connection-timeout: 2000      # 新建连接超时时间，单位ms, 默认2000
-    follow-redirects: true        # 是否允许重定向，默认true
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
     disable-ssl-validation: false # 是否禁止SSL检查， 默认false
     okhttp:
-      read-timeout: 60s           # 请求超时时间，Duration配置方式
+      read-timeout: 60s # 请求超时时间，Duration配置方式
   okhttp:
     enabled: true
-  sentinel:
-    enabled: false
 
 seata:
   enabled: false
@@ -42,9 +59,14 @@ springdoc:
   swagger-ui:
     enabled: true # 默认是true，用于开关API UI
 
+server:
+  servlet:
+    encoding:
+      force: true
+
 logging:
   level:
     root: info
-    com.alibaba.nacos.client: error
+    dev.macula.samples: debug
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log

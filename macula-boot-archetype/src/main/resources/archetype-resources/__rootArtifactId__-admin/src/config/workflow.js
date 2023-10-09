@@ -30,7 +30,7 @@ export default {
         parseData: function (res) {
             return {
                 rows: res.data,
-                msg: res.message,
+                msg: res.msg,
                 code: res.code
             }
         },
@@ -49,7 +49,7 @@ export default {
             return {
                 rows: res.data.rows,
                 total: res.data.total,
-                msg: res.message,
+                msg: res.msg,
                 code: res.code
             }
         },
@@ -72,7 +72,7 @@ export default {
         parseData: function (res) {
             return {
                 rows: res.data,
-                msg: res.message,
+                msg: res.msg,
                 code: res.code
             }
         },

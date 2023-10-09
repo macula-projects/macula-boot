@@ -21,8 +21,11 @@
 package ${package}.service1.api;
 
 import ${package}.service1.api.fallback.AbstractEchoFeignFallbackFactory;
+import ${package}.service1.vo.app.ApplicationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -34,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "${rootArtifactId}-service1", contextId = "echoFeignClient",
     fallbackFactory = AbstractEchoFeignFallbackFactory.class)
 public interface EchoFeignClient {
-    @GetMapping(name = "/api/v1/echo/hello")
+    @GetMapping("/api/v1/echo/hello")
     String hello(@RequestParam("echo") String echo);
+
+    @PostMapping("/api/v1/echo/app")
+    ApplicationVO app(@RequestBody ApplicationVO vo);
 }

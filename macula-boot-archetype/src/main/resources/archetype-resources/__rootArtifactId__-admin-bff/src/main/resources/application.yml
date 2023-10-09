@@ -45,7 +45,7 @@ springdoc:
 macula:
   cloud:
     endpoint: http://127.0.0.1:9000                   # macula cloud网关地址
-    app-key: example
+    app-key: ${spring.application.name}
     secret-key: example
 
 logging:

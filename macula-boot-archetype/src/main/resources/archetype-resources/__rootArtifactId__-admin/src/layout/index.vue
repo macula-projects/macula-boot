@@ -241,7 +241,7 @@ import NavMenu from './components/navMenu.vue';
 import userbar from './components/userbar.vue';
 import setting from './components/setting.vue';
 import iframeView from './components/iframeView.vue';
-import {mapActions, mapState} from 'pinia';
+import {mapState, mapActions} from 'pinia';
 import {useGlobalStore} from '../stores/global';
 import {useKeepAliveStore} from '../stores/keepAlive';
 

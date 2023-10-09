@@ -33,16 +33,16 @@
                  style="margin-bottom: 15px;"/>
     <div v-loading="loading">
       <el-upload ref="uploader"
-                 :accept="accept"
                  :before-upload="before"
-                 :data="data"
-                 :http-request="request"
+                 :accept="accept"
                  :limit="1"
                  :maxSize="maxSize"
+                 :data="data"
                  :on-error="error"
+                 :http-request="request"
+                 :show-file-list="false"
                  :on-progress="progress"
                  :on-success="success"
-                 :show-file-list="false"
                  drag
       >
         <slot name="uploader">

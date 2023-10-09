@@ -1,4 +1,12 @@
 spring:
+  redis: # 网关自己的redis配置
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    system: # macula-cloud的system模块的redis配置
+      database: 0
+      host: 127.0.0.1
+      port: 6379
   cloud:
     nacos:
       discovery:

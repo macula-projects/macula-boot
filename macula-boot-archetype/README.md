@@ -9,7 +9,7 @@ mvn archetype:generate \
     -Dversion=1.0.0-SNAPSHOT 
     -DarchetypeArtifactId=macula-boot-archetype 
     -DarchetypeGroupId=dev.macula.boot 
-    -DarchetypeVersion=5.0.0-SNAPSHOT 
+    -DarchetypeVersion=5.0.3-SNAPSHOT 
     -DarchetypeRepository=~/.m2/repository 
     -Dgitignore=.gitignore -DinteractiveMode=false
 ```

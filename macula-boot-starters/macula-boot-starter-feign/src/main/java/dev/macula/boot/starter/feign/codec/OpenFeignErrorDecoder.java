@@ -52,7 +52,7 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
             String body = Util.toString(response.body().asReader(Charset.defaultCharset()));
 
             try {
-                if (response.status() == 500) {
+                if (response.status() == 500 || response.status() == 403) {
                     Result<?> resultData = JSONUtil.toBean(body, Result.class);
                     if (!resultData.isSuccess()) {
                         String errMsg = "Feign提供方异常：";

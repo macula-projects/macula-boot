@@ -22,18 +22,18 @@
         :accept="accept"
         :action="action"
         :auto-upload="autoUpload"
-        :before-upload="before"
         :data="data"
+        :http-request="request"
+        :before-upload="before"
         :disabled="disabled"
         :drag="drag"
-        :http-request="request"
-        :limit="limit"
         :multiple="multiple"
         :name="name"
-        :on-error="error"
+        :limit="limit"
         :on-exceed="handleExceed"
-        :on-preview="handlePreview"
         :on-success="success"
+        :on-error="error"
+        :on-preview="handlePreview"
         :show-file-list="showFileList">
       <slot>
         <el-button :disabled="disabled" type="primary">Click to upload</el-button>

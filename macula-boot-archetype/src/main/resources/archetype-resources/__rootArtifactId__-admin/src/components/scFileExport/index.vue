@@ -203,7 +203,7 @@ export default {
           }).catch(() => {
           })
         } else {
-          ElMessageBox.alert(res.message || "未知错误", "发起任务失败", {
+          ElMessageBox.alert(res.cause || res.msg || "未知错误", "发起任务失败", {
             type: "error",
             center: true
           }).catch(() => {

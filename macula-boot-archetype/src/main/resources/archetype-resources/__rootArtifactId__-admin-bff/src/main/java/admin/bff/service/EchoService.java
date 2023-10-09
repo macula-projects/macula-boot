@@ -20,6 +20,8 @@
 #set( $symbol_escape = '\' )
 package ${package}.admin.bff.service;
 
+import ${package}.service1.vo.app.ApplicationVO;
+
 /**
  * {@code EchoService} ECHO演示服务接口
  *
@@ -28,4 +30,6 @@ package ${package}.admin.bff.service;
  */
 public interface EchoService {
     String hello(String echo);
+
+    ApplicationVO app(ApplicationVO vo);
 }

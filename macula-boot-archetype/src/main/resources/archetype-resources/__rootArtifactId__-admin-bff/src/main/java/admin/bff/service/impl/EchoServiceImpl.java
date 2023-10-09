@@ -22,6 +22,7 @@ package ${package}.admin.bff.service.impl;
 
 import ${package}.admin.bff.service.EchoService;
 import ${package}.service1.api.EchoFeignClient;
+import ${package}.service1.vo.app.ApplicationVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,5 +41,10 @@ public class EchoServiceImpl implements EchoService {
     public String hello(String echo) {
         echo = echo + "xxx";
         return echoFeignClient.hello(echo);
+    }
+
+    @Override
+    public ApplicationVO app(ApplicationVO vo) {
+        return echoFeignClient.app(vo);
     }
 }

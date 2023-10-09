@@ -14,20 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 package ${package}.admin.bff.controller;
 
-import ${groupId}.admin.bff.service.EchoService;
+import ${package}.admin.bff.service.EchoService;
+import ${package}.service1.vo.app.ApplicationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * {@code EchoController} ECHO服务
@@ -48,5 +46,12 @@ public class EchoController {
     @GetMapping(value = "/hello")
     public String hello(@RequestParam("echo") String echo) {
         return echoService.hello(echo);
+    }
+
+    @Operation(summary = "POST演示")
+    @Parameter(name = "应用VO")
+    @PostMapping(value = "/app")
+    public ApplicationVO app(@RequestBody ApplicationVO vo) {
+        return echoService.app(vo);
     }
 }

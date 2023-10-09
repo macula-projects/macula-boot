@@ -53,8 +53,6 @@
 </template>
 
 <script>
-import {useTenantStore} from '@/stores/tenant';
-import {mapActions} from 'pinia';
 
 export default {
   data() {
@@ -91,7 +89,6 @@ export default {
 
   },
   methods: {
-    ...mapActions(useTenantStore, ['pushTenantOptions', 'updateTenantLabel', 'updateTenantId', 'clearTenantOptions']),
     async login() {
 
       var validate = await this.$refs.loginForm.validate().catch(() => {
@@ -105,7 +102,7 @@ export default {
         username: this.form.user,
         password: this.form.password,
         grant_type: 'password',
-        client_id: 'e4da4a32-592b-46f0-ae1d-784310e88423',
+        client_id: 'e2fa7e64-249b-46f0-ae1d-797610e88615',
         client_secret: 'secret',
         scope: 'message.read message.write userinfo'
       }
@@ -124,7 +121,7 @@ export default {
       }
 
       var userInfo = await this.$API.common_auth.getUserInfo.get()
-      if (userInfo.code && userInfo.code === '00000') {
+      if (userInfo.success) {
         this.$TOOL.data.set("USER_INFO", userInfo.data)
       } else {
         this.islogin = false
@@ -135,7 +132,7 @@ export default {
       // 处理菜单
       // 用户的角色是否包含路由返回菜单对应的角色
       var res = await this.$API.common_auth.getRoutes.get()
-      if (res.code && res.code === '00000') {
+      if (res.success) {
         var routes = res.data
         var roles = userInfo.data.roles
         var perms = userInfo.data.perms
@@ -163,3 +160,4 @@ export default {
 </script>
 
 <style></style>
+  

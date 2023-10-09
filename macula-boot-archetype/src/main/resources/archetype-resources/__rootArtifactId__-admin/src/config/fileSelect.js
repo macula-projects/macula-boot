@@ -37,7 +37,7 @@ export default {
         return {
             rows: res.data.rows,
             total: res.data.total,
-            msg: res.message,
+            msg: res.msg,
             code: res.code
         }
     },

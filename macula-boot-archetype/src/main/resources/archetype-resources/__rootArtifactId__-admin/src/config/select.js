@@ -24,7 +24,7 @@ export default {
     parseData: function (res) {
         return {
             data: res.data,				//分析行数据字段结构
-            msg: res.message,			//分析描述字段结构
+            msg: res.msg,			//分析描述字段结构
             code: res.code				//分析状态字段结构
         }
     },

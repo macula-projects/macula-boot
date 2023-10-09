@@ -64,6 +64,9 @@ axios.interceptors.response.use(
                     message: "Status:404，正在请求不存在的服务器记录！"
                 });
             } else if (error.response.status == 500) {
+                if (error.response.data.cause || error.response.data.msg) {
+                    return error.response;
+                }
                 ElNotification.error({
                     title: '请求错误',
                     message: error.response.data.message || "Status:500，服务器发生错误！"

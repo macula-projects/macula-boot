@@ -24,7 +24,7 @@ export default {
             data: res.data,
             rows: res.data.records,		//rows: res.data.rows, 分析行数据字段结构
             total: res.data.total,		//分析总数字段结构
-            msg: res.message,			//分析描述字段结构
+            msg: res.msg,			//分析描述字段结构
             code: res.code				//分析状态字段结构
         }
     },
