@@ -25,7 +25,7 @@ import ${package}.admin.bff.service.ApplicationService;
 import ${package}.service1.api.ApplicationFeignClient;
 import ${package}.service1.form.ApplicationForm;
 import ${package}.service1.query.ApplicationPageQuery;
-import ${package}s.service1.vo.app.ApplicationVO;
+import ${package}.service1.vo.app.ApplicationVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

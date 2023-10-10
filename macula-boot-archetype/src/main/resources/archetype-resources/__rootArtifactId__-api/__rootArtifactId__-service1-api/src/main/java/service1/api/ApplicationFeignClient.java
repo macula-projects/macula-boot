@@ -20,12 +20,16 @@
 #set( $symbol_escape = '\' )
 package ${package}.service1.api;
 
-import dev.macula.boot.result.PageVO;
+import ${package}.service1.form.ApplicationForm;
 import ${package}.service1.api.fallback.AbstracApplicationFeignFallbackFactory;
 import ${package}.service1.query.ApplicationPageQuery;
 import ${package}.service1.vo.app.ApplicationVO;
+import dev.macula.boot.result.PageVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.cloud.openfeign.SpringQueryMap;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /**
  * {@code ApplicationFeignClient} is 应用管理接口

@@ -47,7 +47,28 @@
 
         <dependency>
             <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-mybatis-plus</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-mapstruct</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>${rootArtifactId}-service1-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

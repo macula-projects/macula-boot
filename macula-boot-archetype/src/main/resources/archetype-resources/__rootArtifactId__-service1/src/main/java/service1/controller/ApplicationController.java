@@ -21,10 +21,10 @@
 package ${package}.service1.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import dev.macula.samples.service1.form.ApplicationForm;
-import dev.macula.samples.service1.query.ApplicationPageQuery;
-import dev.macula.samples.service1.service.ApplicationService;
-import dev.macula.samples.service1.vo.app.ApplicationVO;
+import ${package}.service1.form.ApplicationForm;
+import ${package}.service1.query.ApplicationPageQuery;
+import ${package}.service1.service.ApplicationService;
+import ${package}.service1.vo.app.ApplicationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

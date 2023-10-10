@@ -33,7 +33,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
+@EnableFeignClients(basePackages = {"${package}.admin.bff", "${package}.service1"})
 public class AdminBffApplication {
     public static void main(String[] args) {
         SpringApplication.run(AdminBffApplication.class, args);

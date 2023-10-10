@@ -15,10 +15,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<archetype-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                      xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
-                      xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 http://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
-                      name="macula-boot-archetype">
+<archetype-descriptor
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
+        xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+        name="macula-boot-archetype">
     <requiredProperties>
         <requiredProperty key="gitignore">
             <defaultValue>.gitignore</defaultValue>
@@ -152,7 +153,11 @@
                     <includes>
                         <include>**/*.yml</include>
                         <include>**/*.properties</include>
+                        <include>**/mapper/*.*</include>
                     </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                    <directory>docs</directory>
                 </fileSet>
             </fileSets>
         </module>

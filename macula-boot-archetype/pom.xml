@@ -28,6 +28,7 @@
 
     <artifactId>macula-boot-archetype</artifactId>
     <packaging>maven-archetype</packaging>
+    <description>Macula Boot ArcheType</description>
 
     <build>
         <extensions>
