@@ -158,11 +158,11 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
             return serverHttpRequest;
         }
 
-        String encrtyParam = data.get(0);
-        log.debug("======editGetParam start path:{}, encrtyParam: {}", path, encrtyParam);
+        String encryptParam = data.get(0);
+        log.debug("======editGetParam start path:{}, encrtyParam: {}", path, encryptParam);
 
         // 解密URL参数
-        String decrypt = cryptoService.decrypt(encrtyParam, sm4Key);
+        String decrypt = cryptoService.decrypt(encryptParam, sm4Key);
 
         if (StrUtil.isNotBlank(decrypt)) {
             // 去除字符串中的引号

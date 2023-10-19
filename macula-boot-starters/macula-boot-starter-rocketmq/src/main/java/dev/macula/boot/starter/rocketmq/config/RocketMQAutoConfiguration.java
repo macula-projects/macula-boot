@@ -25,12 +25,14 @@ import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQConsumerPostProce
 import dev.macula.boot.starter.rocketmq.instrument.GrayRocketMQProducerAspect;
 import dev.macula.boot.starter.rocketmq.instrument.RocketMQConsumerNSPostProcessor;
 import org.apache.rocketmq.client.consumer.MQConsumer;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MQProducer;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -76,6 +78,7 @@ public class RocketMQAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(DefaultMQProducer.class)
     public RocketMQLocalTransactionListener rocketMQTransactionListener() {
         return new DefaultRocketMQLocalTransactionListener();
     }
