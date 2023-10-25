@@ -19,7 +19,7 @@ package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
-import dev.macula.boot.starter.cloud.gateway.utils.HmacUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -47,7 +47,7 @@ public class BodyGlobalFilter implements GlobalFilter, Ordered {
             // 判断是否有加密参数，有则进行加解密操作，无则跳过
             // 判断是否是HMAC请求，不是也不缓存
             String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
-            if (StrUtil.isNotBlank(sm4Key) || HmacUtils.isHmacRequest(exchange)) {
+            if (StrUtil.isNotBlank(sm4Key) || KongApiUtils.isKongApiRequest(exchange)) {
 
                 log.debug("GlobalCacheRequestBodyFilter start...");
 

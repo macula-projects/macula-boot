@@ -56,4 +56,6 @@ public interface CacheConstants {
 
     /** 网关TOKEN的introspect信息缓存 */
     String GATEWAY_TOKEN_CACHE_KEY = "macula:cloud:gateway:principal:";
+
+    String GATEWAY_NONCE_KEY = "macula:scg:nonce";
 }

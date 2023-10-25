@@ -44,7 +44,7 @@ public interface CryptoService {
      * 加密数据
      *
      * @param plainText 明文
-     * @param sm4Key    加密的密钥
+     * @param sm4Key    加密的密钥,32位16进制字符串
      * @return base64密文
      */
     String encrypt(String plainText, String sm4Key);
@@ -53,7 +53,7 @@ public interface CryptoService {
      * 解密数据
      *
      * @param secretText base64密文
-     * @param sm4Key     解密的密钥
+     * @param sm4Key     解密的密钥,32位16进制字符串
      * @return 明文
      */
     String decrypt(String secretText, String sm4Key);

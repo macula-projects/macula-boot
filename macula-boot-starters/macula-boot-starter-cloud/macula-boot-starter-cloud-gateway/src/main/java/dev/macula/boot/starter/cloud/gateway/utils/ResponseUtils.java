@@ -21,8 +21,9 @@ import cn.hutool.json.JSONUtil;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -44,8 +45,16 @@ public class ResponseUtils {
         return writeErrorInfo(response, resultCode, null);
     }
 
-    public static Mono<Void> writeErrorInfo(ServerHttpResponse response, ApiResultCode resultCode, Result<?> result) {
-        switch (resultCode) {
+    /**
+     * 以非HTTP 200响应错误信息
+     *
+     * @param response 响应
+     * @param code     错误码
+     * @param result   具体错误结果
+     * @return void
+     */
+    public static Mono<Void> writeErrorInfo(ServerHttpResponse response, ApiResultCode code, Result<?> result) {
+        switch (code) {
             case ACCESS_UNAUTHORIZED:
             case TOKEN_INVALID_OR_EXPIRED:
                 response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -58,11 +67,33 @@ public class ResponseUtils {
                 response.setStatusCode(HttpStatus.BAD_REQUEST);
                 break;
         }
-        response.getHeaders().set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        response.getHeaders().set("Access-Control-Allow-Origin", "*");
-        response.getHeaders().set("Cache-Control", "no-cache");
-        String body = JSONUtil.toJsonStr(result == null ? Result.failed(resultCode) : result);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        response.getHeaders().setAccessControlAllowOrigin("*");
+        response.getHeaders().setCacheControl(CacheControl.noCache());
+
+        String body = JSONUtil.toJsonStr(result == null ? Result.failed(code) : result);
         DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
         return response.writeWith(Mono.just(buffer)).doOnError(error -> DataBufferUtils.release(buffer));
+    }
+
+    /**
+     * 以 HTTP 200返回错误信息
+     *
+     * @param response 响应
+     * @param code     错误码
+     * @param msg      错误消息
+     * @return void
+     */
+    public static Mono<Void> writeOkErrorInfo(ServerHttpResponse response, ApiResultCode code, String msg) {
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        response.getHeaders().setAccessControlAllowOrigin("*");
+        response.getHeaders().setCacheControl(CacheControl.noCache());
+        response.setStatusCode(HttpStatus.OK);
+
+        return response.writeWith(Mono.fromSupplier(() -> {
+            DataBufferFactory bufferFactory = response.bufferFactory();
+            String failedJson = JSONUtil.toJsonStr(Result.failed(code, msg));
+            return bufferFactory.wrap(failedJson.getBytes(StandardCharsets.UTF_8));
+        }));
     }
 }

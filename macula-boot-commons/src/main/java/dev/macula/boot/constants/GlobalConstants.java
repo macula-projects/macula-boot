@@ -33,9 +33,5 @@ public interface GlobalConstants {
 
     Long DEFAULT_TENANT_ID = 1L;
 
-    String CRYPTO_URLS_ENDPOINT = "/gateway/crypto/urls";
-
-    String CRYPTO_KEY_ENDPOINT = "/gateway/crypto/key";
-
     String GRAY_VERSION_TAG = "grayversion";
 }

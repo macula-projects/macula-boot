@@ -29,11 +29,26 @@ public interface GatewayConstants {
 
     String HMAC_AUTH_PREFIX = "hmac username";
 
+    String PROTECT_URLS_ENDPOINT = "/gateway/protect/urls";
+
+    String PROTECT_KEY_ENDPOINT = "/gateway/protect/key";
+
     String SM4_KEY = "sm4-key";
 
+    String SYM_ALG = "sym-alg";
+
     String CRYPTO_SWITCH = "crypto-switch";
+
+    String SIGN_SWITCH = "sign-switch";
 
     String CRYPTO_DATA_KEY = "data";
 
     String REMOTE_INVOKE_NAME = "invoker";
+
+    String SIGNATURE_NAME = "signature";
+    String TIMESTAMP_NAME = "timestamp";
+    String NONCE_NAME = "nonce";
+    String ALGORITHM_NAME = "algorithm";
+    String DEFAULT_ALGORITHM = "SHA-256";
+    long DEFAULT_TIMESTAMP_BTW = 300;
 }

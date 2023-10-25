@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * <p>
@@ -50,16 +51,21 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(CryptoService.class)
-    public CryptoGlobalFilter cryptoGlobalFilter(CryptoService cryptoService,
-        GatewayProperties properties) {
+    public CryptoGlobalFilter cryptoGlobalFilter(CryptoService cryptoService, GatewayProperties properties) {
         return new CryptoGlobalFilter(cryptoService, properties);
     }
 
     @Bean
+    public SignCheckGlobalFilter tamperProofGlobalFilter(CryptoService cryptoService, GatewayProperties properties,
+        RedisTemplate<String, Object> redisTemplate) {
+        return new SignCheckGlobalFilter(cryptoService, properties, redisTemplate);
+    }
+
+    @Bean
     @ConditionalOnBean(CryptoService.class)
-    public CryptoUrlsEndpointFilter cryptoUrlsEndpointFilter(CryptoService cryptoService,
+    public ProtectUrlsEndpointFilter cryptoUrlsEndpointFilter(CryptoService cryptoService,
         GatewayProperties properties) {
-        return new CryptoUrlsEndpointFilter(cryptoService, properties);
+        return new ProtectUrlsEndpointFilter(cryptoService, properties);
     }
 
     @ConditionalOnBean(JWKSource.class)

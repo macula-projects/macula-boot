@@ -18,9 +18,9 @@
 package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.json.JSONUtil;
-import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets;
  * @since 2023/3/23 17:33
  */
 @RequiredArgsConstructor
-public class CryptoUrlsEndpointFilter implements WebFilter, Ordered {
+public class ProtectUrlsEndpointFilter implements WebFilter, Ordered {
     private final CryptoService cryptoService;
     private final GatewayProperties properties;
 
@@ -54,14 +54,15 @@ public class CryptoUrlsEndpointFilter implements WebFilter, Ordered {
 
         String path = request.getURI().getPath();
 
-        if (path.endsWith(GlobalConstants.CRYPTO_URLS_ENDPOINT) || path.endsWith(GlobalConstants.CRYPTO_KEY_ENDPOINT)) {
+        if (path.endsWith(GatewayConstants.PROTECT_URLS_ENDPOINT) || path.endsWith(
+            GatewayConstants.PROTECT_KEY_ENDPOINT)) {
             response.setStatusCode(HttpStatus.OK);
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             String json = "";
-            if (path.endsWith(GlobalConstants.CRYPTO_URLS_ENDPOINT)) {
-                json = JSONUtil.toJsonStr(Result.success(properties.getCryptoUrls()));
+            if (path.endsWith(GatewayConstants.PROTECT_URLS_ENDPOINT)) {
+                json = JSONUtil.toJsonStr(Result.success(properties.getProtectUrls()));
             }
-            if (path.endsWith(GlobalConstants.CRYPTO_KEY_ENDPOINT)) {
+            if (path.endsWith(GatewayConstants.PROTECT_KEY_ENDPOINT)) {
                 json = JSONUtil.toJsonStr(Result.success(cryptoService.getSm2PublicKey()));
             }
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);

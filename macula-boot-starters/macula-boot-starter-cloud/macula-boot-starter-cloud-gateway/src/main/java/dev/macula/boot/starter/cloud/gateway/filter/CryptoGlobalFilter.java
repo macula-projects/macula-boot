@@ -18,19 +18,17 @@
 package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.codec.PercentCodec;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.net.RFC3986;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import dev.macula.boot.result.ApiResultCode;
-import dev.macula.boot.result.Result;
-import dev.macula.boot.result.ResultCode;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
 import dev.macula.boot.starter.cloud.gateway.utils.RequestBodyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -39,16 +37,17 @@ import org.reactivestreams.Publisher;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.util.AntPathMatcher;
@@ -62,9 +61,11 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@code CryptoGlobalFilter} 加密或解密请求响应处理拦截器
+ * TODO 目前只支持application/json，需要研究支持form-data、url-encoded等
  *
  * @author rain
  * @since 2023/3/22 23:17
@@ -81,63 +82,54 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
     @SneakyThrows
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        ServerHttpResponse response = exchange.getResponse();
+        URI uri = request.getURI();
         // 添加是否加密标志
-        exchange.getResponse().getHeaders()
-            .add(GatewayConstants.CRYPTO_SWITCH, String.valueOf(properties.isCryptoSwitch()));
+        response.getHeaders().add(GatewayConstants.CRYPTO_SWITCH, String.valueOf(properties.isCryptoSwitch()));
 
         // 判断是否有加密参数，有则进行加解密操作，无则跳过
-        String path = exchange.getRequest().getURI().getPath();
-        List<String> sm4Keys = exchange.getRequest().getHeaders().get(GatewayConstants.SM4_KEY);
-        if (CollectionUtil.isEmpty(sm4Keys) || StrUtil.isBlank(sm4Keys.get(0))) {
+        // GlobalFilter里面不带URL不带路由前缀，需要获取原始的请求
+        PathContainer pathContainer =
+            exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
+
+        String path = pathContainer != null ? pathContainer.value() : uri.getPath();
+
+        String sm4Key = request.getHeaders().getFirst(GatewayConstants.SM4_KEY);
+        String symAlg = request.getHeaders().getFirst((GatewayConstants.SYM_ALG));
+        if (StrUtil.isEmpty(sm4Key) || StrUtil.isEmpty(symAlg)) {
             // 如果开启了接口强制加解密则需要并且URL是属于需要加解密的，则返回KEY为空的错误
             PathMatcher pathMatcher = new AntPathMatcher();
-            if (properties.isCryptoSwitch() && properties.isForceCrypto() && properties.getCryptoUrls().stream()
-                .anyMatch(s -> pathMatcher.match(s, path))) {
+            if (properties.isCryptoSwitch() && properties.isForceCrypto() && properties.getProtectUrls().getCrypto()
+                .stream().anyMatch(s -> pathMatcher.match(s, path))) {
 
-                return setFailedResponse(exchange, ApiResultCode.API_CRYPTO_KEY_NOT_EXIST,
+                return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_CRYPTO_KEY_NOT_EXIST,
                     "接口需要加密传输但是缺少KEY: PATH=" + path);
             }
             return chain.filter(exchange);
         }
 
-        String sm4Key = sm4Keys.get(0);
-        if (StrUtil.isNotBlank(sm4Key)) {
-            try {
-                // 解密密钥
-                sm4Key = cryptoService.decryptSm4Key(sm4Key);
-                log.debug("ProcessCryptoReqResFilter， sm4Key:{}", sm4Key);
-                // 解密请求的内容
-                exchange = processRequest(exchange, sm4Key);
-            } catch (Exception e) {
-                // 返回异常信息
-                return setFailedResponse(exchange, ApiResultCode.API_CRYPTO_ERROR, e.getMessage());
-            }
+        try {
+            // 解密密钥
+            sm4Key = cryptoService.decryptSm4Key(sm4Key);
+            log.debug("ProcessCryptoReqResFilter， sm4Key:{}", sm4Key);
+            // 解密请求的内容
+            exchange = processRequest(exchange, sm4Key);
+        } catch (Exception e) {
+            // 返回异常信息
+            return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_CRYPTO_ERROR, e.getMessage());
         }
         return chain.filter(exchange);
     }
 
-    private Mono<Void> setFailedResponse(ServerWebExchange exchange, ResultCode code, String msg) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        response.setStatusCode(HttpStatus.OK);
-
-        log.error("[加解密异常处理]请求路径:{}, 错误信息:{}", exchange.getRequest().getPath(), msg);
-
-        return response.writeWith(Mono.fromSupplier(() -> {
-            DataBufferFactory bufferFactory = response.bufferFactory();
-            String failedJson = JSONUtil.toJsonStr(Result.failed(code, msg));
-            return bufferFactory.wrap(failedJson.getBytes(StandardCharsets.UTF_8));
-        }));
-    }
-
     private ServerWebExchange processRequest(ServerWebExchange exchange, String sm4Key) {
         ServerHttpRequest serverHttpRequest = exchange.getRequest();
-        String method = serverHttpRequest.getMethodValue();
+        HttpMethod method = serverHttpRequest.getMethod();
         ServerHttpRequest newRequest = exchange.getRequest();
         // 解密请求内容
-        if ("POST".equals(method) || "PUT".equals(method)) {
+        if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
             newRequest = processPostRequest(exchange, sm4Key);
-        } else if ("GET".equals(method)) {
+        } else if (method == HttpMethod.GET || method == HttpMethod.DELETE) {
             newRequest = processGetRequest(exchange, sm4Key);
         }
 
@@ -183,20 +175,16 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
 
     private ServerHttpRequest processPostRequest(ServerWebExchange exchange, String sm4Key) {
         ServerHttpRequest request = exchange.getRequest();
-        URI uri = request.getURI();
         // 尝试从 exchange 的自定义属性中取出缓存到的 body
         byte[] body = RequestBodyUtils.getBody(exchange);
+        if (body != null && body.length > 0 && Objects.equals(request.getHeaders().getContentType(),
+            MediaType.APPLICATION_JSON)) {
+            byte[] decrypBytes = body;
 
-        if (body != null) {
-            byte[] decrypBytes;
-            try {
-                String rootData = new String(body, StandardCharsets.UTF_8);
-                decrypBytes = body;
-                JSONObject jsonObject = JSONUtil.parseObj(rootData);
-                Object data = null;
-                if (jsonObject != null) {
-                    data = jsonObject.get(GatewayConstants.CRYPTO_DATA_KEY);
-                }
+            String rootData = new String(body, StandardCharsets.UTF_8);
+            JSONObject jsonObject = JSONUtil.parseObj(rootData);
+            if (jsonObject != null) {
+                Object data = jsonObject.get(GatewayConstants.CRYPTO_DATA_KEY);
                 if (data != null) {
                     String enStr = (String)data;
                     if (StrUtil.isNotBlank(enStr)) {
@@ -208,35 +196,9 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                         }
                     }
                 }
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
             }
             // 根据解密后的参数重新构建请求体
-            DataBufferFactory dataBufferFactory = exchange.getResponse().bufferFactory();
-            Flux<DataBuffer> bodyFlux = Flux.just(dataBufferFactory.wrap(decrypBytes));
-
-            // 构建新的请求头
-            HttpHeaders headers = new HttpHeaders();
-            headers.putAll(exchange.getRequest().getHeaders());
-            // 由于修改了传递参数，需要重新设置CONTENT_LENGTH，长度是字节长度，不是字符串长度
-            int length = decrypBytes.length;
-            headers.remove(HttpHeaders.CONTENT_LENGTH);
-            headers.setContentLength(length);
-
-            ServerHttpRequest newRequest = request.mutate().uri(uri).build();
-            newRequest = new ServerHttpRequestDecorator(newRequest) {
-                @Override
-                public Flux<DataBuffer> getBody() {
-                    return bodyFlux;
-                }
-
-                @Override
-                public HttpHeaders getHeaders() {
-                    return headers;
-                }
-            };
-
-            return newRequest;
+            return RequestBodyUtils.rewriteRequestBody(exchange, decrypBytes);
         }
         return request;
     }
@@ -246,7 +208,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         String path = request.getURI().getPath();
         ServerHttpResponse originalResponse = exchange.getResponse();
         DataBufferFactory bufferFactory = originalResponse.bufferFactory();
-        ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
+        return new ServerHttpResponseDecorator(originalResponse) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
                 if (body instanceof Flux) {
@@ -291,11 +253,10 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                 return super.writeWith(body);
             }
         };
-        return decoratedResponse;
     }
 
     @Override
     public int getOrder() {
-        return 100;
+        return -5;
     }
 }

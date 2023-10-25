@@ -44,14 +44,14 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * {@code HmacUtils} 基于Hmac的签名校验助手
+ * {@code KongApiUtils} 基于Hmac的签名校验助手
  *
  * @author rain
  * @since 2023/2/20 12:38
  */
-public class HmacUtils {
+public class KongApiUtils {
 
-    public static boolean isHmacRequest(ServerWebExchange exchange) {
+    public static boolean isKongApiRequest(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
         String username = StrUtil.subBetween(token, "hmac username=\"", "\",");

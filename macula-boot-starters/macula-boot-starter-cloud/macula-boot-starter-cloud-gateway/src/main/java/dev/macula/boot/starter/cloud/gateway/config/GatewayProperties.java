@@ -38,14 +38,24 @@ public class GatewayProperties {
     private boolean cryptoSwitch = true;
 
     /**
+     * 接口签名全局开关
+     */
+    private boolean signSwitch = true;
+
+    /**
      * 后端配置了接口需要加解密时强制验证
      */
     private boolean forceCrypto = false;
 
     /**
+     * 后端配置了接口需要签名时强制验证
+     */
+    private boolean forceSign = true;
+
+    /**
      * 需要加解密的接口清单
      */
-    private List<String> cryptoUrls = new ArrayList<>();
+    private ProtectUrl protectUrls = new ProtectUrl();
 
     private Gray gray = new Gray();
 
@@ -53,5 +63,11 @@ public class GatewayProperties {
     public static final class Gray {
         /** 灰度开关 */
         private boolean enabled;
+    }
+
+    @Data
+    public static final class ProtectUrl {
+        private List<String> crypto = new ArrayList<>();
+        private List<String> sign = new ArrayList<>();
     }
 }
