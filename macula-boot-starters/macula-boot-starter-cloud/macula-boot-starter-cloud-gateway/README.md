@@ -201,19 +201,22 @@ public class CryptoLocaleServiceImpl implements CryptoService, InitializingBean 
     - 前端根据URL规则判断是否要加密和签名
     - 前端随机产生一串密钥key并使用SM4公钥加密，将该密钥放入HTTP请求头`sm4-key`
 - 请求加密
-    - 前端对GET的Query参数param1=value1&param2=value2用上述随机串key进行AES加密
-    - 前端对POST的JSON Body用上述key进行AES加密
+  - 前端对GET的Query参数param1=value1&param2=value2用上述随机串key进行SM4加密（注意param要排序）
+  - 前端对POST的JSON Body用上述key进行SM4加密
     - 前端GET请求的加密参数附加在URL?data=xxx中，POST请求的加密参数也是以JSON格式放在data这个key中
+  - 加密后以Base64编码（GET请求要encodeURI，Base64含有+=/等符号）
+  - 请求头添加sym-alg，标识加密算法SM4
 - 请求签名（加密后的，非空参数值才参与签名）
     - 生成当前时间戳，为UTC 1970年1月1日0时开始的毫秒数(Unix 时间戳)
-    - 随机生成128为nonce随机串，注意要保证随机唯一性
+    - 随机生成nonce随机串，注意要保证随机唯一性
     - GET请求签名sha256(path+param1=value1&param2=value2...+key+timestamp+nonce)
-    - POST请求签名sha256(POST签名体 = path+param1=value1&param2=value2...+SHA-256=+base64(sha256(body))
+    - POST请求签名sha256(POST签名体 = path+param1=value1&param2=value2...+SHA-256=sha256(body))
       +key+timestamp+nonce)
+    - SHA256是16进制字符串格式
     - timestamp、signature、nonce、algorithm（默认SHA-256）放入Header
     - 签名算法支持MD2、MD5、SHA-1、SHA-256
 - 响应解密
-    - 响应体的加密内容在JSON串的data这个key中，使用AES解密
+  - 响应体的加密内容在JSON串的data这个key中，使用SM4解密
 
 #### 后端流程
 
