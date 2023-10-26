@@ -17,8 +17,6 @@
 
 package dev.macula.boot.starter.cloud.gateway.filter;
 
-import cn.hutool.core.codec.PercentCodec;
-import cn.hutool.core.net.RFC3986;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -59,7 +57,7 @@ import java.util.TreeMap;
  * <pre>
  * 请求头包含：
  * signature：
- *      GET请求签名sha256(path+param1=value1&param2=value2...+key+timestamp+nonce)
+ *      GET请求签名sha256(path+param1=value1&amp;param2=value2...+key+timestamp+nonce)
  *      POST请求签名sha256(path+SHA-256=+base64(sha256(body))+key+timestamp+nonce)
  * timestamp：时间戳
  * nonce：防重放随机串
@@ -77,8 +75,6 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
     private final CryptoService cryptoService;
     private final GatewayProperties properties;
     private final RedisTemplate<String, Object> redisTemplate;
-
-    private final PercentCodec urlEncoder = RFC3986.QUERY;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {

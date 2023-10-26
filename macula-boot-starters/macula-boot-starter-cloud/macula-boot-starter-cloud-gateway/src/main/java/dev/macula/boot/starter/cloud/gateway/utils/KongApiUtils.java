@@ -63,6 +63,7 @@ public class KongApiUtils {
      *
      * @param exchange         请求Exchagne
      * @param sysRedisTemplate 秘钥提取Redis
+     * @param path 请求路径
      * @return 错误信息或者200，200表示成功
      */
     public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
