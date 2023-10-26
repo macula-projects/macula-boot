@@ -27,7 +27,7 @@ import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
-import dev.macula.boot.starter.cloud.gateway.utils.RequestBodyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,7 +140,7 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         byte[] bodyBytes = null;
         if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
             // 从请求里获取Post请求体，并对内容摘要
-            bodyBytes = RequestBodyUtils.getBody(exchange);
+            bodyBytes = RequestUtils.getBody(exchange);
             if (bodyBytes != null && bodyBytes.length > 0) {
                 params = params + "SHA-256=" + HexUtil.encodeHexStr(DigestUtil.sha256(bodyBytes));
                 log.debug("PUT OR POST params： " + params);
@@ -154,7 +154,7 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         if (StrUtil.isEmpty(algorithm)) {
             algorithm = GatewayConstants.DEFAULT_ALGORITHM;
         }
-        String newSignature = DigestUtil.digester(algorithm).digestHex(plain);
+        String newSignature = HexUtil.encodeHexStr(DigestUtil.digester(algorithm).digest(plain), false);
         log.debug("plain: " + plain);
         log.debug("newSignature: " + newSignature);
         if (!newSignature.equalsIgnoreCase(signature)) {
@@ -162,7 +162,7 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         } else {
             // post请求的body需要解析之后再次封装，否则请求会报错
             if (bodyBytes != null) {
-                ServerHttpRequest newRequest = RequestBodyUtils.rewriteRequestBody(exchange, bodyBytes);
+                ServerHttpRequest newRequest = RequestUtils.rewriteRequestBody(exchange, bodyBytes);
                 exchange = exchange.mutate().request(newRequest).build();
             }
         }

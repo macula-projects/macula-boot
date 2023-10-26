@@ -27,7 +27,7 @@ import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
-import dev.macula.boot.starter.cloud.gateway.utils.RequestBodyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,6 @@ import org.reactivestreams.Publisher;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -46,7 +45,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
@@ -84,17 +82,12 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
-        URI uri = request.getURI();
         // 添加是否加密标志
         response.getHeaders().add(GatewayConstants.CRYPTO_SWITCH, String.valueOf(properties.isCryptoSwitch()));
 
+        String path = RequestUtils.getOriginPath(exchange);
+
         // 判断是否有加密参数，有则进行加解密操作，无则跳过
-        // GlobalFilter里面不带URL不带路由前缀，需要获取原始的请求
-        PathContainer pathContainer =
-            exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
-
-        String path = pathContainer != null ? pathContainer.value() : uri.getPath();
-
         String sm4Key = request.getHeaders().getFirst(GatewayConstants.SM4_KEY);
         String symAlg = request.getHeaders().getFirst((GatewayConstants.SYM_ALG));
         if (StrUtil.isEmpty(sm4Key) || StrUtil.isEmpty(symAlg)) {
@@ -176,7 +169,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
     private ServerHttpRequest processPostRequest(ServerWebExchange exchange, String sm4Key) {
         ServerHttpRequest request = exchange.getRequest();
         // 尝试从 exchange 的自定义属性中取出缓存到的 body
-        byte[] body = RequestBodyUtils.getBody(exchange);
+        byte[] body = RequestUtils.getBody(exchange);
         if (body != null && body.length > 0 && Objects.equals(request.getHeaders().getContentType(),
             MediaType.APPLICATION_JSON)) {
             byte[] decrypBytes = body;
@@ -198,7 +191,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                 }
             }
             // 根据解密后的参数重新构建请求体
-            return RequestBodyUtils.rewriteRequestBody(exchange, decrypBytes);
+            return RequestUtils.rewriteRequestBody(exchange, decrypBytes);
         }
         return request;
     }

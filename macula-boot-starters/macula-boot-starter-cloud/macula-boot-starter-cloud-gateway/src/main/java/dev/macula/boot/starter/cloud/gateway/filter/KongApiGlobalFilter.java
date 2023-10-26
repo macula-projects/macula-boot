@@ -23,7 +23,7 @@ import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
-import dev.macula.boot.starter.cloud.gateway.utils.RequestBodyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +63,8 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
 
             if ("POST".equals(method) || "PUT".equals(method)) {
                 // 由于读过RequestBody，需要重新设置exchange
-                byte[] bodyBytes = RequestBodyUtils.getBody(exchange);
-                ServerHttpRequest newRequest = RequestBodyUtils.rewriteRequestBody(exchange, bodyBytes);
+                byte[] bodyBytes = RequestUtils.getBody(exchange);
+                ServerHttpRequest newRequest = RequestUtils.rewriteRequestBody(exchange, bodyBytes);
                 exchange = exchange.mutate().request(newRequest).response(exchange.getResponse()).build();
             }
         }

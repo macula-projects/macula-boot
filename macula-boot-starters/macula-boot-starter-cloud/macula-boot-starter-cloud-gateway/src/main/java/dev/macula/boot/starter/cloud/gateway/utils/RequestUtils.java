@@ -18,13 +18,17 @@
 package dev.macula.boot.starter.cloud.gateway.utils;
 
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
+
+import java.net.URI;
 
 /**
  * {@code RequestBodyUtils} 读取ServerWebExchange的Body并缓存
@@ -32,7 +36,7 @@ import reactor.core.publisher.Flux;
  * @author rain
  * @since 2023/2/20 14:09
  */
-public class RequestBodyUtils {
+public class RequestUtils {
 
     public static byte[] getBody(ServerWebExchange exchange) {
         return exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
@@ -63,5 +67,14 @@ public class RequestBodyUtils {
             }
         };
         return newRequest;
+    }
+
+    public static String getOriginPath(ServerWebExchange exchange) {
+        // GlobalFilter里面不带URL不带路由前缀，需要获取原始的请求
+        URI uri = exchange.getRequest().getURI();
+        PathContainer pathContainer =
+            exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
+
+        return pathContainer != null ? pathContainer.value() : uri.getPath();
     }
 }

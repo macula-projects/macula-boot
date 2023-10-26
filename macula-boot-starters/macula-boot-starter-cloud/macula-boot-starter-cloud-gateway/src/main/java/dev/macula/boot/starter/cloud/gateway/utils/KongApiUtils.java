@@ -147,7 +147,7 @@ public class KongApiUtils {
 
             } else {
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-                byte[] body = RequestBodyUtils.getBody(exchange);
+                byte[] body = RequestUtils.getBody(exchange);
                 if (body == null) {
                     body = new byte[0];
                 }
