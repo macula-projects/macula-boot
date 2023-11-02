@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -56,6 +57,15 @@ public class GatewayProperties {
      * 需要加解密的接口清单
      */
     private ProtectUrl protectUrls = new ProtectUrl();
+
+    /**
+     * 后端配置了移除OpaqueToken接口访问时强制hmac验证
+     */
+    private boolean forceHmacRmOpaqueTokenEndpoint = true;
+    /**
+     * 移除opaqueToken的端点
+     */
+    private String rmOpaqueTokenEndpoint = GatewayConstants.DEFAULT_RM_OPAQUE_TOKEN_ENDPOINT;
 
     private Gray gray = new Gray();
 
