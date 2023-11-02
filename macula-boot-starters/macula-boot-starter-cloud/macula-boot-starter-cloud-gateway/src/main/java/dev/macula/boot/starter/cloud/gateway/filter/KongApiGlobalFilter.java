@@ -31,6 +31,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -50,7 +51,7 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
-        String method = request.getMethodValue();
+        HttpMethod method = request.getMethod();
         String path = request.getURI().getPath();
         String restfulPath = method + ":" + path;
 
@@ -61,7 +62,7 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
                     result);
             }
 
-            if ("POST".equals(method) || "PUT".equals(method)) {
+            if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
                 // 由于读过RequestBody，需要重新设置exchange
                 byte[] bodyBytes = RequestUtils.getBody(exchange);
                 ServerHttpRequest newRequest = RequestUtils.rewriteRequestBody(exchange, bodyBytes);

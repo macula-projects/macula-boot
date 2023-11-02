@@ -17,14 +17,15 @@
 
 package dev.macula.boot.starter.cloud.gateway.filter;
 
-import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -42,12 +43,11 @@ public class BodyGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        String method = exchange.getRequest().getMethodValue();
-        if ("POST".equals(method) || "PUT".equals(method)) {
+        HttpMethod method = exchange.getRequest().getMethod();
+        if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
             // 判断是否有加密参数，有则进行加解密操作，无则跳过
             // 判断是否是HMAC请求，不是也不缓存
-            String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
-            if (StrUtil.isNotBlank(sm4Key) || KongApiUtils.isKongApiRequest(exchange)) {
+            if (RequestUtils.isCryptoOrSignRequest(exchange) || KongApiUtils.isKongApiRequest(exchange)) {
 
                 log.debug("GlobalCacheRequestBodyFilter start...");
 

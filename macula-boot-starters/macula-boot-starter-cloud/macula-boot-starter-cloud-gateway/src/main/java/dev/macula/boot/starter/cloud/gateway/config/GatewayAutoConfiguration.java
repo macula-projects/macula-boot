@@ -56,7 +56,7 @@ public class GatewayAutoConfiguration {
     }
 
     @Bean
-    public SignCheckGlobalFilter tamperProofGlobalFilter(CryptoService cryptoService, GatewayProperties properties,
+    public SignCheckGlobalFilter signCheckGlobalFilter(CryptoService cryptoService, GatewayProperties properties,
         RedisTemplate<String, Object> redisTemplate) {
         return new SignCheckGlobalFilter(cryptoService, properties, redisTemplate);
     }

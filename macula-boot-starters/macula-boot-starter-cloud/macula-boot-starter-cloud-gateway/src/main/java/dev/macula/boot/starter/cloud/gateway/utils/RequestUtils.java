@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.cloud.gateway.utils;
 
+import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -37,6 +38,13 @@ import java.net.URI;
  * @since 2023/2/20 14:09
  */
 public class RequestUtils {
+
+    public static boolean isCryptoOrSignRequest(ServerWebExchange exchange) {
+        String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
+        String signature = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SIGNATURE_NAME);
+        String symAlg = exchange.getRequest().getHeaders().getFirst((GatewayConstants.SYM_ALG));
+        return StrUtil.isNotBlank(sm4Key) && (StrUtil.isNotBlank(signature) || StrUtil.isNotBlank(symAlg));
+    }
 
     public static byte[] getBody(ServerWebExchange exchange) {
         return exchange.getAttributeOrDefault(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, null);
