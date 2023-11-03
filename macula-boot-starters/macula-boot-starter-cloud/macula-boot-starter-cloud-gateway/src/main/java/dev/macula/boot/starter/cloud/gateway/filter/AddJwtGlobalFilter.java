@@ -195,7 +195,7 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
         return 1000;
     }
 
-    private String buildKey(OAuth2AuthenticatedPrincipal principal) {
+    public static String buildKey(OAuth2AuthenticatedPrincipal principal) {
         // 生成缓存JWT的KEY
         // 当有租户ID时，加上a{tenantId}作为KEY，以防止应用的租户会修改
         String app = "";

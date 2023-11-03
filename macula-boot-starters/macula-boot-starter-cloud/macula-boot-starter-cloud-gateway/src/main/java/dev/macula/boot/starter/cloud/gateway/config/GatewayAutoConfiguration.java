@@ -78,4 +78,10 @@ public class GatewayAutoConfiguration {
     public GrayscalePublishFilter grayscalePublishFilter(GatewayProperties gatewayProperties) {
         return new GrayscalePublishFilter(gatewayProperties);
     }
+
+    @Bean
+    public RmOpaqueTokenEndpointFilter rmOpaqueTokenEndpointFilter(GatewayProperties gatewayProperties,
+        RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate){
+        return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
+    }
 }

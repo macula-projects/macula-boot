@@ -51,4 +51,5 @@ public interface GatewayConstants {
     String ALGORITHM_NAME = "algorithm";
     String DEFAULT_ALGORITHM = "SHA-256";
     long DEFAULT_TIMESTAMP_BTW = 300;
+    String DEFAULT_RM_OPAQUE_TOKEN_ENDPOINT = "/gateway/rm/opaqueToken";
 }
