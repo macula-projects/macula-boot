@@ -25,6 +25,7 @@ import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguratio
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -45,14 +46,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 public class GatewayAutoConfiguration {
 
     @Bean
-    public BodyGlobalFilter bodyGlobalFilter() {
-        return new BodyGlobalFilter();
+    @ConditionalOnProperty(value = "macula.cloud.gray.enabled", havingValue = "true", matchIfMissing = true)
+    public GrayscalePublishFilter grayscalePublishFilter(GatewayProperties gatewayProperties) {
+        return new GrayscalePublishFilter(gatewayProperties);
     }
 
     @Bean
-    @ConditionalOnBean(CryptoService.class)
-    public CryptoGlobalFilter cryptoGlobalFilter(CryptoService cryptoService, GatewayProperties properties) {
-        return new CryptoGlobalFilter(cryptoService, properties);
+    public BodyGlobalFilter bodyGlobalFilter() {
+        return new BodyGlobalFilter();
     }
 
     @Bean
@@ -63,7 +64,13 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(CryptoService.class)
-    public ProtectUrlsEndpointFilter cryptoUrlsEndpointFilter(CryptoService cryptoService,
+    public CryptoGlobalFilter cryptoGlobalFilter(CryptoService cryptoService, GatewayProperties properties) {
+        return new CryptoGlobalFilter(cryptoService, properties);
+    }
+
+    @Bean
+    @ConditionalOnBean(CryptoService.class)
+    public ProtectUrlsEndpointFilter protectUrlsEndpointFilter(CryptoService cryptoService,
         GatewayProperties properties) {
         return new ProtectUrlsEndpointFilter(cryptoService, properties);
     }
@@ -75,13 +82,10 @@ public class GatewayAutoConfiguration {
     }
 
     @Bean
-    public GrayscalePublishFilter grayscalePublishFilter(GatewayProperties gatewayProperties) {
-        return new GrayscalePublishFilter(gatewayProperties);
-    }
-
-    @Bean
+    @ConditionalOnProperty(value = "macula.gateway.rm-opaque-token.enabled", havingValue = "true",
+        matchIfMissing = true)
     public RmOpaqueTokenEndpointFilter rmOpaqueTokenEndpointFilter(GatewayProperties gatewayProperties,
-        RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate){
+        RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate) {
         return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
     }
 }

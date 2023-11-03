@@ -22,6 +22,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
@@ -104,8 +105,8 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
             if (properties.isSignSwitch() && properties.isForceSign() && properties.getProtectUrls().getSign().stream()
                 .anyMatch(s -> pathMatcher.match(s, path))) {
 
-                return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_SIGN_PARAMS_NOT_EXIST,
-                    "缺少签名参数头: PATH=" + path);
+                return ResponseUtils.writeResult(response,
+                    Result.failed(ApiResultCode.API_SIGN_PARAMS_NOT_EXIST, "缺少签名参数头: PATH=" + path));
             }
             return chain.filter(exchange);
         }
@@ -114,13 +115,13 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         long timeCheck = (System.currentTimeMillis() - Long.parseLong(timestamp)) / (1000);
         if (timeCheck >= GatewayConstants.DEFAULT_TIMESTAMP_BTW) {
             log.info("timestamp: " + (System.currentTimeMillis()) / (1000));
-            return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_SIGN_ERROR, "时间戳超时");
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "时间戳超时"));
         }
 
         // 2. 校验nonce参数：该参数不能在Redis中出现
         if (Boolean.TRUE.equals(redisTemplate.hasKey(CacheConstants.GATEWAY_NONCE_KEY + nonce))) {
             log.info("nonce:" + nonce);
-            return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_SIGN_ERROR, "禁止重复请求");
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "禁止重复请求"));
         } else {
             redisTemplate.opsForValue().set(CacheConstants.GATEWAY_NONCE_KEY + nonce, "x",
                 Duration.ofSeconds(GatewayConstants.DEFAULT_TIMESTAMP_BTW));
@@ -154,7 +155,7 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         log.debug("plain: " + plain);
         log.debug("newSignature: " + newSignature);
         if (!newSignature.equalsIgnoreCase(signature)) {
-            return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_SIGN_ERROR, "签名验证不通过");
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "签名验证不通过"));
         } else {
             // post请求的body需要解析之后再次封装，否则请求会报错
             if (bodyBytes != null) {

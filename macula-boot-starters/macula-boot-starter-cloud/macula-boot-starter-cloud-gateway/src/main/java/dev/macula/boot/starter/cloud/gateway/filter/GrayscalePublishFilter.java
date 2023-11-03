@@ -22,7 +22,6 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -35,12 +34,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * {@code GrayscalePublishFilter} is
+ * {@code GrayscalePublishFilter} 全链路灰度标签转换拦截器
  *
  * @author rain
  * @since 2023/9/25 19:29
  */
-@ConditionalOnProperty(value = "macula.cloud.gray.enabled", havingValue = "true", matchIfMissing = true)
+
 @RequiredArgsConstructor
 public class GrayscalePublishFilter implements GlobalFilter, Ordered {
     private final GatewayProperties gatewayProperties;

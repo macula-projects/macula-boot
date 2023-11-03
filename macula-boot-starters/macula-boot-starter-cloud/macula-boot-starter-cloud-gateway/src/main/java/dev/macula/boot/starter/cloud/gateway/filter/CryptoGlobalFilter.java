@@ -24,6 +24,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
@@ -96,8 +97,8 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
             if (properties.isCryptoSwitch() && properties.isForceCrypto() && properties.getProtectUrls().getCrypto()
                 .stream().anyMatch(s -> pathMatcher.match(s, path))) {
 
-                return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_CRYPTO_KEY_NOT_EXIST,
-                    "接口需要加密传输但是缺少KEY: PATH=" + path);
+                return ResponseUtils.writeResult(response,
+                    Result.failed(ApiResultCode.API_CRYPTO_KEY_NOT_EXIST, "接口需要加密传输但是缺少KEY: PATH=" + path));
             }
             return chain.filter(exchange);
         }
@@ -110,7 +111,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
             exchange = processRequest(exchange, sm4Key);
         } catch (Exception e) {
             // 返回异常信息
-            return ResponseUtils.writeOkErrorInfo(response, ApiResultCode.API_CRYPTO_ERROR, e.getMessage());
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_CRYPTO_ERROR, e.getMessage()));
         }
         return chain.filter(exchange);
     }

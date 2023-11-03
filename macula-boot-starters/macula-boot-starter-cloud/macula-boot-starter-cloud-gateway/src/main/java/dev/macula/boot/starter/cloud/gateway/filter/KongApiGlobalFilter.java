@@ -19,7 +19,6 @@ package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
@@ -32,6 +31,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -58,8 +58,7 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
             Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath);
             if (!result.isSuccess()) {
-                return ResponseUtils.writeErrorInfo(exchange.getResponse(), ApiResultCode.AKSK_ACCESS_FORBIDDEN,
-                    result);
+                return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
             }
 
             if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {

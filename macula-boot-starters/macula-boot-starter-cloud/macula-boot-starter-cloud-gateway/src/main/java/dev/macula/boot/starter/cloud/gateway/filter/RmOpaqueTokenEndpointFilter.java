@@ -18,7 +18,6 @@
 package dev.macula.boot.starter.cloud.gateway.filter;
 
 import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.result.ApiResultCode;
@@ -31,14 +30,11 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -46,8 +42,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
 
 import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 
@@ -58,7 +52,6 @@ import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
  * @since 2023/11/1 16:33
  */
 @Slf4j
-@ConditionalOnProperty(value = "macula.gateway.rm-opaque-token.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
     private final GatewayProperties properties;
@@ -77,12 +70,12 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             log.debug("删除opaqueToken 日志：method： {}, path： {}， restfulPath: {}", method, path, restfulPath);
         }
         if (path.endsWith(properties.getRmOpaqueTokenEndpoint()) && HttpMethod.POST == request.getMethod()) {
-            if(properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)){
+            if (properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 不进行kong验证：header： {}", request.getHeaders().entrySet());
+                    log.debug("删除opaqueToken 未进行kong验证：header： {}", request.getHeaders().entrySet());
                 }
-                return writeResponse(HttpStatus.FORBIDDEN, JSONUtil.toJsonStr(Result.failed(
-                     ApiResultCode.ACCESS_UNAUTHORIZED)), response);
+                return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN,
+                    Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED));
             } else {
                 return handlerRmOpaqueToken(exchange, response, restfulPath);
             }
@@ -91,20 +84,16 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
         return chain.filter(exchange);
     }
 
-    @Override
-    public int getOrder() {
-        return Integer.MIN_VALUE;
-    }
-
-    private Mono<Void> handlerRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response, String restfulPath) {
+    private Mono<Void> handlerRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response,
+        String restfulPath) {
         return DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
-            byte[] bytes = new byte[dataBuffer.readableByteCount()];
-            dataBuffer.read(bytes);
-            DataBufferUtils.release(dataBuffer);
-            return bytes;
-        }).defaultIfEmpty(new byte[0]).doOnNext(
-            bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
-        .flatMap(bytes -> rmOpaqueToken(exchange, response, restfulPath));
+                byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                dataBuffer.read(bytes);
+                DataBufferUtils.release(dataBuffer);
+                return bytes;
+            }).defaultIfEmpty(new byte[0])
+            .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
+            .flatMap(bytes -> rmOpaqueToken(exchange, response, restfulPath));
     }
 
     private Mono<Void> rmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response, String restfulPath) {
@@ -112,10 +101,10 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath);
             if (!result.isSuccess()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken kong验证失败： header : {}", exchange.getRequest().getHeaders().entrySet());
+                    log.debug("删除opaqueToken kong验证失败： header : {}",
+                        exchange.getRequest().getHeaders().entrySet());
                 }
-                return ResponseUtils.writeErrorInfo(exchange.getResponse(), ApiResultCode.AKSK_ACCESS_FORBIDDEN,
-                        result);
+                return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
             }
         }
         return rmOpaqueToken(exchange, response);
@@ -127,43 +116,39 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             if (log.isDebugEnabled()) {
                 log.debug("删除opaqueToken requestBody: {}", requestBody);
             }
-            if(StringUtils.isBlank(requestBody)){
+            if (StringUtils.isBlank(requestBody)) {
                 return Mono.empty();
             }
             try {
                 return Mono.just(new JSONObject(requestBody).toBean(RmOpaqueTokenQuery.class));
-            }catch (Exception e){
+            } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 转换RmOpaqueTokenQuery失败: {}， {}", e.getMessage(), e);
+                    log.debug("删除opaqueToken 转换RmOpaqueTokenQuery失败: {}", e.getMessage(), e);
                 }
                 return Mono.empty();
             }
         }).defaultIfEmpty(new RmOpaqueTokenQuery()).flatMap(rmOpaqueTokenForm -> {
-            if(StringUtils.isBlank(rmOpaqueTokenForm.getToken())){
-                return writeResponse(HttpStatus.BAD_REQUEST, JSONUtil.toJsonStr(Result.failed(VALIDATE_ERROR)), response);
+            if (StringUtils.isBlank(rmOpaqueTokenForm.getToken())) {
+                return ResponseUtils.writeResult(response, HttpStatus.BAD_REQUEST, Result.failed(VALIDATE_ERROR));
             }
             String opaqueTokenCacheKey = CacheConstants.GATEWAY_TOKEN_CACHE_KEY + rmOpaqueTokenForm.getToken();
-            OAuth2AuthenticatedPrincipal cachedPrincipal = (OAuth2AuthenticatedPrincipal)redisTemplate.opsForValue()
-                    .get(opaqueTokenCacheKey);
-            if(cachedPrincipal != null){
+            OAuth2AuthenticatedPrincipal cachedPrincipal =
+                (OAuth2AuthenticatedPrincipal)redisTemplate.opsForValue().get(opaqueTokenCacheKey);
+            if (cachedPrincipal != null) {
                 redisTemplate.delete(AddJwtGlobalFilter.buildKey(cachedPrincipal));
                 redisTemplate.delete(opaqueTokenCacheKey);
             }
-            return writeResponse(HttpStatus.OK, JSONUtil.toJsonStr(Result.success()), response);
+            return ResponseUtils.writeResult(response, HttpStatus.OK, Result.success());
         });
     }
 
-    private Mono<Void> writeResponse(HttpStatus status, String json, ServerHttpResponse response) {
-        response.setStatusCode(status);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-        response.getHeaders().setContentLength(bytes.length);
-        DataBuffer buffer = response.bufferFactory().wrap(bytes);
-        return response.writeWith(Mono.just(buffer));
+    @Override
+    public int getOrder() {
+        return Integer.MIN_VALUE + 200;
     }
 
     @Data
-    private class RmOpaqueTokenQuery {
+    private static class RmOpaqueTokenQuery {
         private String dealerNo;
         private String token;
     }

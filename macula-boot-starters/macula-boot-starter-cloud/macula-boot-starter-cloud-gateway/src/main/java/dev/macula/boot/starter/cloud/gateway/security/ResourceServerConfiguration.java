@@ -21,6 +21,7 @@ import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.filter.AddJwtGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
@@ -31,6 +32,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -171,8 +173,9 @@ public class ResourceServerConfiguration {
      */
     @Bean
     ServerAccessDeniedHandler accessDeniedHandler() {
-        return (exchange, denied) -> Mono.defer(() -> Mono.just(exchange.getResponse()))
-            .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.ACCESS_UNAUTHORIZED));
+        return (exchange, denied) -> Mono.defer(() -> Mono.just(exchange.getResponse())).flatMap(
+            response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
+                Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED)));
     }
 
     /**
@@ -180,8 +183,9 @@ public class ResourceServerConfiguration {
      */
     @Bean
     ServerAuthenticationEntryPoint authenticationEntryPoint() {
-        return (exchange, e) -> Mono.defer(() -> Mono.just(exchange.getResponse()))
-            .flatMap(response -> ResponseUtils.writeErrorInfo(response, ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
+        return (exchange, e) -> Mono.defer(() -> Mono.just(exchange.getResponse())).flatMap(
+            response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
+                Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED)));
     }
 
     @Bean
