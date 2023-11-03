@@ -24,6 +24,7 @@ import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.hook.FilterMessageHook;
 import org.apache.rocketmq.client.impl.consumer.*;
+import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -55,6 +56,15 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
             return createDefaultMQPullConsumerProxy(bean);
         if (bean instanceof DefaultLitePullConsumer)
             return createDefaultMQLitePullConsumerProxy(bean);
+        if (bean instanceof DefaultRocketMQListenerContainer)
+            return createDefaultRocketMQListenerContainerProxy(bean);
+        return bean;
+    }
+
+    private Object createDefaultRocketMQListenerContainerProxy(Object bean) {
+        DefaultRocketMQListenerContainer defaultRocketMQListenerContainer = (DefaultRocketMQListenerContainer)bean;
+        DefaultMQPushConsumer consumer = defaultRocketMQListenerContainer.getConsumer();
+        createDefaultMQPushConsumerProxy(consumer);
         return bean;
     }
 

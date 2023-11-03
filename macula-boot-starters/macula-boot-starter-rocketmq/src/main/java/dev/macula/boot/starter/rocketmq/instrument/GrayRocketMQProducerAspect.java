@@ -31,7 +31,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 
 /**
- * {@code RocketMQProduceAspect} RocketMQ生产者切面插桩，当GrayVersion不为空时，在消息中带上gray_version表示
+ * {@code RocketMQProduceAspect} RocketMQ生产者切面插桩，当GrayVersion不为空时，在消息中带上gray_version标识
  *
  * @author rain
  * @since 2023/9/7 17:32
