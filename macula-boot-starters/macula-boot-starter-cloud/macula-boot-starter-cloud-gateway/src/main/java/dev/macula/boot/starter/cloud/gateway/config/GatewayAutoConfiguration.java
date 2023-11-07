@@ -47,8 +47,8 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "macula.cloud.gray.enabled", havingValue = "true", matchIfMissing = true)
-    public GrayscalePublishFilter grayscalePublishFilter(GatewayProperties gatewayProperties) {
-        return new GrayscalePublishFilter(gatewayProperties);
+    public GrayscalePublishGlobalFilter grayscalePublishGlobalFilter(GatewayProperties gatewayProperties) {
+        return new GrayscalePublishGlobalFilter(gatewayProperties);
     }
 
     @Bean

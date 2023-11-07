@@ -27,6 +27,7 @@ import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -189,8 +190,9 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, RedisTemplate<String, Object> redisTemplate) {
-        return new AddJwtGlobalFilter(jwtEncoder, redisTemplate);
+    AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, JwtClaimsCustomizer jwtClaimsCustomizer,
+        RedisTemplate<String, Object> redisTemplate) {
+        return new AddJwtGlobalFilter(jwtEncoder, jwtClaimsCustomizer, redisTemplate);
     }
 
     @Bean
@@ -199,7 +201,7 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    public CorsWebFilter corsWebFilter() {
+    CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedMethod("*");
         config.addAllowedOrigin("*");
@@ -207,5 +209,12 @@ public class ResourceServerConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(new PathPatternParser());
         source.registerCorsConfiguration("/**", config);
         return new CorsWebFilter(source);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtClaimsCustomizer.class)
+    JwtClaimsCustomizer jwtClaimsCustomizer() {
+        return builder -> {
+        };
     }
 }

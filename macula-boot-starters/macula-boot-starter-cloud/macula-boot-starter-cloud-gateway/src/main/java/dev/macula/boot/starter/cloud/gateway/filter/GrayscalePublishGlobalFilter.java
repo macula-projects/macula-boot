@@ -34,14 +34,14 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * {@code GrayscalePublishFilter} 全链路灰度标签转换拦截器
+ * {@code GrayscalePublishGlobalFilter} 全链路灰度标签转换拦截器
  *
  * @author rain
  * @since 2023/9/25 19:29
  */
 
 @RequiredArgsConstructor
-public class GrayscalePublishFilter implements GlobalFilter, Ordered {
+public class GrayscalePublishGlobalFilter implements GlobalFilter, Ordered {
     private final GatewayProperties gatewayProperties;
 
     @Override

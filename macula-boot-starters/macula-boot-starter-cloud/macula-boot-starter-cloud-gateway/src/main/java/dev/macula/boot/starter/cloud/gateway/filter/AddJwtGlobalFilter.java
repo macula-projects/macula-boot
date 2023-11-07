@@ -24,6 +24,7 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import dev.macula.boot.starter.cloud.gateway.security.JwtClaimsCustomizer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,8 @@ import java.util.concurrent.TimeUnit;
 public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
 
     private final JwtEncoder jwtEncoder;
+
+    private final JwtClaimsCustomizer jwtClaimsCustomizer;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -173,6 +176,8 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
         if (!principal.getAttributes().containsKey(JWTClaimNames.ISSUER)) {
             jwtClaimBuilder.claim(JWTClaimNames.ISSUER, issuerUri);
         }
+        // 外部定制claims
+        jwtClaimsCustomizer.customize(jwtClaimBuilder);
 
         JwsAlgorithm jwsAlgorithm = SignatureAlgorithm.RS256;
         JwsHeader.Builder jwsHeaderBuilder = JwsHeader.with(jwsAlgorithm);
