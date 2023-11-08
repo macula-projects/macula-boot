@@ -57,6 +57,7 @@ public class GatewayAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(CryptoService.class)
     public SignCheckGlobalFilter signCheckGlobalFilter(CryptoService cryptoService, GatewayProperties properties,
         RedisTemplate<String, Object> redisTemplate) {
         return new SignCheckGlobalFilter(cryptoService, properties, redisTemplate);
