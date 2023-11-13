@@ -30,6 +30,7 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
@@ -118,8 +119,8 @@ public class KongApiUtils {
             // 校验date是否过期，默认5分钟过期
             String dateStr = request.getHeaders().getFirst("Date");
             Date requestDate = DatePattern.HTTP_DATETIME_FORMAT.parse(dateStr);
-            long pastTime = DateUtil.between(requestDate, new Date(), DateUnit.MINUTE);
-            if (pastTime > 5) {
+            long pastTime = DateUtil.between(requestDate, new Date(), DateUnit.SECOND);
+            if (pastTime > GatewayConstants.DEFAULT_TIMESTAMP_BTW) {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "请求已经过期");
             }
 

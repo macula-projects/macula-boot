@@ -112,7 +112,7 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 1. 校验时间戳：服务器时间和请求时间相差超过300秒，校验不通过
-        long timeCheck = (System.currentTimeMillis() - Long.parseLong(timestamp)) / (1000);
+        long timeCheck = Math.abs(System.currentTimeMillis() - Long.parseLong(timestamp)) / (1000);
         if (timeCheck >= GatewayConstants.DEFAULT_TIMESTAMP_BTW) {
             log.info("timestamp: " + (System.currentTimeMillis()) / (1000));
             return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "时间戳超时"));
