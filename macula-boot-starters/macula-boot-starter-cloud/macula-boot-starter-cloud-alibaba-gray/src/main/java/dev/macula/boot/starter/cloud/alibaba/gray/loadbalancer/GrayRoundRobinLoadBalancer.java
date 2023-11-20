@@ -124,11 +124,16 @@ public class GrayRoundRobinLoadBalancer implements ReactorServiceInstanceLoadBal
                     .filter(instance -> StrUtil.isEmpty(instance.getMetadata().get(GlobalConstants.GRAY_VERSION_TAG)))
                     .collect(Collectors.toList());
             }
+        } else {
+            // 没有指定GrayVersion，则选择所有非灰度实例
+            instancesToChoose = instancesToChoose.stream()
+                .filter(instance -> StrUtil.isEmpty(instance.getMetadata().get(GlobalConstants.GRAY_VERSION_TAG)))
+                .collect(Collectors.toList());
+        }
 
-            // 没有选中任何实例，退回，返回所有实例
-            if (CollectionUtils.isEmpty(instancesToChoose)) {
-                instancesToChoose = serviceInstances;
-            }
+        // 没有选中任何实例，退回，返回所有实例
+        if (CollectionUtils.isEmpty(instancesToChoose)) {
+            instancesToChoose = serviceInstances;
         }
         return instancesToChoose;
     }
