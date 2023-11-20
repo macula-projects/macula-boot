@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.cloud.alibaba.gray.loadbalancer;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.cloud.commons.lang.StringUtils;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.context.GrayVersionContextHolder;
@@ -115,7 +116,18 @@ public class GrayRoundRobinLoadBalancer implements ReactorServiceInstanceLoadBal
             }).collect(Collectors.toList());
 
             if (!CollectionUtils.isEmpty(grayInstances)) {
+                // 如果能匹配到指定GrayVersion的灰度实例，则优先选择灰度实例
                 instancesToChoose = grayInstances;
+            } else {
+                // 没有匹配到GrayVersion灰度实例，则选择非灰度实例
+                instancesToChoose = instancesToChoose.stream()
+                    .filter(instance -> StrUtil.isEmpty(instance.getMetadata().get(GlobalConstants.GRAY_VERSION_TAG)))
+                    .collect(Collectors.toList());
+            }
+
+            // 没有选中任何实例，退回，返回所有实例
+            if (CollectionUtils.isEmpty(instancesToChoose)) {
+                instancesToChoose = serviceInstances;
             }
         }
         return instancesToChoose;
