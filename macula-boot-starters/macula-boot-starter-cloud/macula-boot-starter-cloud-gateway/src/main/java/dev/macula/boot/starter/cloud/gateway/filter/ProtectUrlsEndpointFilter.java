@@ -78,6 +78,6 @@ public class ProtectUrlsEndpointFilter implements WebFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return Integer.MIN_VALUE;
+        return Integer.MIN_VALUE + 300;
     }
 }
