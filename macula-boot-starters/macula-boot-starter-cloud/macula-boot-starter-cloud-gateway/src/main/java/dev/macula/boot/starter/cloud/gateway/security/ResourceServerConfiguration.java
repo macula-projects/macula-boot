@@ -32,6 +32,8 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2Res
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
@@ -201,6 +203,7 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedMethod("*");
