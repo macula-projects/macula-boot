@@ -24,7 +24,6 @@ import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.hook.FilterMessageHook;
 import org.apache.rocketmq.client.impl.consumer.*;
-import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -44,43 +43,32 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
 
     private final GrayFilterMessageHookImpl grayFilterMessageHook;
 
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
+    public Object postProcessBeforeInitialization(Object o, String s) throws BeansException {
+        return o;
     }
 
-    @SuppressWarnings("deprecation")
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DefaultMQPushConsumer)
-            return createDefaultMQPushConsumerProxy(bean);
-        if (bean instanceof DefaultMQPullConsumer)
-            return createDefaultMQPullConsumerProxy(bean);
-        if (bean instanceof DefaultLitePullConsumer)
-            return createDefaultMQLitePullConsumerProxy(bean);
-        if (bean instanceof DefaultRocketMQListenerContainer)
-            return createDefaultRocketMQListenerContainerProxy(bean);
-        return bean;
-    }
-
-    private Object createDefaultRocketMQListenerContainerProxy(Object bean) {
-        DefaultRocketMQListenerContainer defaultRocketMQListenerContainer = (DefaultRocketMQListenerContainer)bean;
-        DefaultMQPushConsumer consumer = defaultRocketMQListenerContainer.getConsumer();
-        createDefaultMQPushConsumerProxy(consumer);
-        return bean;
+    public Object postProcessAfterInitialization(Object o, String s) throws BeansException {
+        if (o instanceof DefaultMQPushConsumer)
+            return createDefaultMQPushConsumerProxy(o);
+        if (o instanceof DefaultMQPullConsumer)
+            return createDefaultMQPullConsumerProxy(o);
+        if (o instanceof DefaultLitePullConsumer)
+            return createDefaultMQLitePullConsumerProxy(o);
+        return o;
     }
 
     private Object createDefaultMQLitePullConsumerProxy(Object bean) {
         try {
-            DefaultLitePullConsumer defaultMQPullConsumer = (DefaultLitePullConsumer)bean;
-            Field field = defaultMQPullConsumer.getClass().getDeclaredField("defaultLitePullConsumerImpl");
+            DefaultLitePullConsumer defaultMQPushConsumer = (DefaultLitePullConsumer)bean;
+            Field field = defaultMQPushConsumer.getClass().getDeclaredField("defaultLitePullConsumerImpl");
             field.setAccessible(true);
-            Object defaultLitePullConsumerImplObj = field.get(defaultMQPullConsumer);
+            Object defaultLitePullConsumerImplObj = field.get(defaultMQPushConsumer);
             DefaultLitePullConsumerImpl defaultMQPushConsumerImpl =
                 (DefaultLitePullConsumerImpl)defaultLitePullConsumerImplObj;
-            reflectToAddFilterMessageHook(defaultMQPushConsumerImpl);
+            reflectToAddFilterMessageHook((MQConsumerInner)defaultMQPushConsumerImpl);
             return bean;
         } catch (Exception e) {
-            if (log.isDebugEnabled())
-                log.debug(e.getMessage());
+            log.error("createDefaultMQLitePullConsumerProxy in lane failed", e);
             return bean;
         }
     }
@@ -88,36 +76,27 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
     private Object createDefaultMQPushConsumerProxy(Object bean) {
         try {
             DefaultMQPushConsumer defaultMQPushConsumer = (DefaultMQPushConsumer)bean;
-            // defaultMQPushConsumer.getDefaultMQPushConsumerImpl();
-            Field field = defaultMQPushConsumer.getClass().getDeclaredField("defaultMQPushConsumerImpl");
-            field.setAccessible(true);
-            Object defaultMQPushConsumerImplObj = field.get(defaultMQPushConsumer);
-            DefaultMQPushConsumerImpl defaultMQPushConsumerImpl =
-                (DefaultMQPushConsumerImpl)defaultMQPushConsumerImplObj;
+            DefaultMQPushConsumerImpl defaultMQPushConsumerImpl = defaultMQPushConsumer.getDefaultMQPushConsumerImpl();
             reflectToAddFilterMessageHook(defaultMQPushConsumerImpl);
             return bean;
         } catch (Exception e) {
-            if (log.isDebugEnabled())
-                log.debug(e.getMessage());
+            log.error("createDefaultMQPushConsumerProxy in lane failed", e);
             return bean;
         }
     }
 
-    @SuppressWarnings("deprecation")
     private Object createDefaultMQPullConsumerProxy(Object bean) {
         try {
             DefaultMQPullConsumer defaultMQPullConsumer = (DefaultMQPullConsumer)bean;
             DefaultMQPullConsumerImpl defaultMQPullConsumerImpl = defaultMQPullConsumer.getDefaultMQPullConsumerImpl();
-            reflectToAddFilterMessageHook(defaultMQPullConsumerImpl);
+            reflectToAddFilterMessageHook((MQConsumerInner)defaultMQPullConsumerImpl);
             return bean;
         } catch (Exception e) {
-            if (log.isDebugEnabled())
-                log.debug(e.getMessage());
+            log.error("createDefaultMQPullConsumerProxy in lane failed", e);
             return bean;
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void reflectToAddFilterMessageHook(MQConsumerInner consumerInner)
         throws NoSuchFieldException, IllegalAccessException {
         Field field = consumerInner.getClass().getDeclaredField("filterMessageHookList");
