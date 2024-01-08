@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.macula.boot</groupId>
         <artifactId>macula-boot-parent</artifactId>
-        <version>5.0.4-SNAPSHOT</version>
+        <version>5.0.6-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
