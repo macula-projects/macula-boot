@@ -44,7 +44,7 @@ public enum ApiResultCode implements ResultCode, Serializable {
     /**
      * 业务异常
      */
-    BIZ_ERROR("B0001", "业务异常"), SYS_ERROR("B0002", "系统异常"),
+    BIZ_ERROR("B0001", "业务异常"), SYS_ERROR("B0002", "系统异常"), BIZ_CHECK_ERROR("B0003", "业务检查异常"),
     RESPONSE_PACK_ERROR("B0400", "Response返回包装失败"), API_CRYPTO_ERROR("B0401", "接口加解密异常"),
     API_CRYPTO_KEY_NOT_EXIST("B0402", "加密接口缺少KEY"), API_SIGN_ERROR("B0411", "接口防篡改防重放校验未通过"),
     API_SIGN_PARAMS_NOT_EXIST("B0412", "接口防篡改防重放缺少必备参数"),

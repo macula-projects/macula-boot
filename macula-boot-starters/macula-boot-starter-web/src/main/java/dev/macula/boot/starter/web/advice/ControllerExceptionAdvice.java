@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.web.advice;
 
+import dev.macula.boot.exception.BizCheckException;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
@@ -111,8 +112,16 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
 
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> apiExceptionHandler(BizException e) {
-        log.error("ApiException:" + e.getCode(), e);
+    public Result<?> bizExceptionHandler(BizException e) {
+        log.error("BizException:" + e.getCode(), e);
+        return Result.failed(e.getCode(), e.getMsg(),
+            messageSource.getMessage(e.getMsg(), null, e.getMessage(), LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler(BizCheckException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<?> bizCheckExceptionHandler(BizCheckException e) {
+        log.info("BizCheckException:" + e.getCode(), e);
         return Result.failed(e.getCode(), e.getMsg(),
             messageSource.getMessage(e.getMsg(), null, e.getMessage(), LocaleContextHolder.getLocale()));
     }

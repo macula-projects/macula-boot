@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,30 +22,29 @@ import dev.macula.boot.result.ResultCode;
 import lombok.Getter;
 
 /**
- * {@code BizException} 是服务层对外的统一异常
+ * {@code BizCheckException} 是服务层对外的统一异常
  *
  * @author rain
- * @since 2022/6/29 10:37
+ * @since 2024/1/8 17:25
  */
 @Getter
-public class BizException extends MaculaException {
+public class BizCheckException extends MaculaException {
 
     private final String code;
     private final String msg;
 
-    public BizException(ResultCode resultCode, String exceptionMessage) {
+    public BizCheckException(ResultCode resultCode, String exceptionMessage) {
         this(resultCode.getCode(), resultCode.getMsg(), exceptionMessage);
     }
 
-    public BizException(String code, String msg, String exceptionMessage) {
+    public BizCheckException(String code, String msg, String exceptionMessage) {
         // message用于用户设置抛出错误详情，例如：当前价格-5，小于0
         super(exceptionMessage);
         this.code = code;
         this.msg = msg;
     }
 
-    public BizException(String exceptionMessage) {
-        this(ApiResultCode.BIZ_ERROR, exceptionMessage);
+    public BizCheckException(String exceptionMessage) {
+        this(ApiResultCode.BIZ_CHECK_ERROR, exceptionMessage);
     }
-
 }
