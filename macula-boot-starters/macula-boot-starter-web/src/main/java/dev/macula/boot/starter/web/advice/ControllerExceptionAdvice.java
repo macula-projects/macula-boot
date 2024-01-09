@@ -119,7 +119,7 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
     }
 
     @ExceptionHandler(BizCheckException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NOT_EXTENDED)
     public Result<?> bizCheckExceptionHandler(BizCheckException e) {
         log.info("BizCheckException:" + e.getCode(), e);
         return Result.failed(e.getCode(), e.getMsg(),
@@ -144,4 +144,5 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
     public void setMessageSource(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
+
 }

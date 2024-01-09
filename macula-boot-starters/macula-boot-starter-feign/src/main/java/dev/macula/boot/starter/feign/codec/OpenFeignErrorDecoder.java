@@ -18,12 +18,14 @@
 package dev.macula.boot.starter.feign.codec;
 
 import cn.hutool.json.JSONUtil;
+import dev.macula.boot.exception.BizCheckException;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.Result;
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -52,7 +54,8 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
             String body = Util.toString(response.body().asReader(Charset.defaultCharset()));
 
             try {
-                if (response.status() == 500 || response.status() == 403) {
+                HttpStatus status = HttpStatus.valueOf(response.status());
+                if (status.is4xxClientError() || status.is5xxServerError()) {
                     Result<?> resultData = JSONUtil.toBean(body, Result.class);
                     if (!resultData.isSuccess()) {
                         String errMsg = "Feign提供方异常：";
@@ -61,6 +64,11 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
                         } else {
                             errMsg += resultData.getMsg();
                         }
+                        // 业务检查异常
+                        if (status == HttpStatus.NOT_EXTENDED) {
+                            return new BizCheckException(resultData.getCode(), resultData.getMsg(), errMsg);
+                        }
+                        // 业务类异常
                         return new BizException(resultData.getCode(), resultData.getMsg(), errMsg);
                     }
                 } else {
