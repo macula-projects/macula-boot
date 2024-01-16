@@ -37,6 +37,7 @@
         <dependency>
             <groupId>com.tencent.tsf</groupId>
             <artifactId>spring-cloud-tsf-msgw-scg</artifactId>
+            <version>${spring-cloud-tsf.version}</version>
         </dependency>
     </dependencies>
 </project>

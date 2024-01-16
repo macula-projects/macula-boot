@@ -37,7 +37,8 @@
         <dependency>
             <groupId>com.tencent.tsf</groupId>
             <artifactId>spring-cloud-tsf-starter</artifactId>
+            <version>${spring-cloud-tsf.version}</version>
         </dependency>
-
     </dependencies>
+
 </project>
