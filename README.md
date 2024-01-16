@@ -92,6 +92,14 @@ macula-boot-starter
 
 详见[Macula Cloud Admin](https://github.com/macula-projects/macula-cloud-admin)项目
 
+## 编译说明
+
+编译的时候需要指定deploy这个profile，否则revision不会处理
+
+```shell
+mvn clean install -DskipTests=true -Pdeploy
+```
+
 ## 技术原理
 
 Macula整体的技术交互与应用原理如下图所示：
