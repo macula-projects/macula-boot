@@ -94,7 +94,7 @@ public class RedissonConfigBuilder {
                     throw new IllegalArgumentException("Can't parse config", e1);
                 }
             }
-        } else if (redisProperties != null && redisProperties.getSentinel() != null) {
+        } else if (redisProperties.getSentinel() != null) {
             Method nodesMethod = ReflectionUtils.findMethod(RedisProperties.Sentinel.class, "getNodes");
             Object nodesValue = ReflectionUtils.invokeMethod(nodesMethod, redisProperties.getSentinel());
 

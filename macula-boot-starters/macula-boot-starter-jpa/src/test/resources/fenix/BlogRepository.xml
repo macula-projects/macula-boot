@@ -17,10 +17,7 @@
   -->
 
 <!-- 这是用来操作博客信息的 Fenix XML 文件，请填写 namespace 命名空间. -->
-<fenixs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        namespace="dev.macula.boot.starter.jpa.test.repository.BlogRepository"
-        xmlns="http://macula.dev/schema/jpa"
-        xsi:schemaLocation="http://macula.dev/schema/jpa https://macula.dev/schema/jpa/fenix.xsd">
+<fenixs namespace="dev.macula.boot.starter.jpa.test.repository.BlogRepository">
 
     <!-- 这是一条完整的 Fenix 查询语句块，必须填写 fenix 标签的 id 属性. -->
     <fenix id="queryMyBlogs">

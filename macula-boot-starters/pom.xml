@@ -60,6 +60,7 @@
         <module>macula-boot-starter-logstash</module>
         <module>macula-boot-starter-skylog</module>
         <module>macula-boot-starter-prometheus</module>
+        <module>macula-boot-starter-wechat</module>
     </modules>
 
     <dependencies>

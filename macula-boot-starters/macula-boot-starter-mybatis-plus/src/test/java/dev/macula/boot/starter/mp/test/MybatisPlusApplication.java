@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2022-01-18
  */
 @SpringBootApplication
-@MapperScan("dev.macula.boot.starter.database.test.mapper")
+@MapperScan("dev.macula.boot.starter.mp.test.mapper")
 public class MybatisPlusApplication {
 
     public static void main(String[] args) {
