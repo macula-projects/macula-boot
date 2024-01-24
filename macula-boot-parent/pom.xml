@@ -317,13 +317,7 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!-- MySQL Connector -->
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.connector.version}</version>
-            </dependency>
-
+            <!-- MySQL Binlog Connector -->
             <dependency>
                 <groupId>com.zendesk</groupId>
                 <artifactId>mysql-binlog-connector-java</artifactId>
@@ -416,7 +410,7 @@
             <!-- redisson -->
             <dependency>
                 <groupId>org.redisson</groupId>
-                <artifactId>redisson-spring-data-26</artifactId>
+                <artifactId>redisson-spring-data-27</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
 

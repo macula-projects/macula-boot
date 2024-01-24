@@ -31,7 +31,7 @@
     <dependencies>
         <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-data-26</artifactId>
+            <artifactId>redisson-spring-data-27</artifactId>
         </dependency>
 
         <dependency>
