@@ -1,0 +1,6 @@
+spring:
+  schedulerx2:
+    endpoint: acm.aliyun.com
+    namespace: 76ace3f6-ebfe-40e9-a164-db02e1f24795
+    groupId: macula-dev
+    appKey: 5RXXJvvy8LB6YiaicsVBUMXA

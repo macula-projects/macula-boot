@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.retry.config;
+package dev.macula.example.schedulerx;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * {@code RetryAutoConfiguration} Retry模块配置
+ * {@code MaculaExampleSchedulerxApplication} 启动类
  *
  * @author rain
- * @since 2023/7/24 15:33
+ * @since 2024/1/25 12:34
  */
-@AutoConfiguration
-@EnableRetry
-public class RetryAutoConfiguration {
+@SpringBootApplication
+public class MaculaExampleSchedulerxApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MaculaExampleSchedulerxApplication.class, args);
+    }
 }

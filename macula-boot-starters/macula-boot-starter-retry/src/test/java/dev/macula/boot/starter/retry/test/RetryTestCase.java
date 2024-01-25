@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,18 +15,25 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.retry.config;
+package dev.macula.boot.starter.retry.test;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.retry.annotation.EnableRetry;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * {@code RetryAutoConfiguration} Retry模块配置
+ * {@code RetryTestCase} 测试用例
  *
  * @author rain
- * @since 2023/7/24 15:33
+ * @since 2024/1/25 15:01
  */
-@AutoConfiguration
-@EnableRetry
-public class RetryAutoConfiguration {
+@SpringBootTest
+public class RetryTestCase {
+    @Autowired
+    private RetryTestService retryTestService;
+
+    @Test
+    public void testRetry() {
+        retryTestService.testRetry();
+    }
 }

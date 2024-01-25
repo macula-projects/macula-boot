@@ -42,10 +42,9 @@
         <module>macula-example-consumer</module>
         <module>macula-example-provider1</module>
         <module>macula-example-provider2</module>
-        <module>macula-example-provider3</module>
+        <module>macula-example-schedulerx</module>
         <module>macula-example-ddd</module>
         <module>macula-example-task</module>
-        <module>macula-example-retry</module>
         <module>macula-example-tsf</module>
         <module>macula-example-binlog4j</module>
     </modules>

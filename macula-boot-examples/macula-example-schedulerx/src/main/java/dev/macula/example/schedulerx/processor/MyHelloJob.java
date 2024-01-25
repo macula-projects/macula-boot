@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,18 +15,25 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.retry.config;
+package dev.macula.example.schedulerx.processor;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.retry.annotation.EnableRetry;
+import com.alibaba.schedulerx.worker.domain.JobContext;
+import com.alibaba.schedulerx.worker.processor.JavaProcessor;
+import com.alibaba.schedulerx.worker.processor.ProcessResult;
+import org.springframework.stereotype.Component;
 
 /**
- * {@code RetryAutoConfiguration} Retry模块配置
+ * {@code MyHelloJob} 测试任务
  *
  * @author rain
- * @since 2023/7/24 15:33
+ * @since 2024/1/25 12:33
  */
-@AutoConfiguration
-@EnableRetry
-public class RetryAutoConfiguration {
+@Component
+public class MyHelloJob extends JavaProcessor {
+
+    @Override
+    public ProcessResult process(JobContext context) throws Exception {
+        System.out.println("hello schedulerx2.0");
+        return new ProcessResult(true);
+    }
 }

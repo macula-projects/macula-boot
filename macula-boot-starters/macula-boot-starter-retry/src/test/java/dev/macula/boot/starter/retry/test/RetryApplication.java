@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,26 +15,20 @@
  * limitations under the License.
  */
 
-package dev.macula.example.retry;
+package dev.macula.boot.starter.retry.test;
 
-import dev.macula.boot.starter.retry.config.easyretry.EnableEasyRetry;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * {@code MaculaExampleRetryApplication} 启动类
+ * {@code dev.macula.boot.starter.retry.test.RetryApplication} 重试测试
  *
  * @author rain
- * @since 2023/7/24 23:54
+ * @since 2024/1/25 14:50
  */
 @SpringBootApplication
-@EnableEasyRetry(group = "macula")
-@EnableDiscoveryClient
-@EnableFeignClients
-public class MaculaExampleRetryApplication {
+public class RetryApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MaculaExampleRetryApplication.class, args);
+        SpringApplication.run(RetryApplication.class, args);
     }
 }
