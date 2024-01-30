@@ -26,6 +26,7 @@ import dev.macula.example.consumer.vo.PoBaseDto;
 import dev.macula.example.consumer.vo.PoBaseResult;
 import dev.macula.example.consumer.vo.UserResult;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/consumer")
+@Slf4j
 public class ConsumerController {
 
     @Autowired
@@ -55,7 +57,9 @@ public class ConsumerController {
 
     @GetMapping("/echo")
     public String echo() {
-        return provider1Service.echo("consumer");
+        String hello = provider1Service.echo("consumer");
+        log.info("consumer echo: {}", hello);
+        return hello;
     }
 
     @PostMapping("/user")

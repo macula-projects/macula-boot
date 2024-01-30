@@ -66,10 +66,10 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
         String method = request.getMethodValue();
         String path = request.getURI().getPath();
         String restfulPath = method + ":" + path;
-        if (log.isDebugEnabled()) {
-            log.debug("删除opaqueToken 日志：method： {}, path： {}， restfulPath: {}", method, path, restfulPath);
-        }
         if (path.endsWith(properties.getRmOpaqueTokenEndpoint()) && HttpMethod.POST == request.getMethod()) {
+            if (log.isDebugEnabled()) {
+                log.debug("删除opaqueToken 日志：method： {}, path： {}， restfulPath: {}", method, path, restfulPath);
+            }
             if (properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)) {
                 if (log.isDebugEnabled()) {
                     log.debug("删除opaqueToken 未进行kong验证：header： {}", request.getHeaders().entrySet());

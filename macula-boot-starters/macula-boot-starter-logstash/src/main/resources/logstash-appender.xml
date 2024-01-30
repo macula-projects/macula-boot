@@ -30,8 +30,4 @@
             <customFields>{"spring.application.name":"${APPLICATION_NAME}"}</customFields>
         </encoder>
     </appender>
-
-    <root level="info">
-        <appender-ref ref="logstash"/>
-    </root>
 </included>

@@ -89,4 +89,9 @@ public class GatewayAutoConfiguration {
         RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate) {
         return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
     }
+
+    @Bean
+    public TraceIdGlobalFilter traceIdGlobalFilter() {
+        return new TraceIdGlobalFilter();
+    }
 }

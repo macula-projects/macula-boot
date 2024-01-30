@@ -47,7 +47,6 @@
         <module>macula-boot-starter-springdoc</module>
         <module>macula-boot-starter-dubbo</module>
         <module>macula-boot-starter-feign</module>
-        <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-task</module>
         <module>macula-boot-starter-tinyid</module>
         <module>macula-boot-starter-system</module>
@@ -56,11 +55,13 @@
         <module>macula-boot-starter-seata</module>
         <module>macula-boot-starter-retry</module>
         <module>macula-boot-starter-binlog4j</module>
+        <module>macula-boot-starter-wechat</module>
         <module>macula-boot-starter-auditlog</module>
         <module>macula-boot-starter-logstash</module>
-        <module>macula-boot-starter-skylog</module>
         <module>macula-boot-starter-prometheus</module>
-        <module>macula-boot-starter-wechat</module>
+        <module>macula-boot-starter-sleuth</module>
+        <module>macula-boot-starter-skywalking</module>
+        <module>macula-boot-starter-cloud</module>
     </modules>
 
     <dependencies>

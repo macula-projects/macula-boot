@@ -87,7 +87,6 @@ macula:
       domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
       base-path: jxh/ # 基础路径
 
-
 springdoc:
   api-docs:
     enabled: true  # 默认是true，用于开关API文档
@@ -110,3 +109,4 @@ logging:
     dev.macula.example: debug
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  #config: classpath:logback-skywalking.xml

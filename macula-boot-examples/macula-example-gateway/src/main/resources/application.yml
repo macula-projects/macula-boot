@@ -46,6 +46,9 @@ spring:
           client-id: e4da4a32-592b-46f0-ae1d-784310e88423
           client-secret: secret
           introspection-uri: http://127.0.0.1:9010/oauth2/introspect
+  sleuth:
+    reactor:
+      instrumentation-type: decorate_on_each
 macula:
   gateway:
     security:
@@ -58,3 +61,4 @@ logging:
     dev.macula.boot.starter.cloud.gateway: debug
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  #config: classpath:logback-skywalking.xml
