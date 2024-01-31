@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2023 Macula
+  ~ Copyright (c) 2024 Macula
   ~   macula.dev, China
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,104 +19,29 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>macula-boot-starters</artifactId>
         <groupId>dev.macula.boot</groupId>
+        <artifactId>macula-boot-starters</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-oss</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dromara.x-file-storage</groupId>
+            <artifactId>x-file-storage-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <!-- 七牛云Kodo -->
-        <dependency>
-            <groupId>com.qiniu</groupId>
-            <artifactId>qiniu-java-sdk</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 阿里云OSS -->
-        <dependency>
-            <groupId>com.aliyun.oss</groupId>
-            <artifactId>aliyun-sdk-oss</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 腾讯云COS -->
-        <dependency>
-            <groupId>com.qcloud</groupId>
-            <artifactId>cos_api-bundle</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 华为云 OBS -->
-        <dependency>
-            <groupId>com.huaweicloud</groupId>
-            <artifactId>esdk-obs-java</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Amazon AWS S3 -->
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 谷歌云 Google Cloud Platform Storage-->
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-storage</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Minio -->
-        <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- WebDAV -->
-        <dependency>
-            <groupId>com.github.lookfirst</groupId>
-            <artifactId>sardine</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- SFTP -->
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- FTP -->
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-        </dependency>
-
-        <!-- 图片处理 https://github.com/coobird/thumbnailator -->
-        <dependency>
-            <groupId>net.coobird</groupId>
-            <artifactId>thumbnailator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>

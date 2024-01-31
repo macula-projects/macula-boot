@@ -63,21 +63,14 @@
         <springdoc.version>1.7.0</springdoc.version>
         <powerjob.version>4.3.2</powerjob.version>
         <xxl-job.version>2.4.0</xxl-job.version>
-        <easy-retry.version>2.5.0</easy-retry.version>
         <dubbo.version>3.2.10</dubbo.version>
         <bouncycastle.version>1.69</bouncycastle.version>
-        <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
-        <qcloud-sdk-oss.version>5.6.62</qcloud-sdk-oss.version>
-        <aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
-        <huawei-sdk-oss.version>3.22.12</huawei-sdk-oss.version>
-        <aws-sdk-oss.version>1.12.289</aws-sdk-oss.version>
-        <google-sdk-oss.version>2.22.1</google-sdk-oss.version>
+        <xfile.version>2.1.0</xfile.version>
         <minio.version>8.4.2</minio.version>
-        <sardine.version>5.10</sardine.version>
-        <commons-net.version>3.9.0</commons-net.version>
-        <jsch.version>0.1.55</jsch.version>
-        <tika.version>2.4.1</tika.version>
-        <thumbnailator.version>0.4.19</thumbnailator.version>
+        <fastdfs.version>1.30-20230328</fastdfs.version>
+        <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
+        <qcloud-sdk-oss.version>5.6.195</qcloud-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.16.1</aliyun-sdk-oss.version>
         <cola.version>4.3.2</cola.version>
         <logstash.version>7.4</logstash.version>
         <skywalking-toolkit.version>9.1.0</skywalking-toolkit.version>
@@ -401,6 +394,7 @@
                 <version>${fastjson2.version}</version>
             </dependency>
 
+            <!-- liteflow -->
             <dependency>
                 <groupId>com.yomahub</groupId>
                 <artifactId>liteflow-spring-boot-starter</artifactId>
@@ -425,6 +419,7 @@
                 <version>${redisson.version}</version>
             </dependency>
 
+            <!-- oauth2 -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
@@ -476,12 +471,14 @@
                 <version>${mapstruct-plus.version}</version>
             </dependency>
 
+            <!-- rocketmq -->
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq-spring.version}</version>
             </dependency>
 
+            <!-- cola -->
             <dependency>
                 <groupId>com.alibaba.cola</groupId>
                 <artifactId>cola-component-statemachine</artifactId>
@@ -502,13 +499,6 @@
                 <version>${xxl-job.version}</version>
             </dependency>
 
-            <!-- easy-retry -->
-            <dependency>
-                <groupId>com.aizuda</groupId>
-                <artifactId>easy-retry-client-core</artifactId>
-                <version>${easy-retry.version}</version>
-            </dependency>
-
             <!-- Bouncy Castle -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -518,9 +508,21 @@
 
             <!-- file storage -->
             <dependency>
+                <groupId>org.dromara.x-file-storage</groupId>
+                <artifactId>x-file-storage-core</artifactId>
+                <version>${xfile.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>${minio.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.rui8832</groupId>
+                <artifactId>fastdfs-client-java</artifactId>
+                <version>${fastdfs.version}</version>
             </dependency>
 
             <dependency>
@@ -541,54 +543,6 @@
                 <version>${qiniu-sdk-oss.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.huaweicloud</groupId>
-                <artifactId>esdk-obs-java</artifactId>
-                <version>${huawei-sdk-oss.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-s3</artifactId>
-                <version>${aws-sdk-oss.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.cloud</groupId>
-                <artifactId>google-cloud-storage</artifactId>
-                <version>${google-sdk-oss.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcraft</groupId>
-                <artifactId>jsch</artifactId>
-                <version>${jsch.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-net</groupId>
-                <artifactId>commons-net</artifactId>
-                <version>${commons-net.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.lookfirst</groupId>
-                <artifactId>sardine</artifactId>
-                <version>${sardine.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.tika</groupId>
-                <artifactId>tika-core</artifactId>
-                <version>${tika.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.coobird</groupId>
-                <artifactId>thumbnailator</artifactId>
-                <version>${thumbnailator.version}</version>
-            </dependency>
-
             <!-- logstash -->
             <dependency>
                 <groupId>net.logstash.logback</groupId>
@@ -596,7 +550,7 @@
                 <version>${logstash.version}</version>
             </dependency>
 
-            <!-- skywalking 整合 logback -->
+            <!-- skywalking -->
             <dependency>
                 <groupId>org.apache.skywalking</groupId>
                 <artifactId>apm-toolkit-logback-1.x</artifactId>
@@ -752,6 +706,11 @@
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok-mapstruct-binding</artifactId>
                                 <version>0.2.0</version>
+                            </path>
+                            <path>
+                                <groupId>org.springframework.boot</groupId>
+                                <artifactId>spring-boot-configuration-processor</artifactId>
+                                <version>${spring-boot.version}</version>
                             </path>
                         </annotationProcessorPaths>
                         <compilerArgs>

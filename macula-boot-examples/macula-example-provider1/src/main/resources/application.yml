@@ -86,7 +86,6 @@ macula:
       bucket-name: jxh-cos-dev-1303039456
       domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
       base-path: jxh/ # 基础路径
-
 springdoc:
   api-docs:
     enabled: true  # 默认是true，用于开关API文档

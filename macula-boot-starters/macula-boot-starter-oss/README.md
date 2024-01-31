@@ -1,31 +1,7 @@
 ## 概述
 
-在 SpringBoot 中通过简单的方式将文件存储到 本地、FTP、SFTP、WebDAV、谷歌云存储、阿里云OSS、华为云OBS、七牛云Kodo、腾讯云COS、MinIO、
-AWS S3及其它兼容 S3 协议的平台。详情可以参考spring-file-storage
-
-### 支持的存储平台
-
-#### 本地存储
-
-| 平台     | 支持 |
-|--------|----|
-| 本地     | √  |
-| FTP    | √  |
-| SFTP   | √  |
-| WebDAV | √  |
-
-#### 对象存储
-
-| 平台            | 官方 SDK | AWS S3 SDK | S3 兼容说明                                                                            |
-|---------------|--------|------------|------------------------------------------------------------------------------------|
-| AWS S3        | √      | √          | -                                                                                  |
-| MinIO         | √      | √          | [查看](http://docs.minio.org.cn/docs/master/java-client-quickstart-guide)            |
-| 阿里云 OSS       | √      | √          | [查看](https://help.aliyun.com/document_detail/64919.html#title-cds-fai-yxp)         |
-| 华为云 OBS       | √      | √          | [查看](https://support.huaweicloud.com/topic/74416-1-O-obsduixiangcunchufuwus3xieyi) |
-| 七牛云 Kodo      | √      | √          | [查看](https://developer.qiniu.com/kodo/4086/aws-s3-compatible)                      |
-| 腾讯云 COS       | √      | √          | [查看](https://cloud.tencent.com/document/product/436/37421)                         |
-| 谷歌云存储         | √      | ×          | -                                                                                  |
-| 其它兼容 S3 协议的平台 | ×      | √          | -                                                                                  |
+在 SpringBoot 中通过简单的方式将文件存储到 本地、FTP、SFTP、WebDAV、FastDFS、Minio、谷歌云存储、阿里云OSS、华为云OBS、七牛云Kodo、腾讯云COS、MinIO、
+AWS S3及其它兼容 S3 协议的平台。详情可以参考[x-file-storage](https://x-file-storage.xuyanwu.cn/)官网
 
 ## 组件坐标
 
@@ -40,6 +16,9 @@ AWS S3及其它兼容 S3 协议的平台。详情可以参考spring-file-storage
 
 ## 使用配置
 
+{{% alert title="提示" color="primary" %}}
+注意官网默认配置是以dromara.x-file-storage，由于macula oss没有使用官网的starter，所以这里是以macula.oss开头，其他保持不变。
+{{% /alert %}}
 ```yaml
 # 配置存储平台 ，第一位 test-minio 为默认存储平台
 macula:
@@ -153,7 +132,14 @@ macula:
         credentials-path: file:/deploy/example-key.json # 授权 key json 路径，兼容Spring的ClassPath路径、文件路径、HTTP路径等
         domain: ?? # 访问域名，注意“/”结尾，例如：https://storage.googleapis.com/test-bucket/
         base-path: hy/ # 基础路径
-
+    fastdfs:
+      - platform: fastdfs-1 # 存储平台标识
+        enable-storage: true  # 启用存储
+        run-mod: COVER #运行模式，默认 COVER（覆盖模式），强制用 FastDFS 返回的路径及文件名覆盖 FileInfo 中的 path 及 filename。
+        tracker-server: # Tracker Server 配置
+          server-addr: ?? # Tracker Server 地址（IP:PORT），多个用英文逗号隔开
+        domain: ?? # 访问域名，注意“/”结尾，例如：https://file.abc.com/
+        base-path: "" # 基础路径，强烈建议留空，详情查看兼容性说明章节
 ```
 
 注意配置每个平台前面都有个-号，通过以下方式可以配置多个：
@@ -176,18 +162,32 @@ local:
 
 ## 核心功能
 
+### 上传
+
+支持 File、MultipartFile、byte[]
+、InputStream、URL、URI、String、HttpServletRequest，大文件会自动分片上传。如果想支持更多方式，请阅读 [文件适配器](https://x-file-storage.xuyanwu.cn/#/%E6%96%87%E4%BB%B6%E9%80%82%E9%85%8D%E5%99%A8)
+章节
+
 ```java
 @RestController
 public class FileDetailController {
 
     @Autowired
-    private FileStorageService fileStorageService;			//注入实列
+    private FileStorageService fileStorageService;//注入实列
 
+    /**
+     * 上传文件
+     */
+    @PostMapping("/upload")
+    public FileInfo upload(MultipartFile file) {
+        return fileStorageService.of(file).upload();
+    }
+    
     /**
      * 上传文件，成功返回文件 url
      */
-    @PostMapping("/upload")
-    public String upload(MultipartFile file) {
+    @PostMapping("/upload2")
+    public String upload2(MultipartFile file) {
         FileInfo fileInfo = fileStorageService.of(file)
                 .setPath("upload/") //保存到相对路径下，为了方便管理，不需要可以不写
                 .setObjectId("0")   //关联对象id，为了方便管理，不需要可以不写
@@ -218,227 +218,39 @@ public class FileDetailController {
                 .setPlatform("aliyun-oss-1")    //使用指定的存储平台
                 .upload();
     }
+
+    /**
+     * 直接读取 HttpServletRequest 中的文件进行上传，成功返回文件信息
+     * 使用这种方式有些注意事项，请查看文档 基础功能-上传 章节
+     */
+    @PostMapping("/upload-request")
+    public FileInfo uploadPlatform(HttpServletRequest request) {
+        return fileStorageService.of(request).upload();
+    }
 }
 
 ```
 
-### 上传
-
-#### 多种方式上传
-
+### 其它操作
 ```java
-    // 直接上传
-    fileStorageService.of(file).upload();
+//手动构造文件信息，可用于其它操作
+FileInfo fileInfo = new FileInfo()
+        .setPlatform("huawei-obs-1")
+        .setBasePath("test/")
+        .setPath("aa/")
+        .setFilename("image.png")
+        .setThFilename("image.png.min.jpg");
 
-    // 如果要用 InputStream、URL、URI、String 等方式上传，暂时无法获取 originalFilename 属性，最好手动设置
-    fileStorageService.of(inputStream).setOriginalFilename("a.jpg").upload();
-
-    // 上传到指定路径下
-    fileStorageService.of(file)
-    .setPath("upload/") // 保存到相对路径下，为了方便管理，不需要可以不写
-    .upload();
-
-    // 关联文件参数并上传
-    fileStorageService.of(file)
-    .setObjectId("0")   // 关联对象id，为了方便管理，不需要可以不写
-    .setObjectType("0") // 关联对象类型，为了方便管理，不需要可以不写
-    .putAttr("role","admin") //保存一些属性，可以在切面、保存上传记录、自定义存储平台等地方获取使用，不需要可以不写
-    .putAttr("username","007")
-    .upload();
-
-    // 上传到指定的存储平台
-    fileStorageService.of(file)
-    .setPlatform("aliyun-oss-1")    // 使用指定的存储平台
-    .upload();
-
-    // 对图片进行处理并上传，有多个重载方法。图片处理使用的是 https://github.com/coobird/thumbnailator
-    fileStorageService.of(file)
-    .setThumbnailSuffix(".jpg") //指定缩略图后缀，必须是 thumbnailator 支持的图片格式，默认使用全局的
-    .setSaveThFilename("thabc") //指定缩略图的保存文件名，注意此文件名不含后缀，默认自动生成
-    .image(img->img.size(1000,1000))  // 将图片大小调整到 1000*1000
-    .thumbnail(th->th.size(200,200))  // 再生成一张 200*200 的缩略图
-    .upload();
-
-// 其它更多方法以实际 API 为准
+//文件是否存在
+boolean exists = fileStorageService.exists(fileInfo);
+//下载
+byte[] bytes = fileStorageService.download(fileInfo).bytes();
+//删除
+fileStorageService.delete(fileInfo);
+//其它更多操作
 ```
 
-#### 保存上传记录
-
-如果还想使用除了保存文件之外的其它功能，例如删除、下载文件，还需要实现 `FileRecorder` 这个接口，把文件信息保存到数据库中。
-
-```java
-/**
- * 用来将文件上传记录保存到数据库，这里使用了 MyBatis-Plus 和 Hutool 工具类
- */
-@Service
-public class FileDetailService extends ServiceImpl<FileDetailMapper, FileDetail> implements FileRecorder {
-
-    /**
-     * 保存文件信息到数据库
-     */
-    @SneakyThrows
-    @Override
-    public boolean record(FileInfo info) {
-        FileDetail detail = BeanUtil.copyProperties(info, FileDetail.class, "attr");
-
-        //这是手动获 取附加属性字典 并转成 json 字符串，方便存储在数据库中
-        if (info.getAttr() != null) {
-            detail.setAttr(new ObjectMapper().writeValueAsString(info.getAttr()));
-        }
-        boolean b = save(detail);
-        if (b) {
-            info.setId(detail.getId());
-        }
-        return b;
-    }
-
-    /**
-     * 根据 url 查询文件信息
-     */
-    @SneakyThrows
-    @Override
-    public FileInfo getByUrl(String url) {
-        FileDetail detail = getOne(new QueryWrapper<FileDetail>().eq(FileDetail.COL_URL, url));
-        FileInfo info = BeanUtil.copyProperties(detail, FileInfo.class, "attr");
-
-        //这是手动获取数据库中的 json 字符串 并转成 附加属性字典，方便使用
-        if (StrUtil.isNotBlank(detail.getAttr())) {
-            info.setAttr(new ObjectMapper().readValue(detail.getAttr(), Dict.class));
-        }
-        return info;
-    }
-
-    /**
-     * 根据 url 删除文件信息
-     */
-    @Override
-    public boolean delete(String url) {
-        return remove(new QueryWrapper<FileDetail>().eq(FileDetail.COL_URL, url));
-    }
-}
-```
-
-数据库表结构推荐如下，你也可以根据自己喜好在这里自己扩展
-
-```sql
--- 这里使用的是 mysql
-CREATE TABLE `file_detail`
-(
-    `id`                varchar(32)  NOT NULL COMMENT '文件id',
-    `url`               varchar(512) NOT NULL COMMENT '文件访问地址',
-    `size`              bigint(20) DEFAULT NULL COMMENT '文件大小，单位字节',
-    `filename`          varchar(256) DEFAULT NULL COMMENT '文件名称',
-    `original_filename` varchar(256) DEFAULT NULL COMMENT '原始文件名',
-    `base_path`         varchar(256) DEFAULT NULL COMMENT '基础存储路径',
-    `path`              varchar(256) DEFAULT NULL COMMENT '存储路径',
-    `ext`               varchar(32)  DEFAULT NULL COMMENT '文件扩展名',
-    `content_type`      varchar(32)  DEFAULT NULL COMMENT 'MIME类型',
-    `platform`          varchar(32)  DEFAULT NULL COMMENT '存储平台',
-    `th_url`            varchar(512) DEFAULT NULL COMMENT '缩略图访问路径',
-    `th_filename`       varchar(256) DEFAULT NULL COMMENT '缩略图名称',
-    `th_size`           bigint(20) DEFAULT NULL COMMENT '缩略图大小，单位字节',
-    `th_content_type`   varchar(32)  DEFAULT NULL COMMENT '缩略图MIME类型',
-    `object_id`         varchar(32)  DEFAULT NULL COMMENT '文件所属对象id',
-    `object_type`       varchar(32)  DEFAULT NULL COMMENT '文件所属对象类型，例如用户头像，评价图片',
-    `attr`              text COMMENT '附加属性',
-    `create_time`       datetime     DEFAULT NULL COMMENT '创建时间',
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  ROW_FORMAT = DYNAMIC COMMENT ='文件记录表';
-点击复制错误复制成功
-```
-
-### 下载
-
-#### 多种下载方式
-
-```java
-    // 获取文件信息
-    FileInfo fileInfo=fileStorageService.getFileInfoByUrl("http://file.abc.com/test/a.jpg");
-
-    // 下载为字节数组
-    byte[]bytes=fileStorageService.download(fileInfo).bytes();
-
-    // 下载到文件
-    fileStorageService.download(fileInfo).file("C:\\a.jpg");
-
-    // 下载到 OutputStream 中
-    ByteArrayOutputStream out=new ByteArrayOutputStream();
-    fileStorageService.download(fileInfo).outputStream(out);
-
-    // 获取 InputStream 手动处理
-    fileStorageService.download(fileInfo).inputStream(in->{
-    //TODO 读取 InputStream
-    });
-
-    // 直接通过文件信息中的 url 下载，省去手动查询文件信息记录的过程
-    fileStorageService.download("http://file.abc.com/test/a.jpg").file("C:\\a.jpg");
-
-    // 下载缩略图
-    fileStorageService.downloadTh(fileInfo).file("C:\\th.jpg");
-```
-
-#### 监听下载进度
-
-```java
-// 方式一
-fileStorageService.download(fileInfo).setProgressMonitor(progressSize->
-    System.out.println("已下载："+progressSize)
-    ).file("C:\\a.jpg");
-
-    // 方式二
-    fileStorageService.download(fileInfo).setProgressMonitor((progressSize,allSize)->
-    System.out.println("已下载 "+progressSize+" 总大小"+allSize)
-    ).file("C:\\a.jpg");
-
-    // 方式三
-    fileStorageService.download(fileInfo).setProgressMonitor(new ProgressListener(){
-@Override public void start(){
-    System.out.println("下载开始");
-    }
-
-@Override public void progress(long progressSize,long allSize){
-    System.out.println("已下载 "+progressSize+" 总大小"+allSize);
-    }
-
-@Override public void finish(){
-    System.out.println("下载结束");
-    }
-    }).file("C:\\a.jpg");
-```
-
-### 删除
-
-```java
-//获取文件信息
-FileInfo fileInfo=fileStorageService.getFileInfoByUrl("http://file.abc.com/test/a.jpg");
-
-    //直接删除
-    fileStorageService.delete(fileInfo);
-
-    //条件删除
-    fileStorageService.delete(fileInfo,info->{
-    //TODO 检查是否满足删除条件
-    return true;
-    });
-
-    //直接通过文件信息中的 url 删除，省去手动查询文件信息记录的过程
-    fileStorageService.delete("http://file.abc.com/test/a.jpg");
-```
-
-### 判断文件是否存在
-
-```java
-//获取文件信息
-FileInfo fileInfo=fileStorageService.getFileInfoByUrl("http://file.abc.com/test/a.jpg");
-
-    //判断文件是否存在
-    boolean exists=fileStorageService.exists(fileInfo);
-
-    //直接通过文件信息中的 url 判断文件是否存在，省去手动查询文件信息记录的过程
-    boolean exists2=fileStorageService.exists("http://file.abc.com/test/a.jpg");
-```
+具体的上传、下载、保存记录等所有操作请参考[官方网站](https://x-file-storage.xuyanwu.cn/#/%E5%9F%BA%E7%A1%80%E5%8A%9F%E8%83%BD)
 
 ## 依赖引入
 
@@ -446,106 +258,20 @@ FileInfo fileInfo=fileStorageService.getFileInfoByUrl("http://file.abc.com/test/
 <dependencies>
     <dependency>
         <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.dromara.x-file-storage</groupId>
+        <artifactId>x-file-storage-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <!-- 七牛云Kodo -->
-    <dependency>
-        <groupId>com.qiniu</groupId>
-        <artifactId>qiniu-java-sdk</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- 阿里云OSS -->
-    <dependency>
-        <groupId>com.aliyun.oss</groupId>
-        <artifactId>aliyun-sdk-oss</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- 腾讯云COS -->
-    <dependency>
-        <groupId>com.qcloud</groupId>
-        <artifactId>cos_api</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- 华为云 OBS -->
-    <dependency>
-        <groupId>com.huaweicloud</groupId>
-        <artifactId>esdk-obs-java</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- Amazon AWS S3 -->
-    <dependency>
-        <groupId>com.amazonaws</groupId>
-        <artifactId>aws-java-sdk-s3</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- 谷歌云 Google Cloud Platform Storage-->
-    <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud-storage</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- Minio -->
-    <dependency>
-        <groupId>io.minio</groupId>
-        <artifactId>minio</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- WebDAV -->
-    <dependency>
-        <groupId>com.github.lookfirst</groupId>
-        <artifactId>sardine</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- SFTP -->
-    <dependency>
-        <groupId>com.jcraft</groupId>
-        <artifactId>jsch</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!-- FTP -->
-    <dependency>
-        <groupId>commons-net</groupId>
-        <artifactId>commons-net</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <dependency>
-        <groupId>cn.hutool</groupId>
-        <artifactId>hutool-all</artifactId>
-    </dependency>
-
-    <!-- 图片处理 https://github.com/coobird/thumbnailator -->
-    <dependency>
-        <groupId>net.coobird</groupId>
-        <artifactId>thumbnailator</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.apache.tika</groupId>
-        <artifactId>tika-core</artifactId>
+        <scope>provided</scope>
     </dependency>
 </dependencies>
 ```
 
 ## 版权说明
 
-本模块源码来自https://github.com/1171736840/spring-file-storage
-
-- spring-file-storage：https://github.com/1171736840/spring-file-storage/blob/main/LICENSE
-- thumbnailator：https://github.com/coobird/thumbnailator/blob/master/LICENSE
-- tika-core：https://github.com/apache/tika/blob/main/LICENSE.txt
-- jsch：http://www.jcraft.com/jsch/LICENSE.txt
-- sardine：https://github.com/lookfirst/sardine/blob/master/LICENSE.txt
-- minio：https://github.com/minio/minio/blob/master/LICENSE
-- commons-net：https://github.com/apache/commons-net/blob/master/LICENSE.txt
-- hutool：https://github.com/dromara/hutool/blob/v5-master/LICENSE
+- x-file-storage：https://github.com/dromara/x-file-storage/blob/main/LICENSE

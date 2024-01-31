@@ -68,7 +68,7 @@ public class RedissonOneRedisTest {
     public static class RedisConfig {
 
         @Bean(name = "redissonPropertiesOne")
-        @ConfigurationProperties(prefix = "spring.redis.redisson.one")
+        @ConfigurationProperties(prefix = "spring.redis.redisson.x")
         public RedissonProperties redissonPropertiesOne() {
             return new RedissonProperties();
         }

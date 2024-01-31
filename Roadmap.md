@@ -8,7 +8,7 @@
 - 支持人群包角色（√）
 - 微信开发SDK Starter提供（√）
 - Retry模块基于Spring Retry重构（√）
-- 整理可观测配置(logging,metrics,tracing)，响应头添加TraceId
+- 整理可观测配置(logging,metrics,tracing)，响应头添加TraceId（√）
 - 修复binlog重启后多个连接的问题
 - oss升级到x-file-storage 2.1.0
 - 测试腾讯北极星微服务平台
