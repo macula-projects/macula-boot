@@ -60,7 +60,7 @@ public class BinlogClientConfig {
     private long connectTimeout = TimeUnit.SECONDS.toMillis(3L);
 
     /** 发送心跳包时间间隔 */
-    private long heartbeatInterval = 6000;
+    private long heartbeatInterval = TimeUnit.SECONDS.toMillis(5L);
 
     /** 读取记忆 */
     private boolean persistence = false;

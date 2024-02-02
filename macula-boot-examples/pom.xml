@@ -47,6 +47,9 @@
         <module>macula-example-task</module>
         <module>macula-example-tsf</module>
         <module>macula-example-binlog4j</module>
+        <module>macula-example-tencent-gateway</module>
+        <module>macula-example-tencent-provider</module>
+        <module>macula-example-tencent-consumer</module>
     </modules>
 
     <build>

@@ -1,0 +1,68 @@
+server:
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        # group:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://127.0.0.1:4010/oauth2/jwks    # 网关地址
+feign:
+  httpclient:
+    enabled: false
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
+    disable-ssl-validation: false # 是否禁止SSL检查， 默认false
+    okhttp:
+      read-timeout: 60s # 请求超时时间，Duration配置方式
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+
+seata:
+  enabled: false
+
+springdoc:
+  api-docs:
+    enabled: true  # 默认是true，用于开关API文档
+  swagger-ui:
+    enabled: true # 默认是true，用于开关API UI
+
+macula:
+  cloud:
+    endpoint: http://127.0.0.1:9000                   # macula cloud网关地址
+    app-key: example
+    secret-key: example
+
+gapi:
+  username: applicationA
+  secret: xx
+
+ipaas:
+  username: gbsspo
+  secret: xx
+  appKey: xx
+
+gateway:
+  username: gateway
+  secret: xx
+  appKey: xx
+
+logging:
+  level:
+    root: info
+    com.alibaba.nacos.client: error
+    dev.macula.example.consumer: debug
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  #config: classpath:logback-skywalking.xml

@@ -30,6 +30,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-gateway</artifactId>
         </dependency>

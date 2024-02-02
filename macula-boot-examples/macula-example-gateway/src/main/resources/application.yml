@@ -3,8 +3,7 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: ${nacos.config.server-addr}
-        namespace: ${nacos.config.namespace}
+        namespace: ${nacos.namespace}
         # group:
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat

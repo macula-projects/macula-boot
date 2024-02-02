@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2023 Macula
+  ~ Copyright (c) 2024 Macula
   ~   macula.dev, China
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,63 +19,66 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>macula-boot-starter-cloud</artifactId>
         <groupId>dev.macula.boot</groupId>
+        <artifactId>macula-boot-examples</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>macula-boot-starter-cloud-tencent</artifactId>
+    <artifactId>macula-example-tencent-provider</artifactId>
 
     <dependencies>
-        <!-- Spring Cloud -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-feign</artifactId>
+            <artifactId>macula-boot-starter-crypto</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-        </dependency>
-
-        <!-- Spring Cloud Tencent -->
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-discovery</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-security</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-config</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-springdoc</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-ratelimit</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-cloud-tencent</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-circuitbreaker</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-oss</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-router</artifactId>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api-bundle</artifactId>
+        </dependency>
+
+        <!-- 默认开放 /actuator/health 返回健康状态 -->
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-prometheus</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-metadata-transfer</artifactId>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-sleuth</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
-
 </project>

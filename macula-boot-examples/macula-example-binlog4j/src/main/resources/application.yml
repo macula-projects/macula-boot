@@ -12,6 +12,6 @@ binlog4j:
       password:
       host: 127.0.0.1
       port: 3306
-      serverId: 1990
+      serverId: 1991
       persistence: true
       mode: cluster

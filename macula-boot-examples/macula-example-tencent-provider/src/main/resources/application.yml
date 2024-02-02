@@ -1,0 +1,73 @@
+server:
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://127.0.0.1:4010/oauth2/jwks        # 网关地址
+
+seata:
+  enabled: false
+
+feign:
+  httpclient:
+    enabled: false
+    max-connections: 200 # 线程池最大连接数，默认200
+    time-to-live: 900 # 线程存活时间，单位秒，默认900
+    connection-timeout: 2000  # 新建连接超时时间，单位ms, 默认2000
+    follow-redirects: true # 是否允许重定向，默认true
+    disable-ssl-validation: false # 是否禁止SSL检查， 默认false
+    okhttp:
+      read-timeout: 60s # 请求超时时间，Duration配置方式
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+
+macula:
+  security:
+    ignore-urls:
+      - /api/v1/provider1/echo
+  oss: #文件存储配置
+    default-platform: tencent-cos-1 #默认使用的存储平台
+    thumbnail-suffix: ".min.jpg" #缩略图后缀，例如【.min.jpg】【.png】
+    tencent-cos: # 腾讯云 COS
+      platform: tencent-cos-1 # 存储平台标识
+      enable-storage: true  # 启用存储
+      secret-id: test
+      secret-key: test
+      region: ap-guangzhou #存仓库所在地域
+      bucket-name: jxh-cos-dev-1303039456
+      domain: https://jxh-cos-dev-1303039456.cos.ap-guangzhou.myqcloud.com/ # 访问域名，注意“/”结尾
+      base-path: jxh/ # 基础路径
+springdoc:
+  api-docs:
+    enabled: true  # 默认是true，用于开关API文档
+  swagger-ui:
+    enabled: true # 默认是true，用于开关API UI
+
+# 监控配置
+management:
+  endpoint:
+    metrics:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+
+logging:
+  level:
+    root: info
+    dev.macula.example: debug
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  #config: classpath:logback-skywalking.xml
