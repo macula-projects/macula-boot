@@ -53,7 +53,7 @@
         <module>macula-boot-starter-oss</module>
         <module>macula-boot-starter-crypto</module>
         <module>macula-boot-starter-seata</module>
-        <module>macula-boot-starter-retry</module>
+        <module>macula-boot-starter-springretry</module>
         <module>macula-boot-starter-binlog4j</module>
         <module>macula-boot-starter-wechat</module>
         <module>macula-boot-starter-auditlog</module>

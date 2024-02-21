@@ -8,7 +8,7 @@ Retry来实现重试机制，通过配置retry策略来达到重试的目的。
 ```xml
 <dependency>
     <groupId>dev.macula.boot</groupId>
-    <artifactId>macula-boot-starter-retry</artifactId>
+    <artifactId>macula-boot-starter-springretry</artifactId>
     <version>${macula.version}</version>
 </dependency>
 ```
