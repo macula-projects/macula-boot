@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.config.xxljob;
+package dev.macula.boot.starter.task.worker.xxljob.config.xxljob;
 
 import lombok.Data;
 

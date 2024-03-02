@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.config;
+package dev.macula.boot.starter.task.worker.xxljob.config;
 
-import dev.macula.boot.starter.task.config.xxljob.XxlJobConfiguration;
+import dev.macula.boot.starter.task.worker.xxljob.config.xxljob.XxlJobConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 

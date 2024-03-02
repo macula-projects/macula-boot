@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2023 Macula
+  ~ Copyright (c) 2024 Macula
   ~   macula.dev, China
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,38 +16,33 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.macula.boot</groupId>
-        <artifactId>macula-boot-examples</artifactId>
+        <artifactId>macula-boot-starters</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>macula-example-task</artifactId>
+    <artifactId>macula-boot-starter-kafka</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-task-worker-xxljob</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-feign</artifactId>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <!-- optional - only needed when using kafka-streams -->
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
         </dependency>
     </dependencies>
-
 </project>

@@ -37,9 +37,9 @@
     <properties>
         <revision>5.0.7-SNAPSHOT</revision>
         <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <spring-cloud.version>2021.0.9</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
-        <spring-cloud-tencent.version>1.13.0-2021.0.9-SNAPSHOT</spring-cloud-tencent.version>
+        <spring-cloud-tencent.version>1.13.1-2021.0.9</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.40.5-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <mysql.binlog.version>0.29.0</mysql.binlog.version>
@@ -156,6 +156,11 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-rocketmq</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-kafka</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -304,14 +309,32 @@
                 <artifactId>macula-boot-starter-oss</artifactId>
                 <version>${revision}</version>
             </dependency>
+
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task</artifactId>
+                <artifactId>macula-boot-starter-system</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- task -->
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-task-worker</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-system</artifactId>
+                <artifactId>macula-boot-starter-task-worker-xxljob</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-task-worker-springtask</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-task-scheduler</artifactId>
                 <version>${revision}</version>
             </dependency>
 

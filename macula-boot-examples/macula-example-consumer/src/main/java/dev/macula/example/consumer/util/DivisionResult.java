@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macula
+ * Copyright (c) 2024 Macula
  *   macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,27 +15,19 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.config.xxljob;
+package dev.macula.example.consumer.util;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * xxl-job管理平台配置
+ * {@code DivisionResult} 行政区划结果
  *
- * @author lishangbu
- * @since 2020/9/14
+ * @author rain
+ * @since 2024/2/27 16:00
  */
 @Data
-public class XxlAdminProperties {
-
-    /**
-     * 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
-     */
-    private String addresses;
-
-    /**
-     * 注册到注册中心的Admin的服务名称，addresses和name二选一，adddresses优先。默认是xxl-job-admin
-     */
-    private String name;
-
+public class DivisionResult extends Result {
+    private List<Division> divisionsList;
 }

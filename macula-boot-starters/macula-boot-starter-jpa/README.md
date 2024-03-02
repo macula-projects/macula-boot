@@ -174,9 +174,8 @@ Fenix具体使用请参考[官方文档](https://blinkfox.github.io/fenix/#/READ
 
     <!-- MySql -->
     <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <scope>runtime</scope>
+        <groupId>com.mysql</groupId>
+        <artifactId>mysql-connector-j</artifactId>
     </dependency>
 
     <!-- Druid -->

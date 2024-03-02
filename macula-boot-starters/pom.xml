@@ -62,6 +62,7 @@
         <module>macula-boot-starter-sleuth</module>
         <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-cloud</module>
+        <module>macula-boot-starter-kafka</module>
     </modules>
 
     <dependencies>
