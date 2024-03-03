@@ -50,7 +50,7 @@ import java.util.List;
 import static org.dromara.x.file.storage.core.FileStorageServiceBuilder.doesNotExistClass;
 
 /**
- * {@code XFileAutoConfiguration} is
+ * {@code XFileAutoConfiguration} 自动化配置
  *
  * @author rain
  * @since 2024/1/31 11:03
@@ -64,9 +64,6 @@ public class XFileAutoConfiguration {
     @Autowired
     private ApplicationContext applicationContext;
 
-    /**
-     * 配置本地存储的访问地址
-     */
     @Bean
     @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
     public Object fileStorageWebMvcConfigurer(XFileProperties properties) {
@@ -89,9 +86,6 @@ public class XFileAutoConfiguration {
         };
     }
 
-    /**
-     * 当没有找到 FileRecorder 时使用默认的 FileRecorder
-     */
     @Bean
     @ConditionalOnMissingBean(FileRecorder.class)
     public FileRecorder fileRecorder() {
@@ -99,27 +93,18 @@ public class XFileAutoConfiguration {
         return new DefaultFileRecorder();
     }
 
-    /**
-     * Tika 工厂类型，用于识别上传的文件的 MINE
-     */
     @Bean
     @ConditionalOnMissingBean(TikaFactory.class)
     public TikaFactory tikaFactory() {
         return new DefaultTikaFactory();
     }
 
-    /**
-     * 识别文件的 MIME 类型
-     */
     @Bean
     @ConditionalOnMissingBean(ContentTypeDetect.class)
     public ContentTypeDetect contentTypeDetect(TikaFactory tikaFactory) {
         return new TikaContentTypeDetect(tikaFactory);
     }
 
-    /**
-     * 文件存储服务
-     */
     @Bean(destroyMethod = "destroy")
     public FileStorageService fileStorageService(FileRecorder fileRecorder,
         @Autowired(required = false) List<List<? extends FileStorage>> fileStorageLists,
@@ -191,9 +176,6 @@ public class XFileAutoConfiguration {
         return builder.build();
     }
 
-    /**
-     * 对 FileStorageService 注入自己的代理对象，不然会导致针对 FileStorageService 的代理方法不生效
-     */
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshedEvent() {
         FileStorageService service = applicationContext.getBean(FileStorageService.class);

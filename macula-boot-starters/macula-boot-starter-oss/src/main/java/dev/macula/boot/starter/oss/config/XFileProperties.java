@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * {@code XFileProperties} is
+ * {@code XFileProperties} is 属性
  *
  * @author rain
  * @since 2024/1/31 11:04
@@ -168,9 +168,6 @@ public class XFileProperties {
      */
     private List<? extends SpringAzureBlobStorageConfig> azureBlob = new ArrayList<>();
 
-    /**
-     * 转换成 FileStorageProperties ，并过滤掉没有启用的存储平台
-     */
     public FileStorageProperties toFileStorageProperties() {
         FileStorageProperties properties = new FileStorageProperties();
         properties.setDefaultPlatform(defaultPlatform);
@@ -213,9 +210,6 @@ public class XFileProperties {
         return properties;
     }
 
-    /**
-     * 本地存储
-     */
     @Deprecated
     @Data
     @Accessors(chain = true)
@@ -235,9 +229,6 @@ public class XFileProperties {
         private Boolean enableAccess = false;
     }
 
-    /**
-     * 本地存储升级版
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -256,9 +247,6 @@ public class XFileProperties {
         private Boolean enableAccess = false;
     }
 
-    /**
-     * 华为云 OBS
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -269,9 +257,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * 阿里云 OSS
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -282,9 +267,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * 七牛云 Kodo
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -295,9 +277,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * 腾讯云 COS
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -308,9 +287,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * 百度云 BOS
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -321,9 +297,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * 又拍云 USS
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -334,9 +307,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * MinIO
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -347,9 +317,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * Amazon S3
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -360,9 +327,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * FTP
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -373,9 +337,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * SFTP
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -386,9 +347,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * WebDAV
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -399,9 +357,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * GoogleCloud Storage
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -412,12 +367,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * FastDFS Storage
-     *
-     * @author XS <wanghaiqi@beeplay123.com>
-     * @date 2023/10/23
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -428,9 +377,6 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
-    /**
-     * AzureBlob Storage
-     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
