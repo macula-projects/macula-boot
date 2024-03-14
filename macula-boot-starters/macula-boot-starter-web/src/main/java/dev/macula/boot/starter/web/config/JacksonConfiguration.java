@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Bean;
  */
 public class JacksonConfiguration {
 
-    @Value("${macula.json.null-to-empty:false}")
+    @Value("${macula.jackson.null-to-empty:false}")
     private boolean nullToEmpty;
 
     @Bean

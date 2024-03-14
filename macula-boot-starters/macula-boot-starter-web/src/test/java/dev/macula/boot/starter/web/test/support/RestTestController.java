@@ -51,6 +51,7 @@ public class RestTestController {
         if (dto.getZonedDateTime() == null)
             dto.setZonedDateTime(ZonedDateTime.now());
         dto.setMobile("13822132359");
+        dto.setDateTime(null);
         return dto;
     }
 

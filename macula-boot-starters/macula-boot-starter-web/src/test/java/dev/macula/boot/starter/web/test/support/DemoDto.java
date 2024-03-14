@@ -20,6 +20,7 @@ package dev.macula.boot.starter.web.test.support;
 import dev.macula.boot.starter.web.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -60,5 +61,9 @@ public class DemoDto implements Serializable {
 
     @Sensitive(value = Sensitive.Type.MOBILE)
     private String mobile;
+
+    private Integer amt;
+
+    private SecurityProperties.User user;
 
 }

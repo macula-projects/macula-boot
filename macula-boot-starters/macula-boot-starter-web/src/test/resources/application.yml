@@ -1,3 +1,6 @@
+server:
+  port: 9981
+
 spring:
   application:
     name: macula-boot-web-test
@@ -7,3 +10,7 @@ spring:
     #date-format: com.fasterxml.jackson.databind.util.StdDateFormat
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+
+macula:
+  jackson:
+    null-to-empty: true
