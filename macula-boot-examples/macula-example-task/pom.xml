@@ -31,7 +31,7 @@
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-task-worker-xxljob</artifactId>
+            <artifactId>macula-boot-starter-task-xxljob</artifactId>
         </dependency>
 
         <dependency>

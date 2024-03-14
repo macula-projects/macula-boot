@@ -26,7 +26,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>macula-boot-starter-task-worker-springtask</artifactId>
+    <artifactId>macula-boot-starter-task-springtask</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

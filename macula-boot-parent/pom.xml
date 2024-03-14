@@ -61,7 +61,7 @@
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.2.3</rocketmq-spring.version>
         <springdoc.version>1.7.0</springdoc.version>
-        <powerjob.version>4.3.2</powerjob.version>
+        <powerjob.version>4.3.9</powerjob.version>
         <xxl-job.version>2.4.0</xxl-job.version>
         <dubbo.version>3.2.10</dubbo.version>
         <bouncycastle.version>1.69</bouncycastle.version>
@@ -319,22 +319,22 @@
             <!-- task -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-worker</artifactId>
+                <artifactId>macula-boot-starter-task-powerjob</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-worker-xxljob</artifactId>
+                <artifactId>macula-boot-starter-task-xxljob</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-worker-springtask</artifactId>
+                <artifactId>macula-boot-starter-task-springtask</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-scheduler</artifactId>
+                <artifactId>macula-boot-starter-task-remote</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -511,7 +511,7 @@
             <!-- PowerJob -->
             <dependency>
                 <groupId>tech.powerjob</groupId>
-                <artifactId>powerjob-worker-spring-boot-starter</artifactId>
+                <artifactId>powerjob-worker</artifactId>
                 <version>${powerjob.version}</version>
             </dependency>
 

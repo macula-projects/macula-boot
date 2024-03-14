@@ -29,10 +29,9 @@
     <artifactId>macula-boot-starter-task</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>macula-boot-starter-task-common</module>
-        <module>macula-boot-starter-task-scheduler</module>
-        <module>macula-boot-starter-task-worker</module>
-        <module>macula-boot-starter-task-worker-xxljob</module>
-        <module>macula-boot-starter-task-worker-springtask</module>
+        <module>macula-boot-starter-task-powerjob</module>
+        <module>macula-boot-starter-task-xxljob</module>
+        <module>macula-boot-starter-task-springtask</module>
+        <module>macula-boot-starter-task-core</module>
     </modules>
 </project>
