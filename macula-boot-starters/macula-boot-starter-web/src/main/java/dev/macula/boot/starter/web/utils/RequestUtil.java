@@ -33,7 +33,7 @@ public class RequestUtil {
      * 获取当前线程中请求Request
      *
      * @return HttpServletRequest
-     * @throws IllegalStateException
+     * @throws IllegalStateException 不存在抛出异常
      */
     public static HttpServletRequest getCurrentRequest() throws IllegalStateException {
         ServletRequestAttributes attrs = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();

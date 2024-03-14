@@ -30,7 +30,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * {@code MaculaBeanSerializerModifier} jackson 默认值为 null 时的处理，主要是为了避免 app 端出现null导致闪退 <br/> 规则：
+ * {@code MaculaBeanSerializerModifier} jackson 默认值为 null 时的处理，主要是为了避免 app 端出现null导致闪退
+ * <p>
+ * 规则：
  * <ul>
  *  <li>number -1 </li>
  *  <li>string "" </li>
