@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.macula.boot.starter.web.json.MaculaBeanSerializerModifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +35,9 @@ import org.springframework.context.annotation.Bean;
  */
 public class JacksonConfiguration {
 
+    @Value("${macula.json.nullToEmpty:false}")
+    private boolean nullToEmpty;
+
     @Bean
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
@@ -42,6 +47,16 @@ public class JacksonConfiguration {
             builder.serializerByType(Long.class, ToStringSerializer.instance);
 
             builder.modulesToInstall(new JavaTimeModule());
+
+            if (nullToEmpty) {
+                builder.postConfigurer(objectMapper -> {
+                    // null 处理
+                    objectMapper.setSerializerFactory(
+                        objectMapper.getSerializerFactory().withSerializerModifier(new MaculaBeanSerializerModifier()));
+                    objectMapper.getSerializerProvider().setNullValueSerializer(
+                        MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
+                });
+            }
         };
     }
 }
