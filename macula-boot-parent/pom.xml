@@ -319,6 +319,11 @@
             <!-- task -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-task-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-task-powerjob</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -330,11 +335,6 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-task-springtask</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-remote</artifactId>
                 <version>${revision}</version>
             </dependency>
 
