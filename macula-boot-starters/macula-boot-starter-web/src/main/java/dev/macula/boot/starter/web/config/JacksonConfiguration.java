@@ -38,15 +38,20 @@ public class JacksonConfiguration {
     @Value("${macula.jackson.null-to-empty:false}")
     private boolean nullToEmpty;
 
+    @Value("${macula.jackson.long-to-string:true}")
+    private boolean longToString;
+
     @Bean
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
         return builder -> {
             builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             builder.serializerByType(Long.class, ToStringSerializer.instance);
-
             builder.modulesToInstall(new JavaTimeModule());
+
+            if (longToString) {
+                builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            }
 
             if (nullToEmpty) {
                 builder.postConfigurer(objectMapper -> {

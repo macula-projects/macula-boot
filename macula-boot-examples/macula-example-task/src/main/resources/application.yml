@@ -59,8 +59,8 @@ xxl:
   job:
     accessToken: default_token
     admin:
-      #  addresses: http://127.0.0.1:8080/xxl-job-admin  # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
-      name: macula-cloud-xxljob                        # 注册到注册中心的Admin的服务名称[选填]，默认是xxl-job-admin
+      addresses: http://127.0.0.1:9084/macula-cloud-xxljob      # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
+      #name: macula-cloud-xxljob                                 # 注册到注册中心的Admin的服务名称[选填]，默认是xxl-job-admin
     executor:
       #  appname: xxl-job-executor-sample                # 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册
       #  address:                                        # 服务注册地址,优先使用该配置作为注册地址 为空时使用内嵌服务 ”IP:PORT“ 作为注册地址 从而更灵活的支持容器类型执行器动态IP和动态映射端口问题
@@ -68,6 +68,19 @@ xxl:
       #  port: 9999                                      # 执行器端口号 [选填]：小于等于0则自动获取；默认端口为9099，单机部署多个执行器时，注意要配置不同执行器端口；
       logpath: ${user.home}/logs/${spring.application.name}    # 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
       logretentiondays: 30                             # 执行器日志保存天数 [选填] ：值大于3时生效，启用执行器Log文件定期清理功能，否则不生效；
+
+powerjob:
+  worker:
+    akka-port: 27777                                  # akka 工作端口，可选，默认 27777
+    app-name: ${spring.application.name}              # 接入应用名称，用于分组隔离，推荐填写 本 Java 项目名称
+    server-address: 127.0.0.1:7700                    # 调度服务器地址，IP:Port 或 域名，多值逗号分隔
+    protocol: http                                    # 通讯协议，4.3.0 开始支持 HTTP 和 AKKA 两种协议，官方推荐使用 HTTP 协议（注意 server 和 worker 都要开放相应端口）
+    store-strategy: disk                              # 持久化方式，可选，默认 disk
+    max-result-length: 4096                           # 任务返回结果信息的最大长度，超过这个长度的信息会被截断，默认值 8192
+    max-appended-wf-context-length: 4096              # 单个任务追加的工作流上下文最大长度，超过这个长度的会被直接丢弃，默认值 8192
+    max-lightweight-task-num: 1024                    # 同时运行的轻量级任务数量上限
+    max-heavy-task-num: 64                            # 同时运行的重量级任务数量上限
+
 
 logging:
   level:

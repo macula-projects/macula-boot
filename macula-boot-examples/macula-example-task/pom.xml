@@ -36,6 +36,11 @@
 
         <dependency>
             <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-task-powerjob</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-feign</artifactId>
         </dependency>
 

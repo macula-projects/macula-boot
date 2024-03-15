@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.worker.xxljob.config;
+package dev.macula.boot.starter.task.xxljob.config;
 
-import dev.macula.boot.starter.task.worker.xxljob.config.xxljob.XxlJobConfiguration;
+import dev.macula.boot.starter.task.xxljob.config.support.XxlJobConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
@@ -29,5 +29,5 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @Import(XxlJobConfiguration.class)
-public class TaskAutoConfiguration {
+public class XxlJobAutoConfiguration {
 }

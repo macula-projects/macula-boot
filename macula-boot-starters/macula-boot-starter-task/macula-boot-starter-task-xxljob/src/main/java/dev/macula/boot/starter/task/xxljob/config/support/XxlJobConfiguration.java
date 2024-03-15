@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.worker.xxljob.config.xxljob;
+package dev.macula.boot.starter.task.xxljob.config.support;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
