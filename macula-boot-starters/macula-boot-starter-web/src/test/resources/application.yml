@@ -14,3 +14,4 @@ spring:
 macula:
   jackson:
     null-to-empty: true
+    #long-to-string: false

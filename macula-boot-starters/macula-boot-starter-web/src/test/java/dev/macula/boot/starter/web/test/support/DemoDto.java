@@ -64,6 +64,8 @@ public class DemoDto implements Serializable {
 
     private Integer amt;
 
+    private Long num = 1022L;
+
     private SecurityProperties.User user;
 
 }

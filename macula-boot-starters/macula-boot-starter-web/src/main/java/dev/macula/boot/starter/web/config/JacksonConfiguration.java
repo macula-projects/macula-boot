@@ -46,11 +46,11 @@ public class JacksonConfiguration {
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
         return builder -> {
             builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            builder.serializerByType(Long.class, ToStringSerializer.instance);
+            builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             builder.modulesToInstall(new JavaTimeModule());
 
             if (longToString) {
-                builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+                builder.serializerByType(Long.class, ToStringSerializer.instance);
             }
 
             if (nullToEmpty) {
