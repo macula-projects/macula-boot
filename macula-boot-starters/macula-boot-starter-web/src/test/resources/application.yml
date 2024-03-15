@@ -13,5 +13,5 @@ spring:
 
 macula:
   jackson:
-    null-to-empty: true
-    #long-to-string: false
+    null-to-empty: true         # 将null转为-1或者空串，默认为false
+    long-to-string: false       # 将long转为字符串，默认为true
