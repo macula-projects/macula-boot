@@ -4,7 +4,7 @@
 
 - xxljob任务
 - PowerJob任务
-- Spring注解任务
+- Spring注解(@Scheduled、@Retryable)接管
 - TODO，统一的macula task定义
 
 ## 客户端介绍
