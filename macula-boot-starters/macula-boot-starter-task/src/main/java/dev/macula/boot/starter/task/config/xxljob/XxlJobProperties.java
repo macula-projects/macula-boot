@@ -15,19 +15,26 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.xxljob.config;
+package dev.macula.boot.starter.task.config.xxljob;
 
-import dev.macula.boot.starter.task.xxljob.config.support.XxlJobConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
- * {@code TaskAutoConfiguration} 定时任务自动配置
+ * xxl-job配置
  *
- * @author rain
- * @since 2023/7/4 19:28
+ * @author lishangbu
+ * @since 2020/9/14
  */
-@AutoConfiguration
-@Import(XxlJobConfiguration.class)
-public class XxlJobAutoConfiguration {
+@Data
+@ConfigurationProperties(prefix = "xxl.job")
+public class XxlJobProperties {
+
+    @NestedConfigurationProperty
+    private XxlAdminProperties admin = new XxlAdminProperties();
+
+    @NestedConfigurationProperty
+    private XxlExecutorProperties executor = new XxlExecutorProperties();
+
 }

@@ -57,7 +57,7 @@
         <swagger2.version>1.6.12</swagger2.version>
         <swagger3.version>2.2.20</swagger3.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <mapstruct-plus.version>1.3.6</mapstruct-plus.version>
+        <mapstruct-plus.version>1.4.0</mapstruct-plus.version>
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.2.3</rocketmq-spring.version>
         <springdoc.version>1.7.0</springdoc.version>
@@ -319,22 +319,7 @@
             <!-- task -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-powerjob</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-xxljob</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-task-springtask</artifactId>
+                <artifactId>macula-boot-starter-task</artifactId>
                 <version>${revision}</version>
             </dependency>
 

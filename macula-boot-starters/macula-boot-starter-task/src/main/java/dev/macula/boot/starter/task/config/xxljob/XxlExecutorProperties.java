@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.boot.starter.task.xxljob.config.support;
+package dev.macula.boot.starter.task.config.xxljob;
 
 import lombok.Data;
 

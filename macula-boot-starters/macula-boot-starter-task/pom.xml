@@ -27,18 +27,23 @@
     </parent>
 
     <artifactId>macula-boot-starter-task</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>macula-boot-starter-task-powerjob</module>
-        <module>macula-boot-starter-task-xxljob</module>
-        <module>macula-boot-starter-task-springtask</module>
-        <module>macula-boot-starter-task-core</module>
-    </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!--xxl job-->
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
+        </dependency>
+        <!--提供服务发现能力-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
