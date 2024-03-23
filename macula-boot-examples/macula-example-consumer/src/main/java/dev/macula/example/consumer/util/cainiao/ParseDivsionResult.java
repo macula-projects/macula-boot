@@ -15,25 +15,19 @@
  * limitations under the License.
  */
 
-package dev.macula.example.consumer.util;
+package dev.macula.example.consumer.util.cainiao;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * {@code Division} is 行政区划
+ * {@code ParseDivsionResult} 地址解析结果
  *
  * @author rain
- * @since 2024/2/27 15:55
+ * @since 2024/2/27 18:15
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Division {
-    private String divisionCode;
-    private int divisionLevel;
-    private String pinyin;
-    private String divisionName;
-    private String divisionTname;
-    private String divisionId;
-    private String divisionAbbName;
-    private boolean isdeleted;
-    private String parentId;
+public class ParseDivsionResult extends Result {
+    private ParseDivision parseDivisionResult;
 }

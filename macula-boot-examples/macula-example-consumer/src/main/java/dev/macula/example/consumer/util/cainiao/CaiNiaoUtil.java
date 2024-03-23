@@ -1,4 +1,4 @@
-package dev.macula.example.consumer.util;
+package dev.macula.example.consumer.util.cainiao;
 
 import cn.hutool.core.text.csv.CsvUtil;
 import cn.hutool.core.text.csv.CsvWriter;

@@ -17,6 +17,7 @@
 
 package dev.macula.example.consumer.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Date;
@@ -34,4 +35,5 @@ public class UserResult {
     String userName;
     String password;
     Date birthday = new Date();
+    Integer age;
 }

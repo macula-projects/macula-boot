@@ -64,6 +64,7 @@ public class ConsumerController {
 
     @PostMapping("/user")
     public UserResult getUser(@RequestBody UserResult result) {
+        log.info("User: {}", result);
         return provider1Service.getUser(result);
     }
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dev.macula.example.consumer.util;
+package dev.macula.example.consumer.util.cainiao;
 
 import lombok.Data;
 

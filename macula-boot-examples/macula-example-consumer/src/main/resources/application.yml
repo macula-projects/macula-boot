@@ -79,6 +79,9 @@ macula:
     endpoint: http://127.0.0.1:9000                   # macula cloud网关地址
     app-key: example
     secret-key: example
+  jackson:
+    null-to-empty: true         # 将null转为-1或者空串，默认为false
+    long-to-string: true       # 将long转为字符串，默认为true
 
 gapi:
   username: applicationA

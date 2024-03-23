@@ -15,19 +15,25 @@
  * limitations under the License.
  */
 
-package dev.macula.example.consumer.util;
+package dev.macula.example.consumer.util.cainiao;
 
 import lombok.Data;
 
 /**
- * {@code Result} 返回结果固定格式
+ * {@code Division} is 行政区划
  *
  * @author rain
- * @since 2024/2/27 18:15
+ * @since 2024/2/27 15:55
  */
 @Data
-public class Result {
-    private boolean success;
-    private String errorCode;
-    private String errorMsg;
+public class Division {
+    private String divisionCode;
+    private int divisionLevel;
+    private String pinyin;
+    private String divisionName;
+    private String divisionTname;
+    private String divisionId;
+    private String divisionAbbName;
+    private boolean isdeleted;
+    private String parentId;
 }

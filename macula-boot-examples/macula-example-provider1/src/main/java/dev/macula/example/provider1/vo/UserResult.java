@@ -39,4 +39,6 @@ public class UserResult {
     String password;
     @Schema(name = "出生日期", description = "ISO8601格式")
     Date birthday = new Date();
+    @Schema(name = "年龄", description = "年龄")
+    Integer age;
 }

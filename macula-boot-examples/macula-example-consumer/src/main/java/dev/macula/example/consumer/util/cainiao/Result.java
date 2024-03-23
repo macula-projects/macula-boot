@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-package dev.macula.example.consumer.util;
+package dev.macula.example.consumer.util.cainiao;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
- * {@code DivisionResult} 行政区划结果
+ * {@code Result} 返回结果固定格式
  *
  * @author rain
- * @since 2024/2/27 16:00
+ * @since 2024/2/27 18:15
  */
 @Data
-public class DivisionResult extends Result {
-    private List<Division> divisionsList;
+public class Result {
+    private boolean success;
+    private String errorCode;
+    private String errorMsg;
 }

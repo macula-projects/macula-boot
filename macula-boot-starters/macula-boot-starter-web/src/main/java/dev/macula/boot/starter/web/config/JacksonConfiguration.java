@@ -35,9 +35,6 @@ import org.springframework.context.annotation.Bean;
  */
 public class JacksonConfiguration {
 
-    @Value("${macula.jackson.null-to-empty:false}")
-    private boolean nullToEmpty;
-
     @Value("${macula.jackson.long-to-string:true}")
     private boolean longToString;
 
@@ -51,16 +48,6 @@ public class JacksonConfiguration {
 
             if (longToString) {
                 builder.serializerByType(Long.class, ToStringSerializer.instance);
-            }
-
-            if (nullToEmpty) {
-                builder.postConfigurer(objectMapper -> {
-                    // null 处理
-                    objectMapper.setSerializerFactory(
-                        objectMapper.getSerializerFactory().withSerializerModifier(new MaculaBeanSerializerModifier()));
-                    objectMapper.getSerializerProvider().setNullValueSerializer(
-                        MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
-                });
             }
         };
     }

@@ -52,6 +52,7 @@ public class Provider1Controller {
     @PostMapping("/user")
     @Operation(summary = "获取用户信息", description = "用于获取用户信息")
     public UserResult getUser(@RequestBody UserResult result) {
+        log.info("User: {}", result);
         result.setBirthday(new Date());
         result.setPassword("provider1_pass");
         return result;

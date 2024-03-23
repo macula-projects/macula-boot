@@ -17,9 +17,11 @@
 
 package dev.macula.boot.starter.web.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
 import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
 import dev.macula.boot.starter.web.filter.TenantFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -40,9 +42,12 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @Import({JacksonConfiguration.class})
 public class WebAutoConfiguration {
 
+    @Value("${macula.jackson.null-to-empty:false}")
+    private boolean nullToEmpty;
+
     @Bean
-    public MaculaWebMvcConfigurer maculaWebMvcConfigurer() {
-        return new MaculaWebMvcConfigurer();
+    public MaculaWebMvcConfigurer maculaWebMvcConfigurer(ObjectMapper objectMapper) {
+        return new MaculaWebMvcConfigurer(objectMapper, nullToEmpty);
     }
 
     @Bean
