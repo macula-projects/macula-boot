@@ -22,11 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.starter.web.interceptor.GrayHandlerInterceptor;
 import dev.macula.boot.starter.web.json.MappingApiJackson2HttpMessageConverter;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
-import org.springframework.http.converter.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -45,7 +45,7 @@ import java.util.List;
 public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;
-    private final boolean nullToEmpty;
+    private final JacksonProperties jacksonProperties;
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -71,10 +71,9 @@ public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.removeIf(x -> x instanceof StringHttpMessageConverter);
-		converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        if (nullToEmpty) {
-            converters.removeIf(x -> x instanceof AbstractJackson2HttpMessageConverter);
-            converters.add(new MappingApiJackson2HttpMessageConverter(objectMapper));
-        }
+        converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+
+        converters.removeIf(x -> x instanceof AbstractJackson2HttpMessageConverter);
+        converters.add(new MappingApiJackson2HttpMessageConverter(objectMapper, jacksonProperties));
     }
 }

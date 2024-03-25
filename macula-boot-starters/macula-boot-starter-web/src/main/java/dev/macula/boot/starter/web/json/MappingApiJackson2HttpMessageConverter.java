@@ -19,7 +19,7 @@ package dev.macula.boot.starter.web.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import dev.macula.boot.starter.web.config.JacksonProperties;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.Nullable;
@@ -50,8 +50,8 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
      * @param objectMapper ObjectMapper
      * @see Jackson2ObjectMapperBuilder#json()
      */
-    public MappingApiJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-        super(objectMapper, initWriteObjectMapper(objectMapper), initMediaType());
+    public MappingApiJackson2HttpMessageConverter(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
+        super(objectMapper, initWriteObjectMapper(objectMapper, jacksonProperties), initMediaType());
     }
 
     private static List<MediaType> initMediaType() {
@@ -61,12 +61,18 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
         return supportedMediaTypes;
     }
 
-    private static ObjectMapper initWriteObjectMapper(ObjectMapper readObjectMapper) {
+    private static ObjectMapper initWriteObjectMapper(ObjectMapper readObjectMapper, JacksonProperties jacksonProperties) {
         // 拷贝 readObjectMapper
         ObjectMapper writeObjectMapper = readObjectMapper.copy();
-        // null 处理
-        writeObjectMapper.setSerializerFactory(writeObjectMapper.getSerializerFactory().withSerializerModifier(new MaculaBeanSerializerModifier()));
-        writeObjectMapper.getSerializerProvider().setNullValueSerializer(MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
+
+        writeObjectMapper.registerModule(new BigNumberModule(jacksonProperties.isLongToString()));
+
+        if (jacksonProperties.isNullToEmpty()) {
+            // null 处理
+            writeObjectMapper.setSerializerFactory(writeObjectMapper.getSerializerFactory().withSerializerModifier(new MaculaBeanSerializerModifier()));
+            writeObjectMapper.getSerializerProvider().setNullValueSerializer(MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
+        }
+
         return writeObjectMapper;
     }
 

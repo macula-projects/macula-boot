@@ -17,19 +17,11 @@
 
 package dev.macula.boot.starter.web.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.macula.boot.starter.web.json.BigNumberSerializer;
-import dev.macula.boot.starter.web.json.MaculaBeanSerializerModifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * {@code JacksonAutoConfiguration} Jackson的配置
@@ -37,11 +29,8 @@ import java.math.BigInteger;
  * @author rain
  * @since 2022/6/29 21:09
  */
+@EnableConfigurationProperties(JacksonProperties.class)
 public class JacksonConfiguration {
-
-    @Value("${macula.jackson.long-to-string:true}")
-    private boolean longToString;
-
     @Bean
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
@@ -52,18 +41,6 @@ public class JacksonConfiguration {
             builder.failOnUnknownProperties(false);
 
             builder.modulesToInstall(new JavaTimeModule());
-
-            if (longToString) {
-                builder.serializerByType(BigDecimal.class, ToStringSerializer.instance);
-                builder.serializerByType(BigInteger.class, ToStringSerializer.instance);
-                builder.serializerByType(Long.class, ToStringSerializer.instance);
-                builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
-            } else {
-                builder.serializerByType(BigDecimal.class, BigNumberSerializer.instance);
-                builder.serializerByType(BigInteger.class, BigNumberSerializer.instance);
-                builder.serializerByType(Long.class, BigNumberSerializer.instance);
-                builder.serializerByType(Long.TYPE, BigNumberSerializer.instance);
-            }
         };
     }
 }
