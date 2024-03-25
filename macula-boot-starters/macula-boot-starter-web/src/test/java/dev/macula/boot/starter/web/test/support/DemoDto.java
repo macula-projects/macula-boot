@@ -25,6 +25,8 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -51,7 +53,7 @@ public class DemoDto implements Serializable {
     @Pattern(regexp = "[012]", message = "无效的状态标志")
     private String state;
 
-    private Date dateTime;
+    private Date dateTime = new Date();
 
     private LocalDateTime localDateTime;
 
@@ -62,9 +64,15 @@ public class DemoDto implements Serializable {
     @Sensitive(value = Sensitive.Type.MOBILE)
     private String mobile;
 
-    private Integer amt;
+    private int intNum;
 
-    private Long num = 1022L;
+    private Integer integerNum;
+
+    private Long longNum = 1022L;
+
+    private BigInteger bigInteger = new BigInteger("12333");
+
+    private BigDecimal bigDecimal = new BigDecimal("1234.344");
 
     private SecurityProperties.User user;
 

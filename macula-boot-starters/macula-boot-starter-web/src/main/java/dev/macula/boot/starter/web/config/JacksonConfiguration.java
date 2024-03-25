@@ -21,11 +21,15 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.macula.boot.starter.web.json.BigNumberSerializer;
 import dev.macula.boot.starter.web.json.MaculaBeanSerializerModifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * {@code JacksonAutoConfiguration} Jackson的配置
@@ -42,12 +46,23 @@ public class JacksonConfiguration {
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
         return builder -> {
-            builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            // 序列化时，对象为 null，是否抛异常
+            builder.failOnEmptyBeans(false);
+            // 反序列化时，json 中包含 pojo 不存在属性时，是否抛异常
+            builder.failOnUnknownProperties(false);
+
             builder.modulesToInstall(new JavaTimeModule());
 
             if (longToString) {
+                builder.serializerByType(BigDecimal.class, ToStringSerializer.instance);
+                builder.serializerByType(BigInteger.class, ToStringSerializer.instance);
                 builder.serializerByType(Long.class, ToStringSerializer.instance);
+                builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
+            } else {
+                builder.serializerByType(BigDecimal.class, BigNumberSerializer.instance);
+                builder.serializerByType(BigInteger.class, BigNumberSerializer.instance);
+                builder.serializerByType(Long.class, BigNumberSerializer.instance);
+                builder.serializerByType(Long.TYPE, BigNumberSerializer.instance);
             }
         };
     }
