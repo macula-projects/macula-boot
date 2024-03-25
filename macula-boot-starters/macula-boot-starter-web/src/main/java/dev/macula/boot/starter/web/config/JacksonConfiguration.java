@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.macula.boot.starter.web.json.BigNumberSerializer;
 import dev.macula.boot.starter.web.json.MaculaBeanSerializerModifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -47,7 +48,7 @@ public class JacksonConfiguration {
             builder.modulesToInstall(new JavaTimeModule());
 
             if (longToString) {
-                builder.serializerByType(Long.class, ToStringSerializer.instance);
+                builder.serializerByType(Long.class, BigNumberSerializer.instance);
             }
         };
     }
