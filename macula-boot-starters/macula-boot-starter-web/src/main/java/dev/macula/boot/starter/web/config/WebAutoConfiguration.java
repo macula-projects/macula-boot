@@ -56,8 +56,8 @@ public class WebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "macula.web.response-advice", havingValue = "true", matchIfMissing = true)
-    public ControllerResponseAdvice controllerResponseAdvice() {
-        return new ControllerResponseAdvice();
+    public ControllerResponseAdvice controllerResponseAdvice(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
+        return new ControllerResponseAdvice(objectMapper, jacksonProperties);
     }
 
     @Bean

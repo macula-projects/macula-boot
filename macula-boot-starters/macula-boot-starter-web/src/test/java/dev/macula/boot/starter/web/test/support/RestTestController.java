@@ -54,6 +54,11 @@ public class RestTestController {
         return dto;
     }
 
+    @GetMapping(value = "/str")
+    public String str() {
+        return null;
+    }
+
     @GetMapping("/health")
     @NotControllerResponseAdvice
     public String health() {

@@ -18,12 +18,15 @@
 package dev.macula.boot.starter.web.advice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
+import dev.macula.boot.starter.web.config.JacksonProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +43,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @since 2022/6/29 16:10
  */
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
+
+    private final ObjectMapper objectMapper;
+    private final JacksonProperties jacksonProperties;
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
@@ -68,10 +75,13 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
 
         // String类型不能直接包装
         if (returnType.getGenericParameterType().equals(String.class)) {
-            ObjectMapper objectMapper = new ObjectMapper();
             try {
                 // 将数据包装在ResultVo里后转换为json串进行返回
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                // Flow Null To Empty的逻辑 @see MaculaBeanSerializerModifier
+                if (data == null && jacksonProperties.isNullToEmpty()) {
+                    data = JsonToken.START_OBJECT.asString() + JsonToken.END_OBJECT.asString();
+                }
                 return objectMapper.writeValueAsString(Result.success(data));
             } catch (JsonProcessingException e) {
                 throw new BizException(ApiResultCode.RESPONSE_PACK_ERROR, e.getMessage());
