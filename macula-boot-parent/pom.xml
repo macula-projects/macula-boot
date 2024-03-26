@@ -126,201 +126,201 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-commons</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-binlog4j</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-crypto</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-mapstruct</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-mybatis-plus</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-jpa</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-rocketmq</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-kafka</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-sender</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-redis</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cache</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-leaderelection</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-lock4j</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-idempotent</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-liteflow</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-web</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-security</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-springdoc</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-skywalking</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-logstash</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-auditlog</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-prometheus</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-dubbo</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-feign</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-sleuth</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-wechat</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-gateway</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-alibaba-scg</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-alibaba-gray</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tencent</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tencent-scg</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tsf</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tsf-scg</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-springretry</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-tinyid</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-oss</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-system</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <!-- task -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-task</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <!-- MySQL Binlog Connector -->
