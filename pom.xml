@@ -35,27 +35,6 @@
     <name>macula-boot</name>
     <description>基于Spring Boot、Spring Cloud的微服务开发框架</description>
     <url>https://macula.dev</url>
-
-    <properties>
-        <revision>5.0.7-SNAPSHOT</revision>
-
-    </properties>
-
-    <modules>
-        <module>macula-boot-parent</module>
-        <module>macula-boot-examples</module>
-        <module>macula-boot-commons</module>
-        <module>macula-boot-starters</module>
-        <module>macula-boot-archetype</module>
-    </modules>
-
-    <licenses>
-        <license>
-            <name>The Apache License</name>
-            <url>https://apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
     <developers>
         <developer>
             <name>rainsoft</name>
@@ -68,6 +47,25 @@
         <developerConnection>scm:git:git@github.com:macula-projects/macula-boot.git</developerConnection>
         <url>https://github.com/macula-projects/macula-boot</url>
     </scm>
+
+    <licenses>
+        <license>
+            <name>The Apache License</name>
+            <url>https://apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <revision>5.0.7-SNAPSHOT</revision>
+    </properties>
+
+    <modules>
+        <module>macula-boot-parent</module>
+        <module>macula-boot-examples</module>
+        <module>macula-boot-commons</module>
+        <module>macula-boot-starters</module>
+        <module>macula-boot-archetype</module>
+    </modules>
 
     <dependencies>
         <dependency>

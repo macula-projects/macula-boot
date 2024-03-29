@@ -18,6 +18,8 @@
 package dev.macula.boot.starter.binlog4j;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
+import com.github.shyiko.mysql.binlog.event.EventType;
+import com.github.shyiko.mysql.binlog.event.RotateEventData;
 import dev.macula.boot.starter.binlog4j.dispatcher.BinlogEventDispatcher;
 import dev.macula.boot.starter.binlog4j.enums.BinlogClientMode;
 import dev.macula.boot.starter.binlog4j.position.BinlogPosition;
@@ -96,10 +98,8 @@ public class BinlogClient implements IBinlogClient {
 
     public void runWithStandalone() {
         try {
-            client = new BinaryLogClient(clientConfig.getHost(), clientConfig.getPort(), clientConfig.getUsername(),
-                clientConfig.getPassword());
-            client.registerEventListener(
-                new BinlogEventDispatcher(this.clientConfig, positionHandler, this.eventHandlerMap));
+            client = new BinaryLogClient(clientConfig.getHost(), clientConfig.getPort(), clientConfig.getUsername(), clientConfig.getPassword());
+            client.registerEventListener(new BinlogEventDispatcher(this.clientConfig, this.client, positionHandler, this.eventHandlerMap));
             client.setKeepAlive(clientConfig.isKeepAlive());
             client.setKeepAliveInterval(clientConfig.getKeepAliveInterval());
             client.setHeartbeatInterval(clientConfig.getHeartbeatInterval());
@@ -108,10 +108,23 @@ public class BinlogClient implements IBinlogClient {
             if (clientConfig.isPersistence()) {
                 if (!clientConfig.isInaugural()) {
                     if (positionHandler != null) {
+                        // 恢复位置现场
                         BinlogPosition binlogPosition = positionHandler.loadPosition(clientConfig.getServerId());
                         if (binlogPosition != null) {
-                            client.setBinlogFilename(binlogPosition.getFilename());
-                            client.setBinlogPosition(binlogPosition.getPosition());
+                            if (clientConfig.isGtidMode()) {
+                                client.setGtidSet(binlogPosition.getGtidSet() == null ? "" : binlogPosition.getGtidSet());
+                            } else {
+                                client.setBinlogFilename(binlogPosition.getFilename());
+                                client.setBinlogPosition(binlogPosition.getPosition());
+                            }
+                        } else {
+                            if (clientConfig.isGtidMode()) {
+                                client.setGtidSet("");
+                            }
+                        }
+                    } else {
+                        if (clientConfig.isGtidMode()) {
+                            client.setGtidSet("");
                         }
                     }
                 }

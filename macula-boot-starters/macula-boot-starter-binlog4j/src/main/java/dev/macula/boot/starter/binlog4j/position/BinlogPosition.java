@@ -14,4 +14,6 @@ public class BinlogPosition {
     private Long position;
 
     private String filename;
+
+    private String gtidSet;
 }

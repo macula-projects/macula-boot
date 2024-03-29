@@ -65,6 +65,9 @@ public class BinlogClientConfig {
     /** 读取记忆 */
     private boolean persistence = false;
 
+    /** 是否开启GTID复制 */
+    private boolean gtidMode = false;
+
     /** 部署模式 */
     private BinlogClientMode mode = BinlogClientMode.standalone;
 
