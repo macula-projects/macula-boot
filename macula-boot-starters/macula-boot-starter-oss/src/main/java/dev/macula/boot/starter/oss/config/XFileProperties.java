@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
  */
 @Data
 @Accessors(chain = true)
-@Configuration
 @ConfigurationProperties(prefix = "macula.oss")
 public class XFileProperties {
     /**
