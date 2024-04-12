@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Data
-@Configuration
 @ConfigurationProperties(prefix = "binlog4j")
 public class Binlog4jAutoProperties {
 

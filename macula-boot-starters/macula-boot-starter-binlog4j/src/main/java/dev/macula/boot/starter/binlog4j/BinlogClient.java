@@ -112,19 +112,22 @@ public class BinlogClient implements IBinlogClient {
                         BinlogPosition binlogPosition = positionHandler.loadPosition(clientConfig.getServerId());
                         if (binlogPosition != null) {
                             if (clientConfig.isGtidMode()) {
-                                client.setGtidSet(binlogPosition.getGtidSet() == null ? "" : binlogPosition.getGtidSet());
+                                client.setGtidSetFallbackToPurged(clientConfig.isGtidPurged());
+                                client.setGtidSet(binlogPosition.getGtidSet() == null ? getDefaultGtidSet() : binlogPosition.getGtidSet());
                             } else {
                                 client.setBinlogFilename(binlogPosition.getFilename());
                                 client.setBinlogPosition(binlogPosition.getPosition());
                             }
                         } else {
                             if (clientConfig.isGtidMode()) {
-                                client.setGtidSet("");
+                                client.setGtidSetFallbackToPurged(clientConfig.isGtidPurged());
+                                client.setGtidSet(getDefaultGtidSet());
                             }
                         }
                     } else {
                         if (clientConfig.isGtidMode()) {
-                            client.setGtidSet("");
+                            client.setGtidSetFallbackToPurged(clientConfig.isGtidPurged());
+                            client.setGtidSet(getDefaultGtidSet());
                         }
                     }
                 }
@@ -146,5 +149,10 @@ public class BinlogClient implements IBinlogClient {
                 lock.unlock();
             }
         }
+    }
+
+    private String getDefaultGtidSet() {
+        String gtidSet =  clientConfig.getGtidSetDefault();
+        return gtidSet == null ? "" : gtidSet;
     }
 }

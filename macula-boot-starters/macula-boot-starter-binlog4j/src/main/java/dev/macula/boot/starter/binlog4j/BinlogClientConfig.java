@@ -68,6 +68,12 @@ public class BinlogClientConfig {
     /** 是否开启GTID复制 */
     private boolean gtidMode = false;
 
+    /** 当GtidSet设为""时，是否通过gtid_purged获取新的gtid */
+    private boolean gtidPurged = true;
+
+    /** 当Gtid起始位置没有缓存时，默认的GTID */
+    private String gtidSetDefault;
+
     /** 部署模式 */
     private BinlogClientMode mode = BinlogClientMode.standalone;
 
