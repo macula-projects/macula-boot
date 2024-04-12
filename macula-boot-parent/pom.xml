@@ -226,6 +226,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-websocket</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-security</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -274,6 +279,16 @@
                 <artifactId>macula-boot-starter-wechat</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-springretry</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-oss</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <dependency>
                 <groupId>dev.macula.boot</groupId>
@@ -315,19 +330,10 @@
                 <artifactId>macula-boot-starter-cloud-tsf-scg</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-springretry</artifactId>
-                <version>${revision}</version>
-            </dependency>
+
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-tinyid</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-oss</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -341,6 +347,12 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-task</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>dev.macula.task</groupId>
+                <artifactId>macula-task-worker</artifactId>
                 <version>${revision}</version>
             </dependency>
 

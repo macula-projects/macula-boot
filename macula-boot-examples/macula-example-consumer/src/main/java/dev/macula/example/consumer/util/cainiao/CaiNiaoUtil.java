@@ -75,7 +75,7 @@ public class CaiNiaoUtil {
 
     private static void getDivision(String divisionId, List<Division> list) {
         DivisionResult result = (DivisionResult)CaiNiaoUtil.getCaiLink("CNDZK_CHINA_SUB_DIVISIONS",
-            JSONUtil.createObj().set("divisionId", divisionId).set("version", "20221130001"));
+            JSONUtil.createObj().set("divisionId", divisionId).set("version", "20211231001"));
 
         if (result.isSuccess()) {
             list.addAll(result.getDivisionsList());
@@ -102,9 +102,10 @@ public class CaiNiaoUtil {
     }
 
     public static void main(String[] args) {
-        ParseDivsionResult result = (ParseDivsionResult)getCaiLink("CNDZK_DIVISION_PARSE",
-            JSONUtil.createObj().set("address", "邢台市泉东街道公园东街1002号天业悦荣府")
-                .set("hint", JSONUtil.createObj().set("preferOriginDivision", "false")).set("version", "20221130001"));
-        log.info("返回值:{}", JSONUtil.toJsonStr(result));
+//        ParseDivsionResult result = (ParseDivsionResult)getCaiLink("CNDZK_DIVISION_PARSE",
+//            JSONUtil.createObj().set("address", "邢台市泉东街道公园东街1002号天业悦荣府")
+//                .set("hint", JSONUtil.createObj().set("preferOriginDivision", "false")).set("version", "20211231001"));
+//        log.info("返回值:{}", JSONUtil.toJsonStr(result));
+        writeToDivisonCsv();
     }
 }

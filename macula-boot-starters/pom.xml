@@ -63,6 +63,7 @@
         <module>macula-boot-starter-skywalking</module>
         <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-kafka</module>
+        <module>macula-boot-starter-websocket</module>
     </modules>
 
     <dependencies>
