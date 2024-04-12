@@ -36,6 +36,9 @@ binlog4j:
       KeepAliveInterval: 60000L # 保持连接间隔，默认1分钟，单位毫秒
       connectTimeout: 3000L     # 连接超时时间，默认3秒，单位毫秒
       heartbeatInterval: 6000L  # 发送心跳间隔，默认6秒，单位毫秒  
+      gtidMode: true            # 开启GTID模式，默认为false
+      gtidPurged: true          # 当GTID SET为“”时，是否获取最近的purged的GTID SET，默认为true
+      gtidSetDefault: "xxx"     # 设置开始消费的GTID位置
 ```
 
 ## 核心功能
