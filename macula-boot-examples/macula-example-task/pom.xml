@@ -48,6 +48,11 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-alibaba</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>tech.powerjob</groupId>
+            <artifactId>powerjob-worker</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

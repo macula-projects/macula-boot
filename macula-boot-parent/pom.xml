@@ -85,6 +85,7 @@
         <powerjob.version>4.3.9</powerjob.version>
         <xxl-job.version>2.4.0</xxl-job.version>
         <dubbo.version>3.2.10</dubbo.version>
+        <seata.version>2.0.0</seata.version>
         <bouncycastle.version>1.69</bouncycastle.version>
         <xfile.version>2.1.0</xfile.version>
         <minio.version>8.4.2</minio.version>
@@ -141,6 +142,12 @@
                 <version>${dubbo.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${seata.version}</version>
             </dependency>
 
             <!-- macula -->
