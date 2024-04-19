@@ -32,8 +32,9 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
- * <配置基于STOMP的websocket>
- * <功能详细描述>
+ * <p>
+ * <b>WebSocketAutoConfiguration</b>配置基于STOMP的websocket
+ * </p>
  *
  * @author wzh
  * @version 2018-08-12 18:38

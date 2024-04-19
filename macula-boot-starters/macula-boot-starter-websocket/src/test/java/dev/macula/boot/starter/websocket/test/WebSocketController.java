@@ -25,7 +25,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
@@ -42,9 +43,6 @@ import org.springframework.web.util.HtmlUtils;
 @Slf4j
 public class WebSocketController {
 
-    /**
-     * 客户端发送消息到/app/hello，服务端广播到/topic/greetings，订阅方都能收到
-     */
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/hello")
@@ -54,18 +52,11 @@ public class WebSocketController {
         return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!");
     }
 
-    @MessageMapping("/topic/group/123")
-    public Greeting group(HelloMessage message) throws Exception {
+    @PostMapping("/game/begin/{groupId}")
+    public void group(HelloMessage message, @PathVariable("groupId") String groupId) throws Exception {
         Thread.sleep(1000); // simulated delay
-        log.info("Hello, Group Message:" + HtmlUtils.htmlEscape(message.getName()) + "!");
-        return new Greeting("Hello, , Group Message:" + HtmlUtils.htmlEscape(message.getName()) + "!");
-    }
-
-    @GetMapping("/hello2")
-    public void greeting3(HelloMessage message) throws Exception {
-        Thread.sleep(1000); // simulated delay
-        simpMessagingTemplate.convertAndSend("/topic/greetings",
-                new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!"));
+        simpMessagingTemplate.convertAndSend("/topic/group/" + groupId,
+                new Greeting("Hello Group, " + HtmlUtils.htmlEscape(message.getName()) + "!"));
     }
 
 

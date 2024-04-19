@@ -11,7 +11,7 @@ stompClient.onConnect = (frame) => {
     });
 
     // 订阅群组消息
-    stompClient.subscribe('/topic/topic/greetings', function (greeting) {
+    stompClient.subscribe('/topic/group/123', function (greeting) {
         showGreeting(JSON.parse(greeting.body).content);
     });
 
@@ -69,12 +69,7 @@ function sendName() {
 }
 
 function sendName2() {
-    stompClient.publish({
-        destination: "/app/topic/greetings",
-        body: JSON.stringify({
-            'name': $("#name").val()
-        })
-    });
+    $.post("test.php", { name: "John", time: "2pm" } );
 }
 
 function sendName3() {
