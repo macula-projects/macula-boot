@@ -1,0 +1,12 @@
+server:
+  port: 8083
+
+macula:
+  security:
+    ignore-urls: /, /index.html, **/*.js, **/*.css
+
+logging:
+  level:
+    dev.macula: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG

@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
  * @author rain
  * @since 2023/7/4 17:02
  */
+@Setter
+@Getter
 @Slf4j
 @ConfigurationProperties(prefix = "macula.security")
 public class SecurityProperties implements InitializingBean {
@@ -49,35 +51,41 @@ public class SecurityProperties implements InitializingBean {
     private static final List<String> DEFAULT_IGNORE_URLS = SecurityConstants.DEFAULT_IGNORE_URLS;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.secret:macula_secret$terces_alucam$123456}")
-    @Setter
-    @Getter
     private String jwtSecret;
 
-    @Setter
-    @Getter
     private List<String> ignoreUrls = new ArrayList<>();
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         ignoreUrls.addAll(DEFAULT_IGNORE_URLS);
         RequestMappingHandlerMapping mapping = SpringUtil.getBean("requestMappingHandlerMapping");
         if (mapping != null) {
             Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
-
             map.keySet().forEach(info -> {
                 HandlerMethod handlerMethod = map.get(info);
-
-                // 获取方法上边的注解 替代path variable 为 *
                 Inner method = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Inner.class);
-                Optional.ofNullable(method).ifPresent(
-                    inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
-                        .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
-
-                // 获取类上边的注解, 替代path variable 为 *
                 Inner controller = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Inner.class);
-                Optional.ofNullable(controller).ifPresent(
-                    inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
-                        .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+                if (null != info.getPathPatternsCondition()) {
+                    // 获取方法上边的注解 替代path variable 为 *
+                    Optional.ofNullable(method).ifPresent(
+                            inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
+                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+
+                    // 获取类上边的注解, 替代path variable 为 *
+                    Optional.ofNullable(controller).ifPresent(
+                            inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
+                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+                } else {
+                    // 获取方法上边的注解 替代path variable 为 *
+                    Optional.ofNullable(method).ifPresent(
+                            inner -> Objects.requireNonNull(info.getPatternsCondition()).getPatterns()
+                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+
+                    // 获取类上边的注解, 替代path variable 为 *
+                    Optional.ofNullable(controller).ifPresent(
+                            inner -> Objects.requireNonNull(info.getPatternsCondition()).getPatterns()
+                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+                }
             });
         }
     }
