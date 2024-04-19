@@ -19,14 +19,20 @@ package dev.macula.boot.starter.websocket.stomp;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
+import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.CollectionUtils;
+
+import static dev.macula.boot.starter.websocket.config.WebSocketAutoConfiguration.USER_PREFIX;
 
 /**
  * <p>
@@ -48,19 +54,39 @@ public class RedisRelayBrokerChannelInterceptor implements ExecutorChannelInterc
     public Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
         // 中转BrokerMessageHandler的MESSAGE消息到REDIS[BrokerMessageHandler是真正发送出去的消息]
         if (handler instanceof AbstractBrokerMessageHandler) {
-            SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-            if (SimpMessageType.MESSAGE.equals(messageType)) {
-                // 给发给REDIS订阅的消息打上标识，防止重复发送消息到redis
-                if (!message.getHeaders().containsKey(WEBSOCKET_REDIS_MESSAGE_HEADER_NAME)) {
-                    Message<?> redisMessage = MessageBuilder.fromMessage(message)
-                            .setHeader(WEBSOCKET_REDIS_MESSAGE_HEADER_NAME, "0")
-                            .build();
-                    redisTemplate.convertAndSend(WEBSOCKET_REDIS_TOPIC_NAME, redisMessage);
-                    // 中止本地发送订阅，让redis订阅去发送
-                    return null;
+            String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+            // 排除/user前缀的消息
+            if (checkDestinationPrefix((AbstractBrokerMessageHandler) handler, destination)) {
+                SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+                if (SimpMessageType.MESSAGE.equals(messageType)) {
+                    // 给发给REDIS订阅的消息打上标识，防止重复发送消息到redis
+                    if (!message.getHeaders().containsKey(WEBSOCKET_REDIS_MESSAGE_HEADER_NAME)) {
+                        Message<?> redisMessage = MessageBuilder.fromMessage(message)
+                                .setHeader(WEBSOCKET_REDIS_MESSAGE_HEADER_NAME, "0")
+                                .build();
+                        redisTemplate.convertAndSend(WEBSOCKET_REDIS_TOPIC_NAME, redisMessage);
+                        // 中止本地发送订阅，让redis订阅去发送
+                        return null;
+                    }
                 }
             }
         }
         return message;
+    }
+
+    protected boolean checkDestinationPrefix(AbstractBrokerMessageHandler handler, @Nullable String destination) {
+        if (destination == null) {
+            return true;
+        }
+
+        if (CollectionUtils.isEmpty(handler.getDestinationPrefixes())) {
+            return !destination.startsWith(USER_PREFIX);
+        }
+        for (String prefix : handler.getDestinationPrefixes()) {
+            if (destination.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

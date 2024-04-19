@@ -3,7 +3,7 @@ server:
 
 macula:
   security:
-    ignore-urls: /, /index.html, **/*.js, **/*.css
+    ignore-urls: /, /index.html, **/*.js, **/*.css, /test/**
 
 logging:
   level:

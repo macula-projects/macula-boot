@@ -31,5 +31,4 @@ import lombok.Data;
 public class HelloMessage {
 
     private String name;
-    private String userId;
 }

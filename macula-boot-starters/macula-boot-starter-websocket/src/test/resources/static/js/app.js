@@ -1,42 +1,48 @@
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://localhost:8083/websocket'
+    brokerURL: 'ws://localhost:8083/websocket',
+    connectHeaders: {
+        name: "1234"
+    },
+    onConnect: function (frame) {
+        setConnected(true);
+        console.log('Connected: ' + frame);
+        // DEMO
+        stompClient.subscribe('/topic/test/greetings', (greeting) => {
+            showGreeting(JSON.parse(greeting.body).content);
+        });
+
+        // 订阅群组消息
+        stompClient.subscribe('/topic/test/group/' + groupId, function (greeting) {
+            showGreeting(JSON.parse(greeting.body).content);
+        });
+
+        // 订阅私人消息
+        stompClient.subscribe('/user/queue/test/me', function (greeting) {
+            showGreeting(JSON.parse(greeting.body).content);
+        });
+
+        // 订阅他人发给我的消息
+        stompClient.subscribe('/user/queue/test/chat', function (greeting) {
+            showGreeting(JSON.parse(greeting.body).content);
+        });
+    },
+    // If disconnected, it will retry after 200ms
+    reconnectDelay: 10000,
+
+    debug: function (str) {
+        console.log(str);
+    },
+
+    onWebSocketError: function (error) {
+        console.error('Error with websocket', error);
+    },
+
+    onStompError: function (frame) {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    }
 });
 
-stompClient.onConnect = (frame) => {
-    setConnected(true);
-    console.log('Connected: ' + frame);
-    // DEMO
-    stompClient.subscribe('/topic/greetings', (greeting) => {
-        showGreeting(JSON.parse(greeting.body).content);
-    });
-
-    // 订阅群组消息
-    stompClient.subscribe('/topic/group/123', function (greeting) {
-        showGreeting(JSON.parse(greeting.body).content);
-    });
-
-    // 订阅私人消息
-    stompClient.subscribe('/topic/user/' + userId + '/sendToUser', function (greeting) {
-        showGreeting(JSON.parse(greeting.body).content);
-    });
-
-    stompClient.subscribe('/user/' + userId + '/sendToUser', function (greeting) {
-        showGreeting(JSON.parse(greeting.body).content);
-    });
-};
-
-stompClient.debug = function (str) {
-    console.log(str);
-};
-
-stompClient.onWebSocketError = (error) => {
-    console.error('Error with websocket', error);
-};
-
-stompClient.onStompError = (frame) => {
-    console.error('Broker reported error: ' + frame.headers['message']);
-    console.error('Additional details: ' + frame.body);
-};
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -61,7 +67,7 @@ function disconnect() {
 
 function sendName() {
     stompClient.publish({
-        destination: "/app/hello",
+        destination: "/app/test/hello",
         body: JSON.stringify({
             'name': $("#name").val()
         })
@@ -69,14 +75,24 @@ function sendName() {
 }
 
 function sendName2() {
-    $.post("test.php", { name: "John", time: "2pm" } );
+    $.post("/test/hello2/" + groupId, {
+        name: $("#name").val()
+    });
 }
 
 function sendName3() {
     stompClient.publish({
-        destination: "/app/sendToUser",
+        destination: "/app/test/me",
         body: JSON.stringify({
-            'userId': $("#userId").val(),
+            'name': $("#name").val()
+        })
+    });
+}
+
+function sendName4() {
+    stompClient.publish({
+        destination: "/app/test/chat/" + $("#userId").val(),
+        body: JSON.stringify({
             'name': $("#name").val()
         })
     });
@@ -86,23 +102,13 @@ function showGreeting(message) {
     $("#greetings").append("<tr><td>" + message + "</td></tr>");
 }
 
-function GetQueryString(name) {
-    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-    let r = window.location.search.substring(1).match(reg); //获取url中"?"符后的字符串并正则匹配
-    let context = "";
-    if (r != null)
-        context = r[2];
-    reg = null;
-    r = null;
-    return context == null || context === "" || context === "undefined" ? "" : context;
-}
-
 $(function () {
-    userId = GetQueryString("userId");
+    groupId = 123;
     $("form").on('submit', (e) => e.preventDefault());
     $("#connect").click(() => connect());
     $("#disconnect").click(() => disconnect());
     $("#send").click(() => sendName());
     $("#send2").click(() => sendName2());
     $("#send3").click(() => sendName3());
+    $("#send4").click(() => sendName4());
 });

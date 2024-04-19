@@ -35,11 +35,10 @@ public class WebSocketSecurityConfiguration extends AbstractSecurityWebSocketMes
     @Override
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
 
-        messages.anyMessage().permitAll();
-//                .nullDestMatcher().authenticated()
-//                .simpDestMatchers("/app/test/**").permitAll()
-//                .simpSubscribeDestMatchers("/user/queue/test/**", "/topic/test/**").permitAll()
-//                .anyMessage().authenticated();
+        messages.nullDestMatcher().permitAll()
+                .simpDestMatchers("/app/test/**").permitAll()
+                .simpSubscribeDestMatchers("/user/queue/test/**", "/topic/test/**").permitAll()
+                .anyMessage().authenticated();
     }
 
     @Override
