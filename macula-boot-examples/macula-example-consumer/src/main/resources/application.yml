@@ -82,7 +82,8 @@ macula:
   jackson:
     null-to-empty: true         # 将null转为-1或者空串，默认为false
     long-to-string: true       # 将long转为字符串，默认为true
-
+  security:
+    ignore-urls: /, /index.html, /hello2/**
 gapi:
   username: applicationA
   secret: xx
@@ -99,9 +100,10 @@ gateway:
 
 logging:
   level:
-    root: info
+    root: debug
     com.alibaba.nacos.client: error
     dev.macula.example.consumer: debug
+    org.redisson: info
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
   #config: classpath:logback-skywalking.xml

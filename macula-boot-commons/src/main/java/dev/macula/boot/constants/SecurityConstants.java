@@ -34,7 +34,7 @@ public interface SecurityConstants {
             Arrays.asList(
                     "/actuator/**", "/favicon*", "/webjars/**", "/doc.html", "/swagger-ui/**",
                     "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/h2", "/h2-console", "/h2/**",
-                    "/h2-console/**", "/websocket", "/websocket/**", "/css/**", "/js/**", "/fonts/**",
+                    "/h2-console/**", "/css/**", "/js/**", "/fonts/**",
                     "/images/**", "/static/**"
             );
 
@@ -42,6 +42,11 @@ public interface SecurityConstants {
      * 认证请求头key
      */
     String AUTHORIZATION_KEY = "Authorization";
+
+    /**
+     * 认证请求QUERY参数
+     */
+    String QUERY_AUTHORIZATION_KEY = "access_token";
 
     /**
      * JWT令牌前缀

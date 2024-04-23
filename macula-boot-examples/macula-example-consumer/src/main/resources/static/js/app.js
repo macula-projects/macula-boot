@@ -1,45 +1,42 @@
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://localhost:8083/websocket',
-    connectHeaders: {
-        name: "1234",
-        Authorization: 'Bearer' + "MWQwZTQ3NWMtMTMwNS00ZTYyLWE4OWUtNTgxN2U5MTIwNjRjIyNhZG1pbiMjZTRkYTRhMzItNTkyYi00NmYwLWFlMWQtNzg0MzEwZTg4NDIz"
-    },
     onConnect: function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
+
         // DEMO
-        stompClient.subscribe('/topic/test/greetings', (greeting) => {
+        stompClient.subscribe('/topic/greetings', (greeting) => {
             showGreeting(JSON.parse(greeting.body).content);
         });
 
         // 订阅群组消息
-        stompClient.subscribe('/topic/test/group/' + groupId, function (greeting) {
+        stompClient.subscribe('/topic/group/' + groupId, function (greeting) {
             showGreeting(JSON.parse(greeting.body).content);
         });
 
         // 订阅私人消息
-        stompClient.subscribe('/user/queue/test/me', function (greeting) {
+        stompClient.subscribe('/user/queue/me', function (greeting) {
             showGreeting(JSON.parse(greeting.body).content);
         });
 
         // 订阅他人发给我的消息
-        stompClient.subscribe('/user/queue/test/chat', function (greeting) {
+        stompClient.subscribe('/user/queue/chat', function (greeting) {
             showGreeting(JSON.parse(greeting.body).content);
         });
     },
+
     // If disconnected, it will retry after 200ms
     reconnectDelay: 10000,
 
     debug: function (str) {
         console.log(str);
     },
-    onWebSocketClose: function () {
-        disconnect();
-    },
     onWebSocketError: function (error) {
         console.error('Error with websocket', error);
+        disconnect();
     },
-
+    onDisconnect: function () {
+        disconnect();
+    },
     onStompError: function (frame) {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
@@ -59,7 +56,13 @@ function setConnected(connected) {
 }
 
 function connect() {
-    stompClient.activate();
+    let token = $("#token").val()
+    if (token !== undefined && token.length > 0) {
+        stompClient.brokerURL = 'ws://localhost:8000/websocket/websocket?access_token=' + token
+        stompClient.activate();
+    } else {
+        alert("Please input access token!")
+    }
 }
 
 function disconnect() {
@@ -70,7 +73,7 @@ function disconnect() {
 
 function sendName() {
     stompClient.publish({
-        destination: "/app/test/hello",
+        destination: "/app/hello",
         body: JSON.stringify({
             'name': $("#name").val()
         })
@@ -78,14 +81,14 @@ function sendName() {
 }
 
 function sendName2() {
-    $.post("/test/hello2/" + groupId, {
+    $.post("http://localhost:8000/websocket/consumer/hello2/" + groupId, {
         name: $("#name").val()
     });
 }
 
 function sendName3() {
     stompClient.publish({
-        destination: "/app/test/me",
+        destination: "/app/me",
         body: JSON.stringify({
             'name': $("#name").val()
         })
@@ -94,7 +97,7 @@ function sendName3() {
 
 function sendName4() {
     stompClient.publish({
-        destination: "/app/test/chat/" + $("#userId").val(),
+        destination: "/app/chat/" + $("#sendTo").val(),
         body: JSON.stringify({
             'name': $("#name").val()
         })

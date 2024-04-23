@@ -17,16 +17,17 @@
 
 package dev.macula.boot.starter.websocket.config;
 
+import dev.macula.boot.starter.websocket.annotation.EnableWebSocketMessageBroker;
 import dev.macula.boot.starter.websocket.stomp.RedisRelayBrokerChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -34,14 +35,11 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * <p>
@@ -52,20 +50,21 @@ import java.util.Map;
  * @version 2018-08-12 18:38
  **/
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "macula.websocket.stomp", name = "enabled", havingValue = "true", matchIfMissing = true)
-@Import({WebSocketSecurityConfiguration.class, WebSocketRedisConfiguration.class})
+@ConditionalOnProperty(prefix = "macula.websocket", name = "enabled", havingValue = "true", matchIfMissing = true)
+@Import({WebSocketRedisConfiguration.class, WebSocketSecurityConfiguration.class})
 @EnableWebSocketMessageBroker
+@EnableConfigurationProperties(WebSocketProperties.class)
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigurer {
 
+    private final WebSocketProperties properties;
     private final RedisTemplate<String, Message<?>> webSocketRedisTemplate;
-
-    public final static String USER_PREFIX = "/user";
+    private final WebSocketProperties webSocketProperties;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/websocket")
+        registry.addEndpoint(properties.getEndpoint())
                 .setAllowedOriginPatterns("*");
     }
 
@@ -83,16 +82,16 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
         // 初始化
         taskScheduler.initialize();
 
-        registry.enableSimpleBroker("/topic", "/queue")
-                .setHeartbeatValue(new long[]{10000, 10000})
+        registry.enableSimpleBroker(properties.getBrokerDestinationPrefixes())
+                .setHeartbeatValue(webSocketProperties.getHeartbeat())
                 .setTaskScheduler(taskScheduler);
 
         // 客户端发送/app开头的消息，@MessageMapping注解处理 {@see SimpAnnotationMethodMessageHandler}
-        registry.setApplicationDestinationPrefixes("/app");
+        registry.setApplicationDestinationPrefixes(properties.getAppDestinationPrefixes());
 
         // 客户端订阅个人消息要以/user开头，{@see SimpleBrokerMessageHandler}
-        registry.setUserDestinationPrefix(USER_PREFIX);
-        registry.configureBrokerChannel().interceptors(new RedisRelayBrokerChannelInterceptor(webSocketRedisTemplate));
+        registry.setUserDestinationPrefix(properties.getUserDestinationPrefix());
+        registry.configureBrokerChannel().interceptors(new RedisRelayBrokerChannelInterceptor(webSocketRedisTemplate, properties));
     }
 
     @Override
@@ -100,31 +99,17 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+                StompHeaderAccessor accessor =
+                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    Object raw = message.getHeaders().get(SimpMessageHeaderAccessor.NATIVE_HEADERS);
-                    if (raw instanceof Map) {
-                        Object name = ((Map) raw).get("name");
-                        if (name instanceof ArrayList) {
-                            // 设置当前访问器的认证用户
-                            accessor.setUser(new User(((ArrayList) name).get(0).toString()));
-                        }
+                    Authentication user = SecurityContextHolder.getContext().getAuthentication();
+                    if (!(user instanceof AnonymousAuthenticationToken)) {
+                        accessor.setUser(user);
                     }
                 }
                 return message;
             }
         });
-    }
-
-    static class User implements Principal {
-        private final String name;
-        public User(String name) {
-            this.name = name;
-        }
-        @Override
-        public String getName() {
-            return name;
-        }
     }
 }
 

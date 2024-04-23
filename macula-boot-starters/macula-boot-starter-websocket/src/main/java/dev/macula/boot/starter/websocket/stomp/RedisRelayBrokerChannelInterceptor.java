@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.websocket.stomp;
 
+import dev.macula.boot.starter.websocket.config.WebSocketProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.Nullable;
@@ -26,13 +27,9 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
-import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
-import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
-
-import static dev.macula.boot.starter.websocket.config.WebSocketAutoConfiguration.USER_PREFIX;
 
 /**
  * <p>
@@ -49,6 +46,7 @@ public class RedisRelayBrokerChannelInterceptor implements ExecutorChannelInterc
     public final static String WEBSOCKET_REDIS_MESSAGE_HEADER_NAME = "RDS";
 
     private final RedisTemplate<String, Message<?>> redisTemplate;
+    private final WebSocketProperties properties;
 
     @Override
     public Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
@@ -80,8 +78,9 @@ public class RedisRelayBrokerChannelInterceptor implements ExecutorChannelInterc
         }
 
         if (CollectionUtils.isEmpty(handler.getDestinationPrefixes())) {
-            return !destination.startsWith(USER_PREFIX);
+            return !destination.startsWith(properties.getUserDestinationPrefix());
         }
+
         for (String prefix : handler.getDestinationPrefixes()) {
             if (destination.startsWith(prefix)) {
                 return true;

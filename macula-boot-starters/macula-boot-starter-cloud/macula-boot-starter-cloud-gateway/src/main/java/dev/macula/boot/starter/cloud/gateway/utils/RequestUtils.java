@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.cloud.gateway.utils;
 
 import cn.hutool.core.util.StrUtil;
+import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -84,5 +85,14 @@ public class RequestUtils {
             exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
 
         return pathContainer != null ? pathContainer.value() : uri.getPath();
+    }
+
+    public static String getHeaderOrQueryToken(ServerWebExchange exchange) {
+        String token = exchange.getRequest().getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
+        if (StrUtil.isBlank(token)) {
+            token = exchange.getRequest().getQueryParams().getFirst(SecurityConstants.QUERY_AUTHORIZATION_KEY);
+            token = StrUtil.isBlank(token) ? token : SecurityConstants.TOKEN_PREFIX + token;
+        }
+        return token;
     }
 }

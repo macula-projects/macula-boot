@@ -51,7 +51,7 @@
 
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-sleuth</artifactId>
+            <artifactId>macula-boot-starter-websocket</artifactId>
         </dependency>
     </dependencies>
 

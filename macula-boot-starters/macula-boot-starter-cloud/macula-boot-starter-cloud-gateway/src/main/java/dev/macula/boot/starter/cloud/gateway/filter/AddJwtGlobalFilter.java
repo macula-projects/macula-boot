@@ -25,6 +25,7 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.security.JwtClaimsCustomizer;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -80,58 +82,63 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
     @SneakyThrows
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (exchange.getRequest().getHeaders().containsKey(SecurityConstants.AUTHORIZATION_KEY)) {
-            // OAuth2的Token才转为JWT
-            String token = exchange.getRequest().getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
-            if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {
-                return ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication)
+
+        String token = RequestUtils.getHeaderOrQueryToken(exchange);
+
+        // OAuth2的Token才转为JWT
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {
+            return ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication)
                     .cast(BearerTokenAuthentication.class).map(BearerTokenAuthentication::getPrincipal)
                     .filter(OAuth2AuthenticatedPrincipal.class::isInstance).cast(OAuth2AuthenticatedPrincipal.class)
                     .switchIfEmpty(Mono.error(new BadCredentialsException("Bad Credentials"))).flatMap(principal -> {
                         ServerHttpRequest request = exchange.getRequest();
-                        request = request.mutate().header(SecurityConstants.AUTHORIZATION_KEY,
-                            SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
+                        request = request.mutate()
+                                .uri(UriComponentsBuilder.fromUri(request.getURI()).replaceQuery("").build(true).toUri())
+                                .header(SecurityConstants.AUTHORIZATION_KEY,
+                                        SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
 
+                        // remove access_token in query parameters
                         ServerWebExchange newExchange = exchange.mutate().request(request).build();
+
                         return chain.filter(newExchange);
                     });
-            }
-
-            // AK/SK转JWT
-            if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-                ServerHttpRequest request = exchange.getRequest();
-
-                String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
-
-                // 如果有invoke头，表示上游访问名称
-                String invokeUsername =
-                    exchange.getRequest().getHeaders().getFirst(GatewayConstants.REMOTE_INVOKE_NAME);
-                if (StrUtil.isNotBlank(invokeUsername)) {
-                    username = invokeUsername;
-                }
-
-                Long tenantId = TenantContextHolder.getCurrentTenantId();
-                Map<String, Object> attributes = new HashMap<>();
-                attributes.put(JWTClaimNames.SUBJECT, username);
-
-                // JWT携带租户ID
-                if (Objects.nonNull(tenantId)) {
-                    attributes.put(GlobalConstants.TENANT_ID_NAME, tenantId);
-                }
-                String tokenId = request.getQueryParams().getFirst(GlobalConstants.TOKEN_ID_NAME);
-                if (StrUtil.isNotBlank(tokenId)) {
-                    attributes.put(JWTClaimNames.JWT_ID, tokenId);
-                }
-
-                OAuth2AuthenticatedPrincipal principal =
-                    new DefaultOAuth2AuthenticatedPrincipal(username, attributes, AuthorityUtils.NO_AUTHORITIES);
-                request = request.mutate().header(SecurityConstants.AUTHORIZATION_KEY,
-                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
-                ServerWebExchange newExchange = exchange.mutate().request(request).build();
-
-                return chain.filter(newExchange);
-            }
         }
+
+        // AK/SK转JWT
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
+            ServerHttpRequest request = exchange.getRequest();
+
+            String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
+
+            // 如果有invoke头，表示上游访问名称
+            String invokeUsername =
+                    exchange.getRequest().getHeaders().getFirst(GatewayConstants.REMOTE_INVOKE_NAME);
+            if (StrUtil.isNotBlank(invokeUsername)) {
+                username = invokeUsername;
+            }
+
+            Long tenantId = TenantContextHolder.getCurrentTenantId();
+            Map<String, Object> attributes = new HashMap<>();
+            attributes.put(JWTClaimNames.SUBJECT, username);
+
+            // JWT携带租户ID
+            if (Objects.nonNull(tenantId)) {
+                attributes.put(GlobalConstants.TENANT_ID_NAME, tenantId);
+            }
+            String tokenId = request.getQueryParams().getFirst(GlobalConstants.TOKEN_ID_NAME);
+            if (StrUtil.isNotBlank(tokenId)) {
+                attributes.put(JWTClaimNames.JWT_ID, tokenId);
+            }
+
+            OAuth2AuthenticatedPrincipal principal =
+                    new DefaultOAuth2AuthenticatedPrincipal(username, attributes, AuthorityUtils.NO_AUTHORITIES);
+            request = request.mutate().header(SecurityConstants.AUTHORIZATION_KEY,
+                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
+            ServerWebExchange newExchange = exchange.mutate().request(request).build();
+
+            return chain.filter(newExchange);
+        }
+
         return chain.filter(exchange);
     }
 
@@ -145,7 +152,7 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
     private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
         // 先看缓存，有则直接返回JWT（需要认证服务器每次登录返回不同的JTI）
         String jwtStr;
-        jwtStr = (String)redisTemplate.opsForValue().get(buildKey(principal));
+        jwtStr = (String) redisTemplate.opsForValue().get(buildKey(principal));
         if (StrUtil.isNotBlank(jwtStr)) {
             return jwtStr;
         }

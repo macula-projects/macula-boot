@@ -58,4 +58,10 @@ public interface CacheConstants {
     String GATEWAY_TOKEN_CACHE_KEY = "macula:cloud:gateway:principal:";
 
     String GATEWAY_NONCE_KEY = "macula:scg:nonce";
+
+    /** WEBSOCKET订阅关系KEY */
+    String WEBSOCKET_USERS_KEY = "macula:ws:u:user:";
+    String WEBSOCKET_USER_SESSIONS_KEY = "macula:ws:u:sessions:";
+    String WEBSOCKET_SESSION_USER_KEY = "macula:ws:s:user:";
+    String WEBSOCKET_SESSION_SUBSCRIPTIONS_KEY = "macula:ws:s:subs:";
 }

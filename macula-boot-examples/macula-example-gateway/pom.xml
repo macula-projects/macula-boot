@@ -33,10 +33,6 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-alibaba-scg</artifactId>
         </dependency>
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-sleuth</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

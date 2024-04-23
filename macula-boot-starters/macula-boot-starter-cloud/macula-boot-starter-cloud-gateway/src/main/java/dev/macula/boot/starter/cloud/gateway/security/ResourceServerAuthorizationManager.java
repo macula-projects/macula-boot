@@ -22,6 +22,7 @@ import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,7 +76,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         String restfulPath = appName + ":" + method + ":" + path;
 
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
-        String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
+        String token = RequestUtils.getHeaderOrQueryToken(authorizationContext.getExchange());
 
         // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {

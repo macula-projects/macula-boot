@@ -46,8 +46,10 @@ import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNam
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.web.server.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
@@ -93,11 +95,12 @@ public class ResourceServerConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
-        ReactiveAuthorizationManager<AuthorizationContext> authorizationManager) {
+                                                         ReactiveAuthorizationManager<AuthorizationContext> authorizationManager) {
         //@formatter:off
         // 添加默认忽略的路径
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
         http.oauth2ResourceServer()
+            .bearerTokenConverter(serverBearerTokenAuthenticationConverter())
             .opaqueToken()
             .introspector(opaqueTokenIntrospector())
             .and()
@@ -119,17 +122,24 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
+    public ServerAuthenticationConverter serverBearerTokenAuthenticationConverter() {
+        ServerBearerTokenAuthenticationConverter converter = new ServerBearerTokenAuthenticationConverter();
+        converter.setAllowUriQueryParameter(true);
+        return converter;
+    }
+
+    @Bean
     public ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector() {
         return new ReactiveOpaqueTokenIntrospector() {
             final OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
             final ReactiveOpaqueTokenIntrospector delegate =
-                new NimbusReactiveOpaqueTokenIntrospector(opaqueToken.getIntrospectionUri(), opaqueToken.getClientId(),
-                    opaqueToken.getClientSecret());
+                    new NimbusReactiveOpaqueTokenIntrospector(opaqueToken.getIntrospectionUri(), opaqueToken.getClientId(),
+                            opaqueToken.getClientSecret());
 
             @Override
             public Mono<OAuth2AuthenticatedPrincipal> introspect(String token) {
-                OAuth2AuthenticatedPrincipal cachedPrincipal = (OAuth2AuthenticatedPrincipal)redisTemplate.opsForValue()
-                    .get(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token);
+                OAuth2AuthenticatedPrincipal cachedPrincipal = (OAuth2AuthenticatedPrincipal) redisTemplate.opsForValue()
+                        .get(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token);
 
                 if (cachedPrincipal != null) {
                     return Mono.just(cachedPrincipal);
@@ -142,10 +152,10 @@ public class ResourceServerConfiguration {
                     long between = iat != null && exp != null ? ChronoUnit.MINUTES.between(iat, exp) : 5L;
 
                     principal = new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), principal.getAttributes(),
-                        extractAuthorities(principal));
+                            extractAuthorities(principal));
 
                     redisTemplate.opsForValue()
-                        .set(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token, principal, between, TimeUnit.MINUTES);
+                            .set(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token, principal, between, TimeUnit.MINUTES);
 
                     return principal;
                 });
@@ -158,8 +168,8 @@ public class ResourceServerConfiguration {
                 List<String> authorities = principal.getAttribute(SecurityConstants.AUTHORITIES_KEY);
                 if (authorities != null) {
                     result.addAll(authorities.stream()
-                        .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
-                        .collect(Collectors.toList()));
+                            .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
+                            .collect(Collectors.toList()));
                 }
                 return result;
             }
@@ -177,8 +187,8 @@ public class ResourceServerConfiguration {
     @Bean
     ServerAccessDeniedHandler accessDeniedHandler() {
         return (exchange, denied) -> Mono.defer(() -> Mono.just(exchange.getResponse())).flatMap(
-            response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
-                Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED)));
+                response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
+                        Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED)));
     }
 
     /**
@@ -187,13 +197,13 @@ public class ResourceServerConfiguration {
     @Bean
     ServerAuthenticationEntryPoint authenticationEntryPoint() {
         return (exchange, e) -> Mono.defer(() -> Mono.just(exchange.getResponse())).flatMap(
-            response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
-                Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED)));
+                response -> ResponseUtils.writeResult(response, HttpStatus.UNAUTHORIZED,
+                        Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED)));
     }
 
     @Bean
     AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, JwtClaimsCustomizer jwtClaimsCustomizer,
-        RedisTemplate<String, Object> redisTemplate) {
+                                          RedisTemplate<String, Object> redisTemplate) {
         return new AddJwtGlobalFilter(jwtEncoder, jwtClaimsCustomizer, redisTemplate);
     }
 
