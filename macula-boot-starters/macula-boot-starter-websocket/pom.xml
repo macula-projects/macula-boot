@@ -53,6 +53,12 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-messaging</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-feign</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>

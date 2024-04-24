@@ -17,29 +17,35 @@
 
 package dev.macula.boot.starter.websocket.config;
 
+import cn.hutool.core.collection.CollUtil;
+import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.starter.websocket.annotation.EnableWebSocketMessageBroker;
+import dev.macula.boot.starter.websocket.feign.WebSocketFeignRequestInterceptor;
 import dev.macula.boot.starter.websocket.stomp.RedisRelayBrokerChannelInterceptor;
+import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import java.util.List;
 
 /**
  * <p>
@@ -91,7 +97,10 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
 
         // 客户端订阅个人消息要以/user开头，{@see SimpleBrokerMessageHandler}
         registry.setUserDestinationPrefix(properties.getUserDestinationPrefix());
-        registry.configureBrokerChannel().interceptors(new RedisRelayBrokerChannelInterceptor(webSocketRedisTemplate, properties));
+
+        // 将消息Broker到Redis以便其他实例可以消费
+        registry.configureBrokerChannel()
+                .interceptors(new RedisRelayBrokerChannelInterceptor(webSocketRedisTemplate, properties));
     }
 
     @Override
@@ -101,15 +110,25 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    Authentication user = SecurityContextHolder.getContext().getAuthentication();
-                    if (!(user instanceof AnonymousAuthenticationToken)) {
-                        accessor.setUser(user);
-                    }
+
+                // 从STOMP消息头中读取灰度标识，设置灰度上下文
+                List<String> grayVersion = accessor.getNativeHeader(GlobalConstants.GRAY_VERSION_TAG);
+                if (CollUtil.isNotEmpty(grayVersion)) {
+                    GrayVersionContextHolder.setGrayVersion(grayVersion.get(0));
                 }
+
                 return message;
             }
         });
+    }
+
+    @ConditionalOnClass(RequestInterceptor.class)
+    @Configuration
+    protected static class FeignClientConfiguration {
+        @Bean
+        public RequestInterceptor webSocketFeignRequestInterceptor() {
+            return new WebSocketFeignRequestInterceptor();
+        }
     }
 }
 

@@ -74,6 +74,9 @@ function disconnect() {
 function sendName() {
     stompClient.publish({
         destination: "/app/hello",
+        headers: {
+            'grayversion': "feat-123"
+        },
         body: JSON.stringify({
             'name': $("#name").val()
         })
@@ -81,7 +84,7 @@ function sendName() {
 }
 
 function sendName2() {
-    $.post("http://localhost:8000/websocket/consumer/hello2/" + groupId, {
+    $.post("http://localhost:8000/consumer/hello2/" + groupId, {
         name: $("#name").val()
     });
 }

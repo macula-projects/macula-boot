@@ -53,6 +53,11 @@
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-websocket</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-sleuth</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

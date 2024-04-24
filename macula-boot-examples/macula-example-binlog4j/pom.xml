@@ -38,6 +38,11 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-websocket</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

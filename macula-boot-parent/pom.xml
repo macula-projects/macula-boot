@@ -70,6 +70,7 @@
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.25.2</redisson.version>
         <hutool.version>5.8.25</hutool.version>
+        <easyexcel.version>3.3.4</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>
         <fastjson2.version>2.0.45</fastjson2.version>
         <liteflow.version>2.11.4.1</liteflow.version>
@@ -433,6 +434,13 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>transmittable-thread-local</artifactId>
                 <version>${transmittable-thread.version}</version>
+            </dependency>
+
+            <!-- easyexcel -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
             </dependency>
 
             <!-- fastjson2 -->

@@ -17,10 +17,14 @@
 
 package dev.macula.example.consumer.controller;
 
+import dev.macula.example.consumer.feign.Provider1Service;
 import dev.macula.example.consumer.vo.Greeting;
 import dev.macula.example.consumer.vo.HelloMessage;
+import dev.macula.example.consumer.vo.UserResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -45,6 +49,7 @@ import org.springframework.web.util.HtmlUtils;
 public class WebSocketController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final Provider1Service provider1Service;
 
     /**
      * 客户端通过/app/hello发送websocket消息，
@@ -55,7 +60,10 @@ public class WebSocketController {
     @SendTo("/topic/greetings")
     public Greeting greeting(HelloMessage message) throws Exception {
         Thread.sleep(1000);
-        return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!");
+        UserResult x = new UserResult();
+        x.setUserName("greetings");
+        UserResult u = provider1Service.getUser(x);
+        return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!, p=" + u.getPassword());
     }
 
     /**
@@ -64,8 +72,11 @@ public class WebSocketController {
     @PostMapping("/hello2/{groupId}")
     public void group(HelloMessage message, @PathVariable("groupId") String groupId) throws Exception {
         Thread.sleep(1000);
+        UserResult x = new UserResult();
+        x.setUserName("greetings");
+        UserResult u = provider1Service.getUser(x);
         simpMessagingTemplate.convertAndSend("/topic/group/" + groupId,
-                new Greeting("Hello Group, " + HtmlUtils.htmlEscape(message.getName()) + "!"));
+                new Greeting("Hello Group, " + HtmlUtils.htmlEscape(message.getName()) + "!") + "!, p=" + u.getPassword());
     }
 
     /**
