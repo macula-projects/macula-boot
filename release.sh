@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# 用法：./release.sh 5.0.7
+# 用法：./release.sh 5.0.8
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export VERSION=$1
