@@ -56,7 +56,7 @@
     </licenses>
 
     <properties>
-        <revision>5.0.8-SNAPSHOT</revision>
+        <revision>5.0.8</revision>
         <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.9</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
