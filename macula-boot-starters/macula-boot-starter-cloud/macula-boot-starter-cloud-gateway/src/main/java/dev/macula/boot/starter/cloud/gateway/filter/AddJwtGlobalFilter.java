@@ -51,10 +51,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -95,9 +92,15 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
 
                         // 去掉query String access_token，添加JWT到header【两者不能同时存在】
                         request = request.mutate()
-                                .uri(RequestUtils.removeParam(request.getURI(), SecurityConstants.QUERY_AUTHORIZATION_KEY))
+                                .uri(
+                                        UriComponentsBuilder.fromUri(request.getURI())
+                                                .replaceQueryParam(SecurityConstants.QUERY_AUTHORIZATION_KEY, Collections.EMPTY_LIST)
+                                                .build()
+                                                .toUri()
+                                )
                                 .header(SecurityConstants.AUTHORIZATION_KEY,
-                                        SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
+                                        SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)
+                                ).build();
 
                         // remove access_token in query parameters
                         ServerWebExchange newExchange = exchange.mutate().request(request).build();

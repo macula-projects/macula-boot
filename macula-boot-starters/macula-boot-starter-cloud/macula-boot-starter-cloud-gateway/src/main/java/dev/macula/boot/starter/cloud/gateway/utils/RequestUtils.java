@@ -17,7 +17,9 @@
 
 package dev.macula.boot.starter.cloud.gateway.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
@@ -27,14 +29,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Flux;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * {@code RequestBodyUtils} 读取ServerWebExchange的Body并缓存
@@ -43,6 +54,8 @@ import java.util.List;
  * @since 2023/2/20 14:09
  */
 public class RequestUtils {
+
+    private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
     public static boolean isCryptoOrSignRequest(ServerWebExchange exchange) {
         String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
@@ -98,56 +111,5 @@ public class RequestUtils {
             token = StrUtil.isBlank(token) ? token : SecurityConstants.TOKEN_PREFIX + token;
         }
         return token;
-    }
-
-    public static URI removeParam(URI uri, String... names) {
-        try {
-            String query = uri.getQuery();
-            if (query == null || query.isEmpty()) {
-                // If query is empty, no parameters to remove
-                return uri;
-            }
-
-            // Split query string into key-value pairs
-            String[] queryParams = query.split("&");
-            List<String> updatedParams = new ArrayList<>();
-
-            // Iterate over key-value pairs and add those that are not to be removed
-            for (String param : queryParams) {
-                String[] keyValue = param.split("=");
-                String paramName = keyValue[0];
-                boolean removeParam = false;
-
-                // Check if current parameter should be removed
-                for (String name : names) {
-                    if (paramName.equals(name)) {
-                        removeParam = true;
-                        break;
-                    }
-                }
-
-                // If parameter should not be removed, add it to updated parameters list
-                if (!removeParam) {
-                    updatedParams.add(param);
-                }
-            }
-
-            // Construct new query string without removed parameters
-            String newQuery = null;
-            if (!updatedParams.isEmpty()) {
-                newQuery = String.join("&", updatedParams);
-            }
-            // Reconstruct URI with updated query string
-            return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), newQuery, uri.getFragment());
-        } catch (URISyntaxException ex) {
-            throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
-        }
-    }
-
-    public static void main(String[] args) {
-        String url = "https://www.lyf.com/user/info?access_token=xxx&id=12333&enc=test";
-        URI uri = UriComponentsBuilder.fromHttpUrl(url).build(true).toUri();
-        URI newUri = RequestUtils.removeParam(uri, "access_token", "id");
-        System.out.println(newUri.toString());
     }
 }
