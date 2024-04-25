@@ -26,6 +26,10 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
+# 更新代码
+git checkout main
+git pull
+
 # 修改为发布版本号
 mvn versions:set-property -Dproperty=revision -DnewVersion=${VERSION} -DallowSnapshots=true -DgenerateBackupPoms=false
 
