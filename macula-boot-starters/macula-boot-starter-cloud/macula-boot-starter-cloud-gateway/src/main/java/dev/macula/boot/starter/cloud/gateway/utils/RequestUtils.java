@@ -17,9 +17,7 @@
 
 package dev.macula.boot.starter.cloud.gateway.utils;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
@@ -29,23 +27,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Flux;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * {@code RequestBodyUtils} 读取ServerWebExchange的Body并缓存
@@ -54,8 +39,6 @@ import java.util.regex.Pattern;
  * @since 2023/2/20 14:09
  */
 public class RequestUtils {
-
-    private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
     public static boolean isCryptoOrSignRequest(ServerWebExchange exchange) {
         String sm4Key = exchange.getRequest().getHeaders().getFirst(GatewayConstants.SM4_KEY);
