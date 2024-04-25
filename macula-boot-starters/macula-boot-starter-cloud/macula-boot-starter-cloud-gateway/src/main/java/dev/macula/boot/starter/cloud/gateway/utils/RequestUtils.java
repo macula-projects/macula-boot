@@ -28,9 +28,13 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@code RequestBodyUtils} 读取ServerWebExchange的Body并缓存
@@ -82,7 +86,7 @@ public class RequestUtils {
         // GlobalFilter里面不带URL不带路由前缀，需要获取原始的请求
         URI uri = exchange.getRequest().getURI();
         PathContainer pathContainer =
-            exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
+                exchange.getRequiredAttribute(ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR);
 
         return pathContainer != null ? pathContainer.value() : uri.getPath();
     }
@@ -94,5 +98,56 @@ public class RequestUtils {
             token = StrUtil.isBlank(token) ? token : SecurityConstants.TOKEN_PREFIX + token;
         }
         return token;
+    }
+
+    public static URI removeParam(URI uri, String... names) {
+        try {
+            String query = uri.getQuery();
+            if (query == null || query.isEmpty()) {
+                // If query is empty, no parameters to remove
+                return uri;
+            }
+
+            // Split query string into key-value pairs
+            String[] queryParams = query.split("&");
+            List<String> updatedParams = new ArrayList<>();
+
+            // Iterate over key-value pairs and add those that are not to be removed
+            for (String param : queryParams) {
+                String[] keyValue = param.split("=");
+                String paramName = keyValue[0];
+                boolean removeParam = false;
+
+                // Check if current parameter should be removed
+                for (String name : names) {
+                    if (paramName.equals(name)) {
+                        removeParam = true;
+                        break;
+                    }
+                }
+
+                // If parameter should not be removed, add it to updated parameters list
+                if (!removeParam) {
+                    updatedParams.add(param);
+                }
+            }
+
+            // Construct new query string without removed parameters
+            String newQuery = null;
+            if (!updatedParams.isEmpty()) {
+                newQuery = String.join("&", updatedParams);
+            }
+            // Reconstruct URI with updated query string
+            return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), newQuery, uri.getFragment());
+        } catch (URISyntaxException ex) {
+            throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
+        }
+    }
+
+    public static void main(String[] args) {
+        String url = "https://www.lyf.com/user/info?access_token=xxx&id=12333&enc=test";
+        URI uri = UriComponentsBuilder.fromHttpUrl(url).build(true).toUri();
+        URI newUri = RequestUtils.removeParam(uri, "access_token", "id");
+        System.out.println(newUri.toString());
     }
 }
