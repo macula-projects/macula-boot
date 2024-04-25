@@ -92,8 +92,10 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
                     .filter(OAuth2AuthenticatedPrincipal.class::isInstance).cast(OAuth2AuthenticatedPrincipal.class)
                     .switchIfEmpty(Mono.error(new BadCredentialsException("Bad Credentials"))).flatMap(principal -> {
                         ServerHttpRequest request = exchange.getRequest();
+
+                        // 去掉query String access_token，添加JWT到header【两者不能同时存在】
                         request = request.mutate()
-                                .uri(UriComponentsBuilder.fromUri(request.getURI()).replaceQuery("").build(true).toUri())
+                                .uri(RequestUtils.removeParam(request.getURI(), SecurityConstants.QUERY_AUTHORIZATION_KEY))
                                 .header(SecurityConstants.AUTHORIZATION_KEY,
                                         SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
 

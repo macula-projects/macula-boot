@@ -56,8 +56,8 @@ public class ConsumerController {
     private GatewayService gatewayService;
 
     @GetMapping("/echo")
-    public String echo() {
-        String hello = provider1Service.echo("consumer");
+    public String echo(@RequestParam("str") String str) {
+        String hello = provider1Service.echo(str);
         log.info("consumer echo: {}", hello);
         return hello;
     }
