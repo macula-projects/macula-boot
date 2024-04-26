@@ -58,11 +58,6 @@ import java.util.Objects;
 @EnableConfigurationProperties(MyBatisPlusProperties.class)
 public class MyBatisPlusAutoConfiguration {
 
-    /**
-     * 分页时允许每页最大记录数
-     */
-    private static final Long MAX_LIMIT = 1000L;
-
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(MyBatisPlusProperties properties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -91,7 +86,7 @@ public class MyBatisPlusAutoConfiguration {
             @Override
             public boolean ignoreTable(String tableName) {
                 // 分租户的表名称应该统一以xx标识
-                return !Arrays.stream(properties.getTenantSuffixes()).anyMatch(suffix -> tableName.endsWith(suffix));
+                return Arrays.stream(properties.getTenantSuffixes()).noneMatch(tableName::endsWith);
             }
         }));
 
@@ -103,7 +98,7 @@ public class MyBatisPlusAutoConfiguration {
 
         // 分页插件
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
-        paginationInnerInterceptor.setMaxLimit(MAX_LIMIT);
+        paginationInnerInterceptor.setMaxLimit(properties.getMaxLimit());
         interceptor.addInnerInterceptor(paginationInnerInterceptor);
 
         // 乐观锁插件，自动对具有@version的注解实体加上version条件
@@ -139,8 +134,7 @@ public class MyBatisPlusAutoConfiguration {
     @Bean
     public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer() {
         return plusProperties -> {
-            // TODO 主键策略ASSIGN_ID对应的ID生成器
-            plusProperties.getGlobalConfig().setIdentifierGenerator(new DefaultIdentifierGenerator());
+            plusProperties.getGlobalConfig().setIdentifierGenerator(DefaultIdentifierGenerator.getInstance());
         };
     }
 }
