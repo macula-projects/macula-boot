@@ -55,11 +55,11 @@ public class ConsumerController {
     @Autowired
     private GatewayService gatewayService;
 
-    @GetMapping("/echo")
-    public String echo(@RequestParam("str") String str) {
+    @GetMapping("/echo/{name}")
+    public String echo(@RequestParam("str") String str, @PathVariable String name) {
         String hello = provider1Service.echo(str);
-        log.info("consumer echo: {}", hello);
-        return hello;
+        log.info("consumer echo by {}: {}", name, hello);
+        return hello + "," + name;
     }
 
     @PostMapping("/user")

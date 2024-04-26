@@ -90,14 +90,19 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
                     .switchIfEmpty(Mono.error(new BadCredentialsException("Bad Credentials"))).flatMap(principal -> {
                         ServerHttpRequest request = exchange.getRequest();
 
-                        // 去掉query String access_token，添加JWT到header【两者不能同时存在】
+                        // 去掉query String access_token
+                        if (request.getQueryParams().containsKey(SecurityConstants.QUERY_AUTHORIZATION_KEY)) {
+                            request = request.mutate()
+                                    .uri(
+                                            UriComponentsBuilder.fromUri(request.getURI())
+                                                    .replaceQueryParam(SecurityConstants.QUERY_AUTHORIZATION_KEY, Collections.EMPTY_LIST)
+                                                    .build(true)
+                                                    .toUri()
+                                    ).build();
+                        }
+
+                        // 添加JWT到header
                         request = request.mutate()
-                                .uri(
-                                        UriComponentsBuilder.fromUri(request.getURI())
-                                                .replaceQueryParam(SecurityConstants.QUERY_AUTHORIZATION_KEY, Collections.EMPTY_LIST)
-                                                .build()
-                                                .toUri()
-                                )
                                 .header(SecurityConstants.AUTHORIZATION_KEY,
                                         SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)
                                 ).build();
