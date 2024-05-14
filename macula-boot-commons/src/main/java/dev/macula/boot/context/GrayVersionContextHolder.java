@@ -22,8 +22,6 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 /**
  * {@code GrayVersionContextHolder} 请求上下文的grayVersion标识
  *
- * // TODO 需要再网关提取http请求头，设置到这里，feign要传递，在灰度路由选择时过滤灰度提供者（NacosLoadBalancer扩展choose，引入灰度标识)
- *
  * @author rain
  * @since 2023/9/11 12:41
  */

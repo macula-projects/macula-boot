@@ -8,7 +8,6 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: ${nacos.config.server-addr}
         namespace: ${nacos.config.namespace}
         # group:
     sentinel:

@@ -71,6 +71,7 @@ public class GrayFilterMessageHookImpl implements FilterMessageHook {
     }
 
     private boolean ifConsume(String messageGrayVersion, String myGrayVersion) {
+        // TODO 有漏洞，应该是各自环境不存在的情况下才可以根据配置去消费其他环境的消息 @2024.5.13
         if (StrUtil.isEmpty(messageGrayVersion)) {
             // 基线消息
             if (StrUtil.isEmpty(myGrayVersion)) {

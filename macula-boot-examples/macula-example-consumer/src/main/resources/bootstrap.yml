@@ -8,10 +8,10 @@ spring:
     name: macula-example-consumer
   cloud:
     nacos:
+      server-addr: ${nacos.server-addr}
       username: ${nacos.username}
       password: ${nacos.password}
       config:
-        server-addr: ${nacos.config.server-addr}
         namespace: ${nacos.config.namespace}
         # group:
         refresh-enabled: true
@@ -21,8 +21,8 @@ spring:
 nacos:
   username: nacos
   password: nacos
+  server-addr: 127.0.0.1:8848
   config:
-    server-addr: 127.0.0.1:8848
     namespace: MACULA5
 
 ---
@@ -32,7 +32,7 @@ spring:
       on-profile: dev
 nacos:
   username: maculav5
+  server-addr: 10.94.108.55:8848
   #password: 请通过启动命令赋予密码
   config:
-    server-addr: 10.94.108.55:8848
     namespace: MACULA5
