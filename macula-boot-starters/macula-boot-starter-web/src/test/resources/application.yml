@@ -15,3 +15,6 @@ macula:
   jackson:
     null-to-empty: true         # 将null转为-1或者空串，默认为false
     long-to-string: true       # 将long转为字符串，默认为true
+    local-date-time-format: 'yyyy/MM/dd HH:mm:ss a'
+    local-date-format: 'dd/MM/yyyy'
+    local-time-format: 'HH:mm:ss a'

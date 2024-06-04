@@ -40,4 +40,19 @@ public class JacksonProperties {
      * NULL是否转为空串等
      */
     private boolean nullToEmpty = false;
+
+    /**
+     * LocalDateTime的格式配置
+     */
+    private String localDateTimeFormat;
+
+    /**
+     * LocalDate的格式配置
+     */
+    private String localDateFormat;
+
+    /**
+     * LocalTime的格式配置
+     */
+    private String localTimeFormat;
 }
