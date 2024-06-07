@@ -22,6 +22,7 @@ import dev.macula.boot.starter.rocketmq.annotation.TxMqCheck;
 import dev.macula.boot.starter.rocketmq.annotation.TxMqExecute;
 import dev.macula.boot.starter.rocketmq.test.vo.OrderVo;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,16 +36,25 @@ import org.springframework.stereotype.Service;
 public class OrderServiceImpl {
 
     private final String BIZ_NAME_ORDER = "BIZ_ORDER";
-    private final String TOPIC_ORDER = "TOPIC_ORDER_TX";
     private RocketMQTemplate rocketMQTemplate;
+
+    @Value("${demo.rocketmq.topic.order-tx: TOPIC_ORDER_TX}")
+    private String topicOrderTx;
+
+    @Value("${demo.rocketmq.topic.order: TOPIC_ORDER}")
+    private String topicOrder;
 
     public OrderServiceImpl(RocketMQTemplate template) {
         this.rocketMQTemplate = template;
     }
 
+    public void createOrder2(OrderVo order) {
+        rocketMQTemplate.syncSend(topicOrder, order);
+    }
+
     public void createOrderWithMq(OrderVo order) {
         TxMqMessage<OrderVo> txMsg = new TxMqMessage<>(order, this.getClass(), BIZ_NAME_ORDER, order.getOrderNo());
-        rocketMQTemplate.sendMessageInTransaction(TOPIC_ORDER, txMsg, new Object[] {order});
+        rocketMQTemplate.sendMessageInTransaction(topicOrderTx, txMsg, new Object[] {order});
     }
 
     // @Transactional,数据库事务注解

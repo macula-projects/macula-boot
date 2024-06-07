@@ -22,6 +22,7 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -41,6 +42,7 @@ import java.util.Objects;
  */
 
 @RequiredArgsConstructor
+@Slf4j
 public class GrayscalePublishGlobalFilter implements GlobalFilter, Ordered {
     private final GatewayProperties gatewayProperties;
 
@@ -55,6 +57,7 @@ public class GrayscalePublishGlobalFilter implements GlobalFilter, Ordered {
                     List<String> grayValues = headers.get(GlobalConstants.GRAY_VERSION_TAG);
                     if (!Objects.isNull(grayValues) && !grayValues.isEmpty()) {
                         String grayVersion = grayValues.get(0);
+                        log.debug("http request header contains gray version: {}", grayVersion);
                         GrayVersionContextHolder.setGrayVersion(grayVersion);
                     }
                 }

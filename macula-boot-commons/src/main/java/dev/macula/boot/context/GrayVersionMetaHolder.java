@@ -17,16 +17,14 @@
 
 package dev.macula.boot.context;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
-
 /**
- * {@code VersionMetaHolder} 注册中心Meta定义的gray_version信息
+ * {@code GrayVersionMetaHolder} 注册中心Meta定义的gray_version信息，属于实例级别的meta信息，与线程无关
  *
  * @author rain
  * @since 2023/9/11 12:05
  */
 public class GrayVersionMetaHolder {
-    private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new TransmittableThreadLocal<>();
+    private static String META_GRAY_VERSION;
 
     /**
      * 获取TTL中的灰度版本
@@ -34,7 +32,7 @@ public class GrayVersionMetaHolder {
      * @return 灰度版本号
      */
     public static String getGrayVersion() {
-        return THREAD_LOCAL_GRAY_VERSION.get();
+        return META_GRAY_VERSION;
     }
 
     /**
@@ -43,13 +41,13 @@ public class GrayVersionMetaHolder {
      * @param version 灰度版本号
      */
     public static void setGrayVersion(String version) {
-        THREAD_LOCAL_GRAY_VERSION.set(version);
+        META_GRAY_VERSION = version;
     }
 
     /**
      * 清除灰度版本号
      */
     public static void clear() {
-        THREAD_LOCAL_GRAY_VERSION.remove();
+        META_GRAY_VERSION = null;
     }
 }

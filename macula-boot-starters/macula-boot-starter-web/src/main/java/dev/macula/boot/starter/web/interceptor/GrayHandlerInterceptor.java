@@ -20,6 +20,7 @@ package dev.macula.boot.starter.web.interceptor;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.context.GrayVersionContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -32,12 +33,14 @@ import javax.servlet.http.HttpServletResponse;
  * @author rain
  * @since 2023/9/25 19:19
  */
+@Slf4j
 public class GrayHandlerInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String grayVersion = request.getHeader(GlobalConstants.GRAY_VERSION_TAG);
         // 假如HttpHeader中灰度信息，就放到上下文
         if (StrUtil.isNotEmpty(grayVersion)) {
+            log.debug("http request header contains gray version: {}", grayVersion);
             GrayVersionContextHolder.setGrayVersion(grayVersion);
         }
         return true;

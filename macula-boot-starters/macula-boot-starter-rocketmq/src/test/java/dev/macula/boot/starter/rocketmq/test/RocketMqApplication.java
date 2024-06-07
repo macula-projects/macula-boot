@@ -19,6 +19,7 @@ package dev.macula.boot.starter.rocketmq.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * {@code Application} 启动类
@@ -28,6 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 
 @SpringBootApplication
+@EnableAspectJAutoProxy
 public class RocketMqApplication {
 
     public static void main(String[] args) {

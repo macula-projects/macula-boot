@@ -19,6 +19,7 @@ package dev.macula.boot.starter.rocketmq.instrument;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.context.GrayVersionMetaHolder;
 import dev.macula.boot.starter.rocketmq.config.GrayRocketMQProperties;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.hook.FilterMessageContext;
 import org.apache.rocketmq.client.hook.FilterMessageHook;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.core.env.Environment;
 
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +44,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GrayFilterMessageHookImpl implements FilterMessageHook {
     private final GrayRocketMQProperties grayRocketMQProperties;
+    private final Environment environment;
+    private final DiscoveryClient discoveryClient;
 
     public String hookName() {
         return "grayFilterMessageHookImpl";
@@ -49,52 +55,60 @@ public class GrayFilterMessageHookImpl implements FilterMessageHook {
         if (!this.grayRocketMQProperties.isEnabled())
             return;
 
-        String grayVersion = GrayVersionMetaHolder.getGrayVersion();
+        // 当前实例是否是灰度实例的标识
+        String metaGrayVersion = GrayVersionMetaHolder.getGrayVersion();
 
-        log.debug("rocketmq consumer gray before, args: {}, group grayVersion: {}", context, grayVersion);
+        // 判断是否有基线实例
+        String serviceId = environment.getProperty("spring.application.name");
+        List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+
+        // 只要有一个实例没有grayversion标识，则标识有基线环境
+        boolean hasMainInstance = instances.stream().anyMatch(s -> !s.getMetadata().containsKey(GlobalConstants.GRAY_VERSION_TAG));
+
+        log.debug("rocketmq consumer gray before, args: {}, group metaGrayVersion: {}", context, metaGrayVersion);
         try {
             List<MessageExt> messageList = context.getMsgList();
             Iterator<MessageExt> iterator = messageList.iterator();
             while (iterator.hasNext()) {
                 MessageExt record = iterator.next();
                 String messageGrayVersion = getConsumerRecordGrayVersion(record);
+
                 // 判断不可消费的消息移除
-                boolean ifConsume = ifConsume(messageGrayVersion, grayVersion);
+                boolean ifConsume = ifConsume(messageGrayVersion, metaGrayVersion, hasMainInstance, instances);
                 if (!ifConsume) {
                     iterator.remove();
                 }
             }
-            log.debug("rocketmq consumer gray after, args: {}, group grayVersion: {}", context, grayVersion);
+            log.debug("rocketmq consumer gray after, args: {}, group metaGrayVersion: {}", context, metaGrayVersion);
         } catch (Exception e) {
             log.error("extract gray from rocketmq message error", e);
         }
     }
 
-    private boolean ifConsume(String messageGrayVersion, String myGrayVersion) {
-        // TODO 有漏洞，应该是各自环境不存在的情况下才可以根据配置去消费其他环境的消息 @2024.5.13
+    private boolean ifConsume(String messageGrayVersion, String metaGrayVersion, boolean hasMainInstance, List<ServiceInstance> instances) {
         if (StrUtil.isEmpty(messageGrayVersion)) {
             // 基线消息
-            if (StrUtil.isEmpty(myGrayVersion)) {
+            if (StrUtil.isEmpty(metaGrayVersion)) {
                 // 基线环境可消费
                 return true;
             }
-            // 灰度环境，看看是否灰度可以消费基线
-            return this.grayRocketMQProperties.isGrayConsumeMain();
+            // 基线消息，当前实例是灰度环境且不存在基线环境，配置允许灰度消费基线消息则返回true
+            return !hasMainInstance && this.grayRocketMQProperties.isGrayConsumeMain();
         }
 
-        if (StrUtil.isEmpty(myGrayVersion)) {
-            // 灰度消息，基线环境
-            if (this.grayRocketMQProperties.isMainConsumeGray()) {
-                // 基线环境消费灰度消息，把灰度消息的tag设置上下文
-                GrayVersionMetaHolder.setGrayVersion(messageGrayVersion);
-                return true;
-            }
-            // 基线环境不可以消费灰度消息
-            return false;
+        log.debug("rocketmq message contains gray version: {}", messageGrayVersion);
+
+        if (StrUtil.isEmpty(metaGrayVersion)) {
+            // 灰度消息，当前是基线环境且不存在指定灰度环境，配置允许基线消费灰度消息则返回true
+
+            // 查询是否存在指定灰度标识的实例
+            boolean hasGrayInstance = instances.stream().anyMatch(s -> StrUtil.equals(messageGrayVersion, s.getMetadata().get(GlobalConstants.GRAY_VERSION_TAG)));
+
+            return !hasGrayInstance && this.grayRocketMQProperties.isMainConsumeGray();
         }
 
         // 灰度消息，灰度环境、看是否相等来决定是否可以消费
-        return messageGrayVersion.equals(myGrayVersion);
+        return messageGrayVersion.equals(metaGrayVersion);
     }
 
     private String getConsumerRecordGrayVersion(MessageExt record) {

@@ -81,7 +81,7 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mapstruct-plus.version>1.4.0</mapstruct-plus.version>
         <lock4j.version>2.2.7</lock4j.version>
-        <rocketmq-spring.version>2.2.3</rocketmq-spring.version>
+        <rocketmq-spring.version>2.3.0</rocketmq-spring.version>
         <springdoc.version>1.7.0</springdoc.version>
         <powerjob.version>4.3.9</powerjob.version>
         <xxl-job.version>2.4.0</xxl-job.version>

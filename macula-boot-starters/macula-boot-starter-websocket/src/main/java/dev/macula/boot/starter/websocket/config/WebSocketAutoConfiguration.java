@@ -114,6 +114,7 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
                 // 从STOMP消息头中读取灰度标识，设置灰度上下文
                 List<String> grayVersion = accessor.getNativeHeader(GlobalConstants.GRAY_VERSION_TAG);
                 if (CollUtil.isNotEmpty(grayVersion)) {
+                    log.debug("websocket request header contains gray version: {}", grayVersion);
                     GrayVersionContextHolder.setGrayVersion(grayVersion.get(0));
                 }
 

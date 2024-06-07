@@ -20,36 +20,42 @@ package dev.macula.boot.starter.rocketmq.instrument;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.context.GrayVersionMetaHolder;
+import dev.macula.boot.starter.rocketmq.DefaultRocketMQListenerContainerProxy;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code RocketMQConsumerNSPostProcessor} 消息消费端的namespace统一注入
+ * {@code GrayDefaultRocketMQListenerContainerPostProcessor} DefaultRocketMQListenerContainer灰度的统一处理
  *
  * @author rain
  * @since 2023/9/13 16:04
  */
 @RequiredArgsConstructor
-public class RocketMQConsumerNSPostProcessor implements BeanPostProcessor {
+public class GrayDefaultRocketMQListenerContainerPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private final RocketMQProperties properties;
 
+    private final GrayFilterMessageHookImpl grayFilterMessageHook;
+
+    private ApplicationContext applicationContext;
+
     @Override
     public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName)
-        throws BeansException {
-        // DefaultRocketMQListenerContainer是监听器实现类
+            throws BeansException {
         if (bean instanceof DefaultRocketMQListenerContainer) {
-            DefaultRocketMQListenerContainer container = (DefaultRocketMQListenerContainer)bean;
+            DefaultRocketMQListenerContainer container = (DefaultRocketMQListenerContainer) bean;
 
             // 灰度环境下需要隔离consumerGroup
             if (StrUtil.isNotEmpty(GrayVersionMetaHolder.getGrayVersion())) {
                 container.setConsumerGroup(
-                    container.getConsumerGroup() + CharPool.DASHED + GrayVersionMetaHolder.getGrayVersion());
+                        container.getConsumerGroup() + CharPool.DASHED + GrayVersionMetaHolder.getGrayVersion());
             }
 
             // 配置默认命名空间
@@ -58,8 +64,28 @@ public class RocketMQConsumerNSPostProcessor implements BeanPostProcessor {
                     container.setNamespace(properties.getConsumer().getNamespace());
                 }
             }
-            return container;
+
+            bean = new DefaultRocketMQListenerContainerProxy(container);
+            ((DefaultRocketMQListenerContainerProxy) bean).setName(beanName);
+            ((DefaultRocketMQListenerContainerProxy) bean).setApplicationContext(applicationContext);
         }
         return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
+
+        if (bean instanceof DefaultRocketMQListenerContainer) {
+            // 配置消息过滤钩子
+            DefaultRocketMQListenerContainer container = (DefaultRocketMQListenerContainer) bean;
+            container.getConsumer().getDefaultMQPushConsumerImpl().registerFilterMessageHook(this.grayFilterMessageHook);
+        }
+
+        return bean;
+    }
+
+    @Override
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
