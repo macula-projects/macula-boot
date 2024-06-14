@@ -19,10 +19,12 @@ package dev.macula.example.provider1.controller;
 
 import cn.hutool.core.date.DateUtil;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
+import dev.macula.example.provider1.config.ExampleConfig;
 import dev.macula.example.provider1.vo.UserResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,15 +40,17 @@ import java.util.Date;
 @RestController
 @RequestMapping("/api/v1/provider1")
 @Tag(name = "提供方演示接口", description = "提供方演示")
+@RequiredArgsConstructor
 @Slf4j
 public class Provider1Controller {
+    private final ExampleConfig config;
 
     @GetMapping("/echo")
     @Operation(summary = "echo方法", description = "用于演示")
     @Parameter(name = "字符串", description = "用于回声")
     public String echo(@RequestParam("str") String str) {
-        log.info("echo: " + str);
-        return "Hello " + str + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
+        log.info("echo: " + str + ", test=" + config.getTest());
+        return "Hello " + str + ", test=" + config.getTest() + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
     }
 
     @PostMapping("/user")

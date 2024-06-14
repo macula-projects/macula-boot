@@ -109,3 +109,6 @@ logging:
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
   #config: classpath:logback-skywalking.xml
+
+example:
+  test: 365
