@@ -39,29 +39,35 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String token = null;
+        String sid = null;
+
         if (null != attributes) {
             HttpServletRequest request = attributes.getRequest();
 
             // 微服务之间传递的唯一标识,区分大小写所以通过httpServletRequest获取
-            String sid = request.getHeader(GlobalConstants.FEIGN_REQ_ID);
-            if (StrUtil.isEmpty(sid)) {
-                sid = String.valueOf(UUID.randomUUID());
-            }
-            template.header(GlobalConstants.FEIGN_REQ_ID, sid);
+            sid = request.getHeader(GlobalConstants.FEIGN_REQ_ID);
 
             // 传递Gateway生成的Authorization头
-            String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
-            // 如果feign client不是调用第三方才把上下文的token relay下去
-            if (StrUtil.isNotEmpty(token) && !template.headers().containsKey(SecurityConstants.AUTHORIZATION_KEY)) {
-                template.header(SecurityConstants.AUTHORIZATION_KEY, token);
-            }
+            token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
+        }
 
-            // 传递灰度头给下游提供方(在SpringMVC的拦截器中设置了灰度上下文@see GrayHandlerInterceptor)
-            String grayVersion = GrayVersionContextHolder.getGrayVersion();
-            if (StrUtil.isNotEmpty(grayVersion)) {
-                template.header(GlobalConstants.GRAY_VERSION_TAG, grayVersion);
-            }
+        // 传递链路唯一ID，后面也可以识别是否是微服务内部调用
+        if (StrUtil.isEmpty(sid)) {
+            sid = String.valueOf(UUID.randomUUID());
+        }
+        template.header(GlobalConstants.FEIGN_REQ_ID, sid);
+
+        // 如果feign client不是调用第三方才把上下文的token relay下去
+        if (StrUtil.isNotEmpty(token) && !template.headers().containsKey(SecurityConstants.AUTHORIZATION_KEY)) {
+            template.header(SecurityConstants.AUTHORIZATION_KEY, token);
+        }
+
+        // 传递灰度头给下游提供方(在SpringMVC的拦截器中设置了灰度上下文@see GrayHandlerInterceptor)
+        String grayVersion = GrayVersionContextHolder.getGrayVersion();
+        if (StrUtil.isNotEmpty(grayVersion)) {
+            template.header(GlobalConstants.GRAY_VERSION_TAG, grayVersion);
         }
     }
 }
