@@ -31,7 +31,7 @@ jobs:
       # 3. 发布到Maven中央仓库
       - name: Publish to Maven Central Repo
         # 这里用到了其他人写的action脚本，详细可以去看他的文档。
-        run: mvn clean deploy --batch-mode -Pdeploy -DskipTests=true
+        run: mvn clean deploy -e --batch-mode -Pdeploy -DskipTests=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
