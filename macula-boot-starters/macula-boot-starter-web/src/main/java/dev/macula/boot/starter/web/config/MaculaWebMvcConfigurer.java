@@ -53,6 +53,9 @@ public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
         registry.addConverter(new Converter<String, Date>() {
             @Override
             public Date convert(String source) {
+                if (null == source || source.trim().isEmpty()) {
+                    return null;
+                }
                 return DateUtil.parse(source.trim()).toJdkDate();
             }
         });
