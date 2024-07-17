@@ -41,10 +41,13 @@ public class MyBatisPlusProperties {
 
     private String[] tenantSuffixes = new String[] {"tenant", "TENANT"};
 
+    private boolean tenantEnable = true;
+
     /**
      * 分页时允许的最大记录数
      */
     private long maxLimit = 1000L;
+
 
     @Getter
     @Setter

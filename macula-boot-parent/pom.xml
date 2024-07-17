@@ -65,7 +65,7 @@
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <mysql.binlog.version>0.29.1</mysql.binlog.version>
         <druid.version>1.2.20</druid.version>
-        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.25.2</redisson.version>
