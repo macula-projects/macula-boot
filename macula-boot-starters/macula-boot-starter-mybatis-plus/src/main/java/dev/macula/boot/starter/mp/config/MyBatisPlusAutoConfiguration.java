@@ -63,32 +63,34 @@ public class MyBatisPlusAutoConfiguration {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
         // 租户插件
-        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
-            @Override
-            public Expression getTenantId() {
+        if (properties.isTenantEnable()) {
+            interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+                @Override
+                public Expression getTenantId() {
 
-                // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
-                // TODO 需要检查当前用户是否可以访问该租户
-                if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
-                    return new LongValue(TenantContextHolder.getCurrentTenantId());
+                    // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
+                    // TODO 需要检查当前用户是否可以访问该租户
+                    if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
+                        return new LongValue(TenantContextHolder.getCurrentTenantId());
+                    }
+
+                    // 获取当前登录用户的租户上下文（aksk访问带租户信息）
+                    if (Objects.nonNull(SecurityUtils.getTenantId())) {
+                        return new LongValue(SecurityUtils.getTenantId());
+                    }
+
+                    // 默认租户ID
+                    return new LongValue(properties.getTenantId());
                 }
 
-                // 获取当前登录用户的租户上下文（aksk访问带租户信息）
-                if (Objects.nonNull(SecurityUtils.getTenantId())) {
-                    return new LongValue(SecurityUtils.getTenantId());
+                // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
+                @Override
+                public boolean ignoreTable(String tableName) {
+                    // 分租户的表名称应该统一以xx标识
+                    return Arrays.stream(properties.getTenantSuffixes()).noneMatch(tableName::endsWith);
                 }
-
-                // 默认租户ID
-                return new LongValue(properties.getTenantId());
-            }
-
-            // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
-            @Override
-            public boolean ignoreTable(String tableName) {
-                // 分租户的表名称应该统一以xx标识
-                return Arrays.stream(properties.getTenantSuffixes()).noneMatch(tableName::endsWith);
-            }
-        }));
+            }));
+        }
 
         // 数据权限
         if (ClassUtils.isPresent("dev.macula.boot.starter.security.utils.SecurityUtils",
