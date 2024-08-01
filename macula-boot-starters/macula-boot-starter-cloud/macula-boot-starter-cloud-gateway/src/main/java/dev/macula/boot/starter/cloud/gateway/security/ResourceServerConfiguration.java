@@ -30,10 +30,9 @@ import lombok.Setter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.gateway.config.GlobalCorsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
@@ -53,18 +52,14 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import org.springframework.web.util.pattern.PathPatternParser;
 import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -115,6 +110,8 @@ public class ResourceServerConfiguration {
             .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler())
                 .authenticationEntryPoint(authenticationEntryPoint())
+            .and()
+            .cors()
             .and()
             .csrf().disable();
         return http.build();
@@ -202,6 +199,19 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource(GlobalCorsProperties corsProperties) {
+        if (corsProperties != null) {
+            Map<String, CorsConfiguration> corsConfigurations = corsProperties.getCorsConfigurations();
+            if (!corsConfigurations.isEmpty()) {
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.setCorsConfigurations(corsConfigurations);
+                return source;
+            }
+        }
+        return null;
+    }
+
+    @Bean
     AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, JwtClaimsCustomizer jwtClaimsCustomizer,
                                           RedisTemplate<String, Object> redisTemplate) {
         return new AddJwtGlobalFilter(jwtEncoder, jwtClaimsCustomizer, redisTemplate);
@@ -210,18 +220,6 @@ public class ResourceServerConfiguration {
     @Bean
     KongApiGlobalFilter kongApiGlobalFilter(RedisTemplate<String, Object> sysRedisTemplate) {
         return new KongApiGlobalFilter(sysRedisTemplate);
-    }
-
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    CorsWebFilter corsWebFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedMethod("*");
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(new PathPatternParser());
-        source.registerCorsConfiguration("/**", config);
-        return new CorsWebFilter(source);
     }
 
     @Bean

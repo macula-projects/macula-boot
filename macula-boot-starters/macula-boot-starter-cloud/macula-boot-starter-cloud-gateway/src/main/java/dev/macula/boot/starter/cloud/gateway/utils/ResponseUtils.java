@@ -53,7 +53,6 @@ public class ResponseUtils {
     public static Mono<Void> writeResult(ServerHttpResponse response, HttpStatus status, Result<?> result) {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        response.getHeaders().setAccessControlAllowOrigin("*");
         response.getHeaders().setCacheControl(CacheControl.noCache());
 
         String json = JSONUtil.toJsonStr(result);

@@ -31,6 +31,15 @@ spring:
             data-type: json
             rule-type: flow
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 1800
+        add-to-simple-url-handler-mapping: true
       routes:
         - id: macula-example-consumer
           uri: lb://macula-example-consumer
@@ -57,7 +66,7 @@ spring:
 macula:
   gateway:
     security:
-      ignore-urls: /consumer/hello2/**
+      ignore-urls: /consumer/hello2/**,/consumer/api/v1/consumer/echo/**
       only-auth-urls: /api/**, /websocket/**
 
 logging:

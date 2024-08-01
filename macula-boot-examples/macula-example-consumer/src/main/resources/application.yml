@@ -87,7 +87,7 @@ macula:
     null-to-empty: true         # 将null转为-1或者空串，默认为false
     long-to-string: true       # 将long转为字符串，默认为true
   security:
-    ignore-urls: /, /index.html, /hello2/**
+    ignore-urls: /, /index.html, /hello2/**, /api/v1/consumer/echo/**
 gapi:
   username: applicationA
   secret: xx
