@@ -17,9 +17,12 @@
 
 package dev.macula.example.gateway;
 
+import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
+import dev.macula.example.gateway.crypto.CryptoLocaleServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Bean;
 
 /**
  * {@code MaculaExampleGatewayApplication} 网关应用

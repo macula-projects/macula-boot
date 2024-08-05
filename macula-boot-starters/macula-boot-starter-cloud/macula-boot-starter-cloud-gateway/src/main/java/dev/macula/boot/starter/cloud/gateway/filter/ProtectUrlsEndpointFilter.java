@@ -29,6 +29,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsProcessor;
+import org.springframework.web.cors.reactive.DefaultCorsProcessor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -46,6 +49,8 @@ import java.nio.charset.StandardCharsets;
 public class ProtectUrlsEndpointFilter implements WebFilter, Ordered {
     private final CryptoService cryptoService;
     private final GatewayProperties properties;
+    private final CorsConfigurationSource corsConfigurationSource;
+    private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -65,6 +70,10 @@ public class ProtectUrlsEndpointFilter implements WebFilter, Ordered {
             if (path.endsWith(GatewayConstants.PROTECT_KEY_ENDPOINT)) {
                 json = JSONUtil.toJsonStr(Result.success(cryptoService.getSm2PublicKey()));
             }
+
+            // 处理跨域
+            corsProcessor.process(corsConfigurationSource.getCorsConfiguration(exchange), exchange);
+
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
 
             response.getHeaders().setContentLength(bytes.length);

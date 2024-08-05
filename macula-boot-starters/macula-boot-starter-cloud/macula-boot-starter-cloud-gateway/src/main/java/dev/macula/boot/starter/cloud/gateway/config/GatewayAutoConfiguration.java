@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
 /**
  * <p>
@@ -59,7 +60,7 @@ public class GatewayAutoConfiguration {
     @Bean
     @ConditionalOnBean(CryptoService.class)
     public SignCheckGlobalFilter signCheckGlobalFilter(CryptoService cryptoService, GatewayProperties properties,
-        RedisTemplate<String, Object> redisTemplate) {
+                                                       RedisTemplate<String, Object> redisTemplate) {
         return new SignCheckGlobalFilter(cryptoService, properties, redisTemplate);
     }
 
@@ -72,8 +73,8 @@ public class GatewayAutoConfiguration {
     @Bean
     @ConditionalOnBean(CryptoService.class)
     public ProtectUrlsEndpointFilter protectUrlsEndpointFilter(CryptoService cryptoService,
-        GatewayProperties properties) {
-        return new ProtectUrlsEndpointFilter(cryptoService, properties);
+                                                               GatewayProperties properties, CorsConfigurationSource corsConfigurationSource) {
+        return new ProtectUrlsEndpointFilter(cryptoService, properties, corsConfigurationSource);
     }
 
     @ConditionalOnBean(JWKSource.class)
@@ -84,9 +85,9 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "macula.gateway.rm-opaque-token.enabled", havingValue = "true",
-        matchIfMissing = true)
+            matchIfMissing = true)
     public RmOpaqueTokenEndpointFilter rmOpaqueTokenEndpointFilter(GatewayProperties gatewayProperties,
-        RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate) {
+                                                                   RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate) {
         return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
     }
 
