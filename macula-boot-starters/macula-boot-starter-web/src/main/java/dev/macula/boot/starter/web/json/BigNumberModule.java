@@ -19,6 +19,7 @@ package dev.macula.boot.starter.web.json;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializerBase;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -35,7 +36,16 @@ public class BigNumberModule extends SimpleModule {
     public BigNumberModule(boolean longToString) {
         super(BigNumberModule.class.getName());
         if (longToString) {
-            this.addSerializer(BigDecimal.class, ToStringSerializer.instance);
+            // BigDecimal的toString会生成科学计数法，前端识别不了
+            this.addSerializer(BigDecimal.class, new ToStringSerializerBase(BigDecimal.class) {
+                @Override
+                public String valueToString(Object value) {
+                    if (value instanceof BigDecimal) {
+                        return ((BigDecimal) value).toPlainString();
+                    }
+                    return value.toString();
+                }
+            });
             this.addSerializer(BigInteger.class, ToStringSerializer.instance);
             this.addSerializer(Long.class, ToStringSerializer.instance);
             this.addSerializer(Long.TYPE, ToStringSerializer.instance);

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -56,7 +57,12 @@ public class BigNumberSerializer extends NumberSerializer {
         if (value.longValue() > MIN_SAFE_INTEGER && value.longValue() < MAX_SAFE_INTEGER) {
             super.serialize(value, gen, provider);
         } else {
-            gen.writeString(value.toString());
+            if (value instanceof BigDecimal) {
+                // 防止BigDecimal变成科学计数法
+                gen.writeString(((BigDecimal) value).toPlainString());
+            } else {
+                gen.writeString(value.toString());
+            }
         }
     }
 }
