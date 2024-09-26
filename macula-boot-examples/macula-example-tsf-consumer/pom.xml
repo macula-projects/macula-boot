@@ -26,7 +26,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>macula-example-tsf</artifactId>
+    <artifactId>macula-example-tsf-consumer</artifactId>
 
     <dependencies>
         <dependency>

@@ -1,0 +1,8 @@
+server:
+  port: 7082
+
+spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-tsf-consumer

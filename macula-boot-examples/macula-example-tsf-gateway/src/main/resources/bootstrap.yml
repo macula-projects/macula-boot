@@ -1,8 +1,8 @@
 server:
-  port: 7082
+  port: 3010
 
 spring:
   profiles:
     active: @profile.active@
   application:
-    name: macula-example-tsf
+    name: macula-example-tsf-gateway

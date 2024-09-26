@@ -72,7 +72,9 @@ public class ProtectUrlsEndpointFilter implements WebFilter, Ordered {
             }
 
             // 处理跨域
-            corsProcessor.process(corsConfigurationSource.getCorsConfiguration(exchange), exchange);
+            if (corsConfigurationSource != null) {
+                corsProcessor.process(corsConfigurationSource.getCorsConfiguration(exchange), exchange);
+            }
 
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
 

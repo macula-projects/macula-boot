@@ -1,0 +1,56 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 1800
+        add-to-simple-url-handler-mapping: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: false
+      httpclient:
+        # The connect timeout in millis, the default is 45s.
+        connect-timeout: 45000
+        response-timeout: 10000
+        pool:
+          max-idle-time: 5000
+          acquire-timeout: 45000
+    consul:
+      enabled: true
+      scheme: HTTP
+  ribbon:
+    read-timeout: 60000
+    connect-timeout: 60000
+    max-auto-retries-next-server: 1
+    max-auto-retries: 0
+
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: e4da4a32-592b-46f0-ae1d-784310e88423
+          client-secret: secret
+          introspection-uri: http://127.0.0.1:9010/oauth2/introspect
+
+macula:
+  gateway:
+    security:
+      ignore-urls:
+        - /group1/**
+      only-auth-urls:
+        - /api/**
+
+logging:
+  level:
+    root: info
+    dev.macula.example.gateway: debug
+    dev.macula.boot.starter.cloud.gateway: debug
+  file:
+    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  #config: classpath:logback-skywalking.xml

@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * {@code Provider1Controller} REST 接口
+ * {@code TsfDemoController} REST 接口
  *
  * @author rain
  * @since 2022/7/22 15:14

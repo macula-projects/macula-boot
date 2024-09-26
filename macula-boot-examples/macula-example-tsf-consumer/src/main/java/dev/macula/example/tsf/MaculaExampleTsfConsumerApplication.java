@@ -29,8 +29,8 @@ import org.springframework.tsf.annotation.EnableTsf;
  */
 @EnableTsf
 @SpringBootApplication
-public class MaculaExampleTsfApplication {
+public class MaculaExampleTsfConsumerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MaculaExampleTsfApplication.class, args);
+        SpringApplication.run(MaculaExampleTsfConsumerApplication.class, args);
     }
 }

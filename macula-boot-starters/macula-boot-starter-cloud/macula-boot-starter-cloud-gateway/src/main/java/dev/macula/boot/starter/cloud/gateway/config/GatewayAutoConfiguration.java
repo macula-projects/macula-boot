@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
 /**
@@ -73,7 +74,7 @@ public class GatewayAutoConfiguration {
     @Bean
     @ConditionalOnBean(CryptoService.class)
     public ProtectUrlsEndpointFilter protectUrlsEndpointFilter(CryptoService cryptoService,
-                                                               GatewayProperties properties, CorsConfigurationSource corsConfigurationSource) {
+                                                               GatewayProperties properties, @Nullable CorsConfigurationSource corsConfigurationSource) {
         return new ProtectUrlsEndpointFilter(cryptoService, properties, corsConfigurationSource);
     }
 

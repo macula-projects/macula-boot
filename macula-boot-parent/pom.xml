@@ -56,12 +56,12 @@
     </licenses>
 
     <properties>
-        <revision>5.0.13-SNAPSHOT</revision>
+        <revision>5.0.14-SNAPSHOT</revision>
         <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.9</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.13.2-2021.0.9</spring-cloud-tencent.version>
-        <spring-cloud-tsf.version>1.46.7-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
+        <spring-cloud-tsf.version>1.46.9-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <mysql.binlog.version>0.29.1</mysql.binlog.version>
         <druid.version>1.2.20</druid.version>

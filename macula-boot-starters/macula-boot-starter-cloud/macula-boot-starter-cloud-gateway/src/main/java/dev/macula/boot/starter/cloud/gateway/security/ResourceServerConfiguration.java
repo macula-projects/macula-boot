@@ -28,6 +28,7 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.gateway.config.GlobalCorsProperties;
@@ -199,6 +200,7 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty("spring.cloud.gateway.globalcors")
     public CorsConfigurationSource corsConfigurationSource(GlobalCorsProperties corsProperties) {
         if (corsProperties != null) {
             Map<String, CorsConfiguration> corsConfigurations = corsProperties.getCorsConfigurations();

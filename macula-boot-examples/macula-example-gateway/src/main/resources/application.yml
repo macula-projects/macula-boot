@@ -71,7 +71,7 @@ macula:
 
 logging:
   level:
-    root: debug
+    root: info
     dev.macula.example.gateway: debug
     dev.macula.boot.starter.cloud.gateway: debug
     org.redisson: info
