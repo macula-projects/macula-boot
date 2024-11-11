@@ -17,10 +17,11 @@
 
 package dev.macula.boot.starter.cloud.alibaba.config;
 
+import com.alibaba.cloud.nacos.registry.NacosRegistration;
 import com.alibaba.cloud.nacos.registry.NacosServiceRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.client.serviceregistry.Registration;
+import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,15 +31,16 @@ import org.springframework.context.annotation.Configuration;
  * @author Gordian
  */
 @Configuration
-@ConditionalOnBean({NacosServiceRegistry.class, Registration.class})
+@ConditionalOnBean({NacosServiceRegistry.class, NacosRegistration.class})
 @ConditionalOnProperty(prefix = "spring.cloud.nacos.discovery", name = "register-enabled", havingValue = "false")
 public class NacosDelayRegistrationAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "spring.cloud.nacos.discovery", name = "register-delayed", havingValue = "true")
     public NacosDelayRegistrationListener nacosDelayRegistrationListener(
-            NacosServiceRegistry nacosServiceRegistry, Registration registration) {
-        return new NacosDelayRegistrationListener(nacosServiceRegistry, registration);
+            NacosServiceRegistry nacosServiceRegistry, NacosRegistration nacosRegistration,
+            WebServerApplicationContext webServerApplicationContext) {
+        return new NacosDelayRegistrationListener(nacosServiceRegistry, nacosRegistration, webServerApplicationContext);
     }
 
 }

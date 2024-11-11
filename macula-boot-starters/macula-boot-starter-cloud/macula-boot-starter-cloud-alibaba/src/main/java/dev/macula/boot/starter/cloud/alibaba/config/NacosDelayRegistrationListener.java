@@ -17,9 +17,10 @@
 
 package dev.macula.boot.starter.cloud.alibaba.config;
 
+import com.alibaba.cloud.nacos.registry.NacosRegistration;
 import com.alibaba.cloud.nacos.registry.NacosServiceRegistry;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.client.serviceregistry.Registration;
+import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.context.ApplicationListener;
 
 /**
@@ -30,16 +31,26 @@ import org.springframework.context.ApplicationListener;
 public class NacosDelayRegistrationListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private final NacosServiceRegistry nacosServiceRegistry;
-    private final Registration registration;
+    private final NacosRegistration nacosRegistration;
+    private final WebServerApplicationContext webServerApplicationContext;
 
-    public NacosDelayRegistrationListener(NacosServiceRegistry nacosServiceRegistry, Registration registration) {
+    public NacosDelayRegistrationListener(NacosServiceRegistry nacosServiceRegistry,
+                                          NacosRegistration nacosRegistration,
+                                          WebServerApplicationContext webServerApplicationContext) {
         this.nacosServiceRegistry = nacosServiceRegistry;
-        this.registration = registration;
+        this.nacosRegistration = nacosRegistration;
+        this.webServerApplicationContext = webServerApplicationContext;
     }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        nacosServiceRegistry.register(registration);
+        if (nacosRegistration.getPort() < 0) {
+            // 获取当前应用的端口，以确保注册到 Nacos 的实例信息的端口与实际运行端口一致
+            int port = webServerApplicationContext.getWebServer().getPort();
+            nacosRegistration.setPort(port);
+        }
+
+        nacosServiceRegistry.register(nacosRegistration);
     }
 
 }
