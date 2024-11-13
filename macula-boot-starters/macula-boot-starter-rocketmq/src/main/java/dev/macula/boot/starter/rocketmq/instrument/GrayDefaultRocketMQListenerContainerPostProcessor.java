@@ -19,6 +19,7 @@ package dev.macula.boot.starter.rocketmq.instrument;
 
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
+import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.context.GrayVersionMetaHolder;
 import dev.macula.boot.starter.rocketmq.DefaultRocketMQListenerContainerProxy;
 import lombok.RequiredArgsConstructor;
@@ -87,5 +88,10 @@ public class GrayDefaultRocketMQListenerContainerPostProcessor implements BeanPo
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        // 由于这个类要在bean初始化的时候获取灰度版本，而灰度版本是nacos元数据，系统默认是在注册的时候获取的，所以这里要提前处理
+        if (StrUtil.isEmpty(GrayVersionMetaHolder.getGrayVersion())) {
+            GrayVersionMetaHolder.setGrayVersion(applicationContext.getEnvironment()
+                    .getProperty("spring.cloud.nacos.discovery.metadata." + GlobalConstants.GRAY_VERSION_TAG));
+        }
     }
 }
