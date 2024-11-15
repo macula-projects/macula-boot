@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.rocketmq.instrument;
 
 import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.context.GrayVersionMetaHolder;
 import dev.macula.boot.starter.rocketmq.config.GrayRocketMQProperties;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +58,13 @@ public class GrayRocketMQProducerAspect {
         Object[] args = pjp.getArgs();
         if (!this.grayRocketMQProperties.isEnabled())
             return pjp.proceed(args);
-        String grayVersion = GrayVersionMetaHolder.getGrayVersion();
+
+        // 先看看是否是灰度请求，再看是否是灰度实例
+        String grayVersion = GrayVersionContextHolder.getGrayVersion();
+        if (StringUtils.isBlank(grayVersion)) {
+            grayVersion = GrayVersionMetaHolder.getGrayVersion();
+        }
+
         if (StringUtils.isBlank(grayVersion)) {
             // 为空表示是基线环境
             return pjp.proceed(args);
@@ -83,7 +90,13 @@ public class GrayRocketMQProducerAspect {
         Object[] args = pjp.getArgs();
         if (!this.grayRocketMQProperties.isEnabled())
             return pjp.proceed(args);
-        String grayVersion = GrayVersionMetaHolder.getGrayVersion();
+
+        // 先看看是否是灰度请求，再看是否是灰度实例
+        String grayVersion = GrayVersionContextHolder.getGrayVersion();
+        if (StringUtils.isBlank(grayVersion)) {
+            grayVersion = GrayVersionMetaHolder.getGrayVersion();
+        }
+
         if (StringUtils.isBlank(grayVersion))
             return pjp.proceed(args);
         try {
