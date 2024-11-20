@@ -27,13 +27,20 @@ import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.gateway.config.GlobalCorsProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
@@ -200,7 +207,7 @@ public class ResourceServerConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty("spring.cloud.gateway.globalcors")
+    @Conditional(CorsCondition.class)
     public CorsConfigurationSource corsConfigurationSource(GlobalCorsProperties corsProperties) {
         if (corsProperties != null) {
             Map<String, CorsConfiguration> corsConfigurations = corsProperties.getCorsConfigurations();
@@ -229,5 +236,26 @@ public class ResourceServerConfiguration {
     JwtClaimsCustomizer jwtClaimsCustomizer() {
         return builder -> {
         };
+    }
+
+    static class CorsCondition extends SpringBootCondition {
+        @Override
+        public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            ConfigurableEnvironment environment = (ConfigurableEnvironment) context.getEnvironment();
+            String prefix = "spring.cloud.gateway.globalcors";
+
+            for (PropertySource<?> propertySource : environment.getPropertySources()) {
+                if (propertySource instanceof EnumerablePropertySource) {
+                    EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
+                    for (String propertyName : enumerablePropertySource.getPropertyNames()) {
+                        if (propertyName.startsWith(prefix)) {
+                            return ConditionOutcome.match("CORS configuration exists for path: " + propertyName);
+                        }
+                    }
+                }
+            }
+
+            return ConditionOutcome.noMatch("CORS configuration does not exist");
+        }
     }
 }
