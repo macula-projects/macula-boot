@@ -26,8 +26,6 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 /**
- * @ClassName SSL
- * @Description TOD0
  * author yt
  * Date 2021/03/28 16:04
  * Version 1.0
