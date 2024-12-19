@@ -104,7 +104,7 @@ gateway:
 
 logging:
   level:
-    root: debug
+    root: info
     com.alibaba.nacos.client: error
     dev.macula.example.consumer: debug
     org.redisson: info

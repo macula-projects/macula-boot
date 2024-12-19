@@ -1,6 +1,13 @@
 server:
-  port: 8000
-
+  ssl:
+    key-store: classpath:jwk/springboot.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: springboot
+    key-password: password
+  port: 8443
+  http:
+    port: 8000
 spring:
   profiles:
     active: @profile.active@
