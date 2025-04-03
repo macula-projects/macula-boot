@@ -61,4 +61,14 @@ public @interface AuditLog {
      */
     String[] excludeParamNames() default {};
 
+    /**
+     * 最大请求参数长度
+     */
+    int maxParamLength() default 2000;
+
+    /**
+     * 最大响应结果长度
+     */
+    int maxResultLength() default 2000;
+
 }

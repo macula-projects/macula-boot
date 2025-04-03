@@ -145,14 +145,14 @@ public class AuditLogAspect implements ApplicationContextAware {
         // 是否需要保存request，参数和值
         if (log.isSaveRequestData()) {
             // 获取参数的信息，传入到数据库中。
-            setRequestValue(joinPoint, request, operLog, log.excludeParamNames());
+            setRequestValue(joinPoint, request, operLog, log);
         }
         // 是否需要保存response，参数和值
         if (log.isSaveResponseData() && ObjectUtil.isNotNull(jsonResult)) {
             if (ObjectUtil.isBasicType(jsonResult)) {
                 operLog.setJsonResult(jsonResult.toString());
             } else {
-                operLog.setJsonResult(StrUtil.sub(JSONUtil.toJsonStr(jsonResult), 0, 2000));
+                operLog.setJsonResult(StrUtil.sub(JSONUtil.toJsonStr(jsonResult), 0, log.maxResultLength()));
             }
         }
     }
@@ -161,20 +161,17 @@ public class AuditLogAspect implements ApplicationContextAware {
      * 获取请求的参数，放到log中
      *
      * @param operLog 操作日志
-     * @throws Exception 异常
      */
-    private void setRequestValue(JoinPoint joinPoint, HttpServletRequest request, OperLogEvent operLog,
-        String[] excludeParamNames) throws Exception {
+    private void setRequestValue(JoinPoint joinPoint, HttpServletRequest request, OperLogEvent operLog, AuditLog log) {
         Map<String, String> paramsMap = ServletUtil.getParamMap(request);
         String requestMethod = operLog.getRequestMethod();
-        if (MapUtil.isEmpty(paramsMap) && HttpMethod.PUT.name().equals(requestMethod) || HttpMethod.POST.name()
-            .equals(requestMethod)) {
-            String params = argsArrayToString(joinPoint.getArgs(), excludeParamNames);
-            operLog.setOperParam(StrUtil.sub(params, 0, 2000));
+        if (MapUtil.isEmpty(paramsMap) && HttpMethod.PUT.name().equals(requestMethod) || HttpMethod.POST.name().equals(requestMethod)) {
+            String params = argsArrayToString(joinPoint.getArgs(), log.excludeParamNames());
+            operLog.setOperParam(StrUtil.sub(params, 0, log.maxParamLength()));
         } else {
             MapUtil.removeAny(paramsMap, EXCLUDE_PROPERTIES);
-            MapUtil.removeAny(paramsMap, excludeParamNames);
-            operLog.setOperParam(StrUtil.sub(JSONUtil.toJsonStr(paramsMap), 0, 2000));
+            MapUtil.removeAny(paramsMap, log.excludeParamNames());
+            operLog.setOperParam(StrUtil.sub(JSONUtil.toJsonStr(paramsMap), 0, log.maxParamLength()));
         }
     }
 
