@@ -127,8 +127,8 @@ public class KongApiUtils {
             String method = request.getMethodValue();
             String uri = request.getURI().getPath();
 
-            if (StrUtil.isNotBlank(request.getURI().getQuery())) {
-                uri = uri + "?" + request.getURI().getQuery();
+            if (StrUtil.isNotBlank(request.getURI().getRawQuery())) {
+                uri = uri + "?" + request.getURI().getRawQuery();
             }
 
             // 签名，计算方法为 hmac_sha_256(key, 日期 + 方法 + 路径 + 摘要)
