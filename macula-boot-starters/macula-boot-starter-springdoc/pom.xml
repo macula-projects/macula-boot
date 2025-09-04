@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-springdoc</artifactId>
+    <name>Macula Boot Starter Springdoc</name>
+    <description>Macula Boot Starter Springdoc</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

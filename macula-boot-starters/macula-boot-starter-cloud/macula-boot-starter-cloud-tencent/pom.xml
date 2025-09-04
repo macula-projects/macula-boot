@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-cloud-tencent</artifactId>
+    <name>Macula Boot Starter Cloud Tencent</name>
+    <description>Macula Boot Starter Cloud Tencent</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <!-- Spring Cloud -->

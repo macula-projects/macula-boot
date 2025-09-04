@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-ddd</artifactId>
 
+    <name>Macula Example DDD</name>
+    <description>Macula Example DDD</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

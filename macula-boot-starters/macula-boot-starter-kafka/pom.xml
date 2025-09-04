@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-kafka</artifactId>
+    <name>Macula Boot Starter Kafka</name>
+    <description>Macula Boot Starter Kafka</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

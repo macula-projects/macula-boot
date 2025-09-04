@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-dubbo</artifactId>
+    <name>Macula Boot Starter Dubbo</name>
+    <description>Macula Boot Starter Dubbo</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

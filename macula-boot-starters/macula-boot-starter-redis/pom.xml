@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-redis</artifactId>
+    <name>Macula Boot Starter Redis</name>
+    <description>Macula Boot Starter Redis</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

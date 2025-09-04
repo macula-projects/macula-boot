@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-security</artifactId>
+    <name>Macula Boot Starter Security</name>
+    <description>Macula Boot Starter Security</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

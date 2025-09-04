@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-task</artifactId>
+    <name>Macula Boot Starter Task</name>
+    <description>Macula Boot Starter Task</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

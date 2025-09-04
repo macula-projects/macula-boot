@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-tencent-gateway</artifactId>
 
+    <name>Macula Example Tencent Gateway</name>
+    <description>Macula Example Tencent Gateway</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

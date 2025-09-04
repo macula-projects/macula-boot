@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-provider2</artifactId>
 
+    <name>Macula Example Provider2</name>
+    <description>Macula Example Provider2</description>
+    <url>https://macula.dev</url>
+
     <build>
         <plugins>
             <plugin>

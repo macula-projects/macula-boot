@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-tsf-consumer</artifactId>
 
+    <name>Macula Example TSF Consumer</name>
+    <description>Macula Example TSF Consumer</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

@@ -28,6 +28,9 @@
 
     <artifactId>macula-boot-examples</artifactId>
     <packaging>pom</packaging>
+    <name>Macula Boot Examples</name>
+    <description>Macula Boot Examples</description>
+    <url>https://macula.dev</url>
 
     <properties>
         <maven.install.skip>true</maven.install.skip>

@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-async</artifactId>
+    <name>Macula Boot Starter Async</name>
+    <description>Macula Boot Starter Async</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

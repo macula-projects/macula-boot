@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-cache</artifactId>
+    <name>Macula Boot Starter Cache</name>
+    <description>Macula Boot Starter Cache</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

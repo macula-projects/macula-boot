@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-schedulerx</artifactId>
 
+    <name>Macula Example SchedulerX</name>
+    <description>Macula Example SchedulerX</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>com.aliyun.schedulerx</groupId>

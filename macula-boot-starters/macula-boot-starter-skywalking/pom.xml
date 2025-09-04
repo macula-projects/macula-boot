@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-skywalking</artifactId>
+    <name>Macula Boot Starter Skywalking</name>
+    <description>Macula Boot Starter Skywalking</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

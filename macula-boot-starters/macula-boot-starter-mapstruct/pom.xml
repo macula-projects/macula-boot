@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-mapstruct</artifactId>
+    <name>Macula Boot Starter Mapstruct</name>
+    <description>Macula Boot Starter Mapstruct</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

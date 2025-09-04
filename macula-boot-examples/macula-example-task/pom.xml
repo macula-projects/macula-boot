@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-task</artifactId>
 
+    <name>Macula Example Task</name>
+    <description>Macula Example Task</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

@@ -27,7 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-mybatis-plus</artifactId>
-
+    <name>Macula Boot Starter Mybatis Plus</name>
+    <description>Macula Boot Starter Mybatis Plus</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <!-- macula-i18n-base-starter-commons -->

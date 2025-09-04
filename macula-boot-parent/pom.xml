@@ -32,6 +32,7 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
 
+    <name>Macula Boot Parent</name>
     <description>Based on Spring Boot and Spring Cloud dependencies</description>
     <url>https://macula.dev</url>
 

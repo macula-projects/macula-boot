@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-tencent-consumer</artifactId>
 
+    <name>Macula Example Tencent Consumer</name>
+    <description>Macula Example Tencent Consumer</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-gateway</artifactId>
 
+    <name>Macula Example Gateway</name>
+    <description>Macula Example Gateway</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>

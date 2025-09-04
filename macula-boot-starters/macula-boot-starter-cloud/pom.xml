@@ -28,6 +28,9 @@
 
     <artifactId>macula-boot-starter-cloud</artifactId>
     <packaging>pom</packaging>
+    <name>Macula Boot Starter Cloud</name>
+    <description>Macula Boot Starter Cloud</description>
+    <url>https://macula.dev</url>
 
     <modules>
         <module>macula-boot-starter-cloud-gateway</module>

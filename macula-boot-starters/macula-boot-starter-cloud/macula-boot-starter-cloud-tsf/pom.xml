@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-cloud-tsf</artifactId>
+    <name>Macula Boot Starter Cloud Tsf</name>
+    <description>Macula Boot Starter Cloud Tsf</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

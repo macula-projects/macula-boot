@@ -28,7 +28,9 @@
 
     <artifactId>macula-boot-archetype</artifactId>
     <packaging>maven-archetype</packaging>
+    <name>Macula Boot Archetype</name>
     <description>Macula Boot ArcheType</description>
+    <url>https://macula.dev</url>
 
     <build>
         <extensions>

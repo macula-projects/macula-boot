@@ -28,6 +28,10 @@
 
     <artifactId>macula-example-tsf-gateway</artifactId>
 
+    <name>Macula Example TSF Gateway</name>
+    <description>Macula Example TSF Gateway</description>
+    <url>https://macula.dev</url>
+
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>
