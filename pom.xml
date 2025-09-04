@@ -67,6 +67,18 @@
         <module>macula-boot-archetype</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>deploy</id>
+            <modules>
+                <module>macula-boot-parent</module>
+                <module>macula-boot-commons</module>
+                <module>macula-boot-starters</module>
+                <module>macula-boot-archetype</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
