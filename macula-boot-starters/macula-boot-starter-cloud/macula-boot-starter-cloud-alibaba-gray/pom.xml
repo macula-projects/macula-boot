@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-cloud-alibaba-gray</artifactId>
+    <name>Macula Boot Starter Cloud Alibaba Gray</name>
+    <description>Macula Boot Starter Cloud Alibaba Gray</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

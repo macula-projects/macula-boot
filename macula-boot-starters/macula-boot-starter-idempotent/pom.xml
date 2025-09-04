@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-idempotent</artifactId>
+    <name>Macula Boot Starter Idempotent</name>
+    <description>Macula Boot Starter Idempotent</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

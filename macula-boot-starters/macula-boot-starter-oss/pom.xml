@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-oss</artifactId>
+    <name>Macula Boot Starter Oss</name>
+    <description>Macula Boot Starter Oss</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

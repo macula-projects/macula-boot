@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-seata</artifactId>
+    <name>Macula Boot Starter Seata</name>
+    <description>Macula Boot Starter Seata</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-springretry</artifactId>
+    <name>Macula Boot Starter Springretry</name>
+    <description>Macula Boot Starter Springretry</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

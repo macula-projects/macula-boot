@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-cloud-alibaba-scg</artifactId>
+    <name>Macula Boot Starter Cloud Alibaba Scg</name>
+    <description>Macula Boot Starter Cloud Alibaba Scg</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

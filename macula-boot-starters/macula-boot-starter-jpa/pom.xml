@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-jpa</artifactId>
+    <name>Macula Boot Starter Jpa</name>
+    <description>Macula Boot Starter Jpa</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

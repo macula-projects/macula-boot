@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-lock4j</artifactId>
+    <name>Macula Boot Starter Lock4j</name>
+    <description>Macula Boot Starter Lock4j</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

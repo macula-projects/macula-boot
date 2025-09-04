@@ -27,6 +27,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-liteflow</artifactId>
+    <name>Macula Boot Starter Liteflow</name>
+    <description>Macula Boot Starter Liteflow</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

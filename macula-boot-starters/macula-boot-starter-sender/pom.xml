@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-sender</artifactId>
+    <name>Macula Boot Starter Sender</name>
+    <description>Macula Boot Starter Sender</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

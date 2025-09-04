@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-sleuth</artifactId>
+    <name>Macula Boot Starter Sleuth</name>
+    <description>Macula Boot Starter Sleuth</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

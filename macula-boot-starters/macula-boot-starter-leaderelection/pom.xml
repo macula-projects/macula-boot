@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-leaderelection</artifactId>
+    <name>Macula Boot Starter Leaderelection</name>
+    <description>Macula Boot Starter Leaderelection</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

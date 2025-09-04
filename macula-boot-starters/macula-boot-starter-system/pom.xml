@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-system</artifactId>
+    <name>Macula Boot Starter System</name>
+    <description>Macula Boot Starter System</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

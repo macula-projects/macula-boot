@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-logstash</artifactId>
+    <name>Macula Boot Starter Logstash</name>
+    <description>Macula Boot Starter Logstash</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>

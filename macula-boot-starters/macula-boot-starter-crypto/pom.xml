@@ -27,6 +27,9 @@
     </parent>
 
     <artifactId>macula-boot-starter-crypto</artifactId>
+    <name>Macula Boot Starter Crypto</name>
+    <description>Macula Boot Starter Crypto</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <dependency>
