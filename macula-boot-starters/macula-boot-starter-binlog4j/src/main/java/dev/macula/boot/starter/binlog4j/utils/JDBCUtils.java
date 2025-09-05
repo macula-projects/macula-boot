@@ -4,7 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import dev.macula.boot.starter.binlog4j.BinlogClientConfig;
 import lombok.SneakyThrows;
 
-import javax.sql.DataSource;
+import jakarta.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

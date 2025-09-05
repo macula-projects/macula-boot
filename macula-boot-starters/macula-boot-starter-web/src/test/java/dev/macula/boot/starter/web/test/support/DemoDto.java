@@ -23,8 +23,8 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;

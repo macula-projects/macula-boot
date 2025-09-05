@@ -24,8 +24,8 @@ import org.springframework.boot.web.server.WebServer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * {@code GateWayConfig} SpringBoot配置SSL同时支持http和https访问实现
