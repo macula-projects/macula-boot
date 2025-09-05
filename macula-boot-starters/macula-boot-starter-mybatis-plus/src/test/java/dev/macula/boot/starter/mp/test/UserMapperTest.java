@@ -26,7 +26,7 @@ import dev.macula.boot.starter.mp.test.vo.UserVO;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

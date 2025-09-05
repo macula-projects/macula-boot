@@ -100,7 +100,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
             .csrf().disable()
             .headers().frameOptions().sameOrigin()
             .and()
-            .authorizeRequests().antMatchers(Convert.toStrArray(securityProperties.getIgnoreUrls())).permitAll()
+            .authorizeHttpRequests().requestMatchers(Convert.toStrArray(securityProperties.getIgnoreUrls())).permitAll()
             .anyRequest().authenticated()
             .and()
             .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
@@ -173,7 +173,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
         RSAPublicKey publicKey = (RSAPublicKey)KeyFactory.getInstance("RSA")
             .generatePublic(new X509EncodedKeySpec(getKeySpec(jwt.readPublicKey())));
         return NimbusJwtDecoder.withPublicKey(publicKey)
-            .signatureAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithm())).build();
+            .signatureAlgorithm(SignatureAlgorithm.from(jwt.getJwsAlgorithms().get(0))).build();
     }
 
     private byte[] getKeySpec(String keyValue) {
