@@ -28,7 +28,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.sql.DataSource;
+import javax.sql.DataSource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

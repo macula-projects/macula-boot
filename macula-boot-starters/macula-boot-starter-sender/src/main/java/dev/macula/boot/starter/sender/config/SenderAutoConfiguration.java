@@ -28,7 +28,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import jakarta.sql.DataSource;
+import javax.sql.DataSource;
 
 /**
  * {@code SenderAutoConfiguration} 配置

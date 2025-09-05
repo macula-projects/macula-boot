@@ -22,7 +22,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.json.JSONUtil;
 import dev.macula.boot.starter.auditlog.annotation.AuditLog;
 import dev.macula.boot.starter.auditlog.enums.BusinessStatus;
@@ -96,7 +96,7 @@ public class AuditLogAspect implements ApplicationContextAware {
                 OperLogEvent operLog = new OperLogEvent();
                 operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
                 // 请求的地址
-                String ip = ServletUtil.getClientIP(request);
+                String ip = JakartaServletUtil.getClientIP(request);
                 if (LOCAL_HOST_IPV6.equals(ip)) {
                     ip = LOCAL_HOST;
                 }
@@ -163,7 +163,7 @@ public class AuditLogAspect implements ApplicationContextAware {
      * @param operLog 操作日志
      */
     private void setRequestValue(JoinPoint joinPoint, HttpServletRequest request, OperLogEvent operLog, AuditLog log) {
-        Map<String, String> paramsMap = ServletUtil.getParamMap(request);
+        Map<String, String> paramsMap = JakartaServletUtil.getParamMap(request);
         String requestMethod = operLog.getRequestMethod();
         if (MapUtil.isEmpty(paramsMap) && HttpMethod.PUT.name().equals(requestMethod) || HttpMethod.POST.name().equals(requestMethod)) {
             String params = argsArrayToString(joinPoint.getArgs(), log.excludeParamNames());

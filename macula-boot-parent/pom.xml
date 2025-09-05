@@ -70,7 +70,7 @@
         <mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.25.2</redisson.version>
-        <hutool.version>5.8.25</hutool.version>
+        <hutool.version>5.8.40</hutool.version>
         <easyexcel.version>3.3.4</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>
         <fastjson2.version>2.0.45</fastjson2.version>

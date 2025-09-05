@@ -32,7 +32,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
-import jakarta.sql.DataSource;
+import javax.sql.DataSource;
 import java.util.Map;
 
 /**

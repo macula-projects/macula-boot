@@ -283,7 +283,7 @@ public class TwoLevelCache extends RedisCache {
      */
     @Override
     public void clear() {
-        callRedis(super::clear);
+        callRedis((Runnable) super::clear);
         sendViaRedis(null);
         localCache.invalidateAll();
     }
