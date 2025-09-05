@@ -7,7 +7,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Base64Utils;
+import java.util.Base64;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -36,7 +36,7 @@ public class CaiNiaoUtil {
             String message = content.concat(secretKey);
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(message.getBytes(charset));
-            return Base64Utils.encodeToString(md.digest());
+            return Base64.getEncoder().encodeToString(md.digest());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

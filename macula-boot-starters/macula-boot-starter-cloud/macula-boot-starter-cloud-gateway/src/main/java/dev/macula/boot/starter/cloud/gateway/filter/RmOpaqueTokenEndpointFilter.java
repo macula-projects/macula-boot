@@ -63,7 +63,7 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
-        String method = request.getMethodValue();
+        String method = request.getMethod().name();
         String path = request.getURI().getPath();
         String restfulPath = method + ":" + path;
         if (path.endsWith(properties.getRmOpaqueTokenEndpoint()) && HttpMethod.POST == request.getMethod()) {

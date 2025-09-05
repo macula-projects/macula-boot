@@ -124,7 +124,7 @@ public class KongApiUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "请求已经过期");
             }
 
-            String method = request.getMethodValue();
+            String method = request.getMethod().name();
             String uri = request.getURI().getPath();
 
             if (StrUtil.isNotBlank(request.getURI().getRawQuery())) {
