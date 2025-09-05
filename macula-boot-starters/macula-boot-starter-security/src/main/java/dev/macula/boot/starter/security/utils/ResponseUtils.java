@@ -23,7 +23,7 @@ import dev.macula.boot.result.Result;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
 /**

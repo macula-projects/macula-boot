@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -58,9 +58,9 @@
 
     <properties>
         <revision>6.0.0-SNAPSHOT</revision>
-        <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-cloud.version>2021.0.9</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
+        <spring-boot.version>3.5.5</spring-boot.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.13.2-2021.0.9</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.46.19-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>

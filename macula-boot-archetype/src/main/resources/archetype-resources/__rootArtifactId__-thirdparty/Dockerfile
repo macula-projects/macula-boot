@@ -1,4 +1,4 @@
-FROM konajdk/konajdk:8
+FROM eclipse-temurin:17-jdk-alpine
 ARG JAR_FILE=target/*.jar
 
 ENV LANG en_US.UTF-8
