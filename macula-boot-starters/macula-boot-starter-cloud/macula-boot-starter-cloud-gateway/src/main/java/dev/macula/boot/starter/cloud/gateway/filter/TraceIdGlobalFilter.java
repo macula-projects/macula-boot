@@ -24,7 +24,6 @@ import org.apache.skywalking.apm.toolkit.webflux.WebFluxSkyWalkingOperators;
 import org.springframework.beans.BeansException;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.cloud.sleuth.instrument.web.WebFluxSleuthOperators;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
@@ -52,25 +51,32 @@ public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationCo
         ServerHttpResponse response = exchange.getResponse();
         HttpHeaders headers = response.getHeaders();
 
-        if (TRACE_TYPE_SLEUTH.equals(this.tracingType())) {
+        String tracingType = this.tracingType();
+        
+        if (TRACE_TYPE_SLEUTH.equals(tracingType)) {
             if (tracing == null) {
                 tracing = applicationContext.getBean(Tracing.class);
             }
 
-            return chain.filter(exchange).doOnEach(WebFluxSleuthOperators.withSpanInScope(() -> {
-                final String traceId = ((Tracing)tracing).currentTraceContext().get().traceIdString();
-                headers.add("x-traceId", traceId);
-            })).then();
+            return chain.filter(exchange).doOnSuccess(signal -> {
+                brave.propagation.TraceContext traceContext = ((Tracing)tracing).currentTraceContext().get();
+                if (traceContext != null) {
+                    final String traceId = traceContext.traceIdString();
+                    headers.add("x-traceId", traceId);
+                }
+            });
 
-        } else if (TRACE_TYPE_SKYWALKING.equals(this.tracingType())) {
+        } else if (TRACE_TYPE_SKYWALKING.equals(tracingType)) {
             final String traceId = WebFluxSkyWalkingOperators.continueTracing(exchange, TraceContext::traceId);
             headers.add("x-traceId", traceId);
         }
+        
+        // 对于SkyWalking和没有追踪系统的情况，都直接执行filter
         return chain.filter(exchange);
     }
 
     private String tracingType() {
-        if (isClassExists("org.springframework.cloud.sleuth.Tracer")) {
+        if (isClassExists("brave.Tracing")) {
             return TRACE_TYPE_SLEUTH;
         }
         if (isClassExists("org.apache.skywalking.apm.toolkit.trace.TraceContext")) {

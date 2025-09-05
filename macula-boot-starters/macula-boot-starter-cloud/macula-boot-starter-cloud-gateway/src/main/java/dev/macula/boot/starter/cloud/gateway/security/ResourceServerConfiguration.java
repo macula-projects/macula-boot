@@ -53,7 +53,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNam
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
-import org.springframework.security.oauth2.server.resource.web.server.ServerBearerTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
