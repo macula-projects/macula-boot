@@ -303,7 +303,7 @@ public class BasePageQuery {
     <!-- MyBatis -->
     <dependency>
         <groupId>com.baomidou</groupId>
-        <artifactId>mybatis-plus-boot-starter</artifactId>
+        <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
     </dependency>
 
     <dependency>
