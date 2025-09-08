@@ -58,6 +58,9 @@
 
     <properties>
         <revision>6.0.0-SNAPSHOT</revision>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-boot.version>3.5.5</spring-boot.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
@@ -819,8 +822,8 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>3.8.1</version>
                         <configuration>
-                            <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.target}</target>
+                            <source>${java.version}</source>
+                            <target>${java.version}</target>
                         </configuration>
                     </plugin>
                     <plugin>
