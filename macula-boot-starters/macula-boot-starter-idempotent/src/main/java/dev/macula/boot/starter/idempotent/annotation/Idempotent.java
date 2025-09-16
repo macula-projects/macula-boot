@@ -66,4 +66,20 @@ public @interface Idempotent {
      */
     boolean delKey() default false;
 
+    /**
+     * 是否在任意异常发生时删除幂等 key，默认不删除
+     * 优先级高于 deleteForExceptions，设置为 true 时所有异常都删除 key
+     *
+     * @return boolean
+     */
+    boolean deleteOnException() default false;
+
+    /**
+     * 遇到哪些异常时删除幂等 key，默认不删除
+     * 仅在 deleteOnException=false 时生效
+     *
+     * @return Class[]
+     */
+    Class<?>[] deleteForExceptions() default {};
+
 }
