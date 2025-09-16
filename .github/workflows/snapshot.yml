@@ -3,9 +3,9 @@ name: Sonatype Snapshot Repo Deployment
 # 触发脚本的事件  这里为提交main分支之后触发
 on:
   push:
-    branches: [ main ]
+    branches: [ 5.x ]
   pull_request:
-    branches: [ main ]
+    branches: [ 5.x ]
 # 定义一个发行任务
 jobs:
   publish:
