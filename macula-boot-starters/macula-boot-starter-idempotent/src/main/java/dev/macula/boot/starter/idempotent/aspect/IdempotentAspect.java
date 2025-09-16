@@ -21,10 +21,7 @@ import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 import dev.macula.boot.starter.idempotent.exception.IdempotentException;
 import dev.macula.boot.starter.idempotent.expression.KeyResolver;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
@@ -61,9 +58,13 @@ public class IdempotentAspect {
 
     private static final String DELKEY = "delKey";
 
-    private RedissonClient redisson;
+    private static final String DELETE_FOR_EXCEPTIONS = "deleteForExceptions";
 
-    private KeyResolver keyResolver;
+    private static final String DELETE_ON_EXCEPTION = "deleteOnException";
+
+    private final RedissonClient redisson;
+
+    private final KeyResolver keyResolver;
 
     public IdempotentAspect(RedissonClient redisson, KeyResolver keyResolver) {
         this.redisson = redisson;
@@ -77,10 +78,10 @@ public class IdempotentAspect {
     @Before("pointCut()")
     public void beforePointCut(JoinPoint joinPoint) {
         ServletRequestAttributes requestAttributes =
-            (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
 
-        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         if (!method.isAnnotationPresent(Idempotent.class)) {
             return;
@@ -107,6 +108,8 @@ public class IdempotentAspect {
         String info = idempotent.info();
         TimeUnit timeUnit = idempotent.timeUnit();
         boolean delKey = idempotent.delKey();
+        Class<?>[] deleteForExceptions = idempotent.deleteForExceptions();
+        boolean deleteOnException = idempotent.deleteOnException();
 
         // do not need check null
         RMapCache<String, Object> rMapCache = redisson.getMapCache(RMAPCACHE_KEY);
@@ -122,13 +125,15 @@ public class IdempotentAspect {
                 throw new IdempotentException(info);
             } else {
                 LOGGER.info("[idempotent]:has stored key={},value={},expireTime={}{},now={}", key, value, expireTime,
-                    timeUnit, LocalDateTime.now().toString());
+                    timeUnit, LocalDateTime.now());
             }
         }
 
         Map<String, Object> map = THREAD_CACHE.get();
         map.put(KEY, key);
         map.put(DELKEY, delKey);
+        map.put(DELETE_FOR_EXCEPTIONS, deleteForExceptions);
+        map.put(DELETE_ON_EXCEPTION, deleteOnException);
     }
 
     @After("pointCut()")
@@ -139,16 +144,53 @@ public class IdempotentAspect {
         }
 
         RMapCache<Object, Object> mapCache = redisson.getMapCache(RMAPCACHE_KEY);
-        if (mapCache.size() == 0) {
+        if (mapCache.isEmpty()) {
             return;
         }
 
         String key = map.get(KEY).toString();
-        boolean delKey = (boolean)map.get(DELKEY);
+        boolean delKey = (boolean) map.get(DELKEY);
 
         if (delKey) {
             mapCache.fastRemove(key);
             LOGGER.info("[idempotent]:has removed key={}", key);
+        }
+        THREAD_CACHE.remove();
+    }
+
+    @AfterThrowing(pointcut = "pointCut()", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        Map<String, Object> map = THREAD_CACHE.get();
+        if (CollectionUtils.isEmpty(map)) {
+            return;
+        }
+
+        RMapCache<Object, Object> mapCache = redisson.getMapCache(RMAPCACHE_KEY);
+        if (mapCache.isEmpty()) {
+            return;
+        }
+
+        String key = map.get(KEY).toString();
+        Class<?>[] deleteForExceptions = (Class<?>[]) map.get(DELETE_FOR_EXCEPTIONS);
+        boolean deleteOnException = (boolean) map.get(DELETE_ON_EXCEPTION);
+
+        boolean shouldDelete = false;
+
+        // 优先级：deleteOnException > deleteForExceptions
+        if (deleteOnException) {
+            shouldDelete = true;
+        } else if (deleteForExceptions != null) {
+            for (Class<?> exceptionClass : deleteForExceptions) {
+                if (exceptionClass.isInstance(ex)) {
+                    shouldDelete = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldDelete) {
+            mapCache.fastRemove(key);
+            LOGGER.info("[idempotent]:has removed key={} due to exception: {}", key, ex.getClass().getSimpleName());
         }
         THREAD_CACHE.remove();
     }
