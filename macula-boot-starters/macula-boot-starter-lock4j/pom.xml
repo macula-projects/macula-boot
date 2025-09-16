@@ -36,6 +36,12 @@
             <groupId>com.baomidou</groupId>
             <artifactId>lock4j-redisson-spring-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>${redisson.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>
