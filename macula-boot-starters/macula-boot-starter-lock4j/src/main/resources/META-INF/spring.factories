@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+dev.macula.boot.lock4j.Lock4JAutoConfiguration
