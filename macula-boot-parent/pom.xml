@@ -63,7 +63,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-boot.version>3.5.5</spring-boot.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
-        <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
+        <spring-cloud-alibaba.version>2023.0.3.4</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>1.13.2-2021.0.9</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.46.19-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.4.0</mysql.connector.version>
