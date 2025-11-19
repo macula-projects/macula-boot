@@ -68,6 +68,7 @@
         <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-kafka</module>
         <module>macula-boot-starter-websocket</module>
+        <module>macula-boot-starter-operationlog</module>
     </modules>
 
     <dependencies>
