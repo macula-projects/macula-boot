@@ -52,8 +52,8 @@ public class OperationLogAspect {
 
         //封装操作日志
         OperationLogDTO logDTO = OperationLogUtils.getOperationLog(point, operationLog);
-        //服务名称
-        logDTO.setServiceId(applicationName);
+        //应用名称
+        logDTO.setApplication(applicationName);
         //开始时间
         logDTO.setStartTime(LocalDateTime.now());
         Object obj;
@@ -64,8 +64,8 @@ public class OperationLogAspect {
                 logDTO.setResult(obj);
             }
         } catch (Exception e) {
-            //日志类型
-            logDTO.setLogType(OperationLogTypeEnum.ERROR);
+            //日志级别
+            logDTO.setLevel(OperationLogLevel.ERROR);
             //异常信息
             logDTO.setException(e.getMessage());
             throw e;
@@ -73,7 +73,7 @@ public class OperationLogAspect {
             //结束时间
             logDTO.setEndTime(LocalDateTime.now());
             //操作执行时间
-            logDTO.setCostTime(Duration.between(logDTO.getStartTime(), logDTO.getEndTime()).toMillis());
+            logDTO.setExecutionTimeMillis(Duration.between(logDTO.getStartTime(), logDTO.getEndTime()).toMillis());
             publisher.publishEvent(new OperationLogEvent(logDTO));
         }
         return obj;

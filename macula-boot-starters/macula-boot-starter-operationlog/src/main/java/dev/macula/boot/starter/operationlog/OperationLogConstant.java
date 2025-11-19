@@ -28,7 +28,7 @@ package dev.macula.boot.starter.operationlog;
  * <pre>{@code
  * @OperationLog(
  *     operation = TYPE_SELECT,
- *     layer = LAYER_CONTROLLER,
+ *     scope = SCOPE_CONTROLLER,
  *     module = "用户管理",
  *     description = "查询用户列表"
  * )
@@ -88,38 +88,38 @@ public final class OperationLogConstant {
      */
     public static final String TYPE_UPSERT = "UPSERT";
 
-    // ==================== 业务层级常量 ====================
+    // ==================== 业务范围常量 ====================
 
     /**
-     * 控制器层
+     * 控制器范围
      * <p>
      * 表示在 Controller 层记录的操作日志，通常包含 HTTP 请求信息
      * </p>
      */
-    public static final String LAYER_CONTROLLER = "CONTROLLER";
+    public static final String SCOPE_CONTROLLER = "CONTROLLER";
 
     /**
-     * 业务层
+     * 业务范围
      * <p>
      * 表示在 Service 层记录的操作日志，关注业务逻辑执行
      * </p>
      */
-    public static final String LAYER_SERVICE = "SERVICE";
+    public static final String SCOPE_SERVICE = "SERVICE";
 
     /**
-     * 领域层
+     * 领域范围
      * <p>
      * 表示在 Domain 层记录的操作日志，关注领域规则和核心业务逻辑
      * </p>
      */
-    public static final String LAYER_DOMAIN = "DOMAIN";
+    public static final String SCOPE_DOMAIN = "DOMAIN";
 
     /**
-     * 仓储层
+     * 仓储范围
      * <p>
      * 表示在 Repository 层记录的操作日志，关注数据访问操作
      * </p>
      */
-    public static final String LAYER_REPOSITORY = "REPOSITORY";
+    public static final String SCOPE_REPOSITORY = "REPOSITORY";
 
 }

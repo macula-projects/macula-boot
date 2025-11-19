@@ -17,54 +17,45 @@
 
 package dev.macula.boot.starter.operationlog;
 
+import lombok.Getter;
+
 /**
- * 操作日志类型枚举
+ * 操作日志级别枚举
  *
  * @author Gordian
  * @since 2025-11-19
  */
-public enum OperationLogTypeEnum {
+@Getter
+public enum OperationLogLevel {
 
     /**
-     * 正常日志类型
+     * 信息日志级别
      */
-    NORMAL(1, "正常日志"),
+    INFO("info", "信息"),
 
     /**
-     * 错误日志类型
+     * 警告日志级别
      */
-    ERROR(2, "错误日志");
+    WARN("warn", "警告"),
 
     /**
-     * 类型
+     * 错误日志级别
      */
-    private final Integer type;
+    ERROR("error", "错误");
+
+    /**
+     * 代码
+     */
+    private final String code;
 
     /**
      * 描述
      */
     private final String description;
 
-    OperationLogTypeEnum(Integer type, final String description) {
-        this.type = type;
+    OperationLogLevel(String code, final String description) {
+        this.code = code;
         this.description = description;
     }
 
-    /**
-     * 获取操作类型
-     *
-     * @return
-     */
-    public Integer getType() {
-        return this.type;
-    }
-
-    /**
-     * 获取操作描述
-     *
-     * @return
-     */
-    public String getDescription() {
-        return this.description;
-    }
 }

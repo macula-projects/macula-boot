@@ -35,14 +35,14 @@ public class OperationLogDTO implements Serializable {
     private static final long serialVersionUID = 8935542565073711237L;
 
     /**
-     * 服务ID,一般是服务名称
+     * 应用名称
      */
-    private String serviceId;
+    private String application;
 
     /**
-     * 日志类型
+     * 日志级别
      */
-    private OperationLogTypeEnum logType;
+    private OperationLogLevel level;
 
     /**
      * 日志操作类型
@@ -50,9 +50,9 @@ public class OperationLogDTO implements Serializable {
     private String operation;
 
     /**
-     * 层级信息
+     * 业务范围
      */
-    private String layer;
+    private String scope;
 
     /**
      * 模块名称
@@ -69,9 +69,9 @@ public class OperationLogDTO implements Serializable {
      */
     private String clientIp;
     /**
-     * 请求方式
+     * 请求方法
      */
-    private String requestMode;
+    private String requestMethod;
     /**
      * 请求URI
      */
@@ -83,9 +83,9 @@ public class OperationLogDTO implements Serializable {
     private String method;
 
     /**
-     * 操作提交的数据
+     * 操作提交的参数
      */
-    private Map<String, Object> param;
+    private Map<String, Object> parameters;
 
     /**
      * 操作返回结果
@@ -103,14 +103,9 @@ public class OperationLogDTO implements Serializable {
     private LocalDateTime endTime;
 
     /**
-     * 执行时间
+     * 执行时间(毫秒)
      */
-    private Long costTime;
-
-    /**
-     * 操作者
-     */
-    private String operationUser;
+    private Long executionTimeMillis;
 
     /**
      * 异常信息
