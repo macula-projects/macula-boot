@@ -47,7 +47,7 @@ public class OperationLogDTO implements Serializable {
     /**
      * 日志操作类型
      */
-    private String operationType;
+    private String operation;
 
     /**
      * 层级信息
@@ -57,7 +57,7 @@ public class OperationLogDTO implements Serializable {
     /**
      * 模块名称
      */
-    private String moduleName;
+    private String module;
 
     /**
      * 操作描述

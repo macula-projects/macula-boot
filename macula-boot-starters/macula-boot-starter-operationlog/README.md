@@ -39,13 +39,21 @@
 public class UserController {
 
     @OperationLog(
-        moduleName = "用户管理",
+        module = "用户管理",
         description = "创建用户",
-        operationType = LogConstant.OPERATION_TYPE_ADD,
-        layer = LogConstant.LAYER_CONTROLLER,
-        isShowParam = true,
-        isShowResult = false
+        operation = "ADD",     // 自定义类型
+        layer = "CONTROLLER",       // 自定义层级
+        logParameters = true,
+        logResult = false
     )
+
+// 或使用常量
+@OperationLog(
+    module = "用户管理",
+    description = "查询用户详情",
+    operation = OperationLogConstant.OPERATION_TYPE_SELECT,
+    layer = OperationLogConstant.LAYER_CONTROLLER
+)
     @PostMapping
     public Result<UserVO> createUser(@RequestBody UserCreateDTO dto) {
         // 业务逻辑
@@ -53,10 +61,10 @@ public class UserController {
     }
 
     @OperationLog(
-        moduleName = "用户管理",
+        module = "用户管理",
         description = "查询用户详情",
-        operationType = LogConstant.OPERATION_TYPE_SELECT,
-        layer = LogConstant.LAYER_CONTROLLER
+        operation = OperationLogConstant.OPERATION_TYPE_SELECT,
+        layer = OperationLogConstant.LAYER_CONTROLLER
     )
     @GetMapping("/{id}")
     public Result<UserVO> getUser(@PathVariable Long id) {
@@ -73,22 +81,22 @@ public class UserController {
 public class UserService {
 
     @OperationLog(
-        moduleName = "用户服务",
+        module = "用户服务",
         description = "删除用户",
-        operationType = LogConstant.OPERATION_TYPE_DELETE,
-        layer = LogConstant.LAYER_SERVICE
+        operation = OperationLogConstant.OPERATION_TYPE_DELETE,
+        layer = OperationLogConstant.LAYER_SERVICE
     )
     public void deleteUser(Long userId) {
         // 业务逻辑
     }
 
     @OperationLog(
-        moduleName = "用户服务",
+        module = "用户服务",
         description = "更新用户信息",
-        operationType = LogConstant.OPERATION_TYPE_UPDATE,
-        layer = LogConstant.LAYER_SERVICE,
-        isShowParam = true,
-        isShowResult = true
+        operation = OperationLogConstant.OPERATION_TYPE_UPDATE,
+        layer = OperationLogConstant.LAYER_SERVICE,
+        logParameters = true,
+        logResult = true
     )
     public UserVO updateUser(UserUpdateDTO dto) {
         // 业务逻辑
@@ -104,15 +112,26 @@ public class UserService {
 public class UserDomainService {
 
     @OperationLog(
-        moduleName = "用户领域服务",
+        module = "用户领域服务",
         description = "用户状态变更",
-        operationType = LogConstant.OPERATION_TYPE_UPDATE,
-        layer = LogConstant.LAYER_DOMAIN
+        operation = OperationLogConstant.OPERATION_TYPE_UPDATE,
+        layer = OperationLogConstant.LAYER_DOMAIN
     )
     public void changeUserStatus(Long userId, UserStatus status) {
         // 业务逻辑
     }
 }
+```
+
+#### 自定义操作类型
+
+```java
+@OperationLog(
+    module = "认证服务",
+    description = "用户登录",
+    operation = "LOGIN",            // 自定义类型
+    layer = "CONTROLLER"             // 自定义层级
+)
 ```
 
 ## 注解参数说明
@@ -121,29 +140,45 @@ public class UserDomainService {
 
 | 参数名 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `moduleName` | String | - | **必填**，模块名称 |
+| `module` | String | - | **必填**，模块名称 |
 | `description` | String | - | **必填**，操作描述 |
-| `operationType` | String | "SELECT" | 操作类型：ADD/DELETE/UPDATE/SAVE_OR_UPDATE/SELECT |
-| `layer` | String | "CONTROLLER" | 业务层级：CONTROLLER/SERVICE/DOMAIN/REPOSITORY |
-| `isShowParam` | boolean | true | 是否记录方法入参 |
-| `isShowResult` | boolean | false | 是否记录方法返回值 |
+| `operation` | String | "SELECT" | 操作类型：支持自定义字符串或使用常量 |
+| `layer` | String | "CONTROLLER" | 业务层级：支持自定义字符串或使用常量 |
+| `logParameters` | boolean | true | 是否记录方法入参 |
+| `logResult` | boolean | false | 是否记录方法返回值 |
 
-## 常量说明
+## 常量使用
 
 ### 操作类型常量
 
-- `LogConstant.OPERATION_TYPE_ADD` - 增加
-- `LogConstant.OPERATION_TYPE_DELETE` - 删除
-- `LogConstant.OPERATION_TYPE_UPDATE` - 更新
-- `LogConstant.OPERATION_TYPE_SAVE_OR_UPDATE` - 新增或者修改
-- `LogConstant.OPERATION_TYPE_SELECT` - 查询
+- `OperationLogConstant.OPERATION_TYPE_ADD` - 增加
+- `OperationLogConstant.OPERATION_TYPE_DELETE` - 删除
+- `OperationLogConstant.OPERATION_TYPE_UPDATE` - 更新
+- `OperationLogConstant.OPERATION_TYPE_SAVE_OR_UPDATE` - 新增或者修改
+- `OperationLogConstant.OPERATION_TYPE_SELECT` - 查询
 
-### 分层常量
+### 业务层级常量
 
-- `LogConstant.LAYER_CONTROLLER` - 控制器层
-- `LogConstant.LAYER_SERVICE` - 业务层
-- `LogConstant.LAYER_DOMAIN` - 领域层
-- `LogConstant.LAYER_REPOSITORY` - 仓储层级
+- `OperationLogConstant.LAYER_CONTROLLER` - 控制器层
+- `OperationLogConstant.LAYER_SERVICE` - 业务层
+- `OperationLogConstant.LAYER_DOMAIN` - 领域层
+- `OperationLogConstant.LAYER_REPOSITORY` - 仓储层级
+
+### 使用方式
+
+```java
+// 方式一：直接写字符串（推荐，最灵活）
+@OperationLog(
+    operationType = "LOGIN",     // 自定义类型
+    layer = "CONTROLLER"         // 自定义层级
+)
+
+// 方式二：使用常量类
+@OperationLog(
+    operationType = OperationLogConstant.OPERATION_TYPE_ADD,
+    layer = OperationLogConstant.LAYER_CONTROLLER
+)
+```
 
 ## 日志输出
 
@@ -154,9 +189,9 @@ public class UserDomainService {
 {
   "serviceId": "your-app-name",
   "logType": {"type":1,"description":"正常日志"},
-  "operationType": "ADD",
+  "operation": "ADD",
   "layer": "CONTROLLER",
-  "moduleName": "用户管理",
+  "module": "用户管理",
   "description": "创建用户",
   "clientIp": "127.0.0.1",
   "requestMode": "POST",

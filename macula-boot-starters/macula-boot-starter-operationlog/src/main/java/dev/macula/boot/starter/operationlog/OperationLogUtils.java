@@ -55,7 +55,7 @@ public class OperationLogUtils {
             logDTO.setRequestUri(URLUtil.getPath(request.getRequestURI()));
             logDTO.setRequestMode(request.getMethod());
         }
-        if (operationLog.isShowParam()) {
+        if (operationLog.logParameters()) {
             logDTO.setParam(new OperationLogUtils().getParams(point));
         }
         String className = point.getTarget().getClass().getSimpleName();
@@ -64,9 +64,9 @@ public class OperationLogUtils {
         //操作说明
         logDTO.setDescription(operationLog.description());
         //操作类型
-        logDTO.setOperationType(operationLog.operationType());
+        logDTO.setOperation(operationLog.operation());
         //模块名称
-        logDTO.setModuleName(operationLog.moduleName());
+        logDTO.setModule(operationLog.module());
         //业务层级
         logDTO.setLayer(operationLog.layer());
         return logDTO;

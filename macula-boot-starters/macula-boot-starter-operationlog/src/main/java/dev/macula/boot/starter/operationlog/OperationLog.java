@@ -35,38 +35,31 @@ public @interface OperationLog {
      *
      * @return
      */
-    String operationType() default OperationLogConstant.OPERATION_TYPE_SELECT;
+    String operation() default OperationLogConstant.TYPE_SELECT;
 
     /**
      * 业务层级；controller,service,domain等
-     *
-     * @return
      */
     String layer() default OperationLogConstant.LAYER_CONTROLLER;
 
     /**
-     * 是否获取入参，默认获取
-     *
-     * @return
+     * 是否记录参数
      */
-    boolean isShowParam() default true;
+    boolean logParameters() default true;
 
     /**
-     * 是否获取出参，默认不获取
-     *
-     * @return
+     * 是否记录结果
      */
-    boolean isShowResult() default false;
+    boolean logResult() default false;
 
     /**
      * 模块名称
      */
-    String moduleName();
+    String module();
 
     /**
      * 描述
-     *
-     * @return {String}
      */
     String description();
+
 }
