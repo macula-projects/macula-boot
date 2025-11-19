@@ -36,47 +36,39 @@ import java.time.LocalDateTime;
 @Aspect
 public class OperationLogAspect {
 
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher eventPublisher;
     private final String applicationName;
 
-    public OperationLogAspect(ApplicationEventPublisher publisher, String applicationName) {
-        this.publisher = publisher;
+    public OperationLogAspect(ApplicationEventPublisher eventPublisher, String applicationName) {
+        this.eventPublisher = eventPublisher;
         this.applicationName = applicationName;
     }
 
     @Around("@annotation(operationLog)")
-    public Object around(ProceedingJoinPoint point, OperationLog operationLog) throws Throwable {
-        String className = point.getTarget().getClass().getName();
-        String methodName = point.getSignature().getName();
-        log.debug("[类名]:{},[方法]:{}", className, methodName);
+    public Object logOperation(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
+        OperationLogDTO operationLogDTO = OperationLogUtils.getOperationLog(joinPoint, operationLog);
+        operationLogDTO.setApplication(applicationName);
+        operationLogDTO.setStartTime(LocalDateTime.now());
 
-        //封装操作日志
-        OperationLogDTO logDTO = OperationLogUtils.getOperationLog(point, operationLog);
-        //应用名称
-        logDTO.setApplication(applicationName);
-        //开始时间
-        logDTO.setStartTime(LocalDateTime.now());
-        Object obj;
+        Object result;
         try {
-            obj = point.proceed();
-            //返回值
+            result = joinPoint.proceed();
             if (operationLog.logResult()) {
-                logDTO.setResult(obj);
+                operationLogDTO.setResult(result);
             }
-        } catch (Exception e) {
-            //日志级别
-            logDTO.setLevel(OperationLogLevel.ERROR);
-            //异常信息
-            logDTO.setException(e.getMessage());
-            throw e;
+        } catch (Exception exception) {
+            operationLogDTO.setLevel(OperationLogLevel.ERROR);
+            operationLogDTO.setException(exception.getMessage());
+            throw exception;
         } finally {
-            //结束时间
-            logDTO.setEndTime(LocalDateTime.now());
-            //操作执行时间
-            logDTO.setExecutionTimeMillis(Duration.between(logDTO.getStartTime(), logDTO.getEndTime()).toMillis());
-            publisher.publishEvent(new OperationLogEvent(logDTO));
+            operationLogDTO.setEndTime(LocalDateTime.now());
+            operationLogDTO.setExecutionTimeMillis(
+                Duration.between(operationLogDTO.getStartTime(), operationLogDTO.getEndTime()).toMillis()
+            );
+            eventPublisher.publishEvent(new OperationLogEvent(operationLogDTO));
         }
-        return obj;
+
+        return result;
     }
 
 }

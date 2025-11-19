@@ -37,55 +37,43 @@ import java.util.Objects;
  */
 public class OperationLogUtils {
 
-    /**
-     * 获取操作日志信息
-     *
-     * @param point        切点
-     * @param operationLog 操作日志注解
-     * @return 操作日志DTO
-     */
-    public static OperationLogDTO getOperationLog(ProceedingJoinPoint point, OperationLog operationLog) {
-        HttpServletRequest request = ((ServletRequestAttributes) Objects
+    public static OperationLogDTO getOperationLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) {
+        HttpServletRequest httpRequest = ((ServletRequestAttributes) Objects
             .requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-        OperationLogDTO logDTO = new OperationLogDTO();
-        logDTO.setLevel(OperationLogLevel.INFO);
-        logDTO.setClientIp(ServletUtil.getClientIP(request));
-        //如果是http接口请求，则多打印http请求信息
+
+        OperationLogDTO operationLogDTO = new OperationLogDTO();
+        operationLogDTO.setLevel(OperationLogLevel.INFO);
+        operationLogDTO.setClientIp(ServletUtil.getClientIP(httpRequest));
+
         if (OperationLogConstant.SCOPE_CONTROLLER.equals(operationLog.scope())) {
-            logDTO.setRequestUri(URLUtil.getPath(request.getRequestURI()));
-            logDTO.setRequestMethod(request.getMethod());
+            operationLogDTO.setRequestUri(URLUtil.getPath(httpRequest.getRequestURI()));
+            operationLogDTO.setRequestMethod(httpRequest.getMethod());
         }
+
         if (operationLog.logParameters()) {
-            logDTO.setParameters(new OperationLogUtils().getParams(point));
+            operationLogDTO.setParameters(extractParameters(joinPoint));
         }
-        String className = point.getTarget().getClass().getSimpleName();
-        String methodName = ((MethodSignature) point.getSignature()).getMethod().getName();
-        logDTO.setMethod(className + "." + methodName);
-        //操作说明
-        logDTO.setDescription(operationLog.description());
-        //操作类型
-        logDTO.setOperation(operationLog.operation());
-        //模块名称
-        logDTO.setModule(operationLog.module());
-        //业务范围
-        logDTO.setScope(operationLog.scope());
-        return logDTO;
+
+        String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
+        String targetMethodName = ((MethodSignature) joinPoint.getSignature()).getMethod().getName();
+        operationLogDTO.setMethod(targetClassName + "." + targetMethodName);
+        operationLogDTO.setDescription(operationLog.description());
+        operationLogDTO.setOperation(operationLog.operation());
+        operationLogDTO.setModule(operationLog.module());
+        operationLogDTO.setScope(operationLog.scope());
+
+        return operationLogDTO;
     }
 
-    /**
-     * 获取方法参数
-     *
-     * @param point 切点
-     * @return 参数Map
-     */
-    private Map<String, Object> getParams(ProceedingJoinPoint point) {
-        Map<String, Object> map = new HashMap<>(16);
-        Object[] values = point.getArgs();
-        String[] names = ((MethodSignature) point.getSignature()).getParameterNames();
-        for (int i = 0; i < names.length; i++) {
-            map.put(names[i], values[i]);
+    private static Map<String, Object> extractParameters(ProceedingJoinPoint joinPoint) {
+        String[] parameterNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
+        Object[] parameterValues = joinPoint.getArgs();
+
+        Map<String, Object> parameters = new HashMap<>(parameterNames.length);
+        for (int i = 0; i < parameterNames.length; i++) {
+            parameters.put(parameterNames[i], parameterValues[i]);
         }
-        return map;
+        return parameters;
     }
 
 }
