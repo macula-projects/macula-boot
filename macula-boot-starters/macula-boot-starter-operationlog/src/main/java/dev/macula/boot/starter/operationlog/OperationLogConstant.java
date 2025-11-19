@@ -19,47 +19,107 @@ package dev.macula.boot.starter.operationlog;
 
 /**
  * 操作日志常量类
+ * <p>
+ * 提供操作日志系统中使用的标准常量定义，包括操作类型和业务层级。
+ * 建议在 {@link OperationLog} 注解中使用这些常量以保持一致性。
+ * </p>
+ *
+ * <h2>使用示例：</h2>
+ * <pre>{@code
+ * @OperationLog(
+ *     operation = TYPE_SELECT,
+ *     layer = LAYER_CONTROLLER,
+ *     module = "用户管理",
+ *     description = "查询用户列表"
+ * )
+ * }</pre>
  *
  * @author Gordian
  * @since 2025-11-19
  */
 public final class OperationLogConstant {
 
+    /**
+     * 私有构造函数，防止实例化
+     */
     private OperationLogConstant() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
-    /** 操作类型 start */
+    // ==================== 操作类型常量 ====================
 
-    /** 增加 */
-    public static final String OPERATION_TYPE_ADD = "ADD";
+    /**
+     * 查询操作
+     * <p>
+     * 用于表示读取、查询、检索等不修改系统数据的操作
+     * </p>
+     */
+    public static final String TYPE_SELECT = "SELECT";
 
-    /** 删除 */
-    public static final String OPERATION_TYPE_DELETE = "DELETE";
+    /**
+     * 插入操作
+     * <p>
+     * 用于表示新增、创建、插入等添加新数据的操作
+     * </p>
+     */
+    public static final String TYPE_INSERT = "INSERT";
 
-    /** 更新 */
-    public static final String OPERATION_TYPE_UPDATE = "UPDATE";
+    /**
+     * 更新操作
+     * <p>
+     * 用于表示修改、更新、编辑等修改已有数据的操作
+     * </p>
+     */
+    public static final String TYPE_UPDATE = "UPDATE";
 
-    /** 新增或者修改 */
-    public static final String OPERATION_TYPE_SAVE_OR_UPDATE = "SAVE_OR_UPDATE";
+    /**
+     * 删除操作
+     * <p>
+     * 用于表示删除、移除等清理数据的操作
+     * </p>
+     */
+    public static final String TYPE_DELETE = "DELETE";
 
-    /** 查询 */
-    public static final String OPERATION_TYPE_SELECT = "SELECT";
+    /**
+     * 新增或更新操作
+     * <p>
+     * 用于表示根据数据存在情况决定新增或更新的操作
+     * </p>
+     */
+    public static final String TYPE_UPSERT = "UPSERT";
 
-    /** 操作类型 end */
+    // ==================== 业务层级常量 ====================
 
-    /** 分层 start */
-
-    /** 控制器层 */
+    /**
+     * 控制器层
+     * <p>
+     * 表示在 Controller 层记录的操作日志，通常包含 HTTP 请求信息
+     * </p>
+     */
     public static final String LAYER_CONTROLLER = "CONTROLLER";
 
-    /** 业务层 */
+    /**
+     * 业务层
+     * <p>
+     * 表示在 Service 层记录的操作日志，关注业务逻辑执行
+     * </p>
+     */
     public static final String LAYER_SERVICE = "SERVICE";
 
-    /** 领域层 */
+    /**
+     * 领域层
+     * <p>
+     * 表示在 Domain 层记录的操作日志，关注领域规则和核心业务逻辑
+     * </p>
+     */
     public static final String LAYER_DOMAIN = "DOMAIN";
 
-    /** 仓储层级 */
+    /**
+     * 仓储层
+     * <p>
+     * 表示在 Repository 层记录的操作日志，关注数据访问操作
+     * </p>
+     */
     public static final String LAYER_REPOSITORY = "REPOSITORY";
 
-    /** 分层 end */
 }

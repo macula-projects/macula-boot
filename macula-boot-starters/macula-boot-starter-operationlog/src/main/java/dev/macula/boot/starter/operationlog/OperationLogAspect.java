@@ -46,9 +46,9 @@ public class OperationLogAspect {
 
     @Around("@annotation(operationLog)")
     public Object around(ProceedingJoinPoint point, OperationLog operationLog) throws Throwable {
-        String strClassName = point.getTarget().getClass().getName();
-        String strMethodName = point.getSignature().getName();
-        log.debug("[类名]:{},[方法]:{}", strClassName, strMethodName);
+        String className = point.getTarget().getClass().getName();
+        String methodName = point.getSignature().getName();
+        log.debug("[类名]:{},[方法]:{}", className, methodName);
 
         //封装操作日志
         OperationLogDTO logDTO = OperationLogUtils.getOperationLog(point, operationLog);
@@ -60,7 +60,7 @@ public class OperationLogAspect {
         try {
             obj = point.proceed();
             //返回值
-            if (operationLog.isShowResult()) {
+            if (operationLog.logResult()) {
                 logDTO.setResult(obj);
             }
         } catch (Exception e) {
