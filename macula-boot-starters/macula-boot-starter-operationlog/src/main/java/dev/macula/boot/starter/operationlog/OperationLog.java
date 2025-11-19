@@ -38,9 +38,9 @@ public @interface OperationLog {
     String operation() default OperationLogConstant.TYPE_SELECT;
 
     /**
-     * 业务层级；controller,service,domain等
+     * 业务范围；controller,service,domain等
      */
-    String layer() default OperationLogConstant.LAYER_CONTROLLER;
+    String scope() default OperationLogConstant.SCOPE_CONTROLLER;
 
     /**
      * 是否记录参数

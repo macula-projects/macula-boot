@@ -48,15 +48,15 @@ public class OperationLogUtils {
         HttpServletRequest request = ((ServletRequestAttributes) Objects
             .requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         OperationLogDTO logDTO = new OperationLogDTO();
-        logDTO.setLogType(OperationLogTypeEnum.NORMAL);
+        logDTO.setLevel(OperationLogLevel.INFO);
         logDTO.setClientIp(ServletUtil.getClientIP(request));
         //如果是http接口请求，则多打印http请求信息
-        if (OperationLogConstant.LAYER_CONTROLLER.equals(operationLog.layer())) {
+        if (OperationLogConstant.SCOPE_CONTROLLER.equals(operationLog.scope())) {
             logDTO.setRequestUri(URLUtil.getPath(request.getRequestURI()));
-            logDTO.setRequestMode(request.getMethod());
+            logDTO.setRequestMethod(request.getMethod());
         }
         if (operationLog.logParameters()) {
-            logDTO.setParam(new OperationLogUtils().getParams(point));
+            logDTO.setParameters(new OperationLogUtils().getParams(point));
         }
         String className = point.getTarget().getClass().getSimpleName();
         String methodName = ((MethodSignature) point.getSignature()).getMethod().getName();
@@ -67,8 +67,8 @@ public class OperationLogUtils {
         logDTO.setOperation(operationLog.operation());
         //模块名称
         logDTO.setModule(operationLog.module());
-        //业务层级
-        logDTO.setLayer(operationLog.layer());
+        //业务范围
+        logDTO.setScope(operationLog.scope());
         return logDTO;
     }
 
