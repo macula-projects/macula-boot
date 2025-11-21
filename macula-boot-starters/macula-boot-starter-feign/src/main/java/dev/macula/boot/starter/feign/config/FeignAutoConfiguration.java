@@ -18,10 +18,14 @@
 package dev.macula.boot.starter.feign.config;
 
 import dev.macula.boot.starter.feign.codec.OpenFeignErrorDecoder;
+import dev.macula.boot.starter.feign.interceptor.FeignHeaderRelayProperties;
 import dev.macula.boot.starter.feign.interceptor.HeaderRelayInterceptor;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -36,8 +40,14 @@ import org.springframework.context.annotation.Bean;
 public class FeignAutoConfiguration {
 
     @Bean
-    public RequestInterceptor headerRelayInterceptor() {
-        return new HeaderRelayInterceptor();
+    public RequestInterceptor headerRelayInterceptor(FeignHeaderRelayProperties properties) {
+        return new HeaderRelayInterceptor(properties);
+    }
+
+    @Bean
+    @RefreshScope
+    public FeignHeaderRelayProperties feignHeaderRelayProperties() {
+        return new FeignHeaderRelayProperties();
     }
 
     @Bean
