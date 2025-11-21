@@ -27,6 +27,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -36,6 +38,12 @@ import java.util.UUID;
  * @since 2022/7/23 12:57
  */
 public class HeaderRelayInterceptor implements RequestInterceptor {
+
+    private final FeignHeaderRelayProperties feignHeaderRelayProperties;
+
+    public HeaderRelayInterceptor(FeignHeaderRelayProperties feignHeaderRelayProperties) {
+        this.feignHeaderRelayProperties = feignHeaderRelayProperties;
+    }
 
     @Override
     public void apply(RequestTemplate template) {
@@ -51,6 +59,17 @@ public class HeaderRelayInterceptor implements RequestInterceptor {
 
             // 传递Gateway生成的Authorization头
             token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
+
+            // 传递可配置的自定义请求头
+            if (feignHeaderRelayProperties.isEnabled()) {
+                Optional.ofNullable(feignHeaderRelayProperties.getHeaders())
+                    .orElseGet(Collections::emptyList)
+                    .forEach(header ->
+                        Optional.ofNullable(request.getHeader(header))
+                            .filter(value -> !value.isEmpty()) // 过滤掉空字符串
+                            .ifPresent(value -> template.header(header, value))
+                    );
+            }
         }
 
         // 传递链路唯一ID，后面也可以识别是否是微服务内部调用
