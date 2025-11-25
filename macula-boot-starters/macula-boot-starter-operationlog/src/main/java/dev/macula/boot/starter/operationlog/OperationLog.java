@@ -33,32 +33,42 @@ public @interface OperationLog {
     /**
      * 操作类型
      *
-     * @return
+     * @return 操作类型，默认为 {@link OperationLogConstant#TYPE_SELECT}
      */
     String operation() default OperationLogConstant.TYPE_SELECT;
 
     /**
      * 业务范围；controller,service,domain等
+     *
+     * @return 业务范围，默认为 {@link OperationLogConstant#SCOPE_CONTROLLER}
      */
     String scope() default OperationLogConstant.SCOPE_CONTROLLER;
 
     /**
      * 是否记录参数
+     *
+     * @return 是否记录参数，默认为 true
      */
     boolean logParameters() default true;
 
     /**
      * 是否记录结果
+     *
+     * @return 是否记录结果，默认为 false
      */
     boolean logResult() default false;
 
     /**
      * 模块名称
+     *
+     * @return 模块名称
      */
     String module();
 
     /**
      * 描述
+     *
+     * @return 操作描述
      */
     String description();
 

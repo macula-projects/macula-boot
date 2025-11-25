@@ -25,14 +25,14 @@ package dev.macula.boot.starter.operationlog;
  * </p>
  *
  * <h2>使用示例：</h2>
- * <pre>{@code
- * @OperationLog(
+ * <pre>
+ * &#64;OperationLog(
  *     operation = TYPE_SELECT,
  *     scope = SCOPE_CONTROLLER,
  *     module = "用户管理",
  *     description = "查询用户列表"
  * )
- * }</pre>
+ * </pre>
  *
  * @author Gordian
  * @since 2025-11-19
