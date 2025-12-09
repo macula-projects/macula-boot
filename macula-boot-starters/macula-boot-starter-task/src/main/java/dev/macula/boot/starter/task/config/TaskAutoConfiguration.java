@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.task.config;
 
-import dev.macula.boot.starter.task.config.powerjob.PowerJobConfiguration;
 import dev.macula.boot.starter.task.config.xxljob.XxlJobConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,6 +30,6 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(TaskProperties.class)
-@Import({XxlJobConfiguration.class, PowerJobConfiguration.class})
+@Import({XxlJobConfiguration.class})
 public class TaskAutoConfiguration {
 }

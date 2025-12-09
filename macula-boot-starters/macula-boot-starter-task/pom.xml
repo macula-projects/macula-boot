@@ -41,12 +41,28 @@
         <dependency>
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
+            <optional>true</optional>
         </dependency>
 
-        <!-- powerjob -->
+        <!-- snail job-->
+        <!-- 核心依赖 -->
         <dependency>
-            <groupId>tech.powerjob</groupId>
-            <artifactId>powerjob-worker</artifactId>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-starter</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 重试模块(若不需要可以不引入) -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-retry-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 定时任务(若不需要可以不引入) -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-job-core</artifactId>
             <optional>true</optional>
         </dependency>
 

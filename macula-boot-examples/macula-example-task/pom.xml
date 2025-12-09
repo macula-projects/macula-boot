@@ -54,9 +54,10 @@
         </dependency>
 
         <dependency>
-            <groupId>tech.powerjob</groupId>
-            <artifactId>powerjob-worker</artifactId>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

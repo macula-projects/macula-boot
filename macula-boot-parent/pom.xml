@@ -64,7 +64,7 @@
         <spring-boot.version>3.5.5</spring-boot.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.4</spring-cloud-alibaba.version>
-        <spring-cloud-tencent.version>1.13.2-2021.0.9</spring-cloud-tencent.version>
+        <spring-cloud-tencent.version>2.1.0.0-2023.0.6</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.46.19-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.4.0</mysql.connector.version>
         <mysql.binlog.version>0.29.1</mysql.binlog.version>
@@ -87,8 +87,8 @@
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.3.4</rocketmq-spring.version>
         <springdoc.version>1.7.0</springdoc.version>
-        <powerjob.version>4.3.9</powerjob.version>
-        <xxl-job.version>2.4.0</xxl-job.version>
+        <xxl-job.version>3.3.0</xxl-job.version>
+        <snail-job.version>1.8.1</snail-job.version>
         <dubbo.version>3.2.10</dubbo.version>
         <seata.version>2.0.0</seata.version>
         <bouncycastle.version>1.81</bouncycastle.version>
@@ -551,18 +551,33 @@
                 <version>${cola.version}</version>
             </dependency>
 
-            <!-- PowerJob -->
-            <dependency>
-                <groupId>tech.powerjob</groupId>
-                <artifactId>powerjob-worker</artifactId>
-                <version>${powerjob.version}</version>
-            </dependency>
-
             <!-- xxl-job -->
             <dependency>
                 <groupId>com.xuxueli</groupId>
                 <artifactId>xxl-job-core</artifactId>
                 <version>${xxl-job.version}</version>
+            </dependency>
+
+            <!-- snail-job -->
+            <!-- 核心依赖 -->
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-client-starter</artifactId>
+                <version>${snail-job.version}</version>
+            </dependency>
+
+            <!-- 重试模块(若不需要可以不引入) -->
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-client-retry-core</artifactId>
+                <version>${snail-job.version}</version>
+            </dependency>
+
+            <!-- 定时任务(若不需要可以不引入) -->
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-client-job-core</artifactId>
+                <version>${snail-job.version}</version>
             </dependency>
 
             <!-- Bouncy Castle -->

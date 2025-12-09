@@ -97,7 +97,7 @@ macula-boot-starter
 编译的时候需要指定deploy这个profile，否则revision不会处理
 
 ```shell
-mvn clean install -DskipTests=true -Pdeploy
+mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 ```
 
 ## 技术原理
