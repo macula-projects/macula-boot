@@ -81,19 +81,10 @@ snail-job:
   # 命名空间 【上面配置的空间的唯一标识】
   namespace: OMZct8jxKru5mfSaA_m7HQraaNn7jV4k
   # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
-  group: ${spring.profiles.active}
+  group: ${spring.application.name}-${spring.profiles.active}
   # 接入组 token 【上面配置的token信息】
   token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj
   # 客户端绑定IP，必须服务器可以访问到；默认自动推断，在服务器无法调度客户端时需要手动配置
   # host: 127.0.0.1
   # 客户端通讯端口，默认 1789
   port: 17899
-
-
-logging:
-  level:
-    root: INFO
-    com.alibaba.nacos.client: ERROR
-    dev.macula.example.task: DEBUG
-  file:
-    name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
