@@ -698,17 +698,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>qcloud-central</id>
-            <name>qcloud mirror central</name>
-            <url>https://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
     </repositories>
 
     <build>
