@@ -79,7 +79,7 @@ snail-job:
     # 服务器通讯端口（不是后台管理页面服务端口）
     port: 17888
   # 命名空间 【上面配置的空间的唯一标识】
-  namespace: zzKIFm1MMBaspOctYkGjfgQF95OSo_Uq
+  namespace: OMZct8jxKru5mfSaA_m7HQraaNn7jV4k
   # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
   group: ${spring.profiles.active}
   # 接入组 token 【上面配置的token信息】

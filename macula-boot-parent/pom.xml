@@ -86,7 +86,7 @@
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.3.4</rocketmq-spring.version>
         <springdoc.version>1.7.0</springdoc.version>
-        <xxl-job.version>3.3.1</xxl-job.version>
+        <xxl-job.version>3.1.1</xxl-job.version>
         <snail-job.version>1.8.0</snail-job.version>
         <dubbo.version>3.2.10</dubbo.version>
         <seata.version>2.0.0</seata.version>
