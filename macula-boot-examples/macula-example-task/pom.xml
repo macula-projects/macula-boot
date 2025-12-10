@@ -57,6 +57,18 @@
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-job-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-retry-core</artifactId>
+        </dependency>
 
     </dependencies>
 

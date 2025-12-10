@@ -77,17 +77,17 @@ snail-job:
     # 服务器IP地址（或域名）；集群时建议通过 nginx 做负载均衡
     host: 127.0.0.1
     # 服务器通讯端口（不是后台管理页面服务端口）
-    port: 1788
+    port: 17888
   # 命名空间 【上面配置的空间的唯一标识】
-  namespace: a1NSize1D5jP83Wj0B6Hre094f7kFeHB
+  namespace: zzKIFm1MMBaspOctYkGjfgQF95OSo_Uq
   # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
-  group: test_sj_group
+  group: ${spring.profiles.active}
   # 接入组 token 【上面配置的token信息】
-  token: SJ_t3GFbbDCpmznt9M9Pp62GYJecE6S9q9H
+  token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj
   # 客户端绑定IP，必须服务器可以访问到；默认自动推断，在服务器无法调度客户端时需要手动配置
   # host: 127.0.0.1
   # 客户端通讯端口，默认 1789
-  port: 1789
+  port: 17899
 
 
 logging:

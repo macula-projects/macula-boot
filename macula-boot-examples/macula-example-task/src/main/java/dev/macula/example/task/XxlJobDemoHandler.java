@@ -17,6 +17,7 @@
 
 package dev.macula.example.task;
 
+import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import org.springframework.stereotype.Component;
