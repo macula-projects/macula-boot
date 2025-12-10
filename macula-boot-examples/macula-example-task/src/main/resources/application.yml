@@ -71,17 +71,23 @@ xxl:
       logpath: ${user.home}/logs/${spring.application.name}    # 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
       logretentiondays: 30                             # 执行器日志保存天数 [选填] ：值大于3时生效，启用执行器Log文件定期清理功能，否则不生效；
 
-powerjob:
-  worker:
-    akka-port: 27777                                  # akka 工作端口，可选，默认 27777
-    app-name: ${spring.application.name}              # 接入应用名称，用于分组隔离，推荐填写 本 Java 项目名称
-    server-address: 127.0.0.1:7700                    # 调度服务器地址，IP:Port 或 域名，多值逗号分隔
-    protocol: http                                    # 通讯协议，4.3.0 开始支持 HTTP 和 AKKA 两种协议，官方推荐使用 HTTP 协议（注意 server 和 worker 都要开放相应端口）
-    store-strategy: disk                              # 持久化方式，可选，默认 disk
-    max-result-length: 4096                           # 任务返回结果信息的最大长度，超过这个长度的信息会被截断，默认值 8192
-    max-appended-wf-context-length: 4096              # 单个任务追加的工作流上下文最大长度，超过这个长度的会被直接丢弃，默认值 8192
-    max-lightweight-task-num: 1024                    # 同时运行的轻量级任务数量上限
-    max-heavy-task-num: 64                            # 同时运行的重量级任务数量上限
+snail-job:
+  # 任务调度服务器信息
+  server:
+    # 服务器IP地址（或域名）；集群时建议通过 nginx 做负载均衡
+    host: 127.0.0.1
+    # 服务器通讯端口（不是后台管理页面服务端口）
+    port: 1788
+  # 命名空间 【上面配置的空间的唯一标识】
+  namespace: a1NSize1D5jP83Wj0B6Hre094f7kFeHB
+  # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
+  group: test_sj_group
+  # 接入组 token 【上面配置的token信息】
+  token: SJ_t3GFbbDCpmznt9M9Pp62GYJecE6S9q9H
+  # 客户端绑定IP，必须服务器可以访问到；默认自动推断，在服务器无法调度客户端时需要手动配置
+  # host: 127.0.0.1
+  # 客户端通讯端口，默认 1789
+  port: 1789
 
 
 logging:

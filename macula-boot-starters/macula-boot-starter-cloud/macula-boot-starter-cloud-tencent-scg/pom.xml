@@ -37,39 +37,14 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
 
+		<dependency>
+			<groupId>com.tencent.cloud</groupId>
+			<artifactId>spring-cloud-starter-tencent-all</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-starter-cloud-gateway</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-discovery</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-ratelimit</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-polaris-router</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-tencent-gateway-plugin</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-starter-tencent-metadata-transfer</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>spring-cloud-tencent-featureenv-plugin</artifactId>
         </dependency>
 
     </dependencies>

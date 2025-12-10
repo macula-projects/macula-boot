@@ -14,6 +14,8 @@ seata:
   enabled: false
 
 feign:
+  tsf:
+    enabled: true
   httpclient:
     enabled: false
     max-connections: 200 # 线程池最大连接数，默认200

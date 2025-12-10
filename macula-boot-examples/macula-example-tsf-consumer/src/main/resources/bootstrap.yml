@@ -6,3 +6,6 @@ spring:
     active: @profile.active@
   application:
     name: macula-example-tsf-consumer
+
+#本地测试时打开
+#tsf_namespace_id: default_namespace

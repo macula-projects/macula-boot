@@ -35,14 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-cloud-tsf-scg</artifactId>
-        </dependency>
-
-        <!-- 默认的1.4.5版本启动有异常 -->
-        <dependency>
-            <groupId>com.ecwid.consul</groupId>
-            <artifactId>consul-api</artifactId>
-            <version>1.4.2</version>
+            <artifactId>macula-boot-starter-cloud-tencent-scg</artifactId>
         </dependency>
     </dependencies>
 </project>
