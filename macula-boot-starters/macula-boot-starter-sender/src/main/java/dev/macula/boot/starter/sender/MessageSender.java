@@ -20,10 +20,16 @@ package dev.macula.boot.starter.sender;
 /**
  * {@code MessageSender} 消息发送给MQ的接口
  *
- * @author https://gitee.com/litao851025/lego
+ * @author <a href="https://gitee.com/litao851025/lego">lego</a>
  * @since 2023/1/3 14:10
  */
 public interface MessageSender {
 
+    /**
+     * 发送消息到消息队列
+     *
+     * @param message 要发送的消息
+     * @return 消息ID
+     */
     String send(Message message);
 }

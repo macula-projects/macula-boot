@@ -49,6 +49,9 @@ public class CryptoManager {
 
     /**
      * 获取类加密字段缓存
+     *
+     * @param sourceClazz 源类
+     * @return 加密字段集合
      */
     public Set<Field> getFieldCache(Class<?> sourceClazz) {
         return fieldCache.computeIfAbsent(sourceClazz, clazz -> {
@@ -67,6 +70,7 @@ public class CryptoManager {
      * 注册加密执行者到缓存
      *
      * @param encryptContext 加密执行者需要的相关配置参数
+     * @return 加密执行者实例
      */
     public IEncryptor registerAndGetEncryptor(CryptoContext encryptContext) {
         if (encryptorMap.containsKey(encryptContext)) {
@@ -91,6 +95,7 @@ public class CryptoManager {
      *
      * @param value          待加密的值
      * @param encryptContext 加密相关的配置信息
+     * @return 加密后的字符串
      */
     public String encrypt(String value, CryptoContext encryptContext) {
         IEncryptor encryptor = this.registerAndGetEncryptor(encryptContext);
@@ -102,6 +107,7 @@ public class CryptoManager {
      *
      * @param value          待解密的值
      * @param encryptContext 加密相关的配置信息
+     * @return 解密后的字符串
      */
     public String decrypt(String value, CryptoContext encryptContext) {
         IEncryptor encryptor = this.registerAndGetEncryptor(encryptContext);

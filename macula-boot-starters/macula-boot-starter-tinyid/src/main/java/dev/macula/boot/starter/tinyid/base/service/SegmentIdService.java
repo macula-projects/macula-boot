@@ -20,15 +20,17 @@ package dev.macula.boot.starter.tinyid.base.service;
 import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
 
 /**
+ * 段 ID服务接口
+ * 
  * @author du_imba
  */
 public interface SegmentIdService {
 
     /**
-     * 根据bizType获取下一个SegmentId对象
+     * 根据bizType 获取下一个SegmentId对象
      *
-     * @param bizType
-     * @return
+     * @param bizType 业务类型
+     * @return SegmentId
      */
     SegmentId getNextSegmentId(String bizType);
 

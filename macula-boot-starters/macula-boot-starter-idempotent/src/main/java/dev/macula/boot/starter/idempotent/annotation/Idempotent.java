@@ -21,6 +21,8 @@ import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 幂等性注解，用于防止重复提交
+ * 
  * @author ITyunqing
  */
 @Inherited

@@ -41,6 +41,9 @@ public class TwoLevelCacheProperties {
      */
     private Duration defaultTimeToLive = Duration.ofHours(24L);
 
+    /**
+     * Cache specific time-to-live settings
+     */
     private Map<String, Duration> timeToLive = new HashMap<>();
 
     /**
@@ -58,6 +61,9 @@ public class TwoLevelCacheProperties {
      */
     private String topic = "macula:cache:two-level:topic";
 
+    /**
+     * Whether to enable circuit breaker for Redis access
+     */
     private boolean openCircuitBreaker = true;
 
     /**

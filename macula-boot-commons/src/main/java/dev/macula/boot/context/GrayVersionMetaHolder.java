@@ -27,6 +27,12 @@ public class GrayVersionMetaHolder {
     private static String META_GRAY_VERSION;
 
     /**
+     * 私有构造函数
+     */
+    private GrayVersionMetaHolder() {
+    }
+
+    /**
      * 获取TTL中的灰度版本
      *
      * @return 灰度版本号

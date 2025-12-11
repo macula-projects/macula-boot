@@ -21,6 +21,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * 命名线程工厂
+ * 
  * @author du_imba
  */
 public class NamedThreadFactory implements ThreadFactory {
@@ -33,8 +35,7 @@ public class NamedThreadFactory implements ThreadFactory {
 
     public NamedThreadFactory(String namePrefix, boolean daemon) {
         this.daemon = daemon;
-        SecurityManager s = System.getSecurityManager();
-        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        group = Thread.currentThread().getThreadGroup();
         this.namePrefix = namePrefix;
     }
 

@@ -33,9 +33,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.lang.reflect.Method;
 
 /**
+ * Spring EL表达式解析器，用于解析幂等性注解中的SpEL表达式
+ * 
  * @author lengleng
- *     <p>
- *     默认key 抽取， 优先根据 spel 处理
  * @since 2020-09-25
  */
 public class ExpressionResolver implements KeyResolver {

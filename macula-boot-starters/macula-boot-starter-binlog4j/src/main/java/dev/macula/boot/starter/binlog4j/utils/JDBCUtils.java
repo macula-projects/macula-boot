@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * JDBC 工具类
  *
- * @author
+ * @author macula
  */
 public class JDBCUtils {
 

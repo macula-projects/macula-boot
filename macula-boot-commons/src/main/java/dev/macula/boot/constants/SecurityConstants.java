@@ -30,6 +30,9 @@ import java.util.List;
  */
 public interface SecurityConstants {
 
+    /**
+     * 默认忽略的URL列表
+     */
     List<String> DEFAULT_IGNORE_URLS =
             Arrays.asList(
                     "/actuator/**", "/favicon*", "/webjars/**", "/doc.html", "/swagger-ui/**",
@@ -51,12 +54,24 @@ public interface SecurityConstants {
     /**
      * JWT令牌前缀
      */
+    /**
+     * JWT令牌前缀
+     */
     String TOKEN_PREFIX = "Bearer ";
 
+    /**
+     * JWT昵称键
+     */
     String JWT_NICKNAME_KEY = "nickname";
 
+    /**
+     * JWT数据权限键
+     */
     String JWT_DATASCOPE_KEY = "dataScope";
 
+    /**
+     * JWT部门ID键
+     */
     String JWT_DEPTID_KEY = "deptId";
 
     /**
@@ -87,12 +102,24 @@ public interface SecurityConstants {
     /**
      * 超级管理员角色编码
      */
+    /**
+     * 超级管理员角色编码
+     */
     String ROOT_ROLE_CODE = "ROOT";
 
+    /**
+     * 无操作密码编码
+     */
     String NOOP = "{noop}";
 
+    /**
+     * 短信授权类型
+     */
     String GRANT_TYPE_SMS = "sms";
 
+    /**
+     * 后台用户标识
+     */
     String BACKGROUND_USER = "*SYSADM";
 
     /**

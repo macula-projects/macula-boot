@@ -21,6 +21,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * TinyId 分布式 ID 生成器配置属性
+ * 
  * @author du_imba
  */
 @ConfigurationProperties(prefix = "macula.cloud.tinyid")

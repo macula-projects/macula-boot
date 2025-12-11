@@ -27,10 +27,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 
 /**
+ * 幂等性自动配置类
+ * 
  * @author lengleng
  * @since 2020/9/25
- *     <p>
- *     幂等插件初始化
  */
 @AutoConfiguration(after = RedissonAutoConfiguration.class)
 public class IdempotentAutoConfiguration {

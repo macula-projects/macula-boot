@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -61,46 +61,46 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <spring-boot.version>3.5.5</spring-boot.version>
-        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-boot.version>3.5.8</spring-boot.version>
+        <spring-cloud.version>2023.0.6</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.4</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>2.1.0.0-2023.0.6</spring-cloud-tencent.version>
-        <mysql.connector.version>8.4.0</mysql.connector.version>
-        <mysql.binlog.version>0.29.1</mysql.binlog.version>
+        <mysql.connector.version>9.5.0</mysql.connector.version>
+        <mysql.binlog.version>0.40.3</mysql.binlog.version>
         <druid.version>1.2.27</druid.version>
-        <mybatis-plus.version>3.5.14</mybatis-plus.version>
+        <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>3.0.5</mybatis-spring-boot-starter.version>
-        <fenix.version>2.7.0</fenix.version>
-        <redisson.version>3.51.0</redisson.version>
-        <hutool.version>5.8.40</hutool.version>
-        <easyexcel.version>3.3.4</easyexcel.version>
+        <fenix.version>3.1.0</fenix.version>
+        <redisson.version>3.52.0</redisson.version>
+        <hutool.version>5.8.42</hutool.version>
+        <easyexcel.version>4.0.3</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>
-        <fastjson2.version>2.0.58</fastjson2.version>
-        <liteflow.version>2.11.4.1</liteflow.version>
-        <oauth2-oidc-sdk.version>11.9.1</oauth2-oidc-sdk.version>
-        <resilience4j.version>1.7.1</resilience4j.version>
-        <swagger2.version>1.6.12</swagger2.version>
-        <swagger3.version>2.2.20</swagger3.version>
+        <fastjson2.version>2.0.60</fastjson2.version>
+        <liteflow.version>2.15.2</liteflow.version>
+        <oauth2-oidc-sdk.version>11.30.1</oauth2-oidc-sdk.version>
+        <resilience4j.version>2.2.0</resilience4j.version>
+        <swagger2.version>1.6.16</swagger2.version>
+        <swagger3.version>2.2.41</swagger3.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.3.4</rocketmq-spring.version>
-        <springdoc.version>1.7.0</springdoc.version>
+        <springdoc.version>2.8.14</springdoc.version>
         <xxl-job.version>3.1.1</xxl-job.version>
         <snail-job.version>1.8.0</snail-job.version>
-        <dubbo.version>3.2.10</dubbo.version>
-        <seata.version>2.0.0</seata.version>
-        <bouncycastle.version>1.81</bouncycastle.version>
-        <xfile.version>2.1.0</xfile.version>
-        <minio.version>8.4.2</minio.version>
+        <dubbo.version>3.2.19</dubbo.version>
+        <seata.version>2.5.0</seata.version>
+        <bouncycastle.version>1.83</bouncycastle.version>
+        <xfile.version>2.3.0</xfile.version>
+        <minio.version>8.6.0</minio.version>
         <fastdfs.version>1.30-20230328</fastdfs.version>
-        <qiniu-sdk-oss.version>7.13.0</qiniu-sdk-oss.version>
-        <qcloud-sdk-oss.version>5.6.195</qcloud-sdk-oss.version>
-        <aliyun-sdk-oss.version>3.16.1</aliyun-sdk-oss.version>
-        <cola.version>4.3.2</cola.version>
-        <logstash.version>7.4</logstash.version>
-        <skywalking-toolkit.version>9.1.0</skywalking-toolkit.version>
-        <weixin-java.version>4.6.0</weixin-java.version>
+        <qiniu-sdk-oss.version>7.19.0</qiniu-sdk-oss.version>
+        <qcloud-sdk-oss.version>5.6.246.3</qcloud-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.18.3</aliyun-sdk-oss.version>
+        <cola.version>5.0.0</cola.version>
+        <logstash.version>9.0</logstash.version>
+        <skywalking-toolkit.version>9.5.0</skywalking-toolkit.version>
+        <weixin-java.version>4.7.0</weixin-java.version>
     </properties>
 
     <dependencyManagement>
@@ -148,12 +148,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-spring-boot-starter</artifactId>
-                <version>${seata.version}</version>
-            </dependency>
-
             <!-- macula -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
@@ -162,102 +156,7 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-binlog4j</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-crypto</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-mapstruct</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-mybatis-plus</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-jpa</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-rocketmq</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-kafka</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-sender</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-redis</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-cache</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-leaderelection</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-lock4j</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-idempotent</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-liteflow</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-web</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-websocket</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-springdoc</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-skywalking</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-logstash</artifactId>
+                <artifactId>macuala-boot-starter-async</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -267,43 +166,12 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-prometheus</artifactId>
+                <artifactId>macula-boot-starter-binlog4j</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-dubbo</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-feign</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-sleuth</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-wechat</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-springretry</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-oss</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-cloud-gateway</artifactId>
+                <artifactId>macula-boot-starter-cache</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -323,6 +191,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-cloud-gateway</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-cloud-tencent</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -331,35 +204,161 @@
                 <artifactId>macula-boot-starter-cloud-tencent-scg</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-tinyid</artifactId>
+                <artifactId>macula-boot-starter-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
-
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-dubbo</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-feign</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-idempotent</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-jpa</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-kafka</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-leaderelection</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-liteflow</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-lock4j</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-logstash</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-mapstruct</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-mybatis-plus</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-oss</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-prometheus</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-rocketmq</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-seata</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-sender</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-skywalking</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-sleuth</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-springdoc</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-springretry</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-statemachine</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-system</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <!-- task -->
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-task</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
-                <groupId>dev.macula.task</groupId>
-                <artifactId>macula-task-worker</artifactId>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-tinyid</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-websocket</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.macula.boot</groupId>
+                <artifactId>macula-boot-starter-wechat</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- MySQL Binlog Connector -->
             <dependency>
-                <groupId>com.zendesk</groupId>
+                <groupId>io.debezium</groupId>
                 <artifactId>mysql-binlog-connector-java</artifactId>
                 <version>${mysql.binlog.version}</version>
             </dependency>
@@ -377,7 +376,13 @@
                 <version>${druid.version}</version>
             </dependency>
 
-            <!-- mybastis plus -->
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${seata.version}</version>
+            </dependency>
+
+            <!-- mybatis plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
@@ -487,7 +492,6 @@
                 <artifactId>resilience4j-circuitbreaker</artifactId>
                 <version>${resilience4j.version}</version>
             </dependency>
-
             <!-- Swagger2 -->
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -503,7 +507,7 @@
 
             <dependency>
                 <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-ui</artifactId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
 
@@ -706,7 +710,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.14.1</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
@@ -787,7 +791,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.5.0</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -819,6 +823,7 @@
                             <target>${java.version}</target>
                         </configuration>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>

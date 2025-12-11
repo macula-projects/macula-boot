@@ -22,6 +22,8 @@ import dev.macula.boot.starter.tinyid.base.generator.IdGenerator;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 抽象 ID生成器工厂
+ * 
  * @author du_imba
  */
 public abstract class AbstractIdGeneratorFactory implements IdGeneratorFactory {
@@ -44,10 +46,10 @@ public abstract class AbstractIdGeneratorFactory implements IdGeneratorFactory {
     }
 
     /**
-     * 根据bizType创建id生成器
+     * 根据 bizType创建id生成器
      *
-     * @param bizType
-     * @return
+     * @param bizType 业务类型
+     * @return IdGenerator
      */
     protected abstract IdGenerator createIdGenerator(String bizType);
 }

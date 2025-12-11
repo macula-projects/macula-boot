@@ -56,7 +56,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     // 给前端个人的API（只认证Token，不鉴权)
     private final List<String> onlyAuthUrls;
 
-    // 默认URL是否需要检查权限
+    // 默认 URL是否需要检查权限
     private final boolean defaultUrlRequireCheck;
 
     @Value("${spring.application.name}")

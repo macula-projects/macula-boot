@@ -24,14 +24,18 @@ package dev.macula.boot.constants;
  * @since 2023/3/1 19:18
  */
 public interface GlobalConstants {
-
+    /** 请求ID */
     String FEIGN_REQ_ID = "FEIGN_REQ_ID";
 
+    /** 租户ID */
     String TENANT_ID_NAME = "tenantId";
 
+    /** 令牌ID */
     String TOKEN_ID_NAME = "tokenId";
 
+    /** 默认租户ID */
     Long DEFAULT_TENANT_ID = 1L;
 
+    /** 灰度版本标签 */
     String GRAY_VERSION_TAG = "grayversion";
 }

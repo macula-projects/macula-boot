@@ -34,14 +34,13 @@ import java.time.LocalTime;
 public class RetryTestService {
     int a = 0;
 
-    @Retryable(value = {RuntimeException.class}, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2))
-    public String testRetry() {
+    @Retryable(retryFor = {RuntimeException.class}, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2))
+    public void testRetry() {
         a++;
         System.out.println(a + " - 调用时间是" + LocalTime.now());
         if (a < 10) {
             throw new RuntimeException("未满足条件");
         }
-        return "执行成功";
     }
 
     @Recover

@@ -53,6 +53,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNam
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.SpringReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
@@ -102,26 +103,20 @@ public class ResourceServerConfiguration {
         //@formatter:off
         // 添加默认忽略的路径
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
-        http.oauth2ResourceServer()
+        http.oauth2ResourceServer(oauth2 -> oauth2
             .bearerTokenConverter(serverBearerTokenAuthenticationConverter())
-            .opaqueToken()
-            .introspector(opaqueTokenIntrospector())
-            .and()
+            .opaqueToken(opaque -> opaque.introspector(opaqueTokenIntrospector()))
+        )
+        .exceptionHandling(exceptions -> exceptions
             .accessDeniedHandler(accessDeniedHandler())
             .authenticationEntryPoint(authenticationEntryPoint())
-            .and()
-            .authorizeExchange()
+        )
+        .authorizeExchange(exchanges -> exchanges
             .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
-            .anyExchange()
-            .access(authorizationManager)
-            .and()
-            .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler())
-                .authenticationEntryPoint(authenticationEntryPoint())
-            .and()
-            .cors()
-            .and()
-            .csrf().disable();
+            .anyExchange().access(authorizationManager)
+        )
+        .cors(ServerHttpSecurity.CorsSpec::disable)
+        .csrf(ServerHttpSecurity.CsrfSpec::disable);
         return http.build();
         //@formatter:on
     }
@@ -137,9 +132,11 @@ public class ResourceServerConfiguration {
     public ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector() {
         return new ReactiveOpaqueTokenIntrospector() {
             final OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
-            final ReactiveOpaqueTokenIntrospector delegate =
-                    new NimbusReactiveOpaqueTokenIntrospector(opaqueToken.getIntrospectionUri(), opaqueToken.getClientId(),
-                            opaqueToken.getClientSecret());
+            final ReactiveOpaqueTokenIntrospector delegate = SpringReactiveOpaqueTokenIntrospector
+                        .withIntrospectionUri(opaqueToken.getIntrospectionUri())
+                        .clientId(opaqueToken.getClientId())
+                        .clientSecret(opaqueToken.getClientSecret())
+                        .build();
 
             @Override
             public Mono<OAuth2AuthenticatedPrincipal> introspect(String token) {
@@ -245,8 +242,7 @@ public class ResourceServerConfiguration {
             String prefix = "spring.cloud.gateway.globalcors";
 
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
-                if (propertySource instanceof EnumerablePropertySource) {
-                    EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
+                if (propertySource instanceof EnumerablePropertySource<?> enumerablePropertySource) {
                     for (String propertyName : enumerablePropertySource.getPropertyNames()) {
                         if (propertyName.startsWith(prefix)) {
                             return ConditionOutcome.match("CORS configuration exists for path: " + propertyName);

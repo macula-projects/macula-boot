@@ -34,7 +34,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CacheEvictMessage implements Serializable {
 
+    /**
+     * 缓存名称
+     */
     private String cacheName;
+    
+    /**
+     * 缓存条目键
+     */
     private String entryKey;
 
 }

@@ -18,6 +18,8 @@
 package dev.macula.boot.starter.tinyid.base.exception;
 
 /**
+ * TinyId 系统异常
+ * 
  * @author du_imba
  */
 public class TinyIdSysException extends RuntimeException {

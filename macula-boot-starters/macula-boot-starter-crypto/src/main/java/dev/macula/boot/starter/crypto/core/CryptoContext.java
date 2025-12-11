@@ -58,6 +58,12 @@ public class CryptoContext {
      */
     private EncodeType encode;
 
+    /**
+     * 构造函数
+     *
+     * @param cryptoField       加密字段注解
+     * @param defaultProperties 默认加密配置属性
+     */
     public CryptoContext(CryptoField cryptoField, CryptoProperties defaultProperties) {
         this.setAlgorithm(cryptoField.algorithm() == AlgorithmType.DEFAULT ? defaultProperties.getAlgorithm()
             : cryptoField.algorithm());
@@ -71,6 +77,11 @@ public class CryptoContext {
             StrUtil.isBlank(cryptoField.publicKey()) ? defaultProperties.getPublicKey() : cryptoField.publicKey());
     }
 
+    /**
+     * 构造函数
+     *
+     * @param p 加密配置属性
+     */
     public CryptoContext(CryptoProperties p) {
         this.setPassword(p.getPassword());
         this.setAlgorithm(p.getAlgorithm());

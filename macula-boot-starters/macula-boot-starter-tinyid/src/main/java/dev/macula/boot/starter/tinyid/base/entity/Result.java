@@ -17,9 +17,16 @@
 
 package dev.macula.boot.starter.tinyid.base.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
+ * 结果实体类
+ * 
  * @author du_imba
  */
+@Setter
+@Getter
 public class Result {
 
     private int code;
@@ -27,22 +34,6 @@ public class Result {
 
     public Result(int code, long id) {
         this.code = code;
-        this.id = id;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
         this.id = id;
     }
 

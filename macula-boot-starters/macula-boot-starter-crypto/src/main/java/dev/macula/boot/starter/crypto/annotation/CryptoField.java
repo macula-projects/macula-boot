@@ -36,26 +36,36 @@ public @interface CryptoField {
 
     /**
      * 加密算法
+     *
+     * @return 加密算法类型
      */
     AlgorithmType algorithm() default AlgorithmType.DEFAULT;
 
     /**
      * 秘钥。AES、SM4需要
+     *
+     * @return 秘钥字符串
      */
     String password() default "";
 
     /**
      * 公钥。RSA、SM2需要
+     *
+     * @return 公钥字符串
      */
     String publicKey() default "";
 
     /**
-     * 公钥。RSA、SM2需要
+     * 私钥。RSA、SM2需要
+     *
+     * @return 私钥字符串
      */
     String privateKey() default "";
 
     /**
      * 编码方式。对加密算法为BASE64的不起作用
+     *
+     * @return 编码类型
      */
     EncodeType encode() default EncodeType.DEFAULT;
 

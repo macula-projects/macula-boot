@@ -31,6 +31,9 @@ import org.springframework.security.access.AccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
+ * 内部服务调用切面，用于处理服务间接口不鉴权的逻辑
+ * 在FeignClient定义时需要标识header "from=Y"
+ * 
  * @author lengleng
  * @since 2022-06-04
  *

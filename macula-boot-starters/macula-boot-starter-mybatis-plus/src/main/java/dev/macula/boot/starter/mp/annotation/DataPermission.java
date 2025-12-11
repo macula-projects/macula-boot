@@ -33,12 +33,32 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface DataPermission {
 
+    /**
+     * 部门别名
+     *
+     * @return 部门别名
+     */
     String deptAlias() default "";
 
+    /**
+     * 部门ID列名
+     *
+     * @return 部门ID列名
+     */
     String deptIdColumnName() default "dept_id";
 
+    /**
+     * 用户别名
+     *
+     * @return 用户别名
+     */
     String userAlias() default "";
 
+    /**
+     * 用户ID列名
+     *
+     * @return 用户ID列名
+     */
     String userIdColumnName() default "create_by";
 
 }

@@ -20,6 +20,8 @@ package dev.macula.boot.starter.tinyid.base.generator;
 import java.util.List;
 
 /**
+ * ID 生成器接口
+ * 
  * @author du_imba
  */
 public interface IdGenerator {

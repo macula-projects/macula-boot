@@ -30,6 +30,8 @@ public interface IEncryptor {
 
     /**
      * 获得当前算法
+     *
+     * @return 算法类型
      */
     AlgorithmType algorithm();
 

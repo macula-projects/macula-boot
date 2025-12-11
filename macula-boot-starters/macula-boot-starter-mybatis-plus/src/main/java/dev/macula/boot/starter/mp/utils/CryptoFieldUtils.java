@@ -33,6 +33,14 @@ public class CryptoFieldUtils {
 
     private static final ConcurrentHashMap<String, Set<Field>> CRYPT_FIELDS = new ConcurrentHashMap<>();
 
+    /**
+     * 获取加密字段映射
+     *
+     * @param prefix 前缀
+     * @param params 参数对象
+     * @return 加密字段映射
+     * @throws IllegalAccessException 访问异常
+     */
     public static Map<String, String> getCryptoMap(String prefix, Object params) throws IllegalAccessException {
         if (params == null || params instanceof Collections) {
             return Collections.emptyMap();
@@ -61,6 +69,12 @@ public class CryptoFieldUtils {
         return cryptFieldMap;
     }
 
+    /**
+     * 获取加密字段集合
+     *
+     * @param params 参数对象
+     * @return 加密字段集合
+     */
     public static Set<Field> getCryptoFields(Object params) {
         if (params == null || params instanceof Map || params instanceof Collection) {
             return Collections.emptySet();

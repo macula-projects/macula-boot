@@ -20,6 +20,8 @@ package dev.macula.boot.starter.web.utils;
 import cn.hutool.core.util.StrUtil;
 
 /**
+ * 敏感信息脱敏工具类，用于对手机号、身份证、银行卡等敏感信息进行脱敏处理
+ * 
  * @author rain
  */
 public class SensitiveUtil {
@@ -141,7 +143,7 @@ public class SensitiveUtil {
      *
      * @param str           需要替换的字符串
      * @param overlay       将被替换成的字符串
-     * @param overlayRepeat overlay重复的次数
+     * @param overlayRepeat overlay 重复的次数
      * @param start         开始位置
      * @param end           结束位置
      * @return 脱敏后的字符串

@@ -23,11 +23,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * TinyId HTTP工具类，用于与TinyId服务端进行HTTP通信
+ * 
  * @author du_imba
  */
 public class TinyIdHttpUtils {
@@ -53,7 +56,7 @@ public class TinyIdHttpUtils {
         if (form != null) {
             for (Map.Entry<String, String> entry : form.entrySet()) {
                 String key = entry.getKey();
-                if (param.length() != 0) {
+                if (!param.isEmpty()) {
                     param.append("&");
                 }
                 param.append(key).append("=").append(entry.getValue());
@@ -68,10 +71,10 @@ public class TinyIdHttpUtils {
             conn.setConnectTimeout(connectTimeout);
             conn.setUseCaches(false);
             conn.connect();
-            os = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
+            os = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
             os.write(param.toString());
             os.flush();
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }

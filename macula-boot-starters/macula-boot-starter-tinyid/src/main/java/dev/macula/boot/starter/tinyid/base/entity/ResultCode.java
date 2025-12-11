@@ -18,6 +18,8 @@
 package dev.macula.boot.starter.tinyid.base.entity;
 
 /**
+ * 结果码常量类
+ * 
  * @author du_imba
  */
 public class ResultCode {
@@ -27,7 +29,7 @@ public class ResultCode {
      */
     public static final int NORMAL = 1;
     /**
-     * 需要去加载nextId
+     * 需要去加载 nextId
      */
     public static final int LOADING = 2;
     /**

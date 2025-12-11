@@ -88,7 +88,7 @@ public class TwoLevelCacheAutoConfiguration {
     static CircuitBreaker cacheCircuitBreaker(TwoLevelCacheProperties cacheProperties) {
         CircuitBreakerRegistry cbr = CircuitBreakerRegistry.ofDefaults();
 
-        if (!cbr.getConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME).isPresent()) {
+        if (cbr.getConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME).isEmpty()) {
             TwoLevelCacheProperties.CircuitBreakerProperties props = cacheProperties.getCircuitBreaker();
 
             CircuitBreakerConfig.Builder cbc = CircuitBreakerConfig.custom();
@@ -117,7 +117,7 @@ public class TwoLevelCacheAutoConfiguration {
 
         CircuitBreaker cb = cbr.circuitBreaker(CIRCUIT_BREAKER_NAME, CIRCUIT_BREAKER_CONFIGURATION_NAME);
         cb.getEventPublisher().onError(
-                event -> log.trace("Cache circuit breaker error occurred in " + event.getElapsedDuration(),
+                event -> log.trace("Cache circuit breaker error occurred in {}", event.getElapsedDuration(),
                     event.getThrowable())).onSlowCallRateExceeded(
                 event -> log.trace("Cache circuit breaker {} calls were slow, rate exceeded", event.getSlowCallRate()))
             .onFailureRateExceeded(

@@ -30,6 +30,12 @@ import lombok.Data;
 @Schema
 public class BasePageQuery {
 
+    /**
+     * 默认构造函数
+     */
+    public BasePageQuery() {
+    }
+
     @Schema(description = "页码", example = "1")
     private int pageNum = 1;
 

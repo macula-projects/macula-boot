@@ -28,6 +28,11 @@ import dev.macula.boot.starter.crypto.core.IEncryptor;
  */
 public abstract class AbstractEncryptor implements IEncryptor {
 
+    /**
+     * 构造函数
+     *
+     * @param context 加密上下文
+     */
     public AbstractEncryptor(CryptoContext context) {
         // 用户配置校验与配置注入
     }

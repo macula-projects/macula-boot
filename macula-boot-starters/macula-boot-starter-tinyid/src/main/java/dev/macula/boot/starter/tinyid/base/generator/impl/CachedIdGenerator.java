@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * 缓存 ID生成器实现
+ * 
  * @author du_imba
  */
 public class CachedIdGenerator implements IdGenerator {
@@ -40,8 +42,8 @@ public class CachedIdGenerator implements IdGenerator {
     protected volatile SegmentId current;
     protected volatile SegmentId next;
     private volatile boolean isLoadingNext;
-    private Object lock = new Object();
-    private ExecutorService executorService =
+    private final Object lock = new Object();
+    private final ExecutorService executorService =
         Executors.newSingleThreadExecutor(new NamedThreadFactory("tinyid-generator"));
 
     public CachedIdGenerator(String bizType, SegmentIdService segmentIdService) {
@@ -53,8 +55,7 @@ public class CachedIdGenerator implements IdGenerator {
     public synchronized void loadCurrent() {
         if (current == null || !current.useful()) {
             if (next == null) {
-                SegmentId segmentId = querySegmentId();
-                this.current = segmentId;
+                this.current = querySegmentId();
             } else {
                 current = next;
                 next = null;
@@ -122,5 +123,4 @@ public class CachedIdGenerator implements IdGenerator {
         }
         return ids;
     }
-
 }

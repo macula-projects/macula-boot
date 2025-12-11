@@ -24,12 +24,20 @@ import java.util.List;
 
 /**
  * {@code PageVo} 分页返回VO
+ * @param <T> 数据类型
  *
  * @author rain
  * @since 2023/6/21 15:45
  */
 @Data
 public class PageVO<T> implements Serializable {
+    
+    /**
+     * 私有构造函数，防止实例化
+     */
+    private PageVO() {
+    }
+    
     /**
      * 当前页的数据
      */

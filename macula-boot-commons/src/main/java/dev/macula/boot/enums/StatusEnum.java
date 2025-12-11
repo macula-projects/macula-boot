@@ -28,7 +28,15 @@ import lombok.Getter;
  */
 public enum StatusEnum implements IBaseEnum<Integer> {
 
-    ENABLE(1, "启用"), DISABLE(0, "禁用");
+    /**
+     * 启用
+     */
+    ENABLE(1, "启用"),
+    
+    /**
+     * 禁用
+     */
+    DISABLE(0, "禁用");
 
     @Getter
     private final Integer value;
@@ -36,6 +44,12 @@ public enum StatusEnum implements IBaseEnum<Integer> {
     @Getter
     private final String label;
 
+    /**
+     * 构造函数
+     *
+     * @param value 状态值
+     * @param label 状态标签
+     */
     StatusEnum(Integer value, String label) {
         this.value = value;
         this.label = label;

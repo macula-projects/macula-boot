@@ -30,6 +30,11 @@ import dev.macula.boot.starter.crypto.enums.EncodeType;
  */
 public class Base64Encryptor extends AbstractEncryptor {
 
+    /**
+     * 构造函数
+     *
+     * @param context 加密上下文
+     */
     public Base64Encryptor(CryptoContext context) {
         super(context);
     }

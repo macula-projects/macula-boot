@@ -25,13 +25,15 @@ import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
 import java.util.logging.Logger;
 
 /**
+ * 缓存ID 生成器工厂
+ * 
  * @author du_imba
  */
 public class CachedIdGeneratorFactory extends AbstractIdGeneratorFactory {
 
     private static final Logger logger = Logger.getLogger(CachedIdGeneratorFactory.class.getName());
 
-    private SegmentIdService segmentIdService;
+    private final SegmentIdService segmentIdService;
 
     public CachedIdGeneratorFactory(SegmentIdService segmentIdService) {
         this.segmentIdService = segmentIdService;

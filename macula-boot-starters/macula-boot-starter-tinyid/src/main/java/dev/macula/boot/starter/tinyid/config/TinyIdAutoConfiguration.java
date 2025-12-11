@@ -27,6 +27,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
+ * TinyId 分布式ID生成器自动配置类
+ * 
  * @author rain
  */
 @AutoConfiguration

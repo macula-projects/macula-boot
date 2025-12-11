@@ -49,7 +49,7 @@
             <artifactId>druid</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.zendesk</groupId>
+            <groupId>io.debezium</groupId>
             <artifactId>mysql-binlog-connector-java</artifactId>
         </dependency>
         <dependency>

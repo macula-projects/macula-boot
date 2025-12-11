@@ -20,14 +20,16 @@ package dev.macula.boot.starter.tinyid.base.factory;
 import dev.macula.boot.starter.tinyid.base.generator.IdGenerator;
 
 /**
+ * ID 生成器工厂接口
+ * 
  * @author du_imba
  */
 public interface IdGeneratorFactory {
 
     /**
-     * 根据bizType创建id生成器
+     * 根据 bizType创建id生成器
      *
-     * @param bizType
+     * @param bizType 业务类型
      * @return IdGenerator
      */
     IdGenerator getIdGenerator(String bizType);

@@ -57,11 +57,15 @@ public interface CacheConstants {
     /** 网关TOKEN的introspect信息缓存 */
     String GATEWAY_TOKEN_CACHE_KEY = "macula:cloud:gateway:principal:";
 
+    /** 网关nonce参数信息缓存 */
     String GATEWAY_NONCE_KEY = "macula:scg:nonce";
 
     /** WEBSOCKET订阅关系KEY */
     String WEBSOCKET_USERS_KEY = "macula:ws:u:user:";
+    /** WEBSOCKET订阅关系会话KEY */
     String WEBSOCKET_USER_SESSIONS_KEY = "macula:ws:u:sessions:";
+    /** WEBSOCKET订阅关系会话与用户对应KEY */
     String WEBSOCKET_SESSION_USER_KEY = "macula:ws:s:user:";
+    /** WEBSOCKET订阅关系会话订阅KEY */
     String WEBSOCKET_SESSION_SUBSCRIPTIONS_KEY = "macula:ws:s:subs:";
 }

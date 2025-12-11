@@ -18,6 +18,8 @@
 package dev.macula.boot.starter.tinyid.utils;
 
 /**
+ * TinyId数字工具类，提供数字转换相关的方法
+ * 
  * @author du_imba
  */
 public class TinyIdNumberUtils {

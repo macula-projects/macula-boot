@@ -30,6 +30,7 @@ import java.util.Map;
 /**
  * {@code TxMessage} 事务消息
  *
+ * @param <T> 消息载荷类型
  * @author rain
  * @since 2022/12/1 09:55
  */

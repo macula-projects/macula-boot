@@ -17,15 +17,33 @@
 
 package dev.macula.boot.starter.tinyid.base.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author du_imba nextId: (currentId, maxId]
+ * 段ID实体类
+ * nextId: (currentId, maxId]
+ * 
+ * @author du_imba
  */
+@Getter
+@Setter
 public class SegmentId {
 
+    /**
+     * max id
+     */
     private long maxId;
+    /**
+     * loading id
+     */
     private long loadingId;
+
+    /**
+     * current Id
+     */
     private AtomicLong currentId;
     /**
      * increment by
@@ -60,7 +78,7 @@ public class SegmentId {
                 id = currentId.incrementAndGet();
                 if (id % delta == remainder) {
                     // 避免浪费 减掉系统自己占用的一个id
-                    currentId.addAndGet(0 - delta);
+                    currentId.addAndGet(-delta);
                     isInit = true;
                     return;
                 }
@@ -82,46 +100,6 @@ public class SegmentId {
 
     public boolean useful() {
         return currentId.get() <= maxId;
-    }
-
-    public long getMaxId() {
-        return maxId;
-    }
-
-    public void setMaxId(long maxId) {
-        this.maxId = maxId;
-    }
-
-    public long getLoadingId() {
-        return loadingId;
-    }
-
-    public void setLoadingId(long loadingId) {
-        this.loadingId = loadingId;
-    }
-
-    public AtomicLong getCurrentId() {
-        return currentId;
-    }
-
-    public void setCurrentId(AtomicLong currentId) {
-        this.currentId = currentId;
-    }
-
-    public int getDelta() {
-        return delta;
-    }
-
-    public void setDelta(int delta) {
-        this.delta = delta;
-    }
-
-    public int getRemainder() {
-        return remainder;
-    }
-
-    public void setRemainder(int remainder) {
-        this.remainder = remainder;
     }
 
     @Override

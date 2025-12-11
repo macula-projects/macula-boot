@@ -20,15 +20,14 @@ package dev.macula.boot.starter.cache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.vavr.CheckedFunction0;
-import io.vavr.control.Try;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -60,11 +59,11 @@ public class TwoLevelCache extends RedisCache {
     /**
      * These are local non-overridable properties for ReentrantLocks cache to provide atomicity
      */
-    private static final Object CACHE_WIDE_LOCK_OBJECT = new Object();
     private static final long LOCKS_CACHE_MAXIMUM_SIZE = 1000;
     private static final Duration LOCKS_CACHE_EXPIRE_AFTER_ACCESS = Duration.ofSeconds(15);
 
     protected final TwoLevelCacheProperties properties;
+    @Getter
     protected final Cache<Object, Object> localCache;
     protected final Cache<Object, ReentrantLock> locks;
     protected final CircuitBreaker cacheCircuitBreaker;
@@ -91,22 +90,6 @@ public class TwoLevelCache extends RedisCache {
         this.cacheCircuitBreaker = cacheCircuitBreaker;
     }
 
-    public Cache<Object, Object> getLocalCache() {
-        return localCache;
-    }
-
-    // Workarounds for tests
-    @Nullable
-    @SuppressWarnings("unchecked")
-    <T> T nativeGet(@NonNull Object key) {
-        return (T)callRedis(() -> super.get(key, () -> null)).get();
-    }
-
-    void nativePut(@NonNull Object key, @Nullable Object value) {
-        callRedis(() -> super.put(key, value));
-    }
-    // Workarounds for tests
-
     /**
      * Perform an actual lookup in the underlying store.
      *
@@ -118,13 +101,12 @@ public class TwoLevelCache extends RedisCache {
      * @return the raw store value for the key, or {@code null} if none
      */
     @Override
-    protected Object lookup(@NonNull Object key) {
+    protected @Nullable Object lookup(@NonNull Object key) {
         final String localKey = convertKey(key);
         Object localValue = localCache.getIfPresent(localKey);
 
         if (localValue == null) {
-            return callRedis(() -> super.lookup(key)).andThen(value -> localCache.put(localKey, value))
-                .recover(e -> null).get();
+            return callRedis(() -> super.lookup(key), value -> localCache.put(localKey, value));
         }
 
         return localValue;
@@ -157,16 +139,22 @@ public class TwoLevelCache extends RedisCache {
         }
 
         final String localKey = convertKey(key);
-        return callRedis(() -> super.get(key, valueLoader)).andThen(value -> localCache.put(localKey, value))
-            .recover(e -> {
-                try {
-                    T value = valueLoader.call();
-                    localCache.put(localKey, value);
-                    return value;
-                } catch (Exception recoverException) {
-                    throw new ValueRetrievalException(key, valueLoader, recoverException);
-                }
-            }).get();
+        T cacheResult = callRedis(() -> super.get(key, valueLoader), () -> {
+            try {
+                T value = valueLoader.call();
+                localCache.put(localKey, value);
+                return value;
+            } catch (Exception recoverException) {
+                throw new ValueRetrievalException(key, valueLoader, recoverException);
+            }
+        });
+        
+        // 保证不会返回 null，因为 fallback 逻辑总是会抛出异常或返回有效值
+        if (cacheResult == null) {
+            throw new ValueRetrievalException(key, valueLoader, 
+                new IllegalStateException("Cache lookup returned unexpected null"));
+        }
+        return cacheResult;
     }
 
     /**
@@ -224,7 +212,7 @@ public class TwoLevelCache extends RedisCache {
      * @see #put(Object, Object)
      */
     @Override
-    public ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
+    public @Nullable ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
         if (value == null) {
             evict(key);
             return null;
@@ -270,7 +258,6 @@ public class TwoLevelCache extends RedisCache {
         sendViaRedis(localKey);
 
         localCache.invalidate(localKey);
-
     }
 
     /**
@@ -283,7 +270,7 @@ public class TwoLevelCache extends RedisCache {
      */
     @Override
     public void clear() {
-        callRedis((Runnable) super::clear);
+        callRedis(() -> super.clear());
         sendViaRedis(null);
         localCache.invalidateAll();
     }
@@ -302,21 +289,72 @@ public class TwoLevelCache extends RedisCache {
      */
     private void callRedis(@NonNull Runnable call) {
         if (properties.isOpenCircuitBreaker()) {
-            Try.runRunnable(cacheCircuitBreaker.decorateRunnable(call));
+            cacheCircuitBreaker.executeRunnable(call);
         } else {
-            Try.runRunnable(call);
+            call.run();
         }
     }
 
     /**
      * @param call to Redis
-     * @return execution result as {@link Try}
+     * @param <T> return type
+     * @return execution result as Supplier
      */
-    private <T> Try<T> callRedis(@NonNull CheckedFunction0<T> call) {
-        if (properties.isOpenCircuitBreaker()) {
-            return Try.of(cacheCircuitBreaker.decorateCheckedSupplier(call));
-        } else {
-            return Try.of(call);
+    private <T> java.util.function.Supplier<T> callRedis(java.util.function.Supplier<T> call) {
+        return () -> {
+            try {
+                if (properties.isOpenCircuitBreaker()) {
+                    return cacheCircuitBreaker.executeSupplier(call);
+                } else {
+                    return call.get();
+                }
+            } catch (Exception e) {
+                log.debug("Redis call failed, returning null", e);
+                return null;
+            }
+        };
+    }
+
+    /**
+     * @param call to Redis with post action
+     * @param postAction action to execute after successful call
+     * @param <T> return type
+     * @return execution result or null on failure
+     */
+    private <T> T callRedis(java.util.function.Supplier<T> call, java.util.function.Consumer<T> postAction) {
+        try {
+            T result;
+            if (properties.isOpenCircuitBreaker()) {
+                result = cacheCircuitBreaker.executeSupplier(call);
+            } else {
+                result = call.get();
+            }
+            if (result != null) {
+                postAction.accept(result);
+            }
+            return result;
+        } catch (Exception e) {
+            log.debug("Redis call failed, returning null", e);
+            return null;
+        }
+    }
+
+    /**
+     * @param call to Redis with fallback
+     * @param fallback fallback function to execute on failure
+     * @param <T> return type
+     * @return execution result
+     */
+    private <T> T callRedis(java.util.function.Supplier<T> call, java.util.function.Supplier<T> fallback) {
+        try {
+            if (properties.isOpenCircuitBreaker()) {
+                return cacheCircuitBreaker.executeSupplier(call);
+            } else {
+                return call.get();
+            }
+        } catch (Exception e) {
+            log.debug("Redis call failed, using fallback", e);
+            return fallback.get();
         }
     }
 
@@ -324,12 +362,20 @@ public class TwoLevelCache extends RedisCache {
      * @param key to send notification about eviction. Can be {@code null}.
      */
     private void sendViaRedis(@Nullable String key) {
+        Runnable sendMessage = () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key));
+        
         if (properties.isOpenCircuitBreaker()) {
-            Try.runRunnable(cacheCircuitBreaker.decorateRunnable(
-                () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key))));
+            try {
+                cacheCircuitBreaker.executeRunnable(sendMessage);
+            } catch (Exception e) {
+                log.debug("Failed to send cache eviction message via Redis", e);
+            }
         } else {
-            Try.runRunnable(
-                () -> redisTemplate.convertAndSend(properties.getTopic(), new CacheEvictMessage(getName(), key)));
+            try {
+                sendMessage.run();
+            } catch (Exception e) {
+                log.debug("Failed to send cache eviction message via Redis", e);
+            }
         }
     }
 

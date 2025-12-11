@@ -27,6 +27,12 @@ import com.alibaba.ttl.TransmittableThreadLocal;
  */
 public class TenantContextHolder {
 
+    /**
+     * 私有构造函数，防止实例化
+     */
+    private TenantContextHolder() {
+    }
+
     private final static ThreadLocal<Long> THREAD_LOCAL_VERSION = new TransmittableThreadLocal<>();
 
     /**

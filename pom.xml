@@ -21,16 +21,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>dev.macula.boot</groupId>
-        <artifactId>macula-boot-parent</artifactId>
-        <version>${revision}</version>
-        <relativePath>macula-boot-parent</relativePath>
-    </parent>
-
+    <groupId>dev.macula.boot</groupId>
     <artifactId>macula-boot</artifactId>
-    <packaging>pom</packaging>
     <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <name>macula-boot</name>
     <description>基于Spring Boot、Spring Cloud的微服务开发框架</description>
@@ -66,19 +60,4 @@
         <module>macula-boot-examples</module>
         <module>macula-boot-archetype</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
 </project>

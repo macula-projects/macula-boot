@@ -52,40 +52,10 @@ TODO
         <artifactId>macula-boot-starter-feign</artifactId>
     </dependency>
 
-    <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-    </dependency>
-
     <!-- Spring Cloud Tencent -->
     <dependency>
         <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-discovery</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-config</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-ratelimit</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-circuitbreaker</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-router</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-metadata-transfer</artifactId>
+        <artifactId>spring-cloud-starter-tencent-all</artifactId>
     </dependency>
 </dependencies>
 ```
@@ -102,32 +72,7 @@ TODO
 
     <dependency>
         <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-discovery</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-ratelimit</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-polaris-router</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-tencent-gateway-plugin</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-starter-tencent-metadata-transfer</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-tencent-featureenv-plugin</artifactId>
+        <artifactId>spring-cloud-starter-tencent-all</artifactId>
     </dependency>
 </dependencies>
 ```

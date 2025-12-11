@@ -34,6 +34,11 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(value = "macula.crypto.enable", havingValue = "true")
 public class CryptoAutoConfiguration {
 
+    /**
+     * 创建加密管理器Bean
+     *
+     * @return 加密管理器实例
+     */
     @Bean
     public CryptoManager encryptorManager() {
         return new CryptoManager();

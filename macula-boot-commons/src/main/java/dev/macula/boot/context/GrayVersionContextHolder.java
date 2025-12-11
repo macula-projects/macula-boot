@@ -26,6 +26,12 @@ import com.alibaba.ttl.TransmittableThreadLocal;
  * @since 2023/9/11 12:41
  */
 public class GrayVersionContextHolder {
+    /**
+     * 私有构造函数，防止实例化
+     */
+    private GrayVersionContextHolder() {
+    }
+    
     private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new TransmittableThreadLocal<>();
 
     /**

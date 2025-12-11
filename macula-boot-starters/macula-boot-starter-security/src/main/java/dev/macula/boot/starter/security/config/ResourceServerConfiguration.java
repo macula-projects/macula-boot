@@ -25,8 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.ConditionalOnIssuerLocationJwtDecoder;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.ConditionalOnPublicKeyJwtDecoder;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -37,8 +37,10 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -71,7 +73,7 @@ import java.util.Set;
  */
 
 @RequiredArgsConstructor
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 @EnableConfigurationProperties(SecurityProperties.class)
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {
@@ -82,29 +84,48 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
+    /**
+     * 配置安全过滤器链
+     *
+     * @param http HTTP安全配置
+     * @return 安全过滤器链
+     * @throws Exception 配置异常
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 添加默认忽略的路径
         // @formatter:off
-        http.oauth2ResourceServer()
-            .jwt()
-            .decoder(applicationContext.getBean(JwtDecoder.class))
-            .jwtAuthenticationConverter(jwtAuthenticationConverter())
-            .and()
-            .accessDeniedHandler(accessDeniedHandler())
-            .authenticationEntryPoint(authenticationEntryPoint());
-
-        http.sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .csrf().disable()
-            .headers().frameOptions().sameOrigin()
-            .and()
-            .authorizeHttpRequests().requestMatchers(Convert.toStrArray(securityProperties.getIgnoreUrls())).permitAll()
+        // 1. OAuth2 资源服务器配置（JWT 认证）
+        http.oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt
+                .decoder(applicationContext.getBean(JwtDecoder.class)) // 获取自定义 JwtDecoder
+                .jwtAuthenticationConverter(jwtAuthenticationConverter()) // 自定义 JWT 认证转换器
+            )
+            .accessDeniedHandler(accessDeniedHandler()) // 拒绝访问处理器
+            .authenticationEntryPoint(authenticationEntryPoint()) // 认证入口点
+        )
+        // 2. 会话管理（无状态）
+        .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        // 3. CSRF 禁用（前后端分离场景）
+        .csrf(AbstractHttpConfigurer::disable)
+        // 4. 响应头配置（允许同源 iframe）
+        .headers(headers -> headers
+            .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+        )
+        // 5. 请求授权规则
+        .authorizeHttpRequests(authorize -> authorize
+            // 放行忽略的 URL
+            .requestMatchers(Convert.toStrArray(securityProperties.getIgnoreUrls())).permitAll()
+            // 其他请求需要认证
             .anyRequest().authenticated()
-            .and()
-            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
-            .authenticationEntryPoint(authenticationEntryPoint());
+        )
+        // 6. 异常处理（7.0 中可直接配置，无需重复 and()）
+        .exceptionHandling(exceptions -> exceptions
+            .accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint())
+        );
+
         return http.build();
         // @formatter:on
     }
@@ -116,7 +137,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     /**
-     * token无效或者已过期自定义响应
+     * token 无效或者已过期自定义响应
      */
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
@@ -126,7 +147,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
 
     @Bean
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        // 从JWT转换为Authentication
+        // 从 JWT 转换为 Authentication
         return new Converter<Jwt, AbstractAuthenticationToken>() {
             private final JwtGrantedAuthoritiesConverter jwtScopeAuthoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
@@ -139,9 +160,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
                 return new JwtAuthenticationToken(jwt, authorities);
             }
 
-            // 从JWT的authorities属性中读取权限
+            // 从 JWT的authorities属性中读取权限
             private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-                // 先把SCOPE变成authorities
+                // 先把 SCOPE变成authorities
                 Collection<GrantedAuthority> authorities = jwtScopeAuthoritiesConverter.convert(jwt);
                 // 再把authorities属性转换过来，相加
                 jwtAuthoritiesAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_KEY);
@@ -167,7 +188,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
-    @Conditional(KeyValueCondition.class)
+    @ConditionalOnPublicKeyJwtDecoder
     JwtDecoder jwtDecoderByPublicKeyValue() throws Exception {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
         RSAPublicKey publicKey = (RSAPublicKey)KeyFactory.getInstance("RSA")
@@ -182,7 +203,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
-    @Conditional(IssuerUriCondition.class)
+    @ConditionalOnIssuerLocationJwtDecoder
     SupplierJwtDecoder jwtDecoderByIssuerUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
         return new SupplierJwtDecoder(() -> JwtDecoders.fromIssuerLocation(jwt.getIssuerUri()));
@@ -192,7 +213,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(SecretCondition.class)
     JwtDecoder jwtDecoderBySecret() throws UnsupportedEncodingException {
-        // 根据给定的字节数组使用AES加密算法构造一个密钥
+        // 根据给定的字节数组使用 AES加密算法构造一个密钥
         byte[] secrets = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(secrets, 0, secrets.length, "HMACSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();

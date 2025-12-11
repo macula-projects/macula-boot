@@ -31,13 +31,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
+ * 基于HTTP 的段ID服务实现
+ * 
  * @author du_imba
  */
 public class HttpSegmentIdServiceImpl implements SegmentIdService {
 
     private static final Logger logger = Logger.getLogger(HttpSegmentIdServiceImpl.class.getName());
-    private static String serverUrl = "http://{0}/tinyid/api/v1/id/nextSegmentIdSimple?token={1}&bizType=";
-    private TinyIdProperties properties;
+    private static final String serverUrl = "http://{0}/tinyid/api/v1/id/nextSegmentIdSimple?token={1}&bizType=";
+    private final TinyIdProperties properties;
     private List<String> serverList;
 
     public HttpSegmentIdServiceImpl(TinyIdProperties properties) {
@@ -49,7 +51,7 @@ public class HttpSegmentIdServiceImpl implements SegmentIdService {
         String url = chooseService(bizType);
         String response = TinyIdHttpUtils.post(url, properties.getReadTimeout(), properties.getConnectTimeout());
         logger.info("tinyId client getNextSegmentId end, response:" + response);
-        if (response == null || "".equals(response.trim())) {
+        if (response == null || response.trim().isEmpty()) {
             return null;
         }
         SegmentId segmentId = new SegmentId();
@@ -63,7 +65,7 @@ public class HttpSegmentIdServiceImpl implements SegmentIdService {
     }
 
     private String chooseService(String bizType) {
-        // 将tinyIdServer转为需要的访问URL
+        // 将tinyIdServer 转为需要的访问 URL
         if (serverList == null) {
             if (StringUtils.hasLength(properties.getServer()) && StringUtils.hasLength(properties.getToken())) {
                 String[] tinyIdServers = properties.getServer().split(",");

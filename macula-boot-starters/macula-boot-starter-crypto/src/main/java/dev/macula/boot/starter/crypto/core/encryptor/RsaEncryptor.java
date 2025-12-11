@@ -36,6 +36,11 @@ public class RsaEncryptor extends AbstractEncryptor {
 
     private final RSA rsa;
 
+    /**
+     * 构造函数
+     *
+     * @param context 加密上下文
+     */
     public RsaEncryptor(CryptoContext context) {
         super(context);
         String privateKey = context.getPrivateKey();

@@ -21,10 +21,10 @@ import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 import org.aspectj.lang.JoinPoint;
 
 /**
+ * 幂等性键解析器接口，用于解析生成幂等检查的唯一键
+ * 
  * @author lengleng
  * @since 2020/9/25
- *     <p>
- *     唯一标志处理器
  */
 public interface KeyResolver {
 

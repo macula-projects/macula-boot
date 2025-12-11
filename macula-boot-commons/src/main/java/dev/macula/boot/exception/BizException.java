@@ -31,13 +31,31 @@ import lombok.Getter;
 @Getter
 public class BizException extends MaculaException {
 
+    /**
+     * 错误码
+     */
     private final String code;
+    
+    /**
+     * 错误消息
+     */
     private final String msg;
 
+    /**
+     * 构造函数
+     * @param resultCode 结果码
+     * @param exceptionMessage 异常信息
+     */
     public BizException(ResultCode resultCode, String exceptionMessage) {
         this(resultCode.getCode(), resultCode.getMsg(), exceptionMessage);
     }
 
+    /**
+     * 构造函数
+     * @param code 错误码
+     * @param msg 错误信息
+     * @param exceptionMessage 异常信息
+     */
     public BizException(String code, String msg, String exceptionMessage) {
         // message用于用户设置抛出错误详情，例如：当前价格-5，小于0
         super(exceptionMessage);
@@ -45,6 +63,10 @@ public class BizException extends MaculaException {
         this.msg = msg;
     }
 
+    /**
+     * 构造函数
+     * @param exceptionMessage 异常信息
+     */
     public BizException(String exceptionMessage) {
         this(ApiResultCode.BIZ_ERROR, exceptionMessage);
     }

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import lombok.NonNull;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -36,7 +37,6 @@ import org.springframework.util.TypeUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -79,7 +79,7 @@ public abstract class AbstractReadWriteJackson2HttpMessageConverter extends Abst
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+	public boolean canWrite(@NonNull Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
 		}

@@ -24,6 +24,7 @@ import java.util.Objects;
 
 /**
  * 枚举通用接口
+ * @param <T> 枚举值类型
  *
  * @author haoxr
  * @since 2022/3/27 12:06
@@ -87,8 +88,16 @@ public interface IBaseEnum<T> {
         return value;
     }
 
+    /**
+     * 获取枚举值
+     * @return 枚举值
+     */
     T getValue();
 
+    /**
+     * 获取枚举文本标签
+     * @return 枚举文本标签
+     */
     String getLabel();
 
 }

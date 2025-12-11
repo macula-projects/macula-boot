@@ -24,19 +24,34 @@ package dev.macula.boot.exception;
  * @since 2022/7/6 09:05
  */
 public class MaculaException extends RuntimeException {
-
+    /**
+     * 构造函数
+     */
     public MaculaException() {
         super();
     }
 
+    /**
+     * 构造函数
+     * @param message 异常信息
+     */
     public MaculaException(String message) {
         super(message);
     }
 
+    /**
+     * 构造函数
+     * @param message 异常信息
+     * @param cause 异常原因
+     */
     public MaculaException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * 构造函数
+     * @param cause 异常原因
+     */
     public MaculaException(Throwable cause) {
         super(cause);
     }

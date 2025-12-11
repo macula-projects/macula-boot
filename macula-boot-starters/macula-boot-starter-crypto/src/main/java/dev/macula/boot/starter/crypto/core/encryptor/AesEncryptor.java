@@ -37,6 +37,11 @@ public class AesEncryptor extends AbstractEncryptor {
 
     private final AES aes;
 
+    /**
+     * 构造函数
+     *
+     * @param context 加密上下文
+     */
     public AesEncryptor(CryptoContext context) {
         super(context);
         String password = context.getPassword();

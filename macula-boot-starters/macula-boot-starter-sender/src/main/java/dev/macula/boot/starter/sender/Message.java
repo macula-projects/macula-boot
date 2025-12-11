@@ -23,9 +23,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * {@code Message} 发送给MQ的消息
+ * {@code Message}  发送给 MQ 的消息
  *
- * @author https://gitee.com/litao851025/lego
+ * @author <a href="https://gitee.com/litao851025/lego">lego</a>
  * @since 2023/1/3 14:10
  */
 @Data
@@ -34,15 +34,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Message {
 
+    /**
+     * 是否顺序消息
+     */
     private boolean orderly;
 
+    /**
+     * 消息主题
+     */
     private String topic;
 
+    /**
+     * 分区键
+     */
     private String shardingKey;
 
+    /**
+     * 消息键
+     */
     private String msgKey;
 
+    /**
+     * 消息标签
+     */
     private String tag;
 
+    /**
+     * 消息内容
+     */
     private String msg;
 }

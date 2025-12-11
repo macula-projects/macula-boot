@@ -32,30 +32,101 @@ import java.io.Serializable;
 @NoArgsConstructor
 public enum ApiResultCode implements ResultCode, Serializable {
 
-    SUCCESS("00000", "请求成功"), FAILED("99999", "请求失败"),
-
     /**
-     * 用户异常
+     * 请求成功
      */
-    ACCESS_UNAUTHORIZED("A0301", "未授权的访问"), TOKEN_INVALID_OR_EXPIRED("A0311", "访问令牌无效或已过期"),
-    TOKEN_ACCESS_FORBIDDEN("A0312", "令牌没有访问授权"), AKSK_ACCESS_FORBIDDEN("A0340", "基于AKSK的访问签名无效"),
+    SUCCESS("00000", "请求成功"),
+    
+    /**
+     * 请求失败
+     */
+    FAILED("99999", "请求失败"),
+
+    // 访问异常
+    /**
+     * 未授权的访问
+     */
+    ACCESS_UNAUTHORIZED("A0301", "未授权的访问"),
+    
+    /**
+     * 访问令牌无效或已过期
+     */
+    TOKEN_INVALID_OR_EXPIRED("A0311", "访问令牌无效或已过期"),
+    
+    /**
+     * 令牌没有访问授权
+     */
+    TOKEN_ACCESS_FORBIDDEN("A0312", "令牌没有访问授权"),
+    
+    /**
+     * 基于AKSK的访问签名无效
+     */
+    AKSK_ACCESS_FORBIDDEN("A0340", "基于AKSK的访问签名无效"),
+    
+    /**
+     * 参数校验错误
+     */
     VALIDATE_ERROR("A0400", "参数校验错误"),
 
+    // 业务异常
     /**
      * 业务异常
      */
-    BIZ_ERROR("B0001", "业务异常"), SYS_ERROR("B0002", "系统异常"), BIZ_CHECK_ERROR("B0003", "业务检查异常"),
-    RESPONSE_PACK_ERROR("B0400", "Response返回包装失败"), API_CRYPTO_ERROR("B0401", "接口加解密异常"),
-    API_CRYPTO_KEY_NOT_EXIST("B0402", "加密接口缺少KEY"), API_SIGN_ERROR("B0411", "接口防篡改防重放校验未通过"),
+    BIZ_ERROR("B0001", "业务异常"),
+    
+    /**
+     * 系统异常
+     */
+    SYS_ERROR("B0002", "系统异常"),
+    
+    /**
+     * 业务检查异常
+     */
+    BIZ_CHECK_ERROR("B0003", "业务检查异常"),
+    
+    /**
+     * Response返回包装失败
+     */
+    RESPONSE_PACK_ERROR("B0400", "Response返回包装失败"),
+    
+    /**
+     * 接口加解密异常
+     */
+    API_CRYPTO_ERROR("B0401", "接口加解密异常"),
+    
+    /**
+     * 加密接口缺少KEY
+     */
+    API_CRYPTO_KEY_NOT_EXIST("B0402", "加密接口缺少KEY"),
+    
+    /**
+     * 接口防篡改防重放校验未通过
+     */
+    API_SIGN_ERROR("B0411", "接口防篡改防重放校验未通过"),
+    
+    /**
+     * 接口防篡改防重放缺少必备参数
+     */
     API_SIGN_PARAMS_NOT_EXIST("B0412", "接口防篡改防重放缺少必备参数"),
 
     /**
-     * 调用第三方产生的异常
+     * 限流
      */
-    FLOW_LIMITING("C0401", "限流"), DEGRADATION("C0402", "系统降级");
+    FLOW_LIMITING("C0401", "限流"),
+    
+    /**
+     * 系统降级
+     */
+    DEGRADATION("C0402", "系统降级");
 
+    /**
+     * 响应码
+     */
     private String code;
 
+    /**
+     * 响应消息
+     */
     private String msg;
 
     @Override

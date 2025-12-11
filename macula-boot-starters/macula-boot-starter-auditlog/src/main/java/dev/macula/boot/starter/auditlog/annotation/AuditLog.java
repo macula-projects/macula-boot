@@ -33,41 +33,57 @@ import java.lang.annotation.*;
 public @interface AuditLog {
     /**
      * 模块
+     *
+     * @return 模块名称
      */
     String title() default "";
 
     /**
      * 功能
+     *
+     * @return 业务类型
      */
     BusinessType businessType() default BusinessType.OTHER;
 
     /**
      * 操作人类别
+     *
+     * @return 操作者类型
      */
     OperatorType operatorType() default OperatorType.MANAGE;
 
     /**
      * 是否保存请求的参数
+     *
+     * @return 是否保存请求参数
      */
     boolean isSaveRequestData() default true;
 
     /**
      * 是否保存响应的参数
+     *
+     * @return 是否保存响应参数
      */
     boolean isSaveResponseData() default true;
 
     /**
      * 排除指定的请求参数
+     *
+     * @return 排除指定的请求参数
      */
     String[] excludeParamNames() default {};
 
     /**
      * 最大请求参数长度
+     *
+     * @return 最大请求参数长度
      */
     int maxParamLength() default 2000;
 
     /**
      * 最大响应结果长度
+     *
+     * @return 最大响应结果长度
      */
     int maxResultLength() default 2000;
 

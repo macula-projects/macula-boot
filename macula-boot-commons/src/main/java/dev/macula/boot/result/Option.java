@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * {@code Option} 下拉选项
- *
+ * @param <T> 值类型
  * @author rain
  * @since 2022/12/12 17:46
  */
@@ -37,12 +37,25 @@ public class Option<T> {
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     private List<Option<T>> children;
 
+    /**
+     * 构造函数
+     *
+     * @param value 选项值
+     * @param label 选项标签
+     */
     @Default
     public Option(T value, String label) {
         this.value = value;
         this.label = label;
     }
 
+    /**
+     * 构造函数
+     *
+     * @param value 选项值
+     * @param label 选项标签
+     * @param children 子选项列表
+     */
     public Option(T value, String label, List<Option<T>> children) {
         this.value = value;
         this.label = label;
