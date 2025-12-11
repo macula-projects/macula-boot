@@ -30,7 +30,6 @@
 
     <artifactId>macula-boot</artifactId>
     <packaging>pom</packaging>
-    <version>${revision}</version>
 
     <name>macula-boot</name>
     <description>基于Spring Boot、Spring Cloud的微服务开发框架</description>
