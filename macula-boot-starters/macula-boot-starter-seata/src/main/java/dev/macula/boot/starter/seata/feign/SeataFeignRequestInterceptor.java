@@ -19,7 +19,7 @@ package dev.macula.boot.starter.seata.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import io.seata.core.context.RootContext;
+import org.apache.seata.core.context.RootContext;
 import org.springframework.util.StringUtils;
 
 /**

@@ -41,7 +41,7 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
      * @param pageable JPA 分页排序参数
      * @return 博客分页信息
      */
-    @QueryFenix
+    @QueryFenix("queryMyBlogs")
     Page<Blog> queryMyBlogs(@Param("ids") List<String> ids, @Param("blog") Blog blog, Pageable pageable);
 
 }

@@ -48,7 +48,7 @@ public class MybatisDecryptInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        // 获取执行mysql执行结果
+        // 获取执行 mysql执行结果
         Object result = invocation.proceed();
         if (result == null) {
             return null;
@@ -70,8 +70,7 @@ public class MybatisDecryptInterceptor implements Interceptor {
             new HashSet<>(((Map<?, ?>)sourceObject).values()).forEach(this::decryptHandler);
             return;
         }
-        if (sourceObject instanceof List<?>) {
-            List<?> sourceList = (List<?>)sourceObject;
+        if (sourceObject instanceof List<?> sourceList) {
             if (CollectionUtil.isEmpty(sourceList)) {
                 return;
             }
@@ -80,7 +79,7 @@ public class MybatisDecryptInterceptor implements Interceptor {
             if (CollectionUtil.isEmpty(encryptorManager.getFieldCache(firstItem.getClass()))) {
                 return;
             }
-            ((List<?>)sourceObject).forEach(this::decryptHandler);
+            sourceList.forEach(this::decryptHandler);
             return;
         }
         Set<Field> fields = encryptorManager.getFieldCache(sourceObject.getClass());

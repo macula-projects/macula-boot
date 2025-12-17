@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -41,7 +42,8 @@ import java.util.Map;
  * @author Rain
  */
 
-@AutoConfiguration(before = JpaRepositoriesAutoConfiguration.class)
+@AutoConfiguration(before = JpaRepositoriesAutoConfiguration.class,
+    after = {HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class})
 @ConditionalOnMissingBean({JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class})
 @ConditionalOnBean({DataSource.class})
 @ConditionalOnClass({JpaRepository.class})

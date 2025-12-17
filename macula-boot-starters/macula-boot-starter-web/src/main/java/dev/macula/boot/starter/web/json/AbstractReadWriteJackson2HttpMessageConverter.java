@@ -92,7 +92,7 @@ public abstract class AbstractReadWriteJackson2HttpMessageConverter extends Abst
 	}
 
 	@Override
-	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
+	protected void writeInternal(@NonNull Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 		throws IOException, HttpMessageNotWritableException {
 
    		MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -106,9 +106,8 @@ public abstract class AbstractReadWriteJackson2HttpMessageConverter extends Abst
 			FilterProvider filters = null;
 			JavaType javaType = null;
 
-			if (object instanceof MappingJacksonValue) {
-				MappingJacksonValue container = (MappingJacksonValue) object;
-				value = container.getValue();
+			if (object instanceof MappingJacksonValue container) {
+                value = container.getValue();
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}

@@ -20,9 +20,9 @@ package dev.macula.boot.starter.mp.annotation;
 import java.lang.annotation.*;
 
 /**
- * {@code DataPermission}MP数据权限注解
+ * {@code DataPermission} MP 数据权限注解
  * <p>
- * https://gitee.com/baomidou/mybatis-plus/issues/I37I90
+ * <a href="https://gitee.com/baomidou/mybatis-plus/issues/I37I90">mybatis-plus</a>
  *
  * @author <a href="mailto:2256222053@qq.com">zc</a>
  * @author Rain

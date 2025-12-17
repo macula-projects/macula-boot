@@ -101,7 +101,8 @@ public class TwoLevelCache extends RedisCache {
      * @return the raw store value for the key, or {@code null} if none
      */
     @Override
-    protected @Nullable Object lookup(@NonNull Object key) {
+    @Nullable
+    protected Object lookup(@NonNull Object key) {
         final String localKey = convertKey(key);
         Object localValue = localCache.getIfPresent(localKey);
 
@@ -212,10 +213,11 @@ public class TwoLevelCache extends RedisCache {
      * @see #put(Object, Object)
      */
     @Override
-    public @Nullable ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
+    @NonNull
+    public ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
         if (value == null) {
             evict(key);
-            return null;
+            return new SimpleValueWrapper(null);
         }
 
         final ReentrantLock lock = makeLock(key);
@@ -230,7 +232,7 @@ public class TwoLevelCache extends RedisCache {
 
                 localCache.put(convertKey(key), value);
 
-                return null;
+                return new SimpleValueWrapper(null);
             } else {
                 return new SimpleValueWrapper(existingValue);
             }

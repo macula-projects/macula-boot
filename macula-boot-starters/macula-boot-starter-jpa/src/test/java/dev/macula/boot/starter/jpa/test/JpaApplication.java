@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.jpa.test;
 
+import com.blinkfox.fenix.EnableFenix;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

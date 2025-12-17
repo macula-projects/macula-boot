@@ -4,6 +4,10 @@ spring:
   profiles:
     active: dev
 
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
 macula:
   rocketmq:
     gray:
@@ -29,3 +33,4 @@ logging:
   level:
     root: info
     dev.macula: debug
+

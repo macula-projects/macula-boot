@@ -17,11 +17,6 @@
 
 package dev.macula.boot.starter.idempotent.expression;
 
-/**
- * @author lengleng
- * @since 2020/9/25
- */
-
 import dev.macula.boot.starter.idempotent.annotation.Idempotent;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

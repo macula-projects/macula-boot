@@ -32,20 +32,24 @@ import java.time.LocalTime;
  */
 @Component
 public class RetryTestService {
-    int a = 0;
+    int retryCount = 0;
 
-    @Retryable(retryFor = {RuntimeException.class}, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2))
-    public void testRetry() {
-        a++;
-        System.out.println(a + " - 调用时间是" + LocalTime.now());
-        if (a < 10) {
-            throw new RuntimeException("未满足条件");
+    @Retryable(retryFor = {RuntimeException.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))
+    public String testRetry() {
+        retryCount++;
+        System.out.println("调用不稳定服务，第" + retryCount + "次");
+
+        // 模拟业务异常（前2次失败，第3次成功）
+        if (retryCount < 4) {
+            throw new RuntimeException("服务临时不可用");
         }
+
+        return "调用成功！";
     }
 
     @Recover
     public String recoverTest(RuntimeException e) {
-        System.out.println("回调方法调用时间是-" + LocalTime.now() + "，异常信息-" + e.getMessage());
-        return "回调方法-" + e.getMessage();
+        System.out.println("所有重试均失败，执行兜底逻辑：" + e.getMessage());
+        return "兜底返回：服务暂时无法访问，请稍后重试";
     }
 }

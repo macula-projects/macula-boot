@@ -22,7 +22,6 @@ public class JDBCUtils {
 
     /**
      * 数据源列表 (线程安全)
-     *
      * serverId 与 dataSource 配置
      */
     private static final ConcurrentHashMap<Long, DataSource> dataSourceMap = new ConcurrentHashMap<>();

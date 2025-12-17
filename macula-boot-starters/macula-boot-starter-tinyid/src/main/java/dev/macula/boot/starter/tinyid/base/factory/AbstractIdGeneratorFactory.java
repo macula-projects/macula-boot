@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractIdGeneratorFactory implements IdGeneratorFactory {
 
-    private static ConcurrentHashMap<String, IdGenerator> generators = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, IdGenerator> generators = new ConcurrentHashMap<>();
 
     @Override
     public IdGenerator getIdGenerator(String bizType) {

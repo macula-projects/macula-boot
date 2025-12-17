@@ -51,7 +51,6 @@ import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrinci
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.SpringReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
@@ -148,7 +147,7 @@ public class ResourceServerConfiguration {
                 }
 
                 return this.delegate.introspect(token).map(principal -> {
-                    // introspect获取principal后缓存内容
+                    // introspect 获取principal后缓存内容
                     Instant iat = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.IAT);
                     Instant exp = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.EXP);
                     long between = iat != null && exp != null ? ChronoUnit.MINUTES.between(iat, exp) : 5L;
@@ -163,7 +162,7 @@ public class ResourceServerConfiguration {
                 });
             }
 
-            // 自定义获取用户的authorities
+            // 自定义获取用户的 authorities
             private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
                 List<GrantedAuthority> result = new ArrayList<>(principal.getAuthorities());
 
@@ -171,7 +170,7 @@ public class ResourceServerConfiguration {
                 if (authorities != null) {
                     result.addAll(authorities.stream()
                             .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
-                            .collect(Collectors.toList()));
+                            .toList());
                 }
                 return result;
             }
@@ -194,7 +193,7 @@ public class ResourceServerConfiguration {
     }
 
     /**
-     * token无效或者已过期自定义响应
+     * token 无效或者已过期自定义响应
      */
     @Bean
     ServerAuthenticationEntryPoint authenticationEntryPoint() {

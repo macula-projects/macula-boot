@@ -21,6 +21,7 @@ import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.starter.security.utils.ResponseUtils;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -53,7 +54,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
@@ -73,7 +73,7 @@ import java.util.Set;
  */
 
 @RequiredArgsConstructor
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @EnableConfigurationProperties(SecurityProperties.class)
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {
@@ -148,14 +148,14 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Bean
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         // 从 JWT 转换为 Authentication
-        return new Converter<Jwt, AbstractAuthenticationToken>() {
+        return new Converter<>() {
             private final JwtGrantedAuthoritiesConverter jwtScopeAuthoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
             private final JwtGrantedAuthoritiesConverter jwtAuthoritiesAuthoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
 
             @Override
-            public final AbstractAuthenticationToken convert(Jwt jwt) {
+            public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
                 Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
                 return new JwtAuthenticationToken(jwt, authorities);
             }
@@ -212,7 +212,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     @Bean
     @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(SecretCondition.class)
-    JwtDecoder jwtDecoderBySecret() throws UnsupportedEncodingException {
+    JwtDecoder jwtDecoderBySecret() {
         // 根据给定的字节数组使用 AES加密算法构造一个密钥
         byte[] secrets = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(secrets, 0, secrets.length, "HMACSHA256");
@@ -220,7 +220,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 

@@ -3,6 +3,7 @@ spring:
     name: tiny-id
 
 macula:
-  tinyid:
-    token: 0f673adf80504e2eaa552f5d791b644c
-    server: localhost:8082
+  cloud:
+    tinyid:
+      token: 0f673adf80504e2eaa552f5d791b644c
+      server: localhost:9082

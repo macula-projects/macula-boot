@@ -41,10 +41,10 @@ import java.util.function.Supplier;
 @Slf4j
 public class AuditMetaObjectHandler implements MetaObjectHandler {
 
-    private String createTimeName;
-    private String createByName;
-    private String lastUpdateTimeName;
-    private String lastUpdateByName;
+    private final String createTimeName;
+    private final String createByName;
+    private final String lastUpdateTimeName;
+    private final String lastUpdateByName;
 
     public AuditMetaObjectHandler(MyBatisPlusProperties.Audit audit) {
         this.createByName = audit.getCreateByName();
@@ -56,9 +56,9 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         log.debug("start insert fill ....");
-        this.strictInsertFill(metaObject, createTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
+        this.strictInsertFill(metaObject, createTimeName, LocalDateTime::now, LocalDateTime.class);
         this.strictInsertFill(metaObject, createByName, String.class, getCurrentUser());
-        this.strictInsertFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
+        this.strictInsertFill(metaObject, lastUpdateTimeName, LocalDateTime::now, LocalDateTime.class);
         this.strictInsertFill(metaObject, lastUpdateByName, String.class, getCurrentUser());
     }
 
@@ -66,7 +66,7 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     public void updateFill(MetaObject metaObject) {
         log.debug("start update fill ....");
 
-        this.strictUpdateFill(metaObject, lastUpdateTimeName, () -> LocalDateTime.now(), LocalDateTime.class);
+        this.strictUpdateFill(metaObject, lastUpdateTimeName, LocalDateTime::now, LocalDateTime.class);
         this.strictUpdateFill(metaObject, lastUpdateByName, String.class, getCurrentUser());
     }
 

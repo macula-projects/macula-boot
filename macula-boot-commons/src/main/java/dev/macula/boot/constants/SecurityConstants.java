@@ -54,9 +54,6 @@ public interface SecurityConstants {
     /**
      * JWT令牌前缀
      */
-    /**
-     * JWT令牌前缀
-     */
     String TOKEN_PREFIX = "Bearer ";
 
     /**
@@ -98,10 +95,7 @@ public interface SecurityConstants {
      * 系统默认密码
      */
     String DEFAULT_USER_PASSWORD = "123456";
-
-    /**
-     * 超级管理员角色编码
-     */
+    
     /**
      * 超级管理员角色编码
      */

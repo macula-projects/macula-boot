@@ -31,12 +31,6 @@ import java.io.Serializable;
 public class Result<T> implements Serializable {
 
     /**
-     * 私有构造函数，防止外部实例化
-     */
-    private Result() {
-    }
-
-    /**
      * 响应是否成功
      */
     private boolean success;

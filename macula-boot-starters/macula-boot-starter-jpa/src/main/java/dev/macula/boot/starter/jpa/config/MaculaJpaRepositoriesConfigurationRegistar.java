@@ -41,9 +41,6 @@ class MaculaJpaRepositoriesConfigurationRegistar extends AbstractRepositoryConfi
 
     private BootstrapMode bootstrapMode = null;
 
-    MaculaJpaRepositoriesConfigurationRegistar() {
-    }
-
     protected Class<? extends Annotation> getAnnotation() {
         return EnableJpaRepositories.class;
     }

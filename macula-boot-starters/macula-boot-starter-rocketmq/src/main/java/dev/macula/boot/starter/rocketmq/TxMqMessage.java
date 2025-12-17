@@ -23,6 +23,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ObjectUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,7 @@ import java.util.Map;
  */
 public class TxMqMessage<T> implements Message<T>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private final T payload;
 
@@ -65,10 +67,9 @@ public class TxMqMessage<T> implements Message<T>, Serializable {
     public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
-        } else if (!(other instanceof TxMqMessage)) {
+        } else if (!(other instanceof TxMqMessage<?> otherMsg)) {
             return false;
         } else {
-            TxMqMessage<?> otherMsg = (TxMqMessage<?>)other;
             return ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers);
         }
     }
@@ -81,7 +82,7 @@ public class TxMqMessage<T> implements Message<T>, Serializable {
         StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
         sb.append(" [payload=");
         if (this.payload instanceof byte[]) {
-            sb.append("byte[").append(((byte[])((byte[])this.payload)).length).append(']');
+            sb.append("byte[").append(((byte[])(this.payload)).length).append(']');
         } else {
             sb.append(this.payload);
         }

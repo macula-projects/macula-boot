@@ -1,6 +1,11 @@
 server:
   port: 8083
 
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
 macula:
   security:
     ignore-urls: /, /index.html, **/*.js, **/*.css, /test/**, /websocket**
