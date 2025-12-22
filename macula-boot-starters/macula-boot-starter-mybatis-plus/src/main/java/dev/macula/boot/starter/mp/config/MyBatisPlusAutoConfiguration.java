@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.mp.config;
 
-import cn.hutool.core.util.ClassUtil;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
@@ -31,7 +30,7 @@ import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
 import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
 import dev.macula.boot.starter.mp.interceptor.MybatisDecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.MybatisEncryptInterceptor;
-import dev.macula.boot.starter.security.utils.SecurityUtils;
+import dev.macula.boot.starter.mp.utils.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -40,7 +39,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.util.ClassUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -79,24 +77,21 @@ public class MyBatisPlusAutoConfiguration {
                         return new LongValue(SecurityUtils.getTenantId());
                     }
 
-                    // 默认租户ID
+                    // 默认租户 ID
                     return new LongValue(properties.getTenantId());
                 }
 
                 // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
                 @Override
                 public boolean ignoreTable(String tableName) {
-                    // 分租户的表名称应该统一以xx标识
+                    // 分租户的表名称应该统一以 xx标识
                     return Arrays.stream(properties.getTenantSuffixes()).noneMatch(tableName::endsWith);
                 }
             }));
         }
 
         // 数据权限
-        if (ClassUtils.isPresent("dev.macula.boot.starter.security.utils.SecurityUtils",
-            this.getClass().getClassLoader())) {
-            interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
-        }
+        interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
 
         // 分页插件
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();

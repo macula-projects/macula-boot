@@ -24,7 +24,7 @@ import com.baomidou.mybatisplus.extension.plugins.handler.DataPermissionHandler;
 import dev.macula.boot.base.IBaseEnum;
 import dev.macula.boot.enums.DataScopeEnum;
 import dev.macula.boot.starter.mp.annotation.DataPermission;
-import dev.macula.boot.starter.security.utils.SecurityUtils;
+import dev.macula.boot.starter.mp.utils.SecurityUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;

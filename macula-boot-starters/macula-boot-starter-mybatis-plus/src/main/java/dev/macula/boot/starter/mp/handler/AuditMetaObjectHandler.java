@@ -21,7 +21,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.starter.mp.config.MyBatisPlusProperties;
-import dev.macula.boot.starter.security.utils.SecurityUtils;
+import dev.macula.boot.starter.mp.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 

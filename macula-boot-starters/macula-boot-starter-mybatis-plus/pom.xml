@@ -67,8 +67,14 @@
         </dependency>
 
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-security</artifactId>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
             <optional>true</optional>
         </dependency>
 
