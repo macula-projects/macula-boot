@@ -60,7 +60,6 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * {@code CryptoGlobalFilter} 加密或解密请求响应处理拦截器
@@ -171,8 +170,8 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         // 尝试从 exchange 的自定义属性中取出缓存到的 body
         byte[] body = RequestUtils.getBody(exchange);
-        if (body != null && body.length > 0 && Objects.equals(request.getHeaders().getContentType(),
-            MediaType.APPLICATION_JSON)) {
+        if (body != null && body.length > 0 && MediaType.APPLICATION_JSON.isCompatibleWith(
+            request.getHeaders().getContentType())) {
             byte[] decrypBytes = body;
 
             String rootData = new String(body, StandardCharsets.UTF_8);
