@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.operationlog;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -82,14 +83,14 @@ public class OperationLogDTO implements Serializable {
     private String method;
 
     /**
-     * 操作提交的参数（JSON序列化后的字符串）
+     * 操作提交的参数
      */
-    private String parameters;
+    private JsonNode parameters;
 
     /**
-     * 操作返回结果（JSON序列化后的字符串）
+     * 操作返回结果
      */
-    private String result;
+    private JsonNode result;
 
     /**
      * 开始时间
