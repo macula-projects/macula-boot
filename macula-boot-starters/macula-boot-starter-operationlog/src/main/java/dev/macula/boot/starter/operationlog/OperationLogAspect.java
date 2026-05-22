@@ -61,11 +61,15 @@ public class OperationLogAspect {
             operationLogDTO.setException(exception.getMessage());
             throw exception;
         } finally {
-            operationLogDTO.setEndTime(LocalDateTime.now());
-            operationLogDTO.setExecutionTimeMillis(
-                Duration.between(operationLogDTO.getStartTime(), operationLogDTO.getEndTime()).toMillis()
-            );
-            eventPublisher.publishEvent(new OperationLogEvent(operationLogDTO));
+            try {
+                operationLogDTO.setEndTime(LocalDateTime.now());
+                operationLogDTO.setExecutionTimeMillis(
+                    Duration.between(operationLogDTO.getStartTime(), operationLogDTO.getEndTime()).toMillis()
+                );
+                eventPublisher.publishEvent(new OperationLogEvent(operationLogDTO));
+            } catch (Exception e) {
+                log.warn("Failed to publish operation log event: {}", e.getMessage());
+            }
         }
 
         return result;
