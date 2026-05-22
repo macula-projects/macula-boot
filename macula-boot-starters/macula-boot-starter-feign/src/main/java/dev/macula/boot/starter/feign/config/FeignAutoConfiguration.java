@@ -23,8 +23,7 @@ import dev.macula.boot.starter.feign.interceptor.HeaderRelayInterceptor;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 
@@ -40,6 +39,7 @@ import org.springframework.context.annotation.Bean;
 public class FeignAutoConfiguration {
 
     @Bean
+    @ConditionalOnClass(name = "javax.servlet.http.HttpServletRequest")
     public RequestInterceptor headerRelayInterceptor(FeignHeaderRelayProperties properties) {
         return new HeaderRelayInterceptor(properties);
     }
@@ -54,4 +54,5 @@ public class FeignAutoConfiguration {
     public ErrorDecoder errorDecoder() {
         return new OpenFeignErrorDecoder();
     }
+
 }
