@@ -21,7 +21,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * 操作日志DTO
@@ -83,14 +82,14 @@ public class OperationLogDTO implements Serializable {
     private String method;
 
     /**
-     * 操作提交的参数
+     * 操作提交的参数（JSON序列化后的字符串）
      */
-    private Map<String, Object> parameters;
+    private String parameters;
 
     /**
-     * 操作返回结果
+     * 操作返回结果（JSON序列化后的字符串）
      */
-    private Object result;
+    private String result;
 
     /**
      * 开始时间
