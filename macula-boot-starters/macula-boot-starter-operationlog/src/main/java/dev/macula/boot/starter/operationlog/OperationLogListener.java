@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.operationlog;
 
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -32,6 +32,8 @@ import org.springframework.scheduling.annotation.Async;
 @Slf4j
 public class OperationLogListener {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     /**
      * 处理操作日志事件
      *
@@ -42,7 +44,11 @@ public class OperationLogListener {
     @Async
     public void saveOperationLog(OperationLogEvent event) {
         OperationLogDTO operationLog = event.getOperationLog();
-        log.info("[OperationLog] {} ->\n {}", operationLog.getMethod(), JSONUtil.toJsonStr(operationLog));
+        try {
+            log.info("[OperationLog] {} -> {}", operationLog.getMethod(), MAPPER.writeValueAsString(operationLog));
+        } catch (Exception e) {
+            log.warn("[OperationLog] {} -> {}", operationLog.getMethod(), operationLog);
+        }
     }
 
 }

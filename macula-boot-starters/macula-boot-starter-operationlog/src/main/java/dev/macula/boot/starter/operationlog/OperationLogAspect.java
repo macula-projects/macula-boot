@@ -54,7 +54,7 @@ public class OperationLogAspect {
         try {
             result = joinPoint.proceed();
             if (operationLog.logResult()) {
-                operationLogDTO.setResult(OperationLogUtils.safeToJsonStr(result));
+                operationLogDTO.setResult(OperationLogUtils.safeToJson(result));
             }
         } catch (Exception exception) {
             operationLogDTO.setLevel(OperationLogLevel.ERROR);

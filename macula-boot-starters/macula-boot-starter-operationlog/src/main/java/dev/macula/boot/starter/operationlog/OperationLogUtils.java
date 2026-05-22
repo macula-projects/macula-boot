@@ -19,8 +19,10 @@ package dev.macula.boot.starter.operationlog;
 
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -87,7 +89,7 @@ public class OperationLogUtils {
         return operationLogDTO;
     }
 
-    private static String extractParameters(ProceedingJoinPoint joinPoint) {
+    private static JsonNode extractParameters(ProceedingJoinPoint joinPoint) {
         String[] parameterNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
         Object[] parameterValues = joinPoint.getArgs();
 
@@ -95,35 +97,36 @@ public class OperationLogUtils {
         for (int i = 0; i < parameterNames.length; i++) {
             parameters.put(parameterNames[i], filterValue(parameterValues[i]));
         }
-        return safeToJsonStr(parameters);
+        return safeToJson(parameters);
     }
 
     /**
-     * 安全地将对象序列化为JSON字符串，循环引用自动写为null
+     * 安全地将对象转换为JsonNode，循环引用自动写为null
      *
-     * @param obj 要序列化的对象
-     * @return JSON字符串
+     * @param obj 要转换的对象
+     * @return JsonNode
      */
-    public static String safeToJsonStr(Object obj) {
+    public static JsonNode safeToJson(Object obj) {
         if (obj == null) {
             return null;
         }
         if (isNonSerializable(obj)) {
-            return obj.getClass().getSimpleName();
+            return TextNode.valueOf(obj.getClass().getSimpleName());
         }
         try {
-            String jsonStr = MAPPER.writeValueAsString(obj);
-            if (jsonStr.length() <= MAX_JSON_LENGTH) {
-                return jsonStr;
+            JsonNode node = MAPPER.valueToTree(obj);
+            String str = node.toString();
+            if (str.length() <= MAX_JSON_LENGTH) {
+                return node;
             }
-            log.debug("JSON truncated from {} to {} characters", jsonStr.length(), MAX_JSON_LENGTH);
-            return jsonStr.substring(0, MAX_JSON_LENGTH) + "...(truncated)";
+            log.debug("JSON truncated from {} to {} characters", str.length(), MAX_JSON_LENGTH);
+            return TextNode.valueOf(str.substring(0, MAX_JSON_LENGTH) + "...(truncated)");
         } catch (Exception e) {
             log.warn("Failed to serialize object to JSON: {}", e.getMessage());
             try {
-                return obj.toString();
+                return TextNode.valueOf(obj.toString());
             } catch (Exception ex) {
-                return obj.getClass().getName() + "(toString failed)";
+                return TextNode.valueOf(obj.getClass().getName() + "(toString failed)");
             }
         }
     }
