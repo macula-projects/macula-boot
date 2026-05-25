@@ -27,7 +27,7 @@ if [[ -z "$VERSION" ]]; then
 fi
 
 # 更新代码
-git checkout main
+git checkout 5.x
 git pull
 
 # 修改为发布版本号
