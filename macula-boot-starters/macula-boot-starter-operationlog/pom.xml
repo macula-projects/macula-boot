@@ -10,7 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>macula-boot-starter-operationlog</artifactId>
+    <name>Macula Boot OperationLog Starter</name>
     <description>Macula Boot OperationLog Starter</description>
+    <url>https://macula.dev</url>
 
     <dependencies>
         <!-- Spring Boot Starter -->
