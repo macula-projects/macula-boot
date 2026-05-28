@@ -96,4 +96,10 @@ public class GatewayAutoConfiguration {
     public TraceIdGlobalFilter traceIdGlobalFilter() {
         return new TraceIdGlobalFilter();
     }
+
+    @Bean
+    @ConditionalOnProperty(value = "macula.gateway.apikey.enabled", havingValue = "true", matchIfMissing = true)
+    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(RedisTemplate<String, Object> redisTemplate) {
+        return new ApiKeyAuthenticationFilter(redisTemplate);
+    }
 }

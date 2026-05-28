@@ -149,7 +149,21 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
             return chain.filter(newExchange);
         }
 
-        return chain.filter(exchange);
+        // API Key转JWT（ApiKeyAuthenticationFilter已设置SecurityContext并移除Authorization header）
+        return ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication)
+                .cast(BearerTokenAuthentication.class).map(BearerTokenAuthentication::getPrincipal)
+                .filter(OAuth2AuthenticatedPrincipal.class::isInstance).cast(OAuth2AuthenticatedPrincipal.class)
+                .flatMap(principal -> {
+                    if (!"apikey".equals(principal.getAttribute("authType"))) {
+                        return chain.filter(exchange);
+                    }
+                    ServerHttpRequest request = exchange.getRequest().mutate().header(
+                            SecurityConstants.AUTHORIZATION_KEY,
+                            SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)
+                    ).build();
+                    ServerWebExchange newExchange = exchange.mutate().request(request).build();
+                    return chain.filter(newExchange);
+                }).switchIfEmpty(chain.filter(exchange));
     }
 
     /**

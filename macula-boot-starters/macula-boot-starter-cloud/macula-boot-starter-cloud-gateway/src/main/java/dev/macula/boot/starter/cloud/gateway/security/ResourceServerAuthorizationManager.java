@@ -37,6 +37,7 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import reactor.core.publisher.Mono;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,19 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
             // 放行，由后面的HmacGlobalFilter校验签名
             return Mono.just(new AuthorizationDecision(true));
+        }
+
+        // API Key，属于系统间访问（ApiKeyAuthenticationFilter已设置SecurityContext并移除Authorization header）
+        if (StrUtil.isBlank(token)) {
+            return mono.filter(Authentication::isAuthenticated).flatMap(auth -> {
+                if (auth.getPrincipal() instanceof OAuth2AuthenticatedPrincipal) {
+                    OAuth2AuthenticatedPrincipal principal = (OAuth2AuthenticatedPrincipal) auth.getPrincipal();
+                    if ("apikey".equals(principal.getAttribute("authType"))) {
+                        return Mono.just(new AuthorizationDecision(true));
+                    }
+                }
+                return Mono.just(new AuthorizationDecision(false));
+            }).defaultIfEmpty(new AuthorizationDecision(false));
         }
 
         // 没有 Token不放行

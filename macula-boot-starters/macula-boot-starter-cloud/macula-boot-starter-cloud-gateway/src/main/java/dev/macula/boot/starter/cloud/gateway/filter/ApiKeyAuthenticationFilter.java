@@ -1,0 +1,93 @@
+package dev.macula.boot.starter.cloud.gateway.filter;
+
+import cn.hutool.core.util.StrUtil;
+import dev.macula.boot.constants.GlobalConstants;
+import dev.macula.boot.constants.SecurityConstants;
+import dev.macula.boot.context.TenantContextHolder;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.Result;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RequiredArgsConstructor
+public class ApiKeyAuthenticationFilter implements WebFilter, Ordered {
+
+    private static final String BEARER_SK_PREFIX = "Bearer sk-";
+    private static final String APIKEY_REDIS_PREFIX = "macula:cloud:system:application:apikey:";
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        String token = RequestUtils.getHeaderOrQueryToken(exchange);
+
+        if (StrUtil.isBlank(token) || !StrUtil.startWithIgnoreCase(token, BEARER_SK_PREFIX)) {
+            return chain.filter(exchange);
+        }
+
+        String apikey = token.substring(SecurityConstants.TOKEN_PREFIX.length()).trim();
+
+        String redisKey = APIKEY_REDIS_PREFIX + apikey;
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(redisKey);
+
+        if (entries == null || entries.isEmpty()) {
+            log.warn("API Key验证失败，key不存在: {}", apikey);
+            return ResponseUtils.writeResult(exchange.getResponse(),
+                    Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
+        }
+
+        String applicationCode = (String) entries.get("applicationCode");
+        String applicationId = (String) entries.get("applicationId");
+        String tenantId = (String) entries.get("tenantId");
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", applicationCode);
+        attributes.put("applicationId", applicationId);
+        attributes.put("nickname", applicationCode);
+        attributes.put("authType", "apikey");
+
+        if (StrUtil.isNotBlank(tenantId)) {
+            attributes.put(GlobalConstants.TENANT_ID_NAME, Long.parseLong(tenantId));
+            TenantContextHolder.setCurrentTenantId(Long.parseLong(tenantId));
+        }
+
+        OAuth2AuthenticatedPrincipal principal = new DefaultOAuth2AuthenticatedPrincipal(
+                applicationCode, attributes, AuthorityUtils.NO_AUTHORITIES);
+
+        BearerTokenAuthentication authentication = new BearerTokenAuthentication(
+                principal, null, AuthorityUtils.NO_AUTHORITIES);
+
+        // Remove Authorization header to prevent oauth2ResourceServer from processing it
+        ServerHttpRequest newRequest = exchange.getRequest().mutate()
+                .headers(headers -> headers.remove(SecurityConstants.AUTHORIZATION_KEY))
+                .build();
+
+        ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
+
+        return chain.filter(newExchange)
+                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+    }
+
+    @Override
+    public int getOrder() {
+        return Integer.MIN_VALUE + 400;
+    }
+}
