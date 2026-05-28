@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Bean;
 public class FeignAutoConfiguration {
 
     @Bean
-    @ConditionalOnClass(name = "javax.servlet.http.HttpServletRequest")
+    @ConditionalOnClass(name = "jakarta.servlet.http.HttpServletRequest")
     public RequestInterceptor headerRelayInterceptor(FeignHeaderRelayProperties properties) {
         return new HeaderRelayInterceptor(properties);
     }
