@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.operationlog;
 
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.servlet.JakartaServletUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,9 +30,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,7 +67,7 @@ public class OperationLogUtils {
 
         OperationLogDTO operationLogDTO = new OperationLogDTO();
         operationLogDTO.setLevel(OperationLogLevel.INFO);
-        operationLogDTO.setClientIp(ServletUtil.getClientIP(httpRequest));
+        operationLogDTO.setClientIp(JakartaServletUtil.getClientIP(httpRequest));
 
         if (OperationLogConstant.SCOPE_CONTROLLER.equals(operationLog.scope())) {
             operationLogDTO.setRequestUri(URLUtil.getPath(httpRequest.getRequestURI()));
