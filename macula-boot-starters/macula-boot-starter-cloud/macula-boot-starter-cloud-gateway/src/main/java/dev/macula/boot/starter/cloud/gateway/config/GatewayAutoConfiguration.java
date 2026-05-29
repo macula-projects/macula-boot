@@ -99,7 +99,7 @@ public class GatewayAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "macula.gateway.apikey.enabled", havingValue = "true", matchIfMissing = true)
-    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(RedisTemplate<String, Object> redisTemplate) {
-        return new ApiKeyAuthenticationFilter(redisTemplate);
+    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(RedisTemplate<String, Object> sysRedisTemplate) {
+        return new ApiKeyAuthenticationFilter(sysRedisTemplate);
     }
 }
