@@ -16,6 +16,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.server.ServerWebExchange;
@@ -23,6 +24,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,8 +74,11 @@ public class ApiKeyAuthenticationFilter implements WebFilter, Ordered {
         OAuth2AuthenticatedPrincipal principal = new DefaultOAuth2AuthenticatedPrincipal(
                 applicationCode, attributes, AuthorityUtils.NO_AUTHORITIES);
 
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
+                apikey, Instant.now(), Instant.now().plusSeconds(3600));
+
         BearerTokenAuthentication authentication = new BearerTokenAuthentication(
-                principal, null, AuthorityUtils.NO_AUTHORITIES);
+                principal, accessToken, AuthorityUtils.NO_AUTHORITIES);
 
         // Remove Authorization header to prevent oauth2ResourceServer from processing it
         ServerHttpRequest newRequest = exchange.getRequest().mutate()
