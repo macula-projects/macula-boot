@@ -3,7 +3,6 @@ package dev.macula.boot.starter.cloud.gateway.filter;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import dev.macula.boot.result.ApiResultCode;
@@ -23,6 +22,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -46,49 +46,49 @@ public class ApiKeyAuthenticationFilter implements WebFilter, Ordered {
         }
 
         String apikey = token.substring(SecurityConstants.TOKEN_PREFIX.length()).trim();
-
         String redisKey = APIKEY_REDIS_PREFIX + apikey;
-        Map<Object, Object> entries = redisTemplate.opsForHash().entries(redisKey);
 
-        if (entries == null || entries.isEmpty()) {
-            log.warn("API Key验证失败，key不存在: {}", apikey);
-            return ResponseUtils.writeResult(exchange.getResponse(),
-                    Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
-        }
+        return Mono.fromCallable(() -> redisTemplate.opsForHash().entries(redisKey))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(entries -> {
+                    if (entries == null || entries.isEmpty()) {
+                        log.warn("API Key验证失败，key不存在: {}", apikey);
+                        return ResponseUtils.writeResult(exchange.getResponse(),
+                                Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED));
+                    }
 
-        String applicationCode = (String) entries.get("applicationCode");
-        String applicationId = (String) entries.get("applicationId");
-        String tenantId = (String) entries.get("tenantId");
+                    String applicationCode = (String) entries.get("applicationCode");
+                    String applicationId = (String) entries.get("applicationId");
+                    String tenantId = (String) entries.get("tenantId");
 
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("sub", applicationCode);
-        attributes.put("applicationId", applicationId);
-        attributes.put("nickname", applicationCode);
-        attributes.put("authType", "apikey");
+                    Map<String, Object> attributes = new HashMap<>();
+                    attributes.put("sub", applicationCode);
+                    attributes.put("applicationId", applicationId);
+                    attributes.put("nickname", applicationCode);
+                    attributes.put("authType", "apikey");
 
-        if (StrUtil.isNotBlank(tenantId)) {
-            attributes.put(GlobalConstants.TENANT_ID_NAME, Long.parseLong(tenantId));
-            TenantContextHolder.setCurrentTenantId(Long.parseLong(tenantId));
-        }
+                    if (StrUtil.isNotBlank(tenantId)) {
+                        attributes.put(GlobalConstants.TENANT_ID_NAME, Long.parseLong(tenantId));
+                    }
 
-        OAuth2AuthenticatedPrincipal principal = new DefaultOAuth2AuthenticatedPrincipal(
-                applicationCode, attributes, AuthorityUtils.NO_AUTHORITIES);
+                    OAuth2AuthenticatedPrincipal principal = new DefaultOAuth2AuthenticatedPrincipal(
+                            applicationCode, attributes, AuthorityUtils.NO_AUTHORITIES);
 
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
-                apikey, Instant.now(), Instant.now().plusSeconds(3600));
+                    OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
+                            apikey, Instant.now(), Instant.now().plusSeconds(3600));
 
-        BearerTokenAuthentication authentication = new BearerTokenAuthentication(
-                principal, accessToken, AuthorityUtils.NO_AUTHORITIES);
+                    BearerTokenAuthentication authentication = new BearerTokenAuthentication(
+                            principal, accessToken, AuthorityUtils.NO_AUTHORITIES);
 
-        // Remove Authorization header to prevent oauth2ResourceServer from processing it
-        ServerHttpRequest newRequest = exchange.getRequest().mutate()
-                .headers(headers -> headers.remove(SecurityConstants.AUTHORIZATION_KEY))
-                .build();
+                    ServerHttpRequest newRequest = exchange.getRequest().mutate()
+                            .headers(headers -> headers.remove(SecurityConstants.AUTHORIZATION_KEY))
+                            .build();
 
-        ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
+                    ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
 
-        return chain.filter(newExchange)
-                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                    return chain.filter(newExchange)
+                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                });
     }
 
     @Override
