@@ -43,6 +43,8 @@ public class MyBatisPlusProperties {
 
     private boolean tenantEnable = true;
 
+    private boolean dataPermissionEnable = true;
+
     /**
      * 分页时允许的最大记录数
      */

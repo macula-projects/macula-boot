@@ -91,7 +91,9 @@ public class MyBatisPlusAutoConfiguration {
         }
 
         // 数据权限
-        interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
+        if (properties.isDataPermissionEnable()) {
+            interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
+        }
 
         // 分页插件
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
