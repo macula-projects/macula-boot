@@ -188,13 +188,23 @@ public class AuditLogAspect implements ApplicationContextAware {
         for (Object o : paramsArray) {
             if (ObjectUtil.isNotNull(o) && !isFilterObject(o)) {
                 String str = JSONUtil.toJsonStr(o);
+                // 基本类型和包装类型不做敏感字段处理
+                if (o instanceof Number || o instanceof Character || o instanceof Boolean) {
+                    params.add(str);
+                    continue;
+                }
                 if (!o.getClass().isPrimitive() && !Collection.class.isAssignableFrom(o.getClass()) && !o.getClass()
                     .isArray()) {
-                    Dict dict = JSONUtil.toBean(str, Dict.class);
-                    if (MapUtil.isNotEmpty(dict)) {
-                        MapUtil.removeAny(dict, EXCLUDE_PROPERTIES);
-                        MapUtil.removeAny(dict, excludeParamNames);
-                        str = JSONUtil.toJsonStr(dict);
+                    try {
+                        Dict dict = JSONUtil.toBean(str, Dict.class);
+                        if (MapUtil.isNotEmpty(dict)) {
+                            MapUtil.removeAny(dict, EXCLUDE_PROPERTIES);
+                            MapUtil.removeAny(dict, excludeParamNames);
+                            str = JSONUtil.toJsonStr(dict);
+                        }
+                    } catch (Exception e) {
+                        // 解析失败不影响，直接使用原始字符串
+                        log.error("异常信息:{}", e.getMessage());
                     }
                 }
                 params.add(str);

@@ -98,74 +98,74 @@ public class XFileProperties {
      * 本地存储
      */
     @Deprecated
-    private List<? extends SpringLocalConfig> local = new ArrayList<>();
+    private List<SpringLocalConfig> local = new ArrayList<>();
     /**
      * 本地存储
      */
-    private List<? extends SpringLocalPlusConfig> localPlus = new ArrayList<>();
+    private List<SpringLocalPlusConfig> localPlus = new ArrayList<>();
     /**
      * 华为云 OBS
      */
-    private List<? extends SpringHuaweiObsConfig> huaweiObs = new ArrayList<>();
+    private List<SpringHuaweiObsConfig> huaweiObs = new ArrayList<>();
     /**
      * 阿里云 OSS
      */
-    private List<? extends SpringAliyunOssConfig> aliyunOss = new ArrayList<>();
+    private List<SpringAliyunOssConfig> aliyunOss = new ArrayList<>();
     /**
      * 七牛云 Kodo
      */
-    private List<? extends SpringQiniuKodoConfig> qiniuKodo = new ArrayList<>();
+    private List<SpringQiniuKodoConfig> qiniuKodo = new ArrayList<>();
     /**
      * 腾讯云 COS
      */
-    private List<? extends SpringTencentCosConfig> tencentCos = new ArrayList<>();
+    private List<SpringTencentCosConfig> tencentCos = new ArrayList<>();
     /**
      * 百度云 BOS
      */
-    private List<? extends SpringBaiduBosConfig> baiduBos = new ArrayList<>();
+    private List<SpringBaiduBosConfig> baiduBos = new ArrayList<>();
     /**
      * 又拍云 USS
      */
-    private List<? extends SpringUpyunUssConfig> upyunUss = new ArrayList<>();
+    private List<SpringUpyunUssConfig> upyunUss = new ArrayList<>();
     /**
-     * MinIO USS
+     * MinIO
      */
-    private List<? extends SpringMinioConfig> minio = new ArrayList<>();
+    private List<SpringMinioConfig> minio = new ArrayList<>();
 
     /**
      * Amazon S3
      */
-    private List<? extends SpringAmazonS3Config> amazonS3 = new ArrayList<>();
+    private List<SpringAmazonS3Config> amazonS3 = new ArrayList<>();
 
     /**
      * FTP
      */
-    private List<? extends SpringFtpConfig> ftp = new ArrayList<>();
+    private List<SpringFtpConfig> ftp = new ArrayList<>();
 
     /**
-     * FTP
+     * SFTP
      */
-    private List<? extends SpringSftpConfig> sftp = new ArrayList<>();
+    private List<SpringSftpConfig> sftp = new ArrayList<>();
 
     /**
      * WebDAV
      */
-    private List<? extends SpringWebDavConfig> webdav = new ArrayList<>();
+    private List<SpringWebDavConfig> webdav = new ArrayList<>();
 
     /**
      * GoogleCloud Storage
      */
-    private List<? extends SpringGoogleCloudStorageConfig> googleCloudStorage = new ArrayList<>();
+    private List<SpringGoogleCloudStorageConfig> googleCloudStorage = new ArrayList<>();
 
     /**
      * FastDFS
      */
-    private List<? extends SpringFastDfsConfig> fastdfs = new ArrayList<>();
+    private List<SpringFastDfsConfig> fastdfs = new ArrayList<>();
 
     /**
      * Azure Blob Storage
      */
-    private List<? extends SpringAzureBlobStorageConfig> azureBlob = new ArrayList<>();
+    private List<SpringAzureBlobStorageConfig> azureBlob = new ArrayList<>();
 
     public FileStorageProperties toFileStorageProperties() {
         FileStorageProperties properties = new FileStorageProperties();

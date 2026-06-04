@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.tinyid;
 
 import dev.macula.boot.starter.tinyid.base.factory.IdGeneratorFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @Author du_imba
  */
 @SpringBootTest
+@Disabled("需要启动tinyid服务器才能运行此测试")
 public class ClientTest {
 
     @Autowired

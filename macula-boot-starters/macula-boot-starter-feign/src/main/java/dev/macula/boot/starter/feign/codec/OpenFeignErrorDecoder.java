@@ -54,7 +54,21 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
             String body = Util.toString(response.body().asReader(Charset.defaultCharset()));
 
             try {
-                HttpStatus status = HttpStatus.valueOf(response.status());
+                int statusCode = response.status();
+                HttpStatus status = HttpStatus.valueOf(statusCode);
+                // 207 (Multi-Status) 用于业务检查异常，需要特殊处理
+                if (statusCode == 207) {
+                    Result<?> resultData = JSONUtil.toBean(body, Result.class);
+                    if (!resultData.isSuccess()) {
+                        String errMsg = "Feign提供方异常：";
+                        if (resultData.getCause() != null && !"null".equals(resultData.getCause())) {
+                            errMsg = resultData.getCause();
+                        } else {
+                            errMsg += resultData.getMsg();
+                        }
+                        return new BizCheckException(resultData.getCode(), resultData.getMsg(), errMsg);
+                    }
+                }
                 if (status.is4xxClientError() || status.is5xxServerError()) {
                     Result<?> resultData = JSONUtil.toBean(body, Result.class);
                     if (!resultData.isSuccess()) {
@@ -64,10 +78,6 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
                         } else {
                             errMsg += resultData.getMsg();
                         }
-                        // 业务检查异常
-                        if (status == HttpStatus.NOT_EXTENDED) {
-                            return new BizCheckException(resultData.getCode(), resultData.getMsg(), errMsg);
-                        }
                         // 业务类异常
                         return new BizException(resultData.getCode(), resultData.getMsg(), errMsg);
                     }
@@ -75,6 +85,9 @@ public class OpenFeignErrorDecoder implements ErrorDecoder {
                     return new BizException("Feign提供方异常：" + response.reason());
                 }
             } catch (Exception ex) {
+                if (body == null || body.isBlank()) {
+                    return new BizException("Feign提供方异常");
+                }
                 return new BizException(body);
             }
 

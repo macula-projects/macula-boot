@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: auditlog-test
+
+macula:
+  security:
+    # 测试环境允许所有访问
+    ignore-urls:
+      - /**

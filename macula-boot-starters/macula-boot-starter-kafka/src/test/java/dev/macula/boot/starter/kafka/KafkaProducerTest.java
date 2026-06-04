@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.kafka;
 
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +36,7 @@ import java.util.Map;
  * @since 2024/3/14
  */
 @SpringBootTest
+@Disabled("需要启动Kafka服务才能运行此测试")
 public class KafkaProducerTest {
 
     @Autowired

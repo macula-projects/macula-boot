@@ -21,6 +21,7 @@ import dev.macula.boot.context.GrayVersionMetaHolder;
 import dev.macula.boot.starter.rocketmq.test.service.OrderServiceImpl;
 import dev.macula.boot.starter.rocketmq.test.vo.OrderVo;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +36,7 @@ import java.math.BigDecimal;
  */
 
 @SpringBootTest
+@Disabled("需要启动RocketMQ才能测试")
 public class OrderServiceTest {
 
     @Autowired
