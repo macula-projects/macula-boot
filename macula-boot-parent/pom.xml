@@ -776,6 +776,9 @@
     <profiles>
         <profile>
             <id>deploy</id>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
