@@ -3,9 +3,6 @@ server:
 spring:
   application:
     name: macula-gateway-test
-  cloud:
-    compatibility-verifier:
-      enabled: false
   security:
     oauth2:
       resourceserver:

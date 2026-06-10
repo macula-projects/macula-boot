@@ -5,8 +5,6 @@ server:
 
 spring:
   cloud:
-    compatibility-verifier:
-      enabled: false
     nacos:
       discovery:
         enabled: true

@@ -4,11 +4,6 @@ server:
       force: true
 
 spring:
-  cloud:
-    nacos:
-      discovery:
-        enabled: true
-        # group:
   security:
     oauth2:
       resourceserver:

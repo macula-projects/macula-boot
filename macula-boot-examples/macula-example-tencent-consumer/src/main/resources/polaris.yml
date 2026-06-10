@@ -1,0 +1,9 @@
+global:
+  api:
+    timeout: 5s
+    maxRetryTimes: 3
+    retryInterval: 1s
+
+  serverConnector:
+    connectTimeout: 1s
+    messageTimeout: 5s

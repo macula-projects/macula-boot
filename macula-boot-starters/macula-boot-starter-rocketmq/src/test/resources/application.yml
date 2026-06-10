@@ -3,11 +3,6 @@ spring:
     name: rocketmq-demo
   profiles:
     active: dev
-
-
-  cloud:
-    compatibility-verifier:
-      enabled: false
 macula:
   rocketmq:
     gray:
