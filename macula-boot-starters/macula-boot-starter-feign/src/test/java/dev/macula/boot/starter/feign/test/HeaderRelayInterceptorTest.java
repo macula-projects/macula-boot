@@ -20,6 +20,7 @@ package dev.macula.boot.starter.feign.test;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.context.GrayVersionContextHolder;
+import dev.macula.boot.starter.feign.interceptor.FeignHeaderRelayProperties;
 import dev.macula.boot.starter.feign.interceptor.HeaderRelayInterceptor;
 import feign.RequestTemplate;
 import org.junit.jupiter.api.AfterEach;
@@ -48,10 +49,11 @@ public class HeaderRelayInterceptorTest {
 
     private HeaderRelayInterceptor interceptor;
     private RequestTemplate requestTemplate;
+    private FeignHeaderRelayProperties feignHeaderRelayProperties;
 
     @BeforeEach
     void setUp() {
-        interceptor = new HeaderRelayInterceptor();
+        interceptor = new HeaderRelayInterceptor(feignHeaderRelayProperties);
         requestTemplate = new RequestTemplate();
         // 清空上下文
         RequestContextHolder.resetRequestAttributes();
