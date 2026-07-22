@@ -117,17 +117,12 @@ TODO
 
     <dependency>
         <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-tencent-gateway-plugin</artifactId>
+        <artifactId>spring-cloud-starter-tencent-gateway-plugin</artifactId>
     </dependency>
 
     <dependency>
         <groupId>com.tencent.cloud</groupId>
         <artifactId>spring-cloud-starter-tencent-metadata-transfer</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.tencent.cloud</groupId>
-        <artifactId>spring-cloud-tencent-featureenv-plugin</artifactId>
     </dependency>
 </dependencies>
 ```
