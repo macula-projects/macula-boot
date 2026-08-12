@@ -1,0 +1,68 @@
+name: Maven Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Check changed Java files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            BASE_SHA=$(git rev-parse HEAD^)
+          fi
+          changed_files=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD -- '*.java')
+          if [ -z "$changed_files" ]; then
+            exit 0
+          fi
+
+          checkstyle_root=$(mktemp -d)
+          trap 'rm -rf "$checkstyle_root"' EXIT
+          includes=
+          while IFS= read -r file; do
+            mkdir -p "$checkstyle_root/$(dirname "$file")"
+            git show "HEAD:$file" > "$checkstyle_root/$file"
+            if [ -z "$includes" ]; then
+              includes=$file
+            else
+              includes="$includes,$file"
+            fi
+          done <<EOF
+          $changed_files
+          EOF
+
+          mvn --quiet --non-recursive \
+            org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check \
+            -Dcheckstyle.source.root="$checkstyle_root" \
+            -Dcheckstyle.includes="$includes"
+      - name: Run unit and integration tests
+        run: mvn --batch-mode verify

@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2023-2026 Macula
+ * macula.dev, China
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.macula.boot.starter.tinyid;
+
+import dev.macula.boot.starter.tinyid.base.factory.IdGeneratorFactory;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+/**
+ * TinyID 客户端外部服务集成测试。
+ *
+ * @author du_imba
+ * @since 2026/8/12
+ */
+@SpringBootTest
+@Disabled("需要启动tinyid服务器才能运行此测试")
+public class TinyIdClientIT {
+
+    @Autowired
+    private IdGeneratorFactory idGeneratorFactory;
+
+    @Test
+    public void testNextId() {
+        for (int i = 0; i < 100; i++) {
+            Long id = idGeneratorFactory.getIdGenerator("test").nextId();
+            System.out.println("current id is: " + id);
+        }
+    }
+}
