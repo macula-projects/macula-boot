@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Macula
- *    macula.dev, China
+ * Copyright (c) 2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,100 +14,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.binlog4j.test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.macula.boot.starter.binlog4j.BinlogClientConfig;
 import dev.macula.boot.starter.binlog4j.config.Binlog4jAutoConfiguration;
 import dev.macula.boot.starter.binlog4j.config.Binlog4jAutoProperties;
 import dev.macula.boot.starter.binlog4j.config.Binlog4jInitializationBeanProcessor;
 import dev.macula.boot.starter.binlog4j.enums.BinlogClientMode;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.mock.env.MockEnvironment;
+
 /**
- * <p>
- * <b>Binlog4jAutoConfigurationTest</b> Binlog4j 自动配置测试
- * </p>
- * <p>
- * 测试配置属性绑定是否正确，自动配置是否正常加载
- * </p>
+ * {@code Binlog4jAutoConfigurationTest} Binlog4j自动配置单元测试
  *
  * @author Rain
- * @since 2024/04/07
+ * @since 2026/8/12
  */
-@SpringBootTest(properties = {
-        "binlog4j.clientConfigs.main-client.host=127.0.0.1",
-        "binlog4j.clientConfigs.main-client.port=3306",
-        "binlog4j.clientConfigs.main-client.username=root",
-        "binlog4j.clientConfigs.main-client.password=password",
-        "binlog4j.clientConfigs.main-client.server-id=1",
-        "binlog4j.clientConfigs.main-client.mode=standalone",
-        "binlog4j.clientConfigs.second-client.host=127.0.0.1",
-        "binlog4j.clientConfigs.second-client.port=3307",
-        "binlog4j.clientConfigs.second-client.username=root"
-})
-public class Binlog4jAutoConfigurationTest {
+class Binlog4jAutoConfigurationTest {
 
-    @Autowired
-    private Binlog4jAutoProperties properties;
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+        .withConfiguration(AutoConfigurations.of(Binlog4jAutoConfiguration.class));
 
-    @Autowired
-    private Binlog4jAutoConfiguration autoConfiguration;
-
-    @Autowired
-    private Binlog4jInitializationBeanProcessor processor;
-
-    /**
-     * 测试自动配置组件是否成功注入
-     */
     @Test
-    void testAutoConfigurationInjected() {
-        Assertions.assertNotNull(properties, "Binlog4jAutoProperties should be injected");
-        Assertions.assertNotNull(autoConfiguration, "Binlog4jAutoConfiguration should be injected");
-        Assertions.assertNotNull(processor, "Binlog4jInitializationBeanProcessor should be injected");
+    void createsAutoConfigurationInfrastructureWithoutConfiguredClients() {
+        contextRunner.run(context -> {
+            assertThat(context).hasSingleBean(Binlog4jAutoProperties.class);
+            assertThat(context).hasSingleBean(Binlog4jAutoConfiguration.class);
+            assertThat(context).hasSingleBean(Binlog4jInitializationBeanProcessor.class);
+        });
     }
 
-    /**
-     * 测试配置属性绑定是否正确，多客户端配置
-     */
     @Test
-    void testConfigurationPropertiesBinding() {
-        Map<String, BinlogClientConfig> clientConfigs = properties.getClientConfigs();
+    void bindsMultipleClientConfigurationsWithoutOpeningDatabaseConnections() {
+        MockEnvironment environment = new MockEnvironment()
+            .withProperty("binlog4j.client-configs.main-client.host", "127.0.0.1")
+            .withProperty("binlog4j.client-configs.main-client.port", "3306")
+            .withProperty("binlog4j.client-configs.main-client.username", "root")
+            .withProperty("binlog4j.client-configs.main-client.password", "password")
+            .withProperty("binlog4j.client-configs.main-client.server-id", "1")
+            .withProperty("binlog4j.client-configs.main-client.mode", "standalone")
+            .withProperty("binlog4j.client-configs.second-client.host", "127.0.0.1")
+            .withProperty("binlog4j.client-configs.second-client.port", "3307")
+            .withProperty("binlog4j.client-configs.second-client.username", "root");
 
-        // 验证配置数量正确
-        Assertions.assertNotNull(clientConfigs);
-        Assertions.assertEquals(2, clientConfigs.size());
+        Binlog4jAutoProperties properties = Binder.get(environment)
+            .bind("binlog4j", Bindable.of(Binlog4jAutoProperties.class))
+            .orElseThrow(() -> new AssertionError("binlog4j properties were not bound"));
+        Map<String, BinlogClientConfig> clients = properties.getClientConfigs();
 
-        // 验证第一个客户端配置
-        BinlogClientConfig mainClient = clientConfigs.get("main-client");
-        Assertions.assertNotNull(mainClient);
-        Assertions.assertEquals("127.0.0.1", mainClient.getHost());
-        Assertions.assertEquals(3306, mainClient.getPort());
-        Assertions.assertEquals("root", mainClient.getUsername());
-        Assertions.assertEquals("password", mainClient.getPassword());
-        Assertions.assertEquals(1, mainClient.getServerId());
-        Assertions.assertEquals(BinlogClientMode.standalone, mainClient.getMode());
-
-        // 验证第二个客户端配置
-        BinlogClientConfig secondClient = clientConfigs.get("second-client");
-        Assertions.assertNotNull(secondClient);
-        Assertions.assertEquals("127.0.0.1", secondClient.getHost());
-        Assertions.assertEquals(3307, secondClient.getPort());
-        Assertions.assertEquals("root", secondClient.getUsername());
+        assertThat(clients).hasSize(2);
+        assertThat(clients.get("main-client"))
+            .extracting(BinlogClientConfig::getHost, BinlogClientConfig::getPort, BinlogClientConfig::getUsername, BinlogClientConfig::getPassword, BinlogClientConfig::getServerId, BinlogClientConfig::getMode)
+            .containsExactly("127.0.0.1", 3306, "root", "password", 1L, BinlogClientMode.standalone);
+        assertThat(clients.get("second-client"))
+            .extracting(BinlogClientConfig::getHost, BinlogClientConfig::getPort, BinlogClientConfig::getUsername)
+            .containsExactly("127.0.0.1", 3307, "root");
     }
 
-    /**
-     * 测试 BinlogClientConfig 默认值
-     */
     @Test
-    void testBinlogClientConfigDefaultValues() {
-        BinlogClientConfig config = new BinlogClientConfig();
-        // 验证默认值（如果有的话），这里主要验证对象创建正常
-        Assertions.assertNotNull(config);
+    void clientConfigurationCanBeCreatedWithDefaults() {
+        assertThat(new BinlogClientConfig()).isNotNull();
     }
 }

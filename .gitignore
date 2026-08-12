@@ -14,6 +14,11 @@ flattened.xml
 
 ### IntelliJ IDEA ###
 .idea
+!.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/codeStyles/Project.xml
+!.idea/codeStyles/codeStyleConfig.xml
 *.iws
 *.iml
 *.ipr

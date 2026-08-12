@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Macula
- *    macula.dev, China
+ * Copyright (c) 2024-2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.feign.test;
 
 import dev.macula.boot.constants.GlobalConstants;
@@ -23,6 +22,10 @@ import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.starter.feign.interceptor.FeignHeaderRelayProperties;
 import dev.macula.boot.starter.feign.interceptor.HeaderRelayInterceptor;
 import feign.RequestTemplate;
+
+import java.util.Collection;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,16 +34,10 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Collection;
-import java.util.Map;
-
 /**
- * <p>
  * <b>HeaderRelayInterceptorTest</b> Feign 请求头传递拦截器测试
- * </p>
- * <p>
- * 测试Authorization token、trace id、灰度版本头等是否正确传递给下游服务
- * </p>
+ *
+ * <p>测试Authorization token、trace id、灰度版本头等是否正确传递给下游服务
  *
  * @author Rain
  * @since 2024/04/07
@@ -53,6 +50,7 @@ public class HeaderRelayInterceptorTest {
 
     @BeforeEach
     void setUp() {
+        feignHeaderRelayProperties = new FeignHeaderRelayProperties();
         interceptor = new HeaderRelayInterceptor(feignHeaderRelayProperties);
         requestTemplate = new RequestTemplate();
         // 清空上下文
@@ -66,9 +64,7 @@ public class HeaderRelayInterceptorTest {
         GrayVersionContextHolder.clear();
     }
 
-    /**
-     * 测试有请求上下文时，正确传递Authorization和已有的trace id
-     */
+    /** 测试有请求上下文时，正确传递Authorization和已有的trace id */
     @Test
     void testApplyWithRequestContext() {
         // given: 设置mock request with headers
@@ -94,9 +90,7 @@ public class HeaderRelayInterceptorTest {
         Assertions.assertTrue(headers.get(SecurityConstants.AUTHORIZATION_KEY).contains(testToken));
     }
 
-    /**
-     * 测试没有trace id时，自动生成一个
-     */
+    /** 测试没有trace id时，自动生成一个 */
     @Test
     void testApplyGeneratesSidWhenMissing() {
         // given: 设置mock request without trace id
@@ -117,9 +111,7 @@ public class HeaderRelayInterceptorTest {
         Assertions.assertFalse(sidValues.iterator().next().isEmpty(), "SID should not be empty");
     }
 
-    /**
-     * 测试当Authorization已经存在，不覆盖
-     */
+    /** 测试当Authorization已经存在，不覆盖 */
     @Test
     void testDoesNotOverrideExistingAuthorization() {
         // given: 请求已经有Authorization头
@@ -141,9 +133,7 @@ public class HeaderRelayInterceptorTest {
         Assertions.assertEquals(1, headers.get(SecurityConstants.AUTHORIZATION_KEY).size());
     }
 
-    /**
-     * 测试灰度版本头正确传递
-     */
+    /** 测试灰度版本头正确传递 */
     @Test
     void testGrayVersionHeader() {
         // given: 设置灰度版本上下文
@@ -161,9 +151,7 @@ public class HeaderRelayInterceptorTest {
         Assertions.assertTrue(headers.get(GlobalConstants.GRAY_VERSION_TAG).contains(grayVersion));
     }
 
-    /**
-     * 测试没有灰度版本时不添加头
-     */
+    /** 测试没有灰度版本时不添加头 */
     @Test
     void testNoGrayVersionWhenNotSet() {
         // given: 没有设置灰度版本
@@ -179,9 +167,7 @@ public class HeaderRelayInterceptorTest {
         Assertions.assertFalse(headers.containsKey(GlobalConstants.GRAY_VERSION_TAG));
     }
 
-    /**
-     * 测试没有Web请求上下文时，仍然添加trace id
-     */
+    /** 测试没有Web请求上下文时，仍然添加trace id */
     @Test
     void testApplyWithoutRequestContext() {
         // given: 没有请求上下文

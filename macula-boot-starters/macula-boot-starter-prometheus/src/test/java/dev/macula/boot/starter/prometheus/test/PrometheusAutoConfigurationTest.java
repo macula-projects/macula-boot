@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Macula
- *    macula.dev, China
+ * Copyright (c) 2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,69 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.prometheus.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import dev.macula.boot.starter.prometheus.config.PrometheusAutoConfiguration;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
- * <p>
- * <b>PrometheusAutoConfigurationTest</b> Prometheus 自动配置测试
- * </p>
- * <p>
- * 测试是否正确配置application标签到所有metrics
- * </p>
+ * {@code PrometheusAutoConfigurationTest} Prometheus自动配置单元测试
  *
  * @author Rain
- * @since 2024/04/07
+ * @since 2026/8/12
  */
-@SpringBootTest(properties = {
-        "spring.application.name=macula-prometheus-test"
-})
-public class PrometheusAutoConfigurationTest {
+class PrometheusAutoConfigurationTest {
 
-    @Autowired
-    private MeterRegistryCustomizer<MeterRegistry> meterRegistryCustomizer;
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+        .withConfiguration(AutoConfigurations.of(PrometheusAutoConfiguration.class))
+        .withPropertyValues("spring.application.name=macula-prometheus-test");
 
-    /**
-     * 测试自定义器正确注入并且会添加application common tag
-     */
     @Test
-    void testConfigurerAddsApplicationCommonTag() {
-        Assertions.assertNotNull(meterRegistryCustomizer, "MeterRegistryCustomizer should be configured");
+    @SuppressWarnings("unchecked")
+    void addsApplicationNameAsCommonMetricTag() {
+        contextRunner.run(context -> {
+            MeterRegistryCustomizer<MeterRegistry> customizer = context.getBean(MeterRegistryCustomizer.class);
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
 
-        // 创建一个简单的registry并应用customizer
-        SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        meterRegistryCustomizer.customize(registry);
+            customizer.customize(registry);
+            registry.counter("test-counter", "tag1", "value1");
 
-        // 创建一个metric验证tag存在
-        registry.counter("test-counter", "tag1", "value1");
-
-        // 检查common tags配置是否包含application tag
-        // 验证配置正确应用，可以通过registry配置获取
-        String applicationTagValue = findCommonTagValue(registry, "application");
-        Assertions.assertEquals("macula-prometheus-test", applicationTagValue,
-                "Common tag 'application' should match spring.application.name");
-    }
-
-    /**
-     * 查找common tag的值
-     */
-    private String findCommonTagValue(SimpleMeterRegistry registry, String tagKey) {
-        for (io.micrometer.core.instrument.Meter meter : registry.getMeters()) {
-            for (Tag tag : meter.getId().getTags()) {
-                if (tag.getKey().equals(tagKey)) {
-                    return tag.getValue();
-                }
-            }
-        }
-        return null;
+            assertThat(registry.get("test-counter").counter().getId().getTag("application"))
+                .isEqualTo("macula-prometheus-test");
+        });
     }
 }

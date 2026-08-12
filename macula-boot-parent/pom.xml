@@ -59,8 +59,7 @@
     <properties>
         <revision>6.0.1-SNAPSHOT</revision>
         <java.version>17</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <spring-boot.version>3.5.13</spring-boot.version>
         <spring-cloud.version>2025.0.2</spring-cloud.version>
         <spring-cloud-alibaba.version>2025.0.0.0</spring-cloud-alibaba.version>
@@ -758,6 +757,46 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- Unit tests: fast, isolated tests and Spring ContextRunner slices. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestCase.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/IT*.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/*ITCase.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <!-- Integration tests: full Spring contexts or real infrastructure, run by mvn verify. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/IT*.java</include>
+                        <include>**/*IT.java</include>
+                        <include>**/*ITCase.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
         <resources>
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
@@ -781,9 +820,6 @@
     <profiles>
         <profile>
             <id>deploy</id>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -821,15 +857,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
-                        <configuration>
-                            <source>${java.version}</source>
-                            <target>${java.version}</target>
-                        </configuration>
                     </plugin>
 
                     <plugin>
@@ -884,6 +911,4 @@
             </build>
         </profile>
     </profiles>
-
-
 </project>

@@ -1,5 +1,11 @@
 ## Roadmap
 
+### 6.0
+- 升级到JDK17、SpringBoot3
+
+### 5.1
+- SCG接入OpenSergo作为服务治理平台
+
 ### 5.0
 - Spring Cloud Alibaba全链路灰度发布（√）
 - 反向角色支持（√）
@@ -13,12 +19,3 @@
 - oss升级到x-file-storage 2.1.0（√）
 - 测试腾讯北极星微服务平台（√）
 - 支持接入kafka
-
-### 5.1
-
-- SCG接入OpenSergo作为服务治理平台
-
-### 6.0
-
-- 升级到JDK21、SpringBoot3
-   

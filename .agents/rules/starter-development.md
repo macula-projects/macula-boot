@@ -13,12 +13,13 @@
 ## 依赖与 API
 
 - Starter POM 只声明运行所需依赖；可选集成不要强制污染使用方 classpath。
-- 依赖版本优先放入 `../../macula-boot-parent/pom.xml`，子模块通过 dependency management 引用。
+- 依赖版本优先放入仓库根目录下的 `macula-boot-parent/pom.xml`，子模块通过 dependency management 引用。
 - 不泄漏第三方库的内部类型到公共 API，除非该类型本就是集成契约的一部分。
 - 保持默认行为向后兼容；改变默认值、Bean 名、配置键或序列化行为时补充回归测试和迁移说明。
 
 ## 最低验证
 
-- 覆盖自动配置启用、禁用及用户自定义 Bean 覆盖场景。
+- 自动配置测试使用 `ApplicationContextRunner` 或 `WebApplicationContextRunner`，覆盖启用、禁用及用户自定义 Bean 覆盖场景。
 - 如果改动依赖 classpath 条件，至少验证依赖存在和缺失两条路径。
+- 核心 Starter 可增加一个 `*IT` 完整上下文冒烟测试，验证 `AutoConfiguration.imports` 能被应用真实发现；不要用 `@SpringBootTest` 代替所有条件装配测试。
 - 同步检查模块 README、测试配置及 `AutoConfiguration.imports`。

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Macula
- *   macula.dev, China
+ * Copyright (c) 2024-2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.lock4j;
 
 import com.baomidou.lock.executor.AbstractLockExecutor;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Redisson 不可重入锁
  *
  * @author Gordian
+ * @since 2026/8/12
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -52,6 +53,7 @@ public class RedissonNonReentrantLockExecutor extends AbstractLockExecutor<RLock
             final boolean locked = lockInstance.tryLock(acquireTimeout, expire, TimeUnit.MILLISECONDS);
             return obtainLockInstance(locked, lockInstance);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return null;
         }
     }
@@ -68,5 +70,4 @@ public class RedissonNonReentrantLockExecutor extends AbstractLockExecutor<RLock
         }
         return false;
     }
-
 }

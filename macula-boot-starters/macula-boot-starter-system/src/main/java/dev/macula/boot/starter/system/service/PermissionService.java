@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2023 Macula
- *   macula.dev, China
+ * Copyright (c) 2023-2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.system.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
 import dev.macula.boot.starter.system.dto.UserLoginVO;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.PatternMatchUtils;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * {@code PermissionService} 鉴权服务，用于校验按钮权限标识，可用在Controller方法的注解中
@@ -65,7 +65,6 @@ public class PermissionService {
         if (CollectionUtil.isEmpty(perms)) {
             return false;
         }
-        return perms.stream().anyMatch(item -> PatternMatchUtils.simpleMatch(perm, item));
+        return perms.stream().anyMatch(item -> PatternMatchUtils.simpleMatch(item, perm));
     }
 }
-

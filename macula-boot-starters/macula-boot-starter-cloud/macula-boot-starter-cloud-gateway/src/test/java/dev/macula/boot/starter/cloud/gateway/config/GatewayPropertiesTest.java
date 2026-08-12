@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Macula
- *    macula.dev, China
+ * Copyright (c) 2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,85 +14,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.cloud.gateway.config;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * <p>
- * <b>GatewayPropertiesTest</b> 网关配置属性测试
- * </p>
- * <p>
- * 测试配置属性绑定是否正确，默认值是否正确
- * </p>
+ * {@code GatewayPropertiesTest} 网关配置属性单元测试
  *
  * @author Rain
- * @since 2024/04/07
+ * @since 2026/8/12
  */
-@SpringBootTest(properties = {
-        "macula.gateway.crypto-switch=false",
-        "macula.gateway.sign-switch=true",
-        "macula.gateway.force-crypto=true",
-        "macula.gateway.protect-urls.crypto[0]=/api/crypto/**",
-        "macula.gateway.protect-urls.crypto[1]=/api/encrypt/**",
-        "macula.gateway.protect-urls.sign[0]=/api/sign/**",
-        "macula.gateway.gray.enabled=true"
-})
-@TestConfiguration
-public class GatewayPropertiesTest {
+class GatewayPropertiesTest {
 
-    @Autowired
-    private GatewayProperties gatewayProperties;
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+        .withUserConfiguration(PropertiesConfiguration.class)
+        .withPropertyValues("macula.gateway.crypto-switch=false", "macula.gateway.sign-switch=true", "macula.gateway.force-crypto=true", "macula.gateway.protect-urls.crypto[0]=/api/crypto/**", "macula.gateway.protect-urls.crypto[1]=/api/encrypt/**", "macula.gateway.protect-urls.sign[0]=/api/sign/**", "macula.gateway.gray.enabled=true");
 
-    /**
-     * 测试默认值
-     */
     @Test
-    void testDefaultValues() {
+    void hasDocumentedDefaults() {
         GatewayProperties properties = new GatewayProperties();
-        Assertions.assertTrue(properties.isCryptoSwitch(), "Default cryptoSwitch should be true");
-        Assertions.assertTrue(properties.isSignSwitch(), "Default signSwitch should be true");
-        Assertions.assertFalse(properties.isForceCrypto(), "Default forceCrypto should be false");
-        Assertions.assertTrue(properties.isForceSign(), "Default forceSign should be true");
-        Assertions.assertNotNull(properties.getProtectUrls(), "Default protectUrls should be initialized");
-        Assertions.assertTrue(properties.getProtectUrls().getCrypto().isEmpty(), "Default crypto list should be empty");
-        Assertions.assertTrue(properties.getProtectUrls().getSign().isEmpty(), "Default sign list should be empty");
-        Assertions.assertNotNull(properties.getGray(), "Default gray should be initialized");
-        Assertions.assertFalse(properties.getGray().isEnabled(), "Default gray enabled should be false");
-        Assertions.assertEquals("/gateway/rm/opaqueToken", properties.getRmOpaqueTokenEndpoint(),
-                "Default rmOpaqueTokenEndpoint should match constant");
+
+        assertThat(properties.isCryptoSwitch()).isTrue();
+        assertThat(properties.isSignSwitch()).isTrue();
+        assertThat(properties.isForceCrypto()).isFalse();
+        assertThat(properties.isForceSign()).isTrue();
+        assertThat(properties.getProtectUrls().getCrypto()).isEmpty();
+        assertThat(properties.getProtectUrls().getSign()).isEmpty();
+        assertThat(properties.getGray().isEnabled()).isFalse();
+        assertThat(properties.getRmOpaqueTokenEndpoint()).isEqualTo("/gateway/rm/opaqueToken");
+    }
+
+    @Test
+    void bindsNestedAndListProperties() {
+        contextRunner.run(context -> {
+            GatewayProperties properties = context.getBean(GatewayProperties.class);
+
+            assertThat(properties.isCryptoSwitch()).isFalse();
+            assertThat(properties.isSignSwitch()).isTrue();
+            assertThat(properties.isForceCrypto()).isTrue();
+            assertThat(properties.getProtectUrls().getCrypto()).containsExactly("/api/crypto/**", "/api/encrypt/**");
+            assertThat(properties.getProtectUrls().getSign()).containsExactly("/api/sign/**");
+            assertThat(properties.getGray().isEnabled()).isTrue();
+        });
     }
 
     /**
-     * 测试配置属性绑定
+     * 测试配置，用于注册网关配置属性。
+     *
+     * @since 2026/8/12
      */
-    @Test
-    void testConfigurationBinding() {
-        // 验证自定义配置覆盖了默认值
-        Assertions.assertFalse(gatewayProperties.isCryptoSwitch());
-        Assertions.assertTrue(gatewayProperties.isSignSwitch());
-        Assertions.assertTrue(gatewayProperties.isForceCrypto());
-
-        // 验证列表配置绑定正确
-        GatewayProperties.ProtectUrl protectUrls = gatewayProperties.getProtectUrls();
-        List<String> cryptoList = protectUrls.getCrypto();
-        Assertions.assertEquals(2, cryptoList.size());
-        Assertions.assertEquals("/api/crypto/**", cryptoList.get(0));
-        Assertions.assertEquals("/api/encrypt/**", cryptoList.get(1));
-
-        List<String> signList = protectUrls.getSign();
-        Assertions.assertEquals(1, signList.size());
-        Assertions.assertEquals("/api/sign/**", signList.get(0));
-
-        // 验证嵌套配置正确
-        GatewayProperties.Gray gray = gatewayProperties.getGray();
-        Assertions.assertTrue(gray.isEnabled());
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(GatewayProperties.class)
+    static class PropertiesConfiguration {
     }
 }
