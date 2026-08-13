@@ -20,7 +20,7 @@ package dev.macula.boot.starter.sender;
 /**
  * {@code MessageSender} 本地消息发送接口，实际上是把要发送的消息保存在数据库中，与主体业务在一个事务中
  *
- * @author https://gitee.com/litao851025/lego
+ * @author <a href="https://gitee.com/litao851025/lego">...</a>
  * @since 2023/1/3 14:10
  */
 public interface ReliableMessageSender {

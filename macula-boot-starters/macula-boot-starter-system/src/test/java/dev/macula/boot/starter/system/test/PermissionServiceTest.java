@@ -219,6 +219,7 @@ public class PermissionServiceTest {
 
     /**
      * 测试用的SystemService实现，可定制返回值
+     * @since 5.0.0
      */
     static class TestSystemService implements SystemService {
         private Supplier<UserLoginVO> userSupplier = () -> null;

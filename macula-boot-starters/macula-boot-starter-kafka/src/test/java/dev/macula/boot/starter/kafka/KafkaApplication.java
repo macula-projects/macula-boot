@@ -36,6 +36,11 @@ public class KafkaApplication {
         SpringApplication.run(KafkaApplication.class, args);
     }
 
+    /**
+     * 测试应用中的大数据主题消息监听器。
+     *
+     * @since 5.0.0
+     */
     @Component
     @Slf4j
     public static class BigDataTopicListener {

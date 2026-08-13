@@ -28,6 +28,7 @@ import java.util.logging.Logger;
  * 缓存ID 生成器工厂
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public class CachedIdGeneratorFactory extends AbstractIdGeneratorFactory {
 

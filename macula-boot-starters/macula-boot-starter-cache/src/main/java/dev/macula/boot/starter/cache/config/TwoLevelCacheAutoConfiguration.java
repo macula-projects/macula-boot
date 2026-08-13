@@ -51,6 +51,7 @@ import java.util.Objects;
  * Autoconfiguration properties for this cache
  *
  * @author Rain
+ * @since 5.0.0
  */
 @Slf4j
 @AutoConfiguration(before = CacheAutoConfiguration.class, after = RedisAutoConfiguration.class)

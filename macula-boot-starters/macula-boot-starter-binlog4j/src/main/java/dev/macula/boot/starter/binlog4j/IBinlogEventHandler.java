@@ -17,6 +17,12 @@
 
 package dev.macula.boot.starter.binlog4j;
 
+/**
+ * 处理 Binlog 表数据增删改事件的回调契约。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public interface IBinlogEventHandler<T> {
 
     /**

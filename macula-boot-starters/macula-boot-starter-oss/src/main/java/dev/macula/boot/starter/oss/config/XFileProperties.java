@@ -22,7 +22,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.dromara.x.file.storage.core.FileStorageProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -209,6 +208,11 @@ public class XFileProperties {
         return properties;
     }
 
+    /**
+     * 本地文件存储的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Deprecated
     @Data
     @Accessors(chain = true)
@@ -228,6 +232,11 @@ public class XFileProperties {
         private Boolean enableAccess = false;
     }
 
+    /**
+     * 增强本地文件存储的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -246,6 +255,11 @@ public class XFileProperties {
         private Boolean enableAccess = false;
     }
 
+    /**
+     * 华为云 OBS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -256,6 +270,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * 阿里云 OSS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -266,6 +285,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * 七牛云 Kodo 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -276,6 +300,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * 腾讯云 COS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -286,6 +315,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * 百度云 BOS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -296,6 +330,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * 又拍云 USS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -306,6 +345,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * MinIO 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -316,6 +360,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * Amazon S3 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -326,6 +375,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * FTP 文件存储的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -336,6 +390,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * SFTP 文件存储的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -346,6 +405,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * WebDAV 文件存储的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -356,6 +420,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * Google Cloud Storage 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -366,6 +435,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * FastDFS 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)
@@ -376,6 +450,11 @@ public class XFileProperties {
         private Boolean enableStorage = false;
     }
 
+    /**
+     * Azure Blob Storage 的 Spring 扩展配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     @Accessors(chain = true)
     @EqualsAndHashCode(callSuper = true)

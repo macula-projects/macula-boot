@@ -42,6 +42,7 @@ import jakarta.validation.ConstraintViolationException;
  * 全局异常处理器
  *
  * @author rain
+ * @since 5.0.0
  */
 @RestControllerAdvice
 @Slf4j

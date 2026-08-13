@@ -69,6 +69,11 @@ class MaculaJpaRepositoriesConfigurationRegistar extends AbstractRepositoryConfi
         }
     }
 
+    /**
+     * 启用自定义 Fenix Repository 工厂的内部配置。
+     *
+     * @since 5.0.0
+     */
     @EnableJpaRepositories(repositoryFactoryBeanClass = FenixJpaRepositoryFactoryBean.class)
     private static class EnableJpaRepositoriesConfiguration {
         private EnableJpaRepositoriesConfiguration() {

@@ -21,6 +21,7 @@ package dev.macula.boot.starter.tinyid.base.entity;
  * 结果码常量类
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public class ResultCode {
 

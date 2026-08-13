@@ -21,6 +21,12 @@ import dev.macula.boot.starter.feign.interceptor.KongApiInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * 网关 Feign 客户端的认证配置。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public class GatewayConfiguration {
 
     @Value("${gateway.username}")

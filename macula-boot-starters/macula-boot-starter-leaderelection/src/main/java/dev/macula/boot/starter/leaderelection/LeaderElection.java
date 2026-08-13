@@ -107,6 +107,11 @@ public class LeaderElection {
         this.redissonClient = redissonClient;
     }
 
+    /**
+     * 执行 Leader 竞争和续期的后台线程。
+     *
+     * @since 5.0.0
+     */
     class ElectionThread extends Thread {
 
         private boolean isMaster = false;

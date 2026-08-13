@@ -147,6 +147,11 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
         return Integer.MIN_VALUE + 200;
     }
 
+    /**
+     * 不透明令牌查询参数。
+     *
+     * @since 5.0.0
+     */
     @Data
     private static class RmOpaqueTokenQuery {
         private String dealerNo;

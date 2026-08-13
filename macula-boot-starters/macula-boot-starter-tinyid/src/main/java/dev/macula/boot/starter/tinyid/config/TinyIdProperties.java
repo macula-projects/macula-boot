@@ -24,6 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * TinyId 分布式 ID 生成器配置属性
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 @ConfigurationProperties(prefix = "macula.cloud.tinyid")
 @Data

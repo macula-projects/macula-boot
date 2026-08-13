@@ -28,6 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 数据库表与 Binlog 事件处理器的映射信息。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Data
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class BinlogEventHandlerDetails {

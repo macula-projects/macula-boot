@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
  * 延迟注册服务到 Nacos 配置
  *
  * @author Gordian
+ * @since 5.0.0
  */
 @Configuration
 @ConditionalOnBean({NacosServiceRegistry.class, NacosRegistration.class})

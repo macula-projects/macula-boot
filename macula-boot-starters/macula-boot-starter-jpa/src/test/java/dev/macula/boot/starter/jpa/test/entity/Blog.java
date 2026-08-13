@@ -30,6 +30,7 @@ import jakarta.persistence.Table;
  * 博客信息实体类.
  *
  * @author blinkfox on 2019-08-16.
+ * @since 5.0.0
  */
 @Getter
 @Setter

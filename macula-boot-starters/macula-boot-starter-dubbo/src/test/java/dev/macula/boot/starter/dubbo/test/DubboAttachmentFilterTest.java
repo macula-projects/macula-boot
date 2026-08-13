@@ -21,7 +21,11 @@ import dev.macula.boot.starter.dubbo.rpc.filter.ConsumerAttachmentFilter;
 import dev.macula.boot.starter.dubbo.rpc.filter.ProviderAttachmentFilter;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.*;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.model.ServiceModel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -163,6 +167,7 @@ public class DubboAttachmentFilterTest {
 
     /**
      * 模拟Invoker
+     * @since 5.0.0
      */
     private static class MockInvoker<T> implements Invoker<T> {
         @Override
@@ -309,6 +314,7 @@ public class DubboAttachmentFilterTest {
 
     /**
      * 模拟Invocation
+     * @since 5.0.0
      */
     private static class MockInvocation implements Invocation {
         @Override

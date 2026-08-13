@@ -18,7 +18,11 @@
 package dev.macula.boot.starter.web.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
@@ -78,6 +82,11 @@ public class MaculaBeanSerializerModifier extends BeanSerializerModifier {
         return super.changeProperties(config, beanDesc, beanProperties);
     }
 
+    /**
+     * 各类空值的默认 JSON 序列化器集合。
+     *
+     * @since 5.0.0
+     */
     public interface NullJsonSerializers {
 
         JsonSerializer<Object> STRING_JSON_SERIALIZER = new JsonSerializer<Object>() {

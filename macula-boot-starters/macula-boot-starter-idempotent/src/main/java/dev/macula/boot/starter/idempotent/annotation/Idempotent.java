@@ -17,13 +17,18 @@
 
 package dev.macula.boot.starter.idempotent.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 幂等性注解，用于防止重复提交
  * 
  * @author ITyunqing
+ * @since 5.0.0
  */
 @Inherited
 @Target(ElementType.METHOD)

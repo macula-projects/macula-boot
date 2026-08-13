@@ -25,6 +25,7 @@ import dev.macula.boot.starter.crypto.core.IEncryptor;
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 public abstract class AbstractEncryptor implements IEncryptor {
 

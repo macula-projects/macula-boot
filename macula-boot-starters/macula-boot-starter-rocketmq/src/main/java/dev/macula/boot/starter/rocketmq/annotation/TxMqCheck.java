@@ -17,7 +17,11 @@
 
 package dev.macula.boot.starter.rocketmq.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@code TxMqCheck} 事务消息回调方法的注解

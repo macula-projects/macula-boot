@@ -17,6 +17,12 @@
 
 package dev.macula.boot.starter.binlog4j;
 
+/**
+ * Binlog 客户端连接生命周期契约。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public interface IBinlogClient {
 
     /**

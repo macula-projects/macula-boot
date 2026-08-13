@@ -33,13 +33,18 @@ import org.apache.ibatis.plugin.Signature;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * 入参加密拦截器
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 @Slf4j
 @Intercepts({@Signature(type = ParameterHandler.class, method = "setParameters", args = {PreparedStatement.class})})

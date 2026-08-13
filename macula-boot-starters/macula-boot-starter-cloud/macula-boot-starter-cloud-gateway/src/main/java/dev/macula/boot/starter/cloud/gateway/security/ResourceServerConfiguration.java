@@ -67,14 +67,18 @@ import reactor.core.publisher.Mono;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 资源服务器配置
  *
  * @author huan.fu 2021/8/24 - 上午10:08
+ * @since 5.0.0
  */
 
 @ConfigurationProperties(prefix = "macula.gateway.security")
@@ -234,6 +238,11 @@ public class ResourceServerConfiguration {
         };
     }
 
+    /**
+     * 判断网关是否声明全局 CORS 配置的条件。
+     *
+     * @since 5.0.0
+     */
     static class CorsCondition extends SpringBootCondition {
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {

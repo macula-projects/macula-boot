@@ -24,6 +24,12 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+/**
+ * 验证 SourceTargetMapper 字段和时间类型转换。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public class SourceTargetMapperTest {
     private static final Converter converter = new Converter();
 

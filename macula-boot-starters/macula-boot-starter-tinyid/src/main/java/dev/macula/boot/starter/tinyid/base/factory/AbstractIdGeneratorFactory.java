@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 抽象 ID生成器工厂
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public abstract class AbstractIdGeneratorFactory implements IdGeneratorFactory {
 

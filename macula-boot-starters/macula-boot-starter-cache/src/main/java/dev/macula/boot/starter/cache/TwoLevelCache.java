@@ -46,6 +46,8 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * <p>WARNING: When dealing with local cache we do partial key conversion using {@link
  * RedisCache#convertKey(Object)} for consistency and retrieval of correct {@link String}
+ * @author rain
+ * @since 5.0.0
  */
 @Slf4j
 public class TwoLevelCache extends RedisCache {

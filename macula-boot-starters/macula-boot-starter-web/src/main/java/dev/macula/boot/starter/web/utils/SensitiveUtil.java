@@ -23,6 +23,7 @@ import cn.hutool.core.util.StrUtil;
  * 敏感信息脱敏工具类，用于对手机号、身份证、银行卡等敏感信息进行脱敏处理
  * 
  * @author rain
+ * @since 5.0.0
  */
 public class SensitiveUtil {
 

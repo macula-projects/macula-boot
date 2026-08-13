@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.web.test.support;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.macula.boot.starter.web.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;

@@ -54,6 +54,7 @@ import java.util.List;
  *
  * @author wzh
  * @version 2018-08-12 18:38
+ * @since 5.0.0
  **/
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "macula.websocket", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -123,6 +124,11 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
         });
     }
 
+    /**
+     * WebSocket Feign 请求拦截器配置。
+     *
+     * @since 5.0.0
+     */
     @ConditionalOnClass(RequestInterceptor.class)
     @Configuration
     protected static class FeignClientConfiguration {
@@ -132,5 +138,4 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
         }
     }
 }
-
 

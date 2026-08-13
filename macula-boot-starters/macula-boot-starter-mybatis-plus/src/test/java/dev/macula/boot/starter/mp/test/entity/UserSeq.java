@@ -17,7 +17,12 @@
 
 package dev.macula.boot.starter.mp.test.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import dev.macula.boot.starter.mp.entity.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;

@@ -20,7 +20,12 @@ package dev.macula.boot.starter.crypto.annotation;
 import dev.macula.boot.starter.crypto.enums.AlgorithmType;
 import dev.macula.boot.starter.crypto.enums.EncodeType;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@code CryptoField} 秘密字段注解

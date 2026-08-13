@@ -23,7 +23,11 @@ import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.hook.FilterMessageHook;
-import org.apache.rocketmq.client.impl.consumer.*;
+import org.apache.rocketmq.client.impl.consumer.DefaultLitePullConsumerImpl;
+import org.apache.rocketmq.client.impl.consumer.DefaultMQPullConsumerImpl;
+import org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl;
+import org.apache.rocketmq.client.impl.consumer.MQConsumerInner;
+import org.apache.rocketmq.client.impl.consumer.PullAPIWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -48,12 +52,15 @@ public class GrayRocketMQConsumerPostProcessor implements BeanPostProcessor {
     }
 
     public Object postProcessAfterInitialization(Object o, String s) throws BeansException {
-        if (o instanceof DefaultMQPushConsumer)
+        if (o instanceof DefaultMQPushConsumer) {
             return createDefaultMQPushConsumerProxy(o);
-        if (o instanceof DefaultMQPullConsumer)
+        }
+        if (o instanceof DefaultMQPullConsumer) {
             return createDefaultMQPullConsumerProxy(o);
-        if (o instanceof DefaultLitePullConsumer)
+        }
+        if (o instanceof DefaultLitePullConsumer) {
             return createDefaultMQLitePullConsumerProxy(o);
+        }
         return o;
     }
 

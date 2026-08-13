@@ -50,6 +50,11 @@ public class RouteVO {
     private Meta meta;
     private List<RouteVO> children;
 
+    /**
+     * 路由展示元数据。
+     *
+     * @since 5.0.0
+     */
     @Data
     public static class Meta {
 

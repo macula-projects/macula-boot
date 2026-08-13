@@ -32,6 +32,7 @@ import java.util.logging.Logger;
  * TinyId HTTP工具类，用于与TinyId服务端进行HTTP通信
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public class TinyIdHttpUtils {
 

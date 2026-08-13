@@ -31,6 +31,7 @@ import dev.macula.boot.starter.crypto.enums.EncodeType;
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 public class RsaEncryptor extends AbstractEncryptor {
 

@@ -19,6 +19,12 @@ package dev.macula.example.tencent.consumer.vo;
 
 import lombok.Data;
 
+/**
+ * 采购订单请求参数。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Data
 public class PoBaseDto {
 

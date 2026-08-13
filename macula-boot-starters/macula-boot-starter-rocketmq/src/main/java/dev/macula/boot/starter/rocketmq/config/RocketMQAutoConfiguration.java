@@ -85,6 +85,11 @@ public class RocketMQAutoConfiguration {
         return new DefaultRocketMQLocalTransactionListener();
     }
 
+    /**
+     * 灰度 RocketMQ 消费端增强配置。
+     *
+     * @since 5.0.0
+     */
     @Configuration
     @ConditionalOnProperty(value = {"macula.rocketmq.gray.enabled"})
     @ConditionalOnClass({MQConsumer.class})
@@ -109,6 +114,11 @@ public class RocketMQAutoConfiguration {
         }
     }
 
+    /**
+     * 灰度 RocketMQ 生产端增强配置。
+     *
+     * @since 5.0.0
+     */
     @Configuration
     @ConditionalOnProperty(value = {"macula.rocketmq.gray.enabled"}, matchIfMissing = false)
     @ConditionalOnClass({MQProducer.class})

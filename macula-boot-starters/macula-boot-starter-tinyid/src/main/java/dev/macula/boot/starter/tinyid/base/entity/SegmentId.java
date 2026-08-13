@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * nextId: (currentId, maxId]
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 @Getter
 @Setter

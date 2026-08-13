@@ -54,6 +54,7 @@ import java.util.StringJoiner;
  * 操作日志记录处理
  *
  * @author Lion Li
+ * @since 5.0.0
  */
 @Slf4j
 @Aspect

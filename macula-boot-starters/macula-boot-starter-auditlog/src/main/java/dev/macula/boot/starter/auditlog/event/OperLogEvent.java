@@ -19,6 +19,7 @@ package dev.macula.boot.starter.auditlog.event;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -26,11 +27,13 @@ import java.util.Date;
  * 操作日志事件
  *
  * @author Lion Li
+ * @since 5.0.0
  */
 
 @Data
 public class OperLogEvent implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

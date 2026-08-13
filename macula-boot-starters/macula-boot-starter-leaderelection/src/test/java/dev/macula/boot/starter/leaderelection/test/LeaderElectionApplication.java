@@ -35,6 +35,11 @@ public class LeaderElectionApplication {
         SpringApplication.run(LeaderElectionApplication.class, args);
     }
 
+    /**
+     * 注册 Leader 选举回调的测试服务。
+     *
+     * @since 5.0.0
+     */
     @Component
     public class Service {
 

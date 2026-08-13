@@ -19,17 +19,20 @@ package dev.macula.boot.starter.auditlog.event;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * 登录事件
  *
  * @author Lion Li
+ * @since 5.0.0
  */
 
 @Data
 public class LoginLogEvent implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

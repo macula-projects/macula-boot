@@ -42,14 +42,18 @@ public class RestTestController {
     public DemoDto test(@Valid @RequestBody DemoDto dto) {
         System.out.println("tests....................");
         System.out.println(dto);
-        if (dto.getDateTime() == null)
+        if (dto.getDateTime() == null) {
             dto.setDateTime(new Date());
-        if (dto.getLocalDateTime() == null)
+        }
+        if (dto.getLocalDateTime() == null) {
             dto.setLocalDateTime(LocalDateTime.now());
-        if (dto.getLocalDate() == null)
+        }
+        if (dto.getLocalDate() == null) {
             dto.setLocalDate(LocalDate.now());
-        if (dto.getZonedDateTime() == null)
+        }
+        if (dto.getZonedDateTime() == null) {
             dto.setZonedDateTime(ZonedDateTime.now());
+        }
         dto.setMobile("13822132359");
         return dto;
     }

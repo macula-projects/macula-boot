@@ -24,6 +24,7 @@ import lombok.Getter;
  * 排序类型
  *
  * @author xuzhanfu
+ * @since 5.0.0
  */
 @Getter
 @AllArgsConstructor

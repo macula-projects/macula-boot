@@ -30,12 +30,25 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.user.*;
+import org.springframework.messaging.simp.user.DestinationUserNameProvider;
+import org.springframework.messaging.simp.user.SimpSession;
+import org.springframework.messaging.simp.user.SimpSubscription;
+import org.springframework.messaging.simp.user.SimpSubscriptionMatcher;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.util.Assert;
-import org.springframework.web.socket.messaging.*;
+import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -202,6 +215,11 @@ public class RedisSimpUserRegistry implements SimpUserRegistry, SmartApplication
     }
 
 
+    /**
+     * 本地会话中的 STOMP 用户视图。
+     *
+     * @since 5.0.0
+     */
     private static class LocalSimpUser implements SimpUser {
 
         private final String name;
@@ -269,6 +287,11 @@ public class RedisSimpUserRegistry implements SimpUserRegistry, SmartApplication
     }
 
 
+    /**
+     * 本地 STOMP 会话视图。
+     *
+     * @since 5.0.0
+     */
     private static class LocalSimpSession implements SimpSession {
 
         private final String id;
@@ -325,6 +348,11 @@ public class RedisSimpUserRegistry implements SimpUserRegistry, SmartApplication
     }
 
 
+    /**
+     * 本地 STOMP 订阅视图。
+     *
+     * @since 5.0.0
+     */
     private static class LocalSimpSubscription implements SimpSubscription {
 
         private final String id;

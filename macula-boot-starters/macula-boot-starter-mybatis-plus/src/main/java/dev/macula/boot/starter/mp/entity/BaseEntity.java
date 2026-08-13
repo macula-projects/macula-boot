@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
  * 实体类的基类
  *
  * @author rain.wang
+ * @since 5.0.0
  */
 @Getter
 @Setter

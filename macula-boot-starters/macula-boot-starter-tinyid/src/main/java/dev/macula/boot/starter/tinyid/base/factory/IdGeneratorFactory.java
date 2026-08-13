@@ -23,6 +23,7 @@ import dev.macula.boot.starter.tinyid.base.generator.IdGenerator;
  * ID 生成器工厂接口
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public interface IdGeneratorFactory {
 

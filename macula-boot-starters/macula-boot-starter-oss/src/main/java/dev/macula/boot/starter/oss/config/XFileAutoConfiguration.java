@@ -114,14 +114,18 @@ public class XFileAutoConfiguration {
         @Autowired(required = false) List<List<FileStorageClientFactory<?>>> clientFactoryList,
         XFileProperties properties) {
 
-        if (fileStorageLists == null)
+        if (fileStorageLists == null) {
             fileStorageLists = new ArrayList<>();
-        if (aspectList == null)
+        }
+        if (aspectList == null) {
             aspectList = new ArrayList<>();
-        if (fileWrapperAdapterList == null)
+        }
+        if (fileWrapperAdapterList == null) {
             fileWrapperAdapterList = new ArrayList<>();
-        if (clientFactoryList == null)
+        }
+        if (clientFactoryList == null) {
             clientFactoryList = new ArrayList<>();
+        }
 
         FileStorageServiceBuilder builder =
             FileStorageServiceBuilder.create(properties.toFileStorageProperties()).setFileRecorder(fileRecorder)

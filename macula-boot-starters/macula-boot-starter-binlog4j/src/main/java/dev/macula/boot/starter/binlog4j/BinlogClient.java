@@ -18,8 +18,6 @@
 package dev.macula.boot.starter.binlog4j;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.event.EventType;
-import com.github.shyiko.mysql.binlog.event.RotateEventData;
 import dev.macula.boot.starter.binlog4j.dispatcher.BinlogEventDispatcher;
 import dev.macula.boot.starter.binlog4j.enums.BinlogClientMode;
 import dev.macula.boot.starter.binlog4j.position.BinlogPosition;
@@ -37,6 +35,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 管理 MySQL Binlog 连接、事件分发与位点恢复的客户端。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Slf4j
 public class BinlogClient implements IBinlogClient {
 

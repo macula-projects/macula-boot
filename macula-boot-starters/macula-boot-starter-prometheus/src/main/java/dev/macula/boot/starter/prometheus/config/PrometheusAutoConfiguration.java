@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
  * prometheus 配置
  *
  * @author Lion Li
+ * @since 5.0.0
  */
 @AutoConfiguration
 public class PrometheusAutoConfiguration {

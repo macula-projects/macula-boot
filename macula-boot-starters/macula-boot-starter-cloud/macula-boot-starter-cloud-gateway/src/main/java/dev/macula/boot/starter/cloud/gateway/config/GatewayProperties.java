@@ -69,12 +69,22 @@ public class GatewayProperties {
 
     private Gray gray = new Gray();
 
+    /**
+     * 灰度发布开关配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     public static final class Gray {
         /** 灰度开关 */
         private boolean enabled;
     }
 
+    /**
+     * 需要加密或签名保护的路径配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     public static final class ProtectUrl {
         private List<String> crypto = new ArrayList<>();

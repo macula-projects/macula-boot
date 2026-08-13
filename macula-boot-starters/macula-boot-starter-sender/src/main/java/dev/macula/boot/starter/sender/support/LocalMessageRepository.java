@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * {@code LocalMessage} 本地消息持久化接口
  *
- * @author https://gitee.com/litao851025/lego
+ * @author <a href="https://gitee.com/litao851025/lego">...</a>
  * @since 2023/1/3 14:10
  */
 public interface LocalMessageRepository {

@@ -23,7 +23,8 @@ import org.redisson.config.Config;
  * Callback interface that can be implemented by beans wishing to customize the {@link org.redisson.api.RedissonClient}
  * auto configuration
  *
- * @author Nikos Kakavas (https://github.com/nikakis)
+ * @author Nikos Kakavas (<a href="https://github.com/nikakis">nikakis</a>)
+ * @since 5.0.0
  */
 @FunctionalInterface
 public interface RedissonAutoConfigurationCustomizer {

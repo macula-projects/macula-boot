@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 @Slf4j
 public class CryptoManager {

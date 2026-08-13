@@ -34,6 +34,7 @@ import java.util.logging.Logger;
  * 基于HTTP 的段ID服务实现
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public class HttpSegmentIdServiceImpl implements SegmentIdService {
 

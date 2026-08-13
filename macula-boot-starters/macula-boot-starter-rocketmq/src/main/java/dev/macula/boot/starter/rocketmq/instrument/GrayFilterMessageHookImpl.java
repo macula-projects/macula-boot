@@ -19,7 +19,6 @@ package dev.macula.boot.starter.rocketmq.instrument;
 
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.GlobalConstants;
-import dev.macula.boot.context.GrayVersionContextHolder;
 import dev.macula.boot.context.GrayVersionMetaHolder;
 import dev.macula.boot.starter.rocketmq.config.GrayRocketMQProperties;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +51,9 @@ public class GrayFilterMessageHookImpl implements FilterMessageHook {
     }
 
     public void filterMessage(FilterMessageContext context) {
-        if (!this.grayRocketMQProperties.isEnabled())
+        if (!this.grayRocketMQProperties.isEnabled()) {
             return;
+        }
 
         // 当前实例是否是灰度实例的标识
         String metaGrayVersion = GrayVersionMetaHolder.getGrayVersion();

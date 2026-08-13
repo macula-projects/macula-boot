@@ -1,10 +1,35 @@
+/*
+ * Copyright (c) 2023-2026 Macula
+ * macula.dev, China
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.macula.boot.starter.binlog4j.dispatcher;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.GtidSet;
-import com.github.shyiko.mysql.binlog.event.*;
+import com.github.shyiko.mysql.binlog.event.AnnotateRowsEventData;
+import com.github.shyiko.mysql.binlog.event.DeleteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.Event;
+import com.github.shyiko.mysql.binlog.event.EventData;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.EventType;
+import com.github.shyiko.mysql.binlog.event.QueryEventData;
+import com.github.shyiko.mysql.binlog.event.RotateEventData;
+import com.github.shyiko.mysql.binlog.event.TableMapEventData;
+import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
+import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
-import dev.macula.boot.starter.binlog4j.BinlogClient;
 import dev.macula.boot.starter.binlog4j.BinlogClientConfig;
 import dev.macula.boot.starter.binlog4j.BinlogEventHandlerDetails;
 import dev.macula.boot.starter.binlog4j.BinlogUtils;
@@ -17,6 +42,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 将原始 Binlog 事件转换并路由至表级处理器。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public class BinlogEventDispatcher implements BinaryLogClient.EventListener {
 
     private final Map<Long, TableMapEventData> tableMap = new HashMap<>();
@@ -59,12 +90,15 @@ public class BinlogEventDispatcher implements BinaryLogClient.EventListener {
                     String table = tableMapEventData.getTable();
                     this.eventHandlerMap.forEach((eventHandler) -> {
                         if (eventHandler.getDatabase().equals(database) && eventHandler.getTable().equals(table)) {
-                            if (BinlogUtils.isUpdate(eventType))
+                            if (BinlogUtils.isUpdate(eventType)) {
                                 eventHandler.invokeUpdate(rowMutationEventData.getUpdateRows());
-                            if (BinlogUtils.isDelete(eventType))
+                            }
+                            if (BinlogUtils.isDelete(eventType)) {
                                 eventHandler.invokeDelete(rowMutationEventData.getDeleteRows());
-                            if (BinlogUtils.isInsert(eventType))
+                            }
+                            if (BinlogUtils.isInsert(eventType)) {
                                 eventHandler.invokeInsert(rowMutationEventData.getInsertRows());
+                            }
                         }
                     });
                 }
@@ -123,6 +157,11 @@ public class BinlogEventDispatcher implements BinaryLogClient.EventListener {
         }
     }
 
+    /**
+     * 统一表示行插入、删除和更新数据的事件模型。
+     *
+     * @since 5.0.0
+     */
     @Data
     public static class RowMutationEventData {
 

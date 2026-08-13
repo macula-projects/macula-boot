@@ -25,6 +25,12 @@ import lombok.Setter;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Binlog 客户端连接与订阅配置。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Getter
 @Setter
 public class BinlogClientConfig {

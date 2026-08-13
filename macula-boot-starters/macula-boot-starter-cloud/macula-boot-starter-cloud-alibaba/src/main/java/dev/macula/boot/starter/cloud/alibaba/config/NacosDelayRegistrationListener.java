@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationListener;
  * 延迟注册服务到 Nacos
  *
  * @author Gordian
+ * @since 5.0.0
  */
 public class NacosDelayRegistrationListener implements ApplicationListener<ApplicationReadyEvent> {
 

@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
  * 缓存 ID生成器实现
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public class CachedIdGenerator implements IdGenerator {
 

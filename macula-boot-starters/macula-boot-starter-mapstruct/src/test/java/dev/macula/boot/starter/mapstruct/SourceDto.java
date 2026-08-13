@@ -24,6 +24,12 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+/**
+ * MapStruct 转换测试的源数据模型。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Data
 @AllArgsConstructor
 public class SourceDto {

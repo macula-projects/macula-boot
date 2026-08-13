@@ -68,6 +68,7 @@ public @interface Sensitive {
 
     /**
      * Enumeration used with {@link Sensitive}
+     * @since 5.0.0
      */
     public enum Type {
         /**

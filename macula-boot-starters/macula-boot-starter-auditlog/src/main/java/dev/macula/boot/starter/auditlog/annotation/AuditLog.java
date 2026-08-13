@@ -20,12 +20,17 @@ package dev.macula.boot.starter.auditlog.annotation;
 import dev.macula.boot.starter.auditlog.enums.BusinessType;
 import dev.macula.boot.starter.auditlog.enums.OperatorType;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 自定义操作日志记录注解
  *
  * @author ruoyi
+ * @since 5.0.0
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

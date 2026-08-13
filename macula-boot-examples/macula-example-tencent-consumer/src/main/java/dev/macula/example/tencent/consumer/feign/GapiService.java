@@ -26,6 +26,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * 调用 GAPI 采购订单接口的 Feign 客户端。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @FeignClient(name = "gapi-service", url = "https://gapi-dev.infinitus.com.cn", configuration = GapiConfiguration.class)
 public interface GapiService {
 

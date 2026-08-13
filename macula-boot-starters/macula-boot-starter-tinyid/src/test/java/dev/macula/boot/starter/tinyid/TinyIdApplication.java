@@ -20,6 +20,12 @@ package dev.macula.boot.starter.tinyid;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * TinyID Starter 集成测试应用。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @SpringBootApplication
 public class TinyIdApplication {
 

@@ -23,6 +23,7 @@ import java.util.List;
  * ID 生成器接口
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public interface IdGenerator {
 

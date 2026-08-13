@@ -19,7 +19,6 @@ package dev.macula.boot.starter.feign.test;
 
 import dev.macula.boot.exception.BizCheckException;
 import dev.macula.boot.exception.BizException;
-import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.feign.codec.OpenFeignErrorDecoder;
 import feign.Request;
 import feign.Request.Body;

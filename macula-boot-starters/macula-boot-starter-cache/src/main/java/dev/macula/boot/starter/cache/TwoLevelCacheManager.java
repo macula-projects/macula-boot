@@ -30,13 +30,19 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Cache manager to cover basic operations
  *
  * @author Rain
+ * @since 5.0.0
  */
 
 @Slf4j
@@ -104,6 +110,7 @@ public class TwoLevelCacheManager implements CacheManager {
 
     /**
      * Expiry policy enabling randomized expiry on write for local entities
+     * @since 5.0.0
      */
     static class RandomizedLocalExpiryOnWrite implements Expiry<Object, Object> {
 

@@ -26,6 +26,7 @@ import java.io.Serializable;
  *
  * @param <T> 　T对象
  * @author pangu
+ * @since 5.0.0
  */
 @Data
 public class Result<T> implements Serializable {

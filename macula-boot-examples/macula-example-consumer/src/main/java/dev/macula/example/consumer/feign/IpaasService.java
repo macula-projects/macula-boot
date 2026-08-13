@@ -25,6 +25,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * 调用 iPaaS 企业接口的 Feign 客户端。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @FeignClient(name = "ipaas-service", url = "https://ipaas-dev.infinitus.com.cn",
     configuration = IpaasConfiguration.class)
 public interface IpaasService {

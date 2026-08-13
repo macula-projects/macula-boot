@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2023 Macula
  *   macula.dev, China

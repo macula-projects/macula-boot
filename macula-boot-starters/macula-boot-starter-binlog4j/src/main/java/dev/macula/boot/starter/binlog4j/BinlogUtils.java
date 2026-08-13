@@ -19,6 +19,12 @@ package dev.macula.boot.starter.binlog4j;
 
 import com.github.shyiko.mysql.binlog.event.EventType;
 
+/**
+ * 判断 Binlog 行变更事件类型的工具类。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 public class BinlogUtils {
 
     public static boolean isUpdate(EventType eventType) {

@@ -22,7 +22,6 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
 
 /**
  * {@code RetryTestService} 重试测试服务

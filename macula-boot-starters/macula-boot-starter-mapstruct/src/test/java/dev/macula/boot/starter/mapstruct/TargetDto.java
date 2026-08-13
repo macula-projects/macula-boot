@@ -22,6 +22,12 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * MapStruct 转换测试的目标数据模型。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Data
 public class TargetDto {
 

@@ -51,6 +51,11 @@ public class MyBatisPlusProperties {
     private long maxLimit = 1000L;
 
 
+    /**
+     * 审计字段自动填充配置。
+     *
+     * @since 5.0.0
+     */
     @Getter
     @Setter
     public static class Audit {

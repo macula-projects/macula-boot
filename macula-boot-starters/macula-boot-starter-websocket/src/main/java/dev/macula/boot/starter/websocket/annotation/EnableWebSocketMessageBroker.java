@@ -19,9 +19,12 @@ package dev.macula.boot.starter.websocket.annotation;
 
 import dev.macula.boot.starter.websocket.config.MaculaWebSocketMessageBrokerConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * <p>

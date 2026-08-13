@@ -21,6 +21,7 @@ package dev.macula.boot.result;
  * 返回码接口
  *
  * @author pangu
+ * @since 5.0.0
  */
 public interface ResultCode {
 

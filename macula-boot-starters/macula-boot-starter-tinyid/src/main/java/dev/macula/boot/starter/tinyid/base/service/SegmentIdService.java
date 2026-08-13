@@ -23,6 +23,7 @@ import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
  * 段 ID服务接口
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 public interface SegmentIdService {
 

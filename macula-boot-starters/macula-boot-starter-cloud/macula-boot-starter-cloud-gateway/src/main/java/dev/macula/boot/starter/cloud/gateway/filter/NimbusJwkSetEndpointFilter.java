@@ -73,7 +73,6 @@ public class NimbusJwkSetEndpointFilter implements WebFilter, Ordered {
         this.jwkSource = jwkSource;
         this.jwkSelector = new JWKSelector(new JWKMatcher.Builder().build());
         this.requestMatcher = ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, jwkSetEndpointUri);
-        ;
     }
 
     @Override

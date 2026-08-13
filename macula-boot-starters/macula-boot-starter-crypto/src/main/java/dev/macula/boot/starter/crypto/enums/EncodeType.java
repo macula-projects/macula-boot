@@ -22,6 +22,7 @@ package dev.macula.boot.starter.crypto.enums;
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 public enum EncodeType {
 
@@ -38,6 +39,6 @@ public enum EncodeType {
     /**
      * 16进制编码
      */
-    HEX;
+    HEX
 
 }

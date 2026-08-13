@@ -21,6 +21,7 @@ package dev.macula.boot.starter.auditlog.enums;
  * 操作人类别
  *
  * @author ruoyi
+ * @since 5.0.0
  */
 public enum OperatorType {
     /**

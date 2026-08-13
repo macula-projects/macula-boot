@@ -19,6 +19,12 @@ package dev.macula.example.consumer.vo;
 
 import lombok.Data;
 
+/**
+ * 采购订单接口的通用响应模型。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Data
 public class PoBaseResult<T> {
 

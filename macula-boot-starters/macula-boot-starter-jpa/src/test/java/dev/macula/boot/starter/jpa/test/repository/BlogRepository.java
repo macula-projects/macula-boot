@@ -30,6 +30,7 @@ import java.util.List;
  * BlogRepository.
  *
  * @author blinkfox on 2019-08-16.
+ * @since 5.0.0
  */
 public interface BlogRepository extends JpaRepository<Blog, String> {
 

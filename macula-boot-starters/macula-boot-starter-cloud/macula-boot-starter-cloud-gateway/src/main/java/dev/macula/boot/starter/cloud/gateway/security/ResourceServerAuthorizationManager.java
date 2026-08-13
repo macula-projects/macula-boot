@@ -47,6 +47,7 @@ import java.util.Map;
  * 网关自定义鉴权管理器
  *
  * @author <a href="mailto:xianrui0365@163.com">haoxr</a>
+ * @since 5.0.0
  */
 @RequiredArgsConstructor
 @Slf4j

@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author 老马
  * @version 4.6.0
+ * @since 5.0.0
  */
 @AutoConfiguration
 @EnableConfigurationProperties(CryptoProperties.class)

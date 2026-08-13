@@ -21,6 +21,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+/**
+ * 将源测试模型转换为目标测试模型的 MapStruct 映射器。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
 @Mapper
 public interface SourceTargetMapper {
 

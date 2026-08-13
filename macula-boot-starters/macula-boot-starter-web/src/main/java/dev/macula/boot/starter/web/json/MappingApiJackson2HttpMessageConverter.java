@@ -37,6 +37,7 @@ import java.util.List;
  * </p>
  *
  * @author L.cm, Rain
+ * @since 5.0.0
  */
 public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJackson2HttpMessageConverter {
 

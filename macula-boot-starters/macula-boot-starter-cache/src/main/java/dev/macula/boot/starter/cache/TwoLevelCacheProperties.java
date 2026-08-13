@@ -31,6 +31,7 @@ import java.util.Map;
  * Simple set of properties to control most aspects of the multi-level cache functionality
  *
  * @author Rain
+ * @since 5.0.0
  */
 @Data
 @ConfigurationProperties(prefix = "spring.cache.two-level")
@@ -92,6 +93,11 @@ public class TwoLevelCacheProperties {
         return configuration;
     }
 
+    /**
+     * 本地一级缓存容量与过期策略配置。
+     *
+     * @since 5.0.0
+     */
     @Data
     public static class LocalCacheProperties {
 
@@ -131,6 +137,7 @@ public class TwoLevelCacheProperties {
      *       be 4, {@code minimumNumberOfCalls} is 2 and {@code slidingWindowSize} is 2 (seconds == 8
      *       seconds)
      * </ul>
+     * @since 5.0.0
      */
     @Data
     public static class CircuitBreakerProperties {

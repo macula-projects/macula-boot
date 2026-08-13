@@ -27,6 +27,7 @@ import java.io.Serializable;
  * Small message used by this caching library in order to sync eviction of entries when necessary
  *
  * @author Rain
+ * @since 5.0.0
  */
 
 @Data

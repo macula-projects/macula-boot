@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Bean;
  * TinyId 分布式ID生成器自动配置类
  * 
  * @author rain
+ * @since 5.0.0
  */
 @AutoConfiguration
 @EnableConfigurationProperties(TinyIdProperties.class)

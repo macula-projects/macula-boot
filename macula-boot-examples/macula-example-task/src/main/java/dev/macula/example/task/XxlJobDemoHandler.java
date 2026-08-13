@@ -17,7 +17,6 @@
 
 package dev.macula.example.task;
 
-import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import org.springframework.stereotype.Component;
@@ -35,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  * 4、任务结果：默认任务结果为 "成功" 状态，不需要主动设置；如有诉求，比如设置任务结果为失败，可以通过 "XxlJobHelper.handleFail/handleSuccess" 自主设置任务结果；
  *
  * @author xuxueli 2019-12-11 21:52:51
+ * @since 5.0.0
  */
 @Component
 public class XxlJobDemoHandler {

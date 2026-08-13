@@ -17,6 +17,8 @@
 
 package dev.macula.boot.starter.operationlog;
 
+import java.io.Serial;
+
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -27,6 +29,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class OperationLogEvent extends ApplicationEvent {
 
+    @Serial
     private static final long serialVersionUID = 351105257751859807L;
 
     public OperationLogDTO getOperationLog() {

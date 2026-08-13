@@ -24,6 +24,7 @@ import lombok.Setter;
  * 结果实体类
  * 
  * @author du_imba
+ * @since 5.0.0
  */
 @Setter
 @Getter

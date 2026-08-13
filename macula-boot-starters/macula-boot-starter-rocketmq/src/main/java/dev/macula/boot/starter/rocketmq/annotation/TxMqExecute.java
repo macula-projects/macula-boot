@@ -17,7 +17,11 @@
 
 package dev.macula.boot.starter.rocketmq.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@code TxExecute} 事务消息业务执行方法注解
