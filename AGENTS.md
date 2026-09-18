@@ -55,3 +55,16 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 - 修改/新增 Starter、自动配置或配置属性：`.agents/rules/starter-development.md`
 - 编写、重命名测试或选择验证范围：`.agents/rules/testing.md`
 - 修改 POM、依赖版本、CI 或执行发布：`.agents/rules/dependencies-release.md`
+
+<!-- ai-sdlc:begin -->
+## AI-Native SDLC Loop
+
+This repository uses the AI-Native SDLC loop (https://claude.com/blog/the-ai-native-sdlc-playbook).
+
+- Artifacts live in `.sdlc/<slug>/`: intent.md, spec.md, plan.md
+- Project-root policy: REVIEW.md (review passes), bands.yaml (control bands)
+- No source code is written for a change without an accepted plan.md
+- No gate is ever self-approved by the agent
+- Six stage skills guide the loop: sdlc-plan -> sdlc-design -> sdlc-build -> sdlc-test -> sdlc-deploy -> sdlc-maintain
+- The loop is active for as long as .sdlc/ exists; silence it with .sdlc/OPTOUT
+<!-- ai-sdlc:end -->

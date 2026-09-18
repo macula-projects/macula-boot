@@ -45,7 +45,7 @@ macula-boot
 ├── macula-boot-parent       # 依赖版本、插件和构建规范
 ├── macula-boot-commons      # 通用模型、异常、上下文和工具
 ├── macula-boot-starters     # 按能力拆分的 Spring Boot Starter
-├── macula-boot-examples     # 网关、服务、DDD、任务等示例
+├── macula-boot-examples     # Alibaba/Tencent 微服务、任务和 Binlog 示例
 └── macula-boot-archetype    # Maven 项目骨架
 ```
 
