@@ -57,7 +57,7 @@ feign:
 
 xxl:
   job:
-    accessToken: default_token
+    accessToken: ${XXL_JOB_ACCESS_TOKEN:default_token}
     admin:
       addresses: http://127.0.0.1:9084/macula-cloud-xxljob      # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
       #name: macula-cloud-xxljob                                 # 注册到注册中心的Admin的服务名称[选填]，默认是xxl-job-admin
@@ -77,11 +77,11 @@ snail-job:
     # 服务器通讯端口（不是后台管理页面服务端口）
     port: 17888
   # 命名空间 【上面配置的空间的唯一标识】
-  namespace: OMZct8jxKru5mfSaA_m7HQraaNn7jV4k
+  namespace: ${SNAIL_JOB_NAMESPACE:example}
   # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
   group: ${spring.application.name}-${spring.profiles.active}
   # 接入组 token 【上面配置的token信息】
-  token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj
+  token: ${SNAIL_JOB_TOKEN:example}
   # 客户端绑定IP，必须服务器可以访问到；默认自动推断，在服务器无法调度客户端时需要手动配置
   # host: 127.0.0.1
   # 客户端通讯端口，默认 1789

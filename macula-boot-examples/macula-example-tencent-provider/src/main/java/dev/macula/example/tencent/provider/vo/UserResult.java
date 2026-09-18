@@ -23,10 +23,10 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * {@code UserResult} is
+ * Provider 用户接口的请求与响应模型。
  *
  * @author rain
- * @since 2022/7/23 00:58
+ * @since 5.0.0
  */
 
 @Data

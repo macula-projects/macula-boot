@@ -34,7 +34,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableScheduling
 public class AsyncAutoConfiguration {
-    
+
     @Bean
     public TaskDecorator ttlTaskDecorator() {
         return TtlRunnable::get;

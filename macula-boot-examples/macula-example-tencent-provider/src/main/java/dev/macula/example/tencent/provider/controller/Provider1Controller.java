@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 /**
- * {@code Provider1Controller} REST 接口
+ * 提供回声和用户处理接口，演示资源服务器安全上下文。
  *
  * @author rain
- * @since 2022/7/22 15:14
+ * @since 5.0.0
  */
 
 @RestController

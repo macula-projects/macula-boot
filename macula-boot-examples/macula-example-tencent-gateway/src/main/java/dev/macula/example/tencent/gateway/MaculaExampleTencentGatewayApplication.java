@@ -22,10 +22,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * {@code MaculaExampleTencentGatewayApplication} Tencent网关应用
+ * Tencent 网关示例的启动入口，从 Polaris 发现下游服务。
  *
  * @author rain
- * @since 2022/7/23 14:37
+ * @since 5.0.0
  */
 @SpringBootApplication
 @EnableDiscoveryClient

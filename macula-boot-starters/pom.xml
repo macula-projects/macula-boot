@@ -102,5 +102,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!--
+            Mockito 5 defaults to the inline mock maker, which dynamically attaches Byte Buddy's agent and
+            appends to the bootstrap classpath. Starter tests only require regular subclass-based mocks, so use
+            Mockito's official subclass provider to avoid JVM CDS warnings in both Maven and IDE test runs.
+        -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-subclass</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

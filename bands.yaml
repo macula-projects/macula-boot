@@ -1,0 +1,52 @@
+# Replace worked baselines with this service's approved SLOs.
+bands:
+  - metric: public_api_p99_latency_ms
+    owner: api-platform
+    baseline: rolling_30d
+    rules: western_electric
+    window: 10m
+    tiers:
+      1sigma: { action: log, tools: [dashboard-read] }
+      2sigma:
+        action: diagnose
+        tools: [dashboard-read, logs-read, traces-read, git-log-read]
+      3sigma:
+        action: propose
+        tools: [dashboard-read, logs-read, traces-read, git-log-read, deploy-history-read]
+        routes: [pull_request, runbook:api-latency]
+
+  - metric: public_api_error_rate_percent
+    owner: api-platform
+    baseline: rolling_30d
+    rules: western_electric
+    window: 5m
+    tiers:
+      1sigma: { action: log, tools: [dashboard-read] }
+      2sigma: { action: diagnose, tools: [dashboard-read, logs-read, traces-read] }
+      3sigma:
+        action: propose
+        tools: [dashboard-read, logs-read, traces-read, deploy-history-read]
+        routes: [pull_request, runbook:api-errors]
+
+  - metric: checkout_conversion_rate
+    owner: growth
+    baseline: rolling_30d
+    rules: western_electric
+    window: 1h
+    tiers:
+      1sigma: { action: log, tools: [analytics-read] }
+      2sigma: { action: diagnose, tools: [analytics-read, logs-read, git-log-read] }
+      3sigma:
+        action: propose
+        tools: [analytics-read, logs-read, git-log-read, deploy-history-read]
+        routes: [pull_request, runbook:checkout-regression]
+
+# A control band is statistical, not a fixed alarm. `baseline` is the rolling window the
+# metric is compared against and `rules` names the out-of-band test; tiers escalate by
+# standard deviations from that baseline.
+#
+# 1sigma logs. 2sigma invokes sdlc-diagnostician with the listed read-only tools.
+# 3sigma lets it propose a fix through a route a human controls. No tier deploys anything.
+#
+# Absolute thresholds are acceptable for a metric with no stable baseline (a brand-new
+# service, or a hard contractual SLO). Say so in a comment when you use one.

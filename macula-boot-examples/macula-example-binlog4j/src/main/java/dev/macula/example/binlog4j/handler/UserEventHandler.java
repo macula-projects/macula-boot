@@ -23,10 +23,10 @@ import dev.macula.boot.starter.binlog4j.config.annotation.BinlogSubscriber;
 import dev.macula.example.binlog4j.entity.User;
 
 /**
- * {@code UserEventHandler} 用户表订阅Handler
+ * 订阅 {@code macula-system.sys_user} 表并输出增删改事件的示例处理器。
  *
  * @author rain
- * @since 2023/9/5 11:27
+ * @since 5.0.0
  */
 @BinlogSubscriber(clientName = "master", database = "macula-system", table = "sys_user")
 public class UserEventHandler implements IBinlogEventHandler<User> {

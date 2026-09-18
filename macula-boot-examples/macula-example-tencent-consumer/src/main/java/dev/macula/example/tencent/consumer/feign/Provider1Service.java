@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * {@code Provider1Service} 调用Provider1服务
+ * 通过 Polaris 服务名调用 Tencent provider 的 Feign 客户端。
  *
  * @author rain
- * @since 2022/7/22 22:33
+ * @since 5.0.0
  */
 @FeignClient(name = "macula-example-tencent-provider", path = "/api/v1/provider1", contextId = "provider1Service",
     fallbackFactory = AbstractProviderFallbackFactory.class)

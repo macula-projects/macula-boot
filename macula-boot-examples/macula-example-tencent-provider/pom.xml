@@ -29,7 +29,7 @@
     <artifactId>macula-example-tencent-provider</artifactId>
 
     <name>Macula Example Tencent Provider</name>
-    <description>Macula Example Tencent Provider</description>
+    <description>Tencent Polaris service provider integration example</description>
     <url>https://macula.dev</url>
 
     <dependencies>

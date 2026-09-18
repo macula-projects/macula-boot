@@ -6,7 +6,7 @@ spring:
 
     gateway:
       routes:
-        - id: macula-example-consumer
+        - id: macula-example-tencent-consumer
           uri: lb://macula-example-tencent-consumer
           predicates:
             - Path=/consumer/**

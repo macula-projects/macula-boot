@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 /**
- * {@code Provider1Controller} REST 接口
+ * 第二组 REST 接口，用于演示 SpringDoc 分组和资源服务器上下文。
  *
  * @author rain
- * @since 2022/7/22 15:14
+ * @since 5.0.0
  */
 
 @RestController

@@ -21,10 +21,10 @@ import dev.macula.example.tencent.consumer.feign.Provider1Service;
 import org.springframework.cloud.openfeign.FallbackFactory;
 
 /**
- * {@code AbstractProviderFallbackFactory} is 降级测试
+ * Provider Feign 降级工厂的公共类型，用于固定客户端泛型。
  *
  * @author rain
- * @since 2023/7/12 11:43
+ * @since 5.0.0
  */
 public abstract class AbstractProviderFallbackFactory implements FallbackFactory<Provider1Service> {
 }

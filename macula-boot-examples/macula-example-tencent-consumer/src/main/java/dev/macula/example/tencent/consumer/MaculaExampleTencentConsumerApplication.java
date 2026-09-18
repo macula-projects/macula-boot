@@ -23,10 +23,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * {@code MaculaConsumerApplication} 消费者演示
+ * Tencent 微服务消费者示例的启动入口，开启 Polaris 服务发现和 Feign 客户端扫描。
  *
  * @author rain
- * @since 2022/7/22 22:27
+ * @since 5.0.0
  */
 @SpringBootApplication
 @EnableDiscoveryClient

@@ -22,10 +22,10 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.Data;
 
 /**
- * {@code User} 用户表演示
+ * {@code sys_user} 表的 binlog 事件映射对象，字段名按 snake_case 解析。
  *
  * @author rain
- * @since 2023/9/5 11:26
+ * @since 5.0.0
  */
 @Data
 @JSONType(naming = PropertyNamingStrategy.SnakeCase)

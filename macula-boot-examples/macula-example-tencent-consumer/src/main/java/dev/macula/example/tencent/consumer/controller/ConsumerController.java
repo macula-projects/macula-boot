@@ -25,9 +25,8 @@ import dev.macula.example.tencent.consumer.vo.CompanyDto;
 import dev.macula.example.tencent.consumer.vo.PoBaseDto;
 import dev.macula.example.tencent.consumer.vo.PoBaseResult;
 import dev.macula.example.tencent.consumer.vo.UserResult;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,29 +35,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * {@code ConsumerController} 消费者演示
+ * Tencent 消费者 REST 入口，演示 Polaris 服务调用和带认证拦截器的外部 Feign 调用。
  *
  * @author rain
- * @since 2022/7/22 22:48
+ * @since 5.0.0
  */
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/consumer")
 @Slf4j
 public class ConsumerController {
 
-    @Autowired
-    private Provider1Service provider1Service;
+    private final Provider1Service provider1Service;
 
-    @Autowired
-    private GapiService gapiService;
+    private final GapiService gapiService;
 
-    @Autowired
-    private IpaasService ipaasService;
+    private final IpaasService ipaasService;
 
-    @Autowired
-    private GatewayService gatewayService;
+    private final GatewayService gatewayService;
 
     @GetMapping("/echo")
     public String echo() {

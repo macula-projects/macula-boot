@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author rain
  * @since 5.0.0
  */
-@FeignClient(name = "gapi-service", url = "https://gapi-dev.infinitus.com.cn", configuration = GapiConfiguration.class)
+@FeignClient(name = "gapi-service", url = "${gapi.url:https://gapi-dev.infinitus.com.cn}",
+    configuration = GapiConfiguration.class)
 public interface GapiService {
 
     @PostMapping("/ecp/po/trade/updateEvaluationStatus")

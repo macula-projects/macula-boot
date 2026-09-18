@@ -23,10 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * {@code Provider1FallbackFactory} is 降级演示
+ * Provider 调用异常时创建降级实现，并保留原始异常日志。
  *
  * @author rain
- * @since 2023/7/12 12:04
+ * @since 5.0.0
  */
 @Component
 @Slf4j

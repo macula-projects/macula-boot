@@ -1,0 +1,63 @@
+# Macula Boot Examples
+
+`macula-boot-examples` 提供可以对照源码学习的集成示例，不作为框架模块的依赖来源。示例按云平台和专项能力分组，默认使用 `local` Maven profile。
+
+## 模块一览
+
+| 类别 | 模块 | 默认端口 | 用途 |
+| --- | --- | ---: | --- |
+| Alibaba | `macula-example-alibaba-gateway` | HTTP 8000 / HTTPS 8443 | Nacos 服务发现、Spring Cloud Gateway、Sentinel 与网关安全 |
+| Alibaba | `macula-example-alibaba-provider1` | 7081 | REST 接口、JWT 资源服务器、Nacos 配置刷新与服务注册 |
+| Alibaba | `macula-example-alibaba-consumer` | 7090 | OpenFeign 服务调用、Sentinel 降级和 WebSocket |
+| Alibaba | `macula-example-alibaba-provider2` | - | 预留的第二提供方模块，当前不启动 |
+| Tencent | `macula-example-tencent-gateway` | 4010 | Polaris 服务发现与 Spring Cloud Gateway |
+| Tencent | `macula-example-tencent-provider` | 4011 | REST 接口、JWT 资源服务器与 Polaris 服务注册 |
+| Tencent | `macula-example-tencent-consumer` | 4019 | OpenFeign 服务调用与 Polaris 服务发现 |
+| 任务 | `macula-example-task` | 7099 | XXL-JOB 与 SnailJob 执行器 |
+| Binlog | `macula-example-binlog4j` | - | MySQL binlog 订阅与事件处理 |
+
+## 环境要求
+
+- JDK 17、Maven 3.9+。
+- Alibaba 链路：本地 Nacos（默认 `127.0.0.1:8848`）；Sentinel Dashboard 为可选项。
+- Tencent 链路：本地 Polaris（默认 `grpc://127.0.0.1:8091`）。
+- Task 示例：按需启动 Nacos、XXL-JOB Admin 和 SnailJob Server。
+- Binlog4j 示例：MySQL 需开启 binlog，并准备 Redis 用于消费位点持久化。
+
+示例中的认证信息均是占位值。真实地址、账号、密码和 token 应通过环境变量或配置中心注入，不要提交到仓库。
+
+## 构建与检查
+
+在仓库根目录执行：
+
+```bash
+# 编译并运行 examples 内所有模块的单元测试
+mvn -f macula-boot-examples/pom.xml test
+
+# 全仓 Java 风格检查
+mvn -N checkstyle:check
+```
+
+如果只修改一个示例，优先缩小验证范围：
+
+```bash
+mvn -pl macula-boot-examples/macula-example-alibaba-provider1 -am test
+```
+
+## 启动微服务链路
+
+Alibaba 链路按以下顺序启动：
+
+1. Nacos。
+2. `macula-example-alibaba-provider1`。
+3. `macula-example-alibaba-consumer`。
+4. `macula-example-alibaba-gateway`。
+
+Tencent 链路将 Nacos 替换为 Polaris，并依次启动 provider、consumer 和 gateway。每个模块的配置项、启动命令和验证端点见其目录下的 README。
+
+## 配置约定
+
+- `bootstrap.yml` 放置应用名、端口和配置中心连接信息。
+- `application.yml` 放置业务 Starter 和客户端配置。
+- 可变的基础设施参数使用 `${ENV_NAME:默认值}`，本地可直接运行，其他环境显式覆盖。
+- Maven profile 通过 `@profile.active@` 写入 Spring profile，可选 `local`、`dev`、`stg`、`pet`、`prd`。

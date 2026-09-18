@@ -31,7 +31,7 @@ import org.springframework.boot.web.server.WebServer;
  * {@link NacosDelayRegistrationListener} 延迟注册行为测试。
  *
  * @author Rain
- * @since 2026/8/12
+ * @since 5.0.0
  */
 class NacosDelayRegistrationListenerTest {
 

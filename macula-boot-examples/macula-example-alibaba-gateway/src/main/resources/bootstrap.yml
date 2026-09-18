@@ -1,0 +1,33 @@
+server:
+  ssl:
+    key-store: classpath:jwk/springboot.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: springboot
+    key-password: password
+  port: 8443
+  http:
+    port: 8000
+spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-alibaba-gateway
+  cloud:
+    nacos:
+      username: ${nacos.username}
+      password: ${nacos.password}
+      server-addr: ${nacos.server-addr}
+      config:
+        # group:
+        refresh-enabled: true
+        file-extension: yml
+        namespace: ${nacos.namespace}
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+nacos:
+  username: nacos
+  password: nacos
+  server-addr: 127.0.0.1:8848
+  config:
+    namespace: MACULA5

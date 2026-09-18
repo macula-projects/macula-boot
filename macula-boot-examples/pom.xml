@@ -42,19 +42,15 @@
     </properties>
 
     <modules>
-        <module>macula-example-gateway</module>
-        <module>macula-example-consumer</module>
-        <module>macula-example-provider1</module>
-        <module>macula-example-provider2</module>
-        <module>macula-example-schedulerx</module>
-        <module>macula-example-ddd</module>
+        <module>macula-example-alibaba-gateway</module>
+        <module>macula-example-alibaba-consumer</module>
+        <module>macula-example-alibaba-provider1</module>
+        <module>macula-example-alibaba-provider2</module>
         <module>macula-example-task</module>
         <module>macula-example-binlog4j</module>
         <module>macula-example-tencent-gateway</module>
         <module>macula-example-tencent-provider</module>
         <module>macula-example-tencent-consumer</module>
-        <module>macula-example-tsf-consumer</module>
-        <module>macula-example-tsf-gateway</module>
     </modules>
 
     <dependencies>

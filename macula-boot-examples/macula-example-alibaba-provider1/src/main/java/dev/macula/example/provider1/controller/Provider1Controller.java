@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2023 Macula
+ *   macula.dev, China
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package dev.macula.example.provider1.controller;
+
+import cn.hutool.core.date.DateUtil;
+import dev.macula.boot.starter.security.utils.SecurityUtils;
+import dev.macula.example.provider1.config.ExampleConfig;
+import dev.macula.example.provider1.vo.UserResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
+
+/**
+ * 提供回声和用户处理接口，演示安全上下文与动态配置读取。
+ *
+ * @author rain
+ * @since 5.0.0
+ */
+
+@RestController
+@RequestMapping("/api/v1/provider1")
+@Tag(name = "提供方演示接口", description = "提供方演示")
+@RequiredArgsConstructor
+@Slf4j
+public class Provider1Controller {
+    private final ExampleConfig config;
+
+    @GetMapping("/echo")
+    @Operation(summary = "echo方法", description = "用于演示")
+    @Parameter(name = "字符串", description = "用于回声")
+    public String echo(@RequestParam("str") String str) {
+        log.info("echo: " + str + ", test=" + config.getTest());
+        return "Hello " + str + ", test=" + config.getTest() + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
+    }
+
+    @PostMapping("/user")
+    @Operation(summary = "获取用户信息", description = "用于获取用户信息")
+    public UserResult getUser(@RequestBody UserResult result) {
+        log.info("User: {}", result);
+        result.setBirthday(new Date());
+        result.setPassword("provider1_pass");
+        return result;
+    }
+}

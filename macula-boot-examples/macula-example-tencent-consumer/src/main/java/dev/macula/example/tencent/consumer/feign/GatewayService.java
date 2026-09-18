@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * {@code GatewayService} 测试AK/SK请求
+ * 通过 Tencent 网关调用 consumer 的 AK/SK 认证示例客户端。
  *
  * @author rain
- * @since 2023/8/24 21:28
+ * @since 5.0.0
  */
-@FeignClient(name = "gateway-service", url = "http://127.0.0.1:8000/consumer",
+@FeignClient(name = "gateway-service", url = "${gateway.url:http://127.0.0.1:4010/consumer}",
     configuration = GatewayConfiguration.class)
 public interface GatewayService {
     @PostMapping("/api/v1/consumer/user")

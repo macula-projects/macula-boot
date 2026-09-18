@@ -19,13 +19,3 @@ spring:
 polaris:
   namespace: macula-dev
   server-addr: grpc://127.0.0.1:8091
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-
-polaris:
-  namespace: macula-dev
-  server-addr: grpc://127.0.0.1:8091

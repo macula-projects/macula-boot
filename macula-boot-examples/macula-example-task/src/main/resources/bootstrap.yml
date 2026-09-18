@@ -21,18 +21,6 @@ spring:
 nacos:
   username: nacos
   password: nacos
+  server-addr: 127.0.0.1:8848
   config:
-    server-addr: 127.0.0.1:8848
-    namespace: MACULA5
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-nacos:
-  username: maculav5
-  #password: 请通过启动命令赋予密码
-  config:
-    server-addr: 10.94.108.55:8848
     namespace: MACULA5

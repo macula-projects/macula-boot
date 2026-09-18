@@ -25,10 +25,10 @@ import com.aizuda.snailjob.model.dto.ExecuteResult;
 import org.springframework.stereotype.Component;
 
 /**
- * {@code SnailJobHandler} is SnailJobHandler测试类
+ * SnailJob 执行器示例，记录任务参数并返回成功结果。
  *
  * @author Rain
- * @since 2025/12/10 15:33
+ * @since 5.0.0
  */
 @Component
 public class SnailJobHandler {

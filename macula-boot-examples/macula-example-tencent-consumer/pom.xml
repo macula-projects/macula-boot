@@ -29,7 +29,7 @@
     <artifactId>macula-example-tencent-consumer</artifactId>
 
     <name>Macula Example Tencent Consumer</name>
-    <description>Macula Example Tencent Consumer</description>
+    <description>Tencent Polaris and OpenFeign consumer integration example</description>
     <url>https://macula.dev</url>
 
     <dependencies>

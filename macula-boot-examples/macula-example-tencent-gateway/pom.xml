@@ -29,7 +29,7 @@
     <artifactId>macula-example-tencent-gateway</artifactId>
 
     <name>Macula Example Tencent Gateway</name>
-    <description>Macula Example Tencent Gateway</description>
+    <description>Tencent Polaris and Spring Cloud Gateway integration example</description>
     <url>https://macula.dev</url>
 
     <dependencies>

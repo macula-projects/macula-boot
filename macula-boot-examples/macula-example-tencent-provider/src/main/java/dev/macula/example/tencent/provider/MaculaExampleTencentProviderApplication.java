@@ -22,10 +22,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * {@code MaculaExampleTencentProviderApplication} 启动类
+ * Tencent 服务提供方示例的启动入口，将 REST 服务注册到 Polaris。
  *
  * @author rain
- * @since 2022/7/22 14:55
+ * @since 5.0.0
  */
 
 @SpringBootApplication

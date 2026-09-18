@@ -21,10 +21,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * {@code MaculaExampleBinlog4jApplication} 启动类
+ * Binlog4j 订阅示例的启动入口。
  *
  * @author rain
- * @since 2023/9/5 11:23
+ * @since 5.0.0
  */
 @SpringBootApplication
 public class MaculaExampleBinlog4jApplication {

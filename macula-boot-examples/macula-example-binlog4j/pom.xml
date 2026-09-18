@@ -29,7 +29,7 @@
     <artifactId>macula-example-binlog4j</artifactId>
 
     <name>Macula Example Binlog4j</name>
-    <description>Macula Example Binlog4j</description>
+    <description>MySQL binlog subscription example based on Binlog4j</description>
     <url>https://macula.dev</url>
 
     <dependencies>

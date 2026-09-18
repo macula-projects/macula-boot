@@ -29,7 +29,7 @@
     <artifactId>macula-example-task</artifactId>
 
     <name>Macula Example Task</name>
-    <description>Macula Example Task</description>
+    <description>XXL-JOB and SnailJob executor integration example</description>
     <url>https://macula.dev</url>
 
     <dependencies>
