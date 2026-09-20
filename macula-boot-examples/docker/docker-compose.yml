@@ -1,2 +1,308 @@
+name: macula-boot-examples
+
+x-app-build: &app-build
+  context: ../..
+  dockerfile: macula-boot-examples/docker/Dockerfile
+
+x-app-healthcheck: &app-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 30
+  start_period: 90s
+
+x-alibaba-environment: &alibaba-environment
+  NACOS_SERVER_ADDR: nacos:8848
+  NACOS_NAMESPACE: ${NACOS_NAMESPACE:-MACULA5}
+  NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+  NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+  SENTINEL_NACOS_SERVER_ADDR: nacos:8848
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: 6379
+  SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+
+x-tencent-environment: &tencent-environment
+  POLARIS_SERVER_ADDR: grpc://polaris:8091
+  POLARIS_NAMESPACE: ${POLARIS_NAMESPACE:-macula-dev}
+  SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: polaris:8848
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: 6379
+  SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+
 services:
-  
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.0.43}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-polaris}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nacos_config}
+      MYSQL_USER: ${MYSQL_USER:-nacos}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nacos}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - examples
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4.5}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-redis}"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - examples
+
+  nacos:
+    image: ${NACOS_IMAGE:-nacos/nacos-server:v2.5.1-slim}
+    profiles: ["alibaba"]
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: ${MYSQL_DATABASE:-nacos_config}
+      MYSQL_SERVICE_USER: ${MYSQL_USER:-nacos}
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_PASSWORD:-nacos}
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      NACOS_AUTH_ENABLE: "false"
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      JVM_XMN: 128m
+    ports:
+      - "127.0.0.1:${NACOS_HTTP_PORT:-8848}:8848"
+      - "127.0.0.1:${NACOS_GRPC_PORT:-9848}:9848"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8848/nacos/v1/console/health/readiness >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - examples
+
+  nacos-init:
+    image: ${CURL_IMAGE:-curlimages/curl:8.16.0}
+    profiles: ["alibaba"]
+    restart: "no"
+    depends_on:
+      nacos:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        for namespace in "${NACOS_NAMESPACE:-MACULA5}" SENTINEL; do
+          curl --fail --silent --show-error --request POST \
+            --data-urlencode "customNamespaceId=$${namespace}" \
+            --data-urlencode "namespaceName=$${namespace}" \
+            --data-urlencode "namespaceDesc=Macula Boot local example" \
+            http://nacos:8848/nacos/v1/console/namespaces >/dev/null || true
+        done
+        namespaces="$$(curl --fail --silent http://nacos:8848/nacos/v1/console/namespaces)"
+        printf '%s' "$${namespaces}" | grep -q "${NACOS_NAMESPACE:-MACULA5}"
+        printf '%s' "$${namespaces}" | grep -q 'SENTINEL'
+    networks:
+      - examples
+
+  polaris:
+    image: ${POLARIS_IMAGE:-polarismesh/polaris-server:v1.18.1}
+    profiles: ["tencent"]
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-polaris}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        escaped_password="$$(printf '%s' "$${MYSQL_ROOT_PASSWORD}" | sed 's/[\\&|]/\\&/g')"
+        sed "s|__POLARIS_DB_PASSWORD__|$${escaped_password}|g" \
+          /root/conf/polaris-server.template.yaml > /root/conf/polaris-server.yaml
+        exec /root/polaris-server start
+    ports:
+      - "127.0.0.1:${POLARIS_HTTP_PORT:-8090}:8090"
+      - "127.0.0.1:${POLARIS_DISCOVERY_GRPC_PORT:-8091}:8091"
+      - "127.0.0.1:${POLARIS_CONFIG_GRPC_PORT:-8093}:8093"
+      - "127.0.0.1:${POLARIS_NACOS_PORT:-18849}:8848"
+      - "127.0.0.1:${POLARIS_NACOS_GRPC_PORT:-19849}:9848"
+    volumes:
+      - ./polaris/polaris-server.yaml:/root/conf/polaris-server.template.yaml:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8090/ >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - examples
+
+  macula-example-alibaba-provider1:
+    image: macula-example-alibaba-provider1:local
+    profiles: ["alibaba"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-alibaba-provider1
+    restart: unless-stopped
+    environment:
+      <<: *alibaba-environment
+      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:8000/oauth2/jwks
+    ports:
+      - "127.0.0.1:${ALIBABA_PROVIDER_PORT:-7081}:7081"
+    depends_on:
+      nacos-init:
+        condition: service_completed_successfully
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:7081/actuator/health >/dev/null"]
+    networks:
+      - examples
+
+  macula-example-alibaba-consumer:
+    image: macula-example-alibaba-consumer:local
+    profiles: ["alibaba"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-alibaba-consumer
+    restart: unless-stopped
+    environment:
+      <<: *alibaba-environment
+      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:8000/oauth2/jwks
+    ports:
+      - "127.0.0.1:${ALIBABA_CONSUMER_PORT:-7090}:7090"
+    depends_on:
+      macula-example-alibaba-provider1:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:7090/api/v1/consumer/echo/health?str=health' >/dev/null"]
+    networks:
+      - examples
+
+  macula-example-alibaba-gateway:
+    image: macula-example-alibaba-gateway:local
+    profiles: ["alibaba"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-alibaba-gateway
+    restart: unless-stopped
+    environment:
+      <<: *alibaba-environment
+      OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
+    ports:
+      - "127.0.0.1:${ALIBABA_GATEWAY_HTTP_PORT:-8000}:8000"
+      - "127.0.0.1:${ALIBABA_GATEWAY_HTTPS_PORT:-8443}:8443"
+    depends_on:
+      macula-example-alibaba-consumer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:8000/consumer/api/v1/consumer/echo/health?str=health' >/dev/null"]
+    networks:
+      - examples
+
+  macula-example-tencent-provider:
+    image: macula-example-tencent-provider:local
+    profiles: ["tencent"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-tencent-provider
+    restart: unless-stopped
+    environment:
+      <<: *tencent-environment
+      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4010/oauth2/jwks
+    ports:
+      - "127.0.0.1:${TENCENT_PROVIDER_PORT:-4011}:4011"
+    depends_on:
+      polaris:
+        condition: service_healthy
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4011/actuator/health >/dev/null"]
+    networks:
+      - examples
+
+  macula-example-tencent-consumer:
+    image: macula-example-tencent-consumer:local
+    profiles: ["tencent"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-tencent-consumer
+    restart: unless-stopped
+    environment:
+      <<: *tencent-environment
+      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4010/oauth2/jwks
+      MACULA_SECURITY_IGNORE_URLS: /api/v1/consumer/echo
+    ports:
+      - "127.0.0.1:${TENCENT_CONSUMER_PORT:-4019}:4019"
+    depends_on:
+      macula-example-tencent-provider:
+        condition: service_healthy
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4019/api/v1/consumer/echo >/dev/null"]
+    networks:
+      - examples
+
+  macula-example-tencent-gateway:
+    image: macula-example-tencent-gateway:local
+    profiles: ["tencent"]
+    build:
+      <<: *app-build
+      args:
+        MODULE: macula-example-tencent-gateway
+    restart: unless-stopped
+    environment:
+      <<: *tencent-environment
+      OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
+      MACULA_GATEWAY_SECURITY_IGNORE_URLS: /consumer/api/v1/consumer/echo
+    ports:
+      - "127.0.0.1:${TENCENT_GATEWAY_PORT:-4010}:4010"
+    depends_on:
+      macula-example-tencent-consumer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *app-healthcheck
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4010/consumer/api/v1/consumer/echo >/dev/null"]
+    networks:
+      - examples
+
+networks:
+  examples:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
