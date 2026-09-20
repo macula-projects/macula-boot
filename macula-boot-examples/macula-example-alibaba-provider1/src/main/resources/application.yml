@@ -8,8 +8,8 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: ${nacos.config.server-addr}
-        namespace: ${nacos.config.namespace}
+        server-addr: ${nacos.server-addr}
+        namespace: ${nacos.namespace}
         # group:
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
@@ -29,7 +29,7 @@ spring:
         flow:
           # 指定数据源类型
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:${NACOS_SERVER_ADDR:127.0.0.1:8848}}
             data-id: ${spring.application.name}-flow-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP
@@ -38,7 +38,7 @@ spring:
             rule-type: flow
         degrade:
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:${NACOS_SERVER_ADDR:127.0.0.1:8848}}
             data-id: ${spring.application.name}-degrade-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP
@@ -50,7 +50,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:8000/oauth2/jwks        # 网关地址
+          jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:8000/oauth2/jwks}        # 网关地址
 
 seata:
   enabled: false

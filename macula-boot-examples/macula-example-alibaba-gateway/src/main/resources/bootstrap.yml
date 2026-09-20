@@ -26,8 +26,7 @@ spring:
 
 # 和环境有关的配置信息，不同环境覆盖此处的配置
 nacos:
-  username: nacos
-  password: nacos
-  server-addr: 127.0.0.1:8848
-  config:
-    namespace: MACULA5
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  namespace: ${NACOS_NAMESPACE:MACULA5}

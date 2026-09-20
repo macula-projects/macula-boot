@@ -23,7 +23,7 @@ spring:
         flow:
           # 指定数据源类型
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:${NACOS_SERVER_ADDR:127.0.0.1:8848}}
             data-id: ${spring.application.name}-flow-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP
@@ -59,7 +59,7 @@ spring:
         opaquetoken:
           client-id: e4da4a32-592b-46f0-ae1d-784310e88423
           client-secret: secret
-          introspection-uri: http://127.0.0.1:9010/oauth2/introspect
+          introspection-uri: ${OAUTH2_INTROSPECTION_URI:http://127.0.0.1:9010/oauth2/introspect}
   sleuth:
     reactor:
       instrumentation-type: decorate_on_each

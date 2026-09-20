@@ -33,3 +33,6 @@ nbdist/
 .nb-gradle/
 
 .DS_Store
+
+# Local Docker example overrides
+/macula-boot-examples/docker/.env

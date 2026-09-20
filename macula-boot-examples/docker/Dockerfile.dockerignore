@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+.agents
+.sdlc
+**/.DS_Store
+**/target
+**/build
+**/*.iml
+macula-boot-examples/docker/.env

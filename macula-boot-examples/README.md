@@ -55,6 +55,28 @@ Alibaba 链路按以下顺序启动：
 
 Tencent 链路将 Nacos 替换为 Polaris，并依次启动 provider、consumer 和 gateway。每个模块的配置项、启动命令和验证端点见其目录下的 README。
 
+## Docker Compose 一键环境
+
+`docker/` 提供 Docker Compose v2 环境，包含 MySQL、Redis、Nacos、Polaris，并通过 `alibaba`、`tencent` 两个 profile 运行对应的 gateway、provider、consumer。既可以完整容器化，也可以只启动 Middleware 后从本机 Maven/IDE 运行应用。
+
+```bash
+cd macula-boot-examples/docker
+
+# Alibaba 完整链路
+docker compose --profile alibaba up -d --build
+
+# Tencent 完整链路
+docker compose --profile tencent up -d --build
+
+# Alibaba Middleware-only
+docker compose up -d redis nacos-init
+
+# Tencent Middleware-only
+docker compose up -d redis polaris
+```
+
+完整命令、端口覆盖、日志、停止、数据保留与重置方式见 [`docker/README.md`](docker/README.md)。默认密码只用于回环地址绑定的本地示例，禁止用于共享或生产环境。
+
 ## 配置约定
 
 - `bootstrap.yml` 放置应用名、端口和配置中心连接信息。
