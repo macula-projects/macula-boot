@@ -5,9 +5,9 @@ server:
     key-store-type: pkcs12
     key-alias: springboot
     key-password: password
-  port: 8443
+  port: 5443
   http:
-    port: 8000
+    port: 5000
 spring:
   profiles:
     active: @profile.active@

@@ -14,7 +14,7 @@
 mvn -pl macula-boot-examples/macula-example-alibaba-gateway -am spring-boot:run
 ```
 
-可通过 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖 Nacos 配置。应用同时监听 HTTP `8000` 和 HTTPS `8443`。
+可通过 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖 Nacos 配置。应用同时监听 HTTP `5000` 和 HTTPS `5443`。
 
 ## 路由
 
@@ -26,7 +26,7 @@ mvn -pl macula-boot-examples/macula-example-alibaba-gateway -am spring-boot:run
 验证 consumer 回声接口：
 
 ```bash
-curl "http://127.0.0.1:8000/consumer/api/v1/consumer/echo/demo?str=hello"
+curl "http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello"
 ```
 
 网关安全配置中包含演示用 client secret，部署前必须通过配置中心替换。

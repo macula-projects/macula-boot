@@ -1,6 +1,8 @@
 # Spec: Examples Docker Compose (from intent.md 2026-09-20)
 Status: accepted
 
+Port revision accepted by the originator on 2026-09-21: Alibaba gateway/provider/consumer use `5000/5443`, `5020`, `5010`; Tencent gateway/provider/consumer use `4000`, `4020`, `4010`.
+
 ## Source intent
 [Accepted intent](./intent.md): 为 Alibaba 与 Tencent 示例提供可选择完整容器化或仅启动 Middleware 的 Docker Compose v2 运行方式。
 
@@ -11,15 +13,15 @@ Status: accepted
 4. 使用者必须能够只启动 Alibaba Middleware（MySQL、Redis、Nacos）或 Tencent Middleware（MySQL、Redis、Polaris），且此时六个示例应用容器均不得运行，以便从宿主机通过 Maven 或 IDE 启动应用。
 5. 同时启用 `alibaba` 与 `tencent` profile 时，两条链路必须能够共享 MySQL、Redis 和 Compose 网络，并在现有默认端口互不冲突地同时运行。
 6. 所有长驻服务必须有健康检查；依赖服务必须等待其关键依赖健康后再启动，启动失败必须能从 Compose 状态或容器日志中被观察到。
-7. Alibaba 完整模式必须通过以下可观察行为验收：provider 健康；consumer 经 Nacos 发现 provider；访问 `http://127.0.0.1:8000/consumer/api/v1/consumer/echo/demo?str=hello` 返回 HTTP 2xx，响应同时包含 provider 回声和 `demo`。
-8. Tencent 完整模式必须通过以下可观察行为验收：provider 健康；consumer 经 Polaris 发现 provider；访问 `http://127.0.0.1:4010/consumer/api/v1/consumer/echo` 返回 HTTP 2xx，响应包含 provider 对 `consumer` 的回声。
+7. Alibaba 完整模式必须通过以下可观察行为验收：provider 健康；consumer 经 Nacos 发现 provider；访问 `http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello` 返回 HTTP 2xx，响应同时包含 provider 回声和 `demo`。
+8. Tencent 完整模式必须通过以下可观察行为验收：provider 健康；consumer 经 Polaris 发现 provider；访问 `http://127.0.0.1:4000/consumer/api/v1/consumer/echo` 返回 HTTP 2xx，响应包含 provider 对 `consumer` 的回声。
 9. Middleware-only 模式必须保持现有宿主机连接约定：Nacos 可通过 `127.0.0.1:8848` 访问，Polaris 可通过 `grpc://127.0.0.1:8091` 访问，MySQL 和 Redis 分别可通过 `127.0.0.1:3306`、`127.0.0.1:6379` 访问；端口必须可由环境变量覆盖。
 10. 所有运行镜像必须固定到明确版本，不得使用 `latest`；所选镜像及应用运行时基础镜像必须提供 `linux/amd64` 与 `linux/arm64` manifest。
 11. Compose 必须可在 macOS 和 Windows 的 Docker Compose v2 环境中运行，不依赖 Bash、GNU 专用命令或宿主机路径语法；Windows 支持边界见 Flagged concerns。
 12. 默认凭据只能用于本地示例，服务端口默认仅绑定宿主机回环地址；不得提交真实凭据、token 或外部服务密钥。
 13. MySQL、Redis 以及注册/配置中心需要持久化的数据必须使用命名卷；文档必须说明普通停止与清空数据重建的区别。
 14. `macula-boot-examples/README.md` 与 `macula-boot-examples/docker/README.md` 必须给出完整模式、Middleware-only 模式、同时启动两条链路、查看状态/日志、停止以及重置数据的可复制命令。
-15. 容器化所需的配置调整必须保留当前本机默认行为；未设置容器环境变量时，现有 Maven/IDE 启动地址和端口不得改变。
+15. 容器化所需的地址调整必须保留本机 Maven/IDE 启动行为；未设置容器环境变量时，应用使用 2026-09-21 经 originator 确认的新端口映射，注册中心地址、namespace 和覆盖机制不得回归。
 
 ## Non-goals
 - 首期不容器化或编排 `macula-example-task`、`macula-example-binlog4j`、`macula-example-alibaba-provider2`。
@@ -63,7 +65,7 @@ Status: accepted
 - 不新增或改变 Java 公共 API、HTTP 路径、请求/响应 schema 或 Maven 依赖。
 - 新增用户接口为 Compose CLI：profiles `alibaba`、`tencent`；可点名的 Middleware services `mysql`、`redis`、`nacos`、`polaris`；应用 service names 与模块名保持一一对应。
 - 新增配置契约包括镜像版本、端口、MySQL/Redis 本地凭据、Nacos/Polaris 地址与 namespace。默认值写入 `.env.example` 或 Compose 插值表达式，实际 `.env` 不提交。
-- 默认宿主机端口：MySQL `3306`、Redis `6379`、Nacos HTTP `8848` 与 gRPC `9848`、Polaris HTTP `8090`、服务发现 gRPC `8091`、配置 gRPC `8093`；应用沿用 Alibaba `7081/7090/8000/8443` 与 Tencent `4011/4019/4010`。
+- 默认宿主机端口：MySQL `3306`、Redis `6379`、Nacos HTTP `8848` 与 gRPC `9848`、Polaris HTTP `8090`、服务发现 gRPC `8091`、配置 gRPC `8093`；应用使用 Alibaba provider `5020`、consumer `5010`、gateway HTTP/HTTPS `5000/5443` 与 Tencent provider `4020`、consumer `4010`、gateway `4000`。
 - 命名卷至少分离 MySQL、Redis 和需要独立持久化的注册中心数据；`docker compose down` 保留数据，文档化的显式 `down -v` 才删除本地示例数据。
 - MySQL/Redis/Nacos/Polaris 和应用端口默认以 `127.0.0.1:hostPort:containerPort` 发布，避免默认暴露到局域网。
 

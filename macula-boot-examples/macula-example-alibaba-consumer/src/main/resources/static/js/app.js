@@ -58,7 +58,7 @@ function setConnected(connected) {
 function connect() {
     let token = $("#token").val()
     if (token !== undefined && token.length > 0) {
-        stompClient.brokerURL = 'ws://localhost:8000/websocket/websocket?access_token=' + token
+        stompClient.brokerURL = 'ws://localhost:5000/websocket/websocket?access_token=' + token
         stompClient.activate();
     } else {
         alert("Please input access token!")
@@ -84,7 +84,7 @@ function sendName() {
 }
 
 function sendName2() {
-    $.post("http://localhost:8000/consumer/hello2/" + groupId, {
+    $.post("http://localhost:5000/consumer/hello2/" + groupId, {
         name: $("#name").val()
     });
 }

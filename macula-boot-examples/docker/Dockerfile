@@ -16,15 +16,13 @@ RUN --mount=type=cache,target=/root/.m2 \
     && test -n "${jar_file}" \
     && cp "${jar_file}" /tmp/application.jar
 
-FROM eclipse-temurin:17.0.16_8-jre-jammy AS runtime
+FROM bellsoft/liberica-runtime-container:jre-17.0.20.1_1-glibc AS runtime
 
 LABEL org.opencontainers.image.authors="rainsoft"
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system macula \
-    && useradd --system --gid macula --home-dir /home/macula --create-home macula
+RUN apk add --no-cache curl \
+    && addgroup -S macula \
+    && adduser -S -G macula -h /home/macula macula
 
 WORKDIR /app
 RUN mkdir -p /app/polaris/backup /app/polaris/logs \

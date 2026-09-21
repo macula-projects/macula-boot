@@ -168,15 +168,15 @@ services:
     restart: unless-stopped
     environment:
       <<: *alibaba-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:8000/oauth2/jwks
+      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:5000/oauth2/jwks
     ports:
-      - "127.0.0.1:${ALIBABA_PROVIDER_PORT:-7081}:7081"
+      - "127.0.0.1:${ALIBABA_PROVIDER_PORT:-5020}:5020"
     depends_on:
       nacos-init:
         condition: service_completed_successfully
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:7081/actuator/health >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:5020/actuator/health >/dev/null"]
     networks:
       - examples
 
@@ -190,9 +190,9 @@ services:
     restart: unless-stopped
     environment:
       <<: *alibaba-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:8000/oauth2/jwks
+      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:5000/oauth2/jwks
     ports:
-      - "127.0.0.1:${ALIBABA_CONSUMER_PORT:-7090}:7090"
+      - "127.0.0.1:${ALIBABA_CONSUMER_PORT:-5010}:5010"
     depends_on:
       macula-example-alibaba-provider1:
         condition: service_healthy
@@ -200,7 +200,7 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:7090/api/v1/consumer/echo/health?str=health' >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:5010/api/v1/consumer/echo/health?str=health' >/dev/null"]
     networks:
       - examples
 
@@ -216,8 +216,8 @@ services:
       <<: *alibaba-environment
       OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
     ports:
-      - "127.0.0.1:${ALIBABA_GATEWAY_HTTP_PORT:-8000}:8000"
-      - "127.0.0.1:${ALIBABA_GATEWAY_HTTPS_PORT:-8443}:8443"
+      - "127.0.0.1:${ALIBABA_GATEWAY_HTTP_PORT:-5000}:5000"
+      - "127.0.0.1:${ALIBABA_GATEWAY_HTTPS_PORT:-5443}:5443"
     depends_on:
       macula-example-alibaba-consumer:
         condition: service_healthy
@@ -225,7 +225,7 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:8000/consumer/api/v1/consumer/echo/health?str=health' >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:5000/consumer/api/v1/consumer/echo/health?str=health' >/dev/null"]
     networks:
       - examples
 
@@ -239,15 +239,15 @@ services:
     restart: unless-stopped
     environment:
       <<: *tencent-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4010/oauth2/jwks
+      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4000/oauth2/jwks
     ports:
-      - "127.0.0.1:${TENCENT_PROVIDER_PORT:-4011}:4011"
+      - "127.0.0.1:${TENCENT_PROVIDER_PORT:-4020}:4020"
     depends_on:
       polaris:
         condition: service_healthy
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4011/actuator/health >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4020/actuator/health >/dev/null"]
     networks:
       - examples
 
@@ -261,16 +261,16 @@ services:
     restart: unless-stopped
     environment:
       <<: *tencent-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4010/oauth2/jwks
+      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4000/oauth2/jwks
       MACULA_SECURITY_IGNORE_URLS: /api/v1/consumer/echo
     ports:
-      - "127.0.0.1:${TENCENT_CONSUMER_PORT:-4019}:4019"
+      - "127.0.0.1:${TENCENT_CONSUMER_PORT:-4010}:4010"
     depends_on:
       macula-example-tencent-provider:
         condition: service_healthy
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4019/api/v1/consumer/echo >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4010/api/v1/consumer/echo >/dev/null"]
     networks:
       - examples
 
@@ -287,7 +287,7 @@ services:
       OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
       MACULA_GATEWAY_SECURITY_IGNORE_URLS: /consumer/api/v1/consumer/echo
     ports:
-      - "127.0.0.1:${TENCENT_GATEWAY_PORT:-4010}:4010"
+      - "127.0.0.1:${TENCENT_GATEWAY_PORT:-4000}:4000"
     depends_on:
       macula-example-tencent-consumer:
         condition: service_healthy
@@ -295,7 +295,7 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *app-healthcheck
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4010/consumer/api/v1/consumer/echo >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:4000/consumer/api/v1/consumer/echo >/dev/null"]
     networks:
       - examples
 

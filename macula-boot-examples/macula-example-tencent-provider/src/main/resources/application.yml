@@ -12,7 +12,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:4010/oauth2/jwks}        # 网关地址
+          jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:4000/oauth2/jwks}        # 网关地址
 
 seata:
   enabled: false

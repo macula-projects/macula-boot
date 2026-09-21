@@ -10,12 +10,12 @@
 mvn -pl macula-boot-examples/macula-example-tencent-gateway -am spring-boot:run
 ```
 
-默认端口为 `4010`，Polaris 地址为 `grpc://127.0.0.1:8091`。可通过 `POLARIS_SERVER_ADDR` 和 `POLARIS_NAMESPACE` 覆盖。
+默认端口为 `4000`，Polaris 地址为 `grpc://127.0.0.1:8091`。可通过 `POLARIS_SERVER_ADDR` 和 `POLARIS_NAMESPACE` 覆盖。
 
 ## 验证
 
 ```bash
-curl "http://127.0.0.1:4010/consumer/api/v1/consumer/echo"
+curl "http://127.0.0.1:4000/consumer/api/v1/consumer/echo"
 ```
 
 `/consumer/**` 会去除一层前缀后转发到 `lb://macula-example-tencent-consumer`。OAuth2 client secret 是本地演示值，不得直接用于部署环境。

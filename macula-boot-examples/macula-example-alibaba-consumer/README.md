@@ -10,14 +10,14 @@
 mvn -pl macula-boot-examples/macula-example-alibaba-consumer -am spring-boot:run
 ```
 
-默认端口是 `7090`。可使用 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖 Nacos 配置。
+默认端口是 `5010`。可使用 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖 Nacos 配置。
 
 ## 验证
 
 ```bash
-curl "http://127.0.0.1:7090/api/v1/consumer/echo/demo?str=hello"
+curl "http://127.0.0.1:5010/api/v1/consumer/echo/demo?str=hello"
 ```
 
-WebSocket 演示页位于 `http://127.0.0.1:7090/`。通过网关连接时，页面默认使用 `ws://localhost:8000/websocket/websocket`。
+WebSocket 演示页位于 `http://127.0.0.1:5010/`。通过网关连接时，页面默认使用 `ws://localhost:5000/websocket/websocket`。
 
 `GapiService` 和 `IpaasService` 是带 AK/SK 拦截器的外部 Feign 示例，对应的账号、密钥和地址都应由实际环境覆盖；不验证该能力时无需调用相关端点。
