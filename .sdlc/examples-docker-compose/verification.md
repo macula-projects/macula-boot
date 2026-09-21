@@ -300,8 +300,18 @@ The change did not modify `CLAUDE.md`, a skill, or a hook. No eval suite applies
 
 ## Review and limitations
 
-The earlier `REVIEW.md` Bugs, Security, and Compliance passes attached to PR #30 reported no remaining findings after the password-substitution fix and documentation clarification. The newly confirmed Liberica runtime change is verified here and must be included in the next Stage 5 review pass.
+The earlier `REVIEW.md` Bugs, Security, and Compliance passes attached to PR #30 reported no remaining findings after the password-substitution fix and documentation clarification. The Liberica runtime change received the same three review passes for PR #31; the final review reported no Important or Nit findings.
 
 During the original verification, Docker's server API stopped responding while pulling images. The hung client requests were stopped, OrbStack was restarted after the user instructed the run to continue, and `docker version` then returned both client and server `29.4.0`. No volume or image data was deleted by the restart. All Docker tests above were executed after recovery.
 
 The Stage 4 test stack and isolated password-test volumes were removed after evidence collection. Existing user Nacos/Polaris containers were not stopped or modified. A host-run Polaris cache directory generated under the Tencent provider module was moved to the macOS Trash. The tested implementation and synchronized SDLC artifacts were committed as `32c281f4e06da8f3148740fb42de1a51d5d97d95`; the worktree was clean at Stage 5 entry.
+
+## Pull request and merge evidence
+
+- Pull request: https://github.com/macula-projects/macula-boot/pull/31
+- Status: merged
+- Merged at: 2026-09-21T03:46:15Z
+- Merge commit: `3592cfbf8a685f280ac97a711f35758f065b5665`
+- Required CI results: Maven Verify, Checkstyle, CodeQL, and Sonatype Snapshot Repo Deployment completed successfully.
+
+The human merge decision completed Stage 5. The change is now in Stage 6, where the next gate is monitoring for a control-band breach.
