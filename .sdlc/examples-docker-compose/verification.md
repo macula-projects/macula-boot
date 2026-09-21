@@ -6,7 +6,7 @@ Change: `examples-docker-compose`
 
 Baseline commit: `d36367b5901fedc0150a258dc65e658ce2eafc22`
 
-Change under test: the baseline plus the originator-approved, uncommitted 2026-09-21 application-port revision recorded in `spec.md` and `plan.md`, including the confirmed application runtime change to pinned BellSoft Liberica JRE 17 on Alpaquita glibc.
+Change under test: commit `32c281f4e06da8f3148740fb42de1a51d5d97d95`, containing the originator-approved 2026-09-21 application-port revision recorded in `spec.md` and `plan.md` plus the confirmed application runtime change to pinned BellSoft Liberica JRE 17 on Alpaquita glibc.
 
 Environment: macOS, OrbStack Docker Engine 29.4.0 on `linux/arm64`, Docker Compose v5.1.2 using the Compose v2 `docker compose` interface.
 
@@ -304,4 +304,4 @@ The earlier `REVIEW.md` Bugs, Security, and Compliance passes attached to PR #30
 
 During the original verification, Docker's server API stopped responding while pulling images. The hung client requests were stopped, OrbStack was restarted after the user instructed the run to continue, and `docker version` then returned both client and server `29.4.0`. No volume or image data was deleted by the restart. All Docker tests above were executed after recovery.
 
-The Stage 4 test stack and isolated password-test volumes were removed after evidence collection. Existing user Nacos/Polaris containers were not stopped or modified. A host-run Polaris cache directory generated under the Tencent provider module was moved to the macOS Trash. The Git worktree contains the intended port revision, synchronized documentation and SDLC artifacts; it is not claimed as clean.
+The Stage 4 test stack and isolated password-test volumes were removed after evidence collection. Existing user Nacos/Polaris containers were not stopped or modified. A host-run Polaris cache directory generated under the Tencent provider module was moved to the macOS Trash. The tested implementation and synchronized SDLC artifacts were committed as `32c281f4e06da8f3148740fb42de1a51d5d97d95`; the worktree was clean at Stage 5 entry.
