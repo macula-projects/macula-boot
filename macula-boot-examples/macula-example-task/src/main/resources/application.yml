@@ -4,6 +4,12 @@ server:
     encoding:
       force: true
 
+nacos:
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  namespace: ${NACOS_NAMESPACE:MACULA5}
+
 spring:
   profiles:
     active: @profile.active@
@@ -27,6 +33,7 @@ spring:
         server-addr: ${nacos.server-addr}
         namespace: ${nacos.namespace}
         # group:
+# 以下为本地环境默认配置，可由 Nacos 配置中心的同名配置覆盖
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
       eager: true
@@ -102,10 +109,3 @@ snail-job:
   # host: 127.0.0.1
   # 客户端通讯端口，默认 1789
   port: 17899
-
-# 和环境有关的配置信息，不同环境覆盖此处的配置
-nacos:
-  username: ${NACOS_USERNAME:nacos}
-  password: ${NACOS_PASSWORD:nacos}
-  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
-  namespace: ${NACOS_NAMESPACE:MACULA5}

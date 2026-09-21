@@ -69,7 +69,7 @@
         <druid.version>1.2.27</druid.version>
         <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>3.0.5</mybatis-spring-boot-starter.version>
-        <fenix.version>3.1.0</fenix.version>
+        <fenix.version>4.0.0</fenix.version>
         <redisson.version>3.52.0</redisson.version>
         <hutool.version>5.8.42</hutool.version>
         <easyexcel.version>4.0.3</easyexcel.version>
@@ -389,7 +389,7 @@
             <!-- mybatis plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
@@ -802,6 +802,9 @@
                 <directory>${basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
+                    <include>**/application*.yml</include>
+                    <include>**/application*.yaml</include>
+                    <include>**/application*.properties</include>
                     <include>**/bootstrap*.yml</include>
                     <include>**/bootstrap*.yaml</include>
                     <include>**/bootstrap*.properties</include>
@@ -810,6 +813,9 @@
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
                 <excludes>
+                    <exclude>**/application*.yml</exclude>
+                    <exclude>**/application*.yaml</exclude>
+                    <exclude>**/application*.properties</exclude>
                     <exclude>**/bootstrap*.yml</exclude>
                     <exclude>**/bootstrap*.yaml</exclude>
                     <exclude>**/bootstrap*.properties</exclude>

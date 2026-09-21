@@ -54,10 +54,6 @@ public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationCo
         String tracingType = this.tracingType();
         
         if (TRACE_TYPE_SLEUTH.equals(tracingType)) {
-            if (tracing == null) {
-                tracing = applicationContext.getBean(Tracing.class);
-            }
-
             return chain.filter(exchange).doOnSuccess(signal -> {
                 brave.propagation.TraceContext traceContext = ((Tracing)tracing).currentTraceContext().get();
                 if (traceContext != null) {
@@ -76,7 +72,11 @@ public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationCo
     }
 
     private String tracingType() {
-        if (isClassExists("brave.Tracing")) {
+        Class<?> tracingClass = findClass("brave.Tracing");
+        if (tracing == null && tracingClass != null && applicationContext != null) {
+            tracing = applicationContext.getBeanProvider(tracingClass).getIfAvailable();
+        }
+        if (tracing != null) {
             return TRACE_TYPE_SLEUTH;
         }
         if (isClassExists("org.apache.skywalking.apm.toolkit.trace.TraceContext")) {
@@ -85,18 +85,21 @@ public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationCo
         return null;
     }
 
+    private Class<?> findClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     @Override
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
     }
 
     private boolean isClassExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
+        return findClass(className) != null;
     }
 
     @Override

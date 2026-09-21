@@ -1,6 +1,10 @@
 server:
   port: 4010
 
+polaris:
+  namespace: ${POLARIS_NAMESPACE:macula-dev}
+  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
+
 spring:
   profiles:
     active: @profile.active@
@@ -19,6 +23,7 @@ spring:
         auto-refresh: true
         groups:
           - name: ${spring.application.name}
+# 以下为本地环境默认配置，可由 Polaris 配置中心的同名配置覆盖
   security:
     oauth2:
       resourceserver:
@@ -70,11 +75,6 @@ gateway:
   username: gateway
   secret: xx
   appKey: xx
-
-# 和环境有关的配置信息，不同环境覆盖此处的配置
-polaris:
-  namespace: ${POLARIS_NAMESPACE:macula-dev}
-  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
 
 logging:
   level:
