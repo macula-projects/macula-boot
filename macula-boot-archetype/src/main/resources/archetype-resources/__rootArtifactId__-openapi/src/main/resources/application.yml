@@ -1,11 +1,27 @@
 server:
+  port: 6002
   servlet:
     encoding:
       force: true
 
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: ${rootArtifactId}-openapi
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
+      username: ${nacos.username}
+      password: ${nacos.password}
+      config:
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace}
+        refresh-enabled: true
+        file-extension: yml
       discovery:
         enabled: true
         server-addr: ${nacos.config.server-addr}
@@ -48,3 +64,23 @@ logging:
     com.alibaba.nacos.client: error
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置（这个是本地环境）
+nacos:
+  username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+  password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
+  config:
+    server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:8848}
+    namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+nacos:
+  username: maculav5
+  #password: 请通过启动命令赋予密码
+  config:
+    server-addr: 10.94.108.55:8848
+    namespace: MACULA5

@@ -157,13 +157,13 @@ spring:
 public class Config {
     @Bean
     @ConfigurationProperties(prefix = "spring.redis.one")
-    public RedisProperties redisPropertiesOne() {
-        return new RedisProperties();
+    public DataRedisProperties redisPropertiesOne() {
+        return new DataRedisProperties();
     }
 
     @Primary
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClientOne(ApplicationContext ctx, RedisProperties redisPropertiesOne)
+    public RedissonClient redissonClientOne(ApplicationContext ctx, DataRedisProperties redisPropertiesOne)
         throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesOne, new RedissonProperties());
         return Redisson.create(config);
@@ -171,12 +171,12 @@ public class Config {
 
     @Bean
     @ConfigurationProperties(prefix = "spring.redis.two")
-    public RedisProperties redisPropertiesTwo() {
-        return new RedisProperties();
+    public DataRedisProperties redisPropertiesTwo() {
+        return new DataRedisProperties();
     }
 
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClientTwo(ApplicationContext ctx, RedisProperties redisPropertiesTwo)
+    public RedissonClient redissonClientTwo(ApplicationContext ctx, DataRedisProperties redisPropertiesTwo)
         throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesTwo, new RedissonProperties());
         return Redisson.create(config);

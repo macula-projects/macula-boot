@@ -30,7 +30,7 @@ import lombok.Setter;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.gateway.config.GlobalCorsProperties;
 import org.springframework.context.annotation.Bean;
@@ -247,7 +247,7 @@ public class ResourceServerConfiguration {
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
             ConfigurableEnvironment environment = (ConfigurableEnvironment) context.getEnvironment();
-            String prefix = "spring.cloud.gateway.globalcors";
+            String prefix = "spring.cloud.gateway.server.webflux.globalcors";
 
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
                 if (propertySource instanceof EnumerablePropertySource<?> enumerablePropertySource) {

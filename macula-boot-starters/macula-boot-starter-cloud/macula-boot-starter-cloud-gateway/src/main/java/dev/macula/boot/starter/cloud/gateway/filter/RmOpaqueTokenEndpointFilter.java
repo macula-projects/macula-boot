@@ -72,7 +72,7 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             }
             if (properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 未进行kong验证：header： {}", request.getHeaders().entrySet());
+                    log.debug("删除opaqueToken 未进行kong验证：header： {}", request.getHeaders().headerSet());
                 }
                 return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN,
                     Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED));
@@ -102,7 +102,7 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             if (!result.isSuccess()) {
                 if (log.isDebugEnabled()) {
                     log.debug("删除opaqueToken kong验证失败： header : {}",
-                        exchange.getRequest().getHeaders().entrySet());
+                        exchange.getRequest().getHeaders().headerSet());
                 }
                 return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
             }

@@ -50,7 +50,7 @@
     </licenses>
 
     <properties>
-        <revision>6.0.1-SNAPSHOT</revision>
+        <revision>6.1.0-SNAPSHOT</revision>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <checkstyle.source.root>${maven.multiModuleProjectDirectory}</checkstyle.source.root>
         <checkstyle.includes>**/src/main/java/**/*.java,**/src/test/java/**/*.java</checkstyle.includes>

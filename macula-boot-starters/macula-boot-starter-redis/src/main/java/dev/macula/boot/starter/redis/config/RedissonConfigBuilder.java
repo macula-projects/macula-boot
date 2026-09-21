@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.redis.config;
 
 import org.redisson.config.Config;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ReflectionUtils;
@@ -51,15 +51,16 @@ public class RedissonConfigBuilder {
         return build(ctx, null, redissonProperties);
     }
 
-    public Config build(ApplicationContext ctx, RedisProperties redisProperties, RedissonProperties redissonProperties)
+    public Config build(ApplicationContext ctx, DataRedisProperties redisProperties,
+        RedissonProperties redissonProperties)
         throws IOException {
         if (redisProperties == null) {
-            redisProperties = new RedisProperties();
+            redisProperties = new DataRedisProperties();
         }
 
         Config config = null;
-        Method clusterMethod = ReflectionUtils.findMethod(RedisProperties.class, "getCluster");
-        Method timeoutMethod = ReflectionUtils.findMethod(RedisProperties.class, "getTimeout");
+        Method clusterMethod = ReflectionUtils.findMethod(DataRedisProperties.class, "getCluster");
+        Method timeoutMethod = ReflectionUtils.findMethod(DataRedisProperties.class, "getTimeout");
         Object timeoutValue = ReflectionUtils.invokeMethod(timeoutMethod, redisProperties);
         int timeout;
         if (null == timeoutValue) {
@@ -95,7 +96,7 @@ public class RedissonConfigBuilder {
                 }
             }
         } else if (redisProperties.getSentinel() != null) {
-            Method nodesMethod = ReflectionUtils.findMethod(RedisProperties.Sentinel.class, "getNodes");
+            Method nodesMethod = ReflectionUtils.findMethod(DataRedisProperties.Sentinel.class, "getNodes");
             Object nodesValue = ReflectionUtils.invokeMethod(nodesMethod, redisProperties.getSentinel());
 
             String[] nodes;
@@ -122,7 +123,7 @@ public class RedissonConfigBuilder {
         } else {
             config = new Config();
             String prefix = REDIS_PROTOCOL_PREFIX;
-            Method method = ReflectionUtils.findMethod(RedisProperties.class, "isSsl");
+            Method method = ReflectionUtils.findMethod(DataRedisProperties.class, "isSsl");
             if (method != null && (Boolean)ReflectionUtils.invokeMethod(method, redisProperties)) {
                 prefix = REDISS_PROTOCOL_PREFIX;
             }

@@ -17,14 +17,12 @@
 
 package dev.macula.boot.starter.web.json;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.starter.web.config.JacksonProperties;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.Nullable;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,10 +44,7 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
 
     /**
      * Construct a new {@link MappingApiJackson2HttpMessageConverter} with a custom {@link ObjectMapper}.
-     * You can use {@link Jackson2ObjectMapperBuilder} to build it easily.
-     *
      * @param objectMapper ObjectMapper
-     * @see Jackson2ObjectMapperBuilder#json()
      */
     public MappingApiJackson2HttpMessageConverter(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
         super(objectMapper, initWriteObjectMapper(objectMapper, jacksonProperties), initMediaType());
@@ -63,18 +58,15 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
     }
 
     private static ObjectMapper initWriteObjectMapper(ObjectMapper readObjectMapper, JacksonProperties jacksonProperties) {
-        // 拷贝 readObjectMapper
-        ObjectMapper writeObjectMapper = readObjectMapper.copy();
-
-        writeObjectMapper.registerModule(new BigNumberModule(jacksonProperties.isLongToString()));
+        BigNumberModule writeModule = new BigNumberModule(jacksonProperties.isLongToString());
 
         if (jacksonProperties.isNullToEmpty()) {
             // null 处理
-            writeObjectMapper.setSerializerFactory(writeObjectMapper.getSerializerFactory().withSerializerModifier(new MaculaBeanSerializerModifier()));
-            writeObjectMapper.getSerializerProvider().setNullValueSerializer(MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
+            writeModule.setSerializerModifier(new MaculaBeanSerializerModifier());
+            writeModule.setDefaultNullValueSerializer(
+                MaculaBeanSerializerModifier.NullJsonSerializers.STRING_JSON_SERIALIZER);
         }
-
-        return writeObjectMapper;
+        return readObjectMapper.rebuild().addModule(writeModule).build();
     }
 
     /**
@@ -102,7 +94,7 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
     }
 
     @Override
-    protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
+    protected void writePrefix(JsonGenerator generator, Object object) {
         if (this.jsonPrefix != null) {
             generator.writeRaw(this.jsonPrefix);
         }

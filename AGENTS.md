@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Macula Boot 是基于 Java 17、Spring Boot 3.5 和 Spring Cloud 2025 的多模块微服务框架。修改应保持兼容、聚焦目标模块，并遵循现有代码风格。
+Macula Boot 是基于 Java 17、Spring Boot 4.0 和 Spring Cloud 2025.1 的多模块微服务框架。修改应保持兼容、聚焦目标模块，并遵循现有代码风格。
 
 ## 开始工作
 

@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.websocket.config;
 
-import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
+import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 
 /**
  * <p>
@@ -28,5 +28,5 @@ import org.springframework.security.config.annotation.web.messaging.MessageSecur
  * @since 2024/4/20
  */
 public interface MessageSecurityMetaSourceCustomizer {
-    void customize(MessageSecurityMetadataSourceRegistry messages);
+    void customize(MessageMatcherDelegatingAuthorizationManager.Builder messages);
 }

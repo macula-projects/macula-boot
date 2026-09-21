@@ -1,14 +1,32 @@
 server:
-  servlet:
-    encoding:
-      force: true
+  port: 4010
 
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-tencent-consumer
+  config:
+    import: optional:polaris
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
+    polaris:
+      address: ${polaris.server-addr}
+      namespace: ${polaris.namespace}
+      config:
+        auto-refresh: true
+        groups:
+          - name: ${spring.application.name}
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:4000/oauth2/jwks}    # 网关地址
+  servlet:
+    encoding:
+      force: true
 feign:
   httpclient:
     enabled: false
@@ -52,6 +70,11 @@ gateway:
   username: gateway
   secret: xx
   appKey: xx
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+polaris:
+  namespace: ${POLARIS_NAMESPACE:macula-dev}
+  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
 
 logging:
   level:

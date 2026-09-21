@@ -18,17 +18,15 @@
 package dev.macula.boot.starter.web.json;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import dev.macula.boot.starter.web.annotation.Sensitive;
 import dev.macula.boot.starter.web.utils.SensitiveUtil;
 
-import java.io.IOException;
 import java.util.Objects;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * {@code SensitiveSerializer} 脱敏JSON序列号
@@ -36,7 +34,7 @@ import java.util.Objects;
  * @author rain
  * @since 2022/7/28 23:53
  */
-public class SensitiveSerializer extends JsonSerializer<String> implements ContextualSerializer {
+public class SensitiveSerializer extends ValueSerializer<String> {
 
     private Sensitive.Type type;
     private int startInclude;
@@ -55,7 +53,7 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     }
 
     @Override
-    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(String value, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         if (ObjectUtil.isEmpty(value)) {
             gen.writeString(value);
             return;
@@ -100,8 +98,7 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-        throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
         if (Objects.isNull(property)) {
             return prov.getDefaultNullValueSerializer();
         }
@@ -114,6 +111,6 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
                 return new SensitiveSerializer(sensitive);
             }
         }
-        return prov.findValueSerializer(property.getType(), property);
+        return prov.findPrimaryPropertySerializer(property.getType(), property);
     }
 }

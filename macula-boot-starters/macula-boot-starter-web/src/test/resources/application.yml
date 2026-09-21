@@ -7,7 +7,6 @@ spring:
   messages:
     basename: i18n/messages
   jackson:
-    #date-format: com.fasterxml.jackson.databind.util.StdDateFormat
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
 

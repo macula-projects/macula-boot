@@ -17,11 +17,12 @@
 
 package dev.macula.boot.starter.operationlog;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 操作日志事件监听器
@@ -32,7 +33,7 @@ import org.springframework.scheduling.annotation.Async;
 @Slf4j
 public class OperationLogListener {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMapper.builder().build();
 
     /**
      * 处理操作日志事件

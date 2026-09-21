@@ -17,9 +17,9 @@
 
 package dev.macula.boot.starter.web.json;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializerBase;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.ToStringSerializer;
+import tools.jackson.databind.ser.std.ToStringSerializerBase;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

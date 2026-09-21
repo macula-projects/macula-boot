@@ -1,11 +1,27 @@
 server:
+  port: 5020
   servlet:
     encoding:
       force: true
 
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-alibaba-provider1
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
+      server-addr: ${nacos.server-addr}
+      username: ${nacos.username}
+      password: ${nacos.password}
+      config:
+        namespace: ${nacos.namespace}
+        refresh-enabled: true
+        file-extension: yml
       discovery:
         enabled: true
         server-addr: ${nacos.server-addr}
@@ -112,3 +128,10 @@ logging:
 
 example:
   test: 365
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+nacos:
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  namespace: ${NACOS_NAMESPACE:MACULA5}

@@ -1,6 +1,6 @@
 ## 概述
 
-该模块为web开发所需的基本依赖包。是对spring-boot-starter-web模块的扩展，并且使用undertow替换了tomcat作为WEB服务器。有兴趣可以阅读[优雅的写Controller](https://mp.weixin.qq.com/s/i1iCiwhTxQRMqIQj6QzbiQ)。
+该模块为 Web 开发所需的基本依赖包，是对 `spring-boot-starter-web` 的扩展。Macula Boot 6.1 随 Spring Boot 4 使用其默认的 Tomcat Web 服务器；Spring Boot 4 不再提供 Undertow Starter。有兴趣可以阅读[优雅的写Controller](https://mp.weixin.qq.com/s/i1iCiwhTxQRMqIQj6QzbiQ)。
 
 ## 组件坐标
 
@@ -592,16 +592,6 @@ public @interface Sensitive {
    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <exclusions>
-         <exclusion>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-         </exclusion>
-      </exclusions>
-   </dependency>
-   <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-undertow</artifactId>
    </dependency>
    <dependency>
       <groupId>org.springframework.boot</groupId>

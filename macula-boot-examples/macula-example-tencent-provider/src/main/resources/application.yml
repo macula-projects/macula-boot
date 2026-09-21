@@ -1,13 +1,28 @@
 server:
+  port: 4020
   servlet:
     encoding:
       force: true
 
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-tencent-provider
+  config:
+    import: optional:polaris
   cloud:
     nacos:
       discovery:
         enabled: true
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
+    polaris:
+      address: ${polaris.server-addr}
+      namespace: ${polaris.namespace}
+      config:
+        auto-refresh: true
+        groups:
+          - name: ${spring.application.name}
   security:
     oauth2:
       resourceserver:
@@ -63,6 +78,11 @@ management:
     web:
       exposure:
         include: health,metrics,prometheus
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+polaris:
+  namespace: ${POLARIS_NAMESPACE:macula-dev}
+  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
 
 logging:
   level:

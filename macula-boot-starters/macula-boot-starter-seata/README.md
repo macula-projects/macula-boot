@@ -484,7 +484,7 @@ seata中的解决方案是增加一个事务记录表，在补偿服务执行后
 
     <dependency>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-aop</artifactId>
+        <artifactId>spring-boot-starter-aspectj</artifactId>
     </dependency>
 
     <dependency>

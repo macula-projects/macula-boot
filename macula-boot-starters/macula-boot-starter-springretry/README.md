@@ -91,7 +91,7 @@ public void handleRecovery(MyCustomException exception) {
 <dependencies>
     <dependency>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-aop</artifactId>
+        <artifactId>spring-boot-starter-aspectj</artifactId>
     </dependency>
     <dependency>
         <groupId>org.springframework.retry</groupId>

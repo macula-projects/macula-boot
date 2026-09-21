@@ -23,17 +23,32 @@
 
 ## 使用配置
 
-在bootstrap.yml中如下配置，主要是配置中心的相关配置
+在 `application.yml` 中通过 Spring Config Data 导入 Polaris 配置：
 
 ```yaml
-TODO
+spring:
+  application:
+    name: macula-cloud-system
+  config:
+    import: optional:polaris
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
+    polaris:
+      address: ${polaris.server-addr}
+      namespace: ${polaris.namespace}
+      config:
+        auto-refresh: true
+        groups:
+          - name: ${spring.application.name}
+
+polaris:
+  namespace: ${POLARIS_NAMESPACE:macula-dev}
+  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
 ```
 
-在polarismesh中以spring.application.name命名dataId，如果有profile则加上-xxx命名，后缀是yml，配置注册中心
-
-```yaml
-TODO
-```
+`optional:polaris` 保留配置中心不可用时的本地启动能力；生产环境若要求配置中心强依赖，可移除 `optional:`。
 
 ## 核心功能
 

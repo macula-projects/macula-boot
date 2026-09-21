@@ -1,6 +1,32 @@
+server:
+  ssl:
+    key-store: classpath:jwk/springboot.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: springboot
+    key-password: password
+  port: 5443
+  http:
+    port: 5000
+
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-alibaba-gateway
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
+      server-addr: ${nacos.server-addr}
+      username: ${nacos.username}
+      password: ${nacos.password}
+      config:
+        namespace: ${nacos.namespace}
+        refresh-enabled: true
+        file-extension: yml
       discovery:
         enabled: true
         namespace: ${nacos.namespace}
@@ -31,28 +57,30 @@ spring:
             data-type: json
             rule-type: flow
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origin-patterns: "*"
-            allowed-methods: "*"
-            allowed-headers: "*"
-            allow-credentials: true
-            max-age: 1800
-        add-to-simple-url-handler-mapping: true
-      routes:
-        - id: macula-example-alibaba-consumer
-          uri: lb://macula-example-alibaba-consumer
-          predicates:
-            - Path=/consumer/**
-          filters:
-            - StripPrefix=1
-        - id: macula-example-alibaba-consumer-ws
-          uri: lb:ws://macula-example-alibaba-consumer
-          predicates:
-            - Path=/websocket/**
-          filters:
-            - StripPrefix=1
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origin-patterns: "*"
+                allowed-methods: "*"
+                allowed-headers: "*"
+                allow-credentials: true
+                max-age: 1800
+            add-to-simple-url-handler-mapping: true
+          routes:
+            - id: macula-example-alibaba-consumer
+              uri: lb://macula-example-alibaba-consumer
+              predicates:
+                - Path=/consumer/**
+              filters:
+                - StripPrefix=1
+            - id: macula-example-alibaba-consumer-ws
+              uri: lb:ws://macula-example-alibaba-consumer
+              predicates:
+                - Path=/websocket/**
+              filters:
+                - StripPrefix=1
   security:
     oauth2:
       resourceserver:
@@ -68,6 +96,13 @@ macula:
     security:
       ignore-urls: /consumer/hello2/**,/consumer/api/v1/consumer/echo/**
       only-auth-urls: /api/**, /websocket/**
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+nacos:
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  namespace: ${NACOS_NAMESPACE:MACULA5}
 
 logging:
   level:

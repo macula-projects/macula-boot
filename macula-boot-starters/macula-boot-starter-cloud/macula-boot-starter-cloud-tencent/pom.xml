@@ -37,11 +37,6 @@
             <artifactId>macula-boot-starter-feign</artifactId>
         </dependency>
 
-        <!-- Spring Cloud -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-        </dependency>
         <!-- Spring Cloud Tencent -->
         <dependency>
 			<groupId>com.tencent.cloud</groupId>

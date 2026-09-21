@@ -1,11 +1,24 @@
 server:
-  servlet:
-    encoding:
-      force: true
+  port: 5010
 
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-alibaba-consumer
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
+      server-addr: ${nacos.server-addr}
+      username: ${nacos.username}
+      password: ${nacos.password}
+      config:
+        namespace: ${nacos.namespace}
+        refresh-enabled: true
+        file-extension: yml
       discovery:
         enabled: true
         namespace: ${nacos.namespace}
@@ -53,6 +66,9 @@ spring:
     integration:
       websockets:
         enabled: false
+  servlet:
+    encoding:
+      force: true
 
 feign:
   httpclient:
@@ -101,6 +117,13 @@ gateway:
   username: gateway
   secret: xx
   appKey: xx
+
+# 和环境有关的配置信息，不同环境覆盖此处的配置
+nacos:
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  namespace: ${NACOS_NAMESPACE:MACULA5}
 
 logging:
   level:

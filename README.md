@@ -57,7 +57,7 @@ macula-boot
 <parent>
     <groupId>dev.macula.boot</groupId>
     <artifactId>macula-boot-parent</artifactId>
-    <version>6.0.1-SNAPSHOT</version>
+    <version>6.1.0-SNAPSHOT</version>
 </parent>
 
 <dependencies>

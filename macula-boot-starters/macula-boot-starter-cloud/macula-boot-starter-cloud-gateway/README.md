@@ -244,25 +244,25 @@ public class CryptoLocaleServiceImpl implements CryptoService, InitializingBean 
 public class RedisConfiguration {
     @Bean
     @ConfigurationProperties(prefix = "spring.redis")
-    public RedisProperties redisProperties() {
-        return new RedisProperties();
+    public DataRedisProperties redisProperties() {
+        return new DataRedisProperties();
     }
 
     @Bean
     @ConfigurationProperties(prefix = "spring.redis.system")
-    public RedisProperties sysRedisProperties() {
-        return new RedisProperties();
+    public DataRedisProperties sysRedisProperties() {
+        return new DataRedisProperties();
     }
 
     @Primary
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClient(ApplicationContext ctx, RedisProperties redisProperties) throws Exception {
+    public RedissonClient redissonClient(ApplicationContext ctx, DataRedisProperties redisProperties) throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, redisProperties, new RedissonProperties());
         return Redisson.create(config);
     }
 
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient sysRedissonClient(ApplicationContext ctx, RedisProperties sysRedisProperties)
+    public RedissonClient sysRedissonClient(ApplicationContext ctx, DataRedisProperties sysRedisProperties)
         throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, sysRedisProperties, new RedissonProperties());
         return Redisson.create(config);
@@ -292,7 +292,7 @@ public class RedisConfiguration {
 <dependencies>
     <dependency>
         <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-gateway</artifactId>
+        <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
     </dependency>
 
     <dependency>
