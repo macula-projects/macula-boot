@@ -30,7 +30,7 @@ docker compose --profile alibaba up -d --build
 验证 gateway -> consumer -> provider：
 
 ```shell
-curl "http://127.0.0.1:8000/consumer/api/v1/consumer/echo/demo?str=hello"
+curl "http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello"
 ```
 
 启动 Tencent 链路：
@@ -42,7 +42,7 @@ docker compose --profile tencent up -d --build
 验证 gateway -> consumer -> provider：
 
 ```shell
-curl "http://127.0.0.1:4010/consumer/api/v1/consumer/echo"
+curl "http://127.0.0.1:4000/consumer/api/v1/consumer/echo"
 ```
 
 同时启动两条链路：
@@ -162,8 +162,8 @@ docker compose --profile alibaba --profile tencent down -v
 | Polaris discovery gRPC | `grpc://127.0.0.1:8091` |
 | Polaris config gRPC | `grpc://127.0.0.1:8093` |
 | Polaris Nacos 兼容 HTTP / gRPC | `127.0.0.1:18849` / `127.0.0.1:19849` |
-| Alibaba provider / consumer / gateway | `7081` / `7090` / `8000`、`8443` |
-| Tencent provider / consumer / gateway | `4011` / `4019` / `4010` |
+| Alibaba provider / consumer / gateway | `5020` / `5010` / `5000`、`5443` |
+| Tencent provider / consumer / gateway | `4020` / `4010` / `4000` |
 
 端口均可在 `.env` 中覆盖。容器之间使用 Compose service name 通信，不使用宿主机回环地址。
 

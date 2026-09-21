@@ -6,13 +6,13 @@
 
 | 类别 | 模块 | 默认端口 | 用途 |
 | --- | --- | ---: | --- |
-| Alibaba | `macula-example-alibaba-gateway` | HTTP 8000 / HTTPS 8443 | Nacos 服务发现、Spring Cloud Gateway、Sentinel 与网关安全 |
-| Alibaba | `macula-example-alibaba-provider1` | 7081 | REST 接口、JWT 资源服务器、Nacos 配置刷新与服务注册 |
-| Alibaba | `macula-example-alibaba-consumer` | 7090 | OpenFeign 服务调用、Sentinel 降级和 WebSocket |
+| Alibaba | `macula-example-alibaba-gateway` | HTTP 5000 / HTTPS 5443 | Nacos 服务发现、Spring Cloud Gateway、Sentinel 与网关安全 |
+| Alibaba | `macula-example-alibaba-provider1` | 5020 | REST 接口、JWT 资源服务器、Nacos 配置刷新与服务注册 |
+| Alibaba | `macula-example-alibaba-consumer` | 5010 | OpenFeign 服务调用、Sentinel 降级和 WebSocket |
 | Alibaba | `macula-example-alibaba-provider2` | - | 预留的第二提供方模块，当前不启动 |
-| Tencent | `macula-example-tencent-gateway` | 4010 | Polaris 服务发现与 Spring Cloud Gateway |
-| Tencent | `macula-example-tencent-provider` | 4011 | REST 接口、JWT 资源服务器与 Polaris 服务注册 |
-| Tencent | `macula-example-tencent-consumer` | 4019 | OpenFeign 服务调用与 Polaris 服务发现 |
+| Tencent | `macula-example-tencent-gateway` | 4000 | Polaris 服务发现与 Spring Cloud Gateway |
+| Tencent | `macula-example-tencent-provider` | 4020 | REST 接口、JWT 资源服务器与 Polaris 服务注册 |
+| Tencent | `macula-example-tencent-consumer` | 4010 | OpenFeign 服务调用与 Polaris 服务发现 |
 | 任务 | `macula-example-task` | 7099 | XXL-JOB 与 SnailJob 执行器 |
 | Binlog | `macula-example-binlog4j` | - | MySQL binlog 订阅与事件处理 |
 

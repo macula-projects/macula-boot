@@ -1,5 +1,5 @@
 server:
-  port: 7081
+  port: 5020
 
 spring:
   profiles:

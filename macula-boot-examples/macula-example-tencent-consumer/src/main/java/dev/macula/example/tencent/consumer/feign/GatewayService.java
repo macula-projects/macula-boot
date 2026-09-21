@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author rain
  * @since 5.0.0
  */
-@FeignClient(name = "gateway-service", url = "${gateway.url:http://127.0.0.1:4010/consumer}",
+@FeignClient(name = "gateway-service", url = "${gateway.url:http://127.0.0.1:4000/consumer}",
     configuration = GatewayConfiguration.class)
 public interface GatewayService {
     @PostMapping("/api/v1/consumer/user")
