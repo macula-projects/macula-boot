@@ -12,7 +12,7 @@
 
 ## 结论
 
-`Verification is green`。
+验证尚未通过。Pull Request 门禁行为正确，但合并后的首次 Snapshot 发布暴露了 `actions/setup-java@v6` 与仓库 `maven-gpg-plugin:3.0.1` 的不兼容，当前不能进入审查交接。
 
 本次验证未合并 PR、未创建 Tag、未触发 Release，也未发布 Snapshot 或 Maven Central 正式版本。
 
@@ -101,6 +101,26 @@ Publish Snapshot  skipped
 
 PR 全部检查汇总为 `6 successful, 1 skipped, 0 failing`。这证明 GitHub 接受可复用工作流语法，PR 会运行 Checkstyle 和 Maven Verify，而 Snapshot 调用任务会被条件跳过，不会产生部署运行。
 
+## 合并后首次 main 运行
+
+PR #33 在验证报告提交前由维护者合并，合并提交为 `ee30cf88d4883a484ebb419e3c02cd5b51677b0c`。对应的 [Maven Verification 运行 35739822914](https://github.com/macula-projects/macula-boot/actions/runs/35739822914) 证明任务门禁顺序正确：
+
+```text
+Checkstyle        success（9s）
+Maven Verify      success（3m58s）
+Publish Snapshot  在两个前置任务成功后启动
+```
+
+首次 Snapshot 尝试因 Maven Central 下载 Guava 时连接提前结束而失败。仅重跑失败 Job 后，依赖解析成功，但 GPG 签名稳定失败：
+
+```text
+gpg: signing failed: No pinentry
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-gpg-plugin:3.0.1:sign
+[INFO] Macula Boot Parent ................................. FAILURE
+```
+
+`actions/setup-java@v6` 官方说明其 GPG passphrase 改用 `gpg.passphraseEnvName`，要求 `maven-gpg-plugin` 3.2.0 或更高版本；仓库根 POM 与 `macula-boot-parent/pom.xml` 均固定为 3.0.1。修复需要升级 Maven GPG Plugin，并将工作流切换到 v6 的 `server-username-env-var`、`server-password-env-var` 和 `gpg-passphrase-env-var` 输入。这属于已接受规格“不得修改 Maven”之外的变更，尚待人工确认。
+
 ## 需求与证明对应关系
 
 - 需求 1、2、8、9：由 `actionlint`、结构断言和 PR 实际运行共同证明。
@@ -116,4 +136,4 @@ PR 全部检查汇总为 `6 successful, 1 skipped, 0 failing`。这证明 GitHub
 
 ## 交接
 
-Stage 4 验证证据完整，可进入人工门禁的 `sdlc-deploy` 审查阶段。本报告不自行批准审查、合并、Release 或发布。
+Stage 4 当前为红色，必须回到 Build 修复 GPG 签名兼容性并重新验证；不得进入 `sdlc-deploy`。本报告不自行批准依赖范围扩展、审查、合并、Release 或发布。
