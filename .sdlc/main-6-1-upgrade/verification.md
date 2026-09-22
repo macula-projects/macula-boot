@@ -142,9 +142,11 @@ That review also identified that the Stage 4 Nacos canary seed could overwrite p
 
 The third independent pass found that five downstream Redis-consuming Starter READMEs plus the idempotent and Redis test resources still used Boot 3's standard `spring.redis` connection prefix. Cache, idempotent, leader-election, Lock4j, and Binlog4j documentation and both test resources now use `spring.data.redis`; the independent Macula Redisson namespace remains `spring.redis.redisson`. A direct binder test proves that Boot 4 consumes the documented host and port keys, and a repository-wide search found no remaining standard `spring.redis.host`/`port` examples.
 
+Final PR-check inspection proved that the Snapshot workflow also contained a `pull_request` trigger targeting `main`; GitHub recorded the completed Snapshot deployment for `33d14f6` with event `pull_request` and head branch `feat/main-6-1-upgrade`. With maintainer approval, `.github/workflows/snapshot.yml` now retains only `push.branches: [main]`. Pull requests continue to use the separate verification and CodeQL workflows, while Snapshot deployment is deferred until a commit reaches `main`.
+
 ## Protected configuration and evals
 
-Compared with the accepted baseline, `AGENTS.md` changes only the project description from Boot 3.5/Cloud 2025 to Boot 4.0/Cloud 2025.1. `CLAUDE.md` remains its symlink view. No workflow policy, skill, or hook changed. Repository search found no versioned eval suite guarding this descriptive change, so no applicable eval command exists.
+Compared with the accepted baseline, `AGENTS.md` changes only the project description from Boot 3.5/Cloud 2025 to Boot 4.0/Cloud 2025.1. `CLAUDE.md` remains its symlink view. The only GitHub Actions workflow change removes the unintended Snapshot `pull_request` trigger described above; no AI-SDLC policy, skill, or hook changed. Repository search found no versioned eval suite guarding the descriptive instruction change, so no applicable eval command exists.
 
 ## Handoff
 
