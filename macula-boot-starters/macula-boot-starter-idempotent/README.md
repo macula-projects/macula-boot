@@ -21,9 +21,10 @@
 
 ```yaml
 spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 ```
 
 ## 核心功能
@@ -112,7 +113,7 @@ public @interface Idempotent {
   </dependency>
   <dependency>
     <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-aop</artifactId>
+    <artifactId>spring-boot-starter-aspectj</artifactId>
   </dependency>
   <dependency>
     <groupId>dev.macula.boot</groupId>
@@ -125,4 +126,3 @@ public @interface Idempotent {
 
 - 原始代码1：https://github.com/it4alla/idempotent/blob/dev/LICENSE
 - 原始代码2：https://github.com/pig-mesh/idempotent-spring-boot-starter/blob/master/LICENSE
-

@@ -17,9 +17,10 @@
 
 ```yaml
 spring:
-  redis:
-    host: localhost
-    port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
   cache:
     type: redis    # 必须指定是redis，否则使用系统默认的缓存
     # These properties are custom

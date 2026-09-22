@@ -213,7 +213,7 @@ spring-cloud-starter-alibaba-sentinel默认已经集成了sentinel-spring-webflu
 参考 [Sentinel 网关限流](https://github.com/alibaba/Sentinel/wiki/网关限流)。
 
 若想跟 Sentinel Starter 配合使用，需要加上 spring-cloud-alibaba-sentinel-gateway 依赖，同时需要添加
-spring-cloud-starter-gateway 依赖来让 spring-cloud-alibaba-sentinel-gateway 模块里的 Spring Cloud Gateway 自动化配置类生效：
+spring-cloud-starter-gateway-server-webflux 依赖来让 spring-cloud-alibaba-sentinel-gateway 模块里的 Spring Cloud Gateway 自动化配置类生效：
 
 ```xml
 
@@ -227,7 +227,7 @@ spring-cloud-starter-gateway 依赖来让 spring-cloud-alibaba-sentinel-gateway 
 </dependency>
 <dependency>
 <groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-gateway</artifactId>
+<artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
 </dependency>
 ```
 

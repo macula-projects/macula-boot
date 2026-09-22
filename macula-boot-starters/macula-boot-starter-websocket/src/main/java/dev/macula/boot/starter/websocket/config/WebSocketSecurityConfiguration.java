@@ -18,11 +18,15 @@
 package dev.macula.boot.starter.websocket.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
-import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
+import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 
 import java.util.Collection;
 
@@ -35,15 +39,17 @@ import java.util.Collection;
  * @since 2024/4/17
  */
 @Configuration
+@EnableWebSocketSecurity
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
-public class WebSocketSecurityConfiguration extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+public class WebSocketSecurityConfiguration {
 
     private final WebSocketProperties properties;
     private final Collection<MessageSecurityMetaSourceCustomizer> customizers;
 
-    @Override
-    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
+    @Bean
+    AuthorizationManager<Message<?>> messageAuthorizationManager(
+            MessageMatcherDelegatingAuthorizationManager.Builder messages) {
 
         if (properties.isPermitTest()) {
             messages.nullDestMatcher().permitAll()
@@ -57,10 +63,12 @@ public class WebSocketSecurityConfiguration extends AbstractSecurityWebSocketMes
 
         // 兜底，所有漏网之鱼都要登录认证通过
         messages.anyMessage().authenticated();
+        return messages.build();
     }
 
-    @Override
-    protected boolean sameOriginDisabled() {
-        return true;
+    @Bean(name = "csrfChannelInterceptor")
+    ChannelInterceptor csrfChannelInterceptor() {
+        return new ChannelInterceptor() {
+        };
     }
 }

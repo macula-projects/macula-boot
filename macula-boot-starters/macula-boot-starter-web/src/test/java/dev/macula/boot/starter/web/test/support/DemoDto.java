@@ -20,7 +20,6 @@ package dev.macula.boot.starter.web.test.support;
 import dev.macula.boot.starter.web.annotation.Sensitive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -75,6 +74,6 @@ public class DemoDto implements Serializable {
 
     private BigDecimal bigDecimal = new BigDecimal("1234.344");
 
-    private SecurityProperties.User user;
+    private Object user;
 
 }

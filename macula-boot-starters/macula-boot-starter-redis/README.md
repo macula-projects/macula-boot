@@ -18,26 +18,35 @@
 
 ```yaml
 spring:
-  redis:
-    database: 
-    host:
-    port:
-    password:
-    ssl: 
-    timeout:
-    cluster:
-      nodes:
-    sentinel:
-      master:
-      nodes:
+  data:
+    redis:
+      database:
+      host:
+      port:
+      password:
+      ssl:
+        enabled: false
+      timeout:
+      cluster:
+        nodes:
+      sentinel:
+        master:
+        nodes:
 ```
 
+启用 `spring.data.redis.ssl.enabled` 时，单机、Sentinel 和 Cluster 地址都会使用 `rediss://`。
+当前自动构建的 Redisson 配置不支持 Spring Boot SSL Bundle；如需自定义证书或信任库，请使用下面的
+`spring.redis.redisson` YAML 配置并按 Redisson TLS 选项显式配置。
+
 redisson的配置方式如下，包括单点、主从、集群，下面是集群模式：
+
+Macula Boot 6.1 使用 Redisson 4，`spring.redis.redisson.config` 和 `file` 仅支持 Redisson YAML 格式；
+Redisson 4 已移除 JSON 配置解析。固定的 `retryInterval` 应迁移为 `retryDelay`，并显式选择延迟策略。
 
 ```yaml
 spring:
   redis:
-   redisson: 
+    redisson:
       file: classpath:redisson.yaml  # file和config选一个
       config: |
         clusterServersConfig:
@@ -45,10 +54,9 @@ spring:
           connectTimeout: 10000
           timeout: 3000
           retryAttempts: 3
-          retryInterval: 1500
-          failedSlaveReconnectionInterval: 3000
-          failedSlaveCheckInterval: 60000
-          password: null
+          retryDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT1S, maxDelay: PT2S}
+          reconnectionDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT0.1S, maxDelay: PT10S}
+          failedSlaveNodeDetector: !<org.redisson.client.FailedConnectionDetector> {}
           subscriptionsPerConnection: 5
           clientName: null
           loadBalancer: !<org.redisson.connection.balancer.RoundRobinLoadBalancer> {}
@@ -68,6 +76,7 @@ spring:
           pingConnectionInterval: 0
           keepAlive: false
           tcpNoDelay: false
+        password: null
         threads: 16
         nettyThreads: 32
         codec: !<org.redisson.codec.Kryo5Codec> {}
@@ -142,11 +151,12 @@ public class Config {
 
 ```yaml
 spring:
-  redis:
-    one:
-    xxx
-    two:
-      xxx
+  data:
+    redis:
+      one:
+        xxx
+      two:
+        xxx
 ```
 
 然后添加配置Bean，注意其中一个要设置@Primary注解，以便给默认的RedisConnectionFactory使用
@@ -156,27 +166,27 @@ spring:
 @Configuration
 public class Config {
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis.one")
-    public RedisProperties redisPropertiesOne() {
-        return new RedisProperties();
+    @ConfigurationProperties(prefix = "spring.data.redis.one")
+    public DataRedisProperties redisPropertiesOne() {
+        return new DataRedisProperties();
     }
 
     @Primary
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClientOne(ApplicationContext ctx, RedisProperties redisPropertiesOne)
+    public RedissonClient redissonClientOne(ApplicationContext ctx, DataRedisProperties redisPropertiesOne)
         throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesOne, new RedissonProperties());
         return Redisson.create(config);
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis.two")
-    public RedisProperties redisPropertiesTwo() {
-        return new RedisProperties();
+    @ConfigurationProperties(prefix = "spring.data.redis.two")
+    public DataRedisProperties redisPropertiesTwo() {
+        return new DataRedisProperties();
     }
 
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClientTwo(ApplicationContext ctx, RedisProperties redisPropertiesTwo)
+    public RedissonClient redissonClientTwo(ApplicationContext ctx, DataRedisProperties redisPropertiesTwo)
         throws Exception {
         Config config = RedissonConfigBuilder.create().build(ctx, redisPropertiesTwo, new RedissonProperties());
         return Redisson.create(config);
@@ -197,7 +207,7 @@ public class Config {
 <dependencies>
     <dependency>
         <groupId>org.redisson</groupId>
-        <artifactId>redisson-spring-data-26</artifactId>
+        <artifactId>redisson-spring-data-40</artifactId>
     </dependency>
 
     <dependency>

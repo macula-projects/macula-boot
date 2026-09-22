@@ -9,6 +9,6 @@ mvn archetype:generate \
     -Dversion=1.0.0-SNAPSHOT \												# 你的应用的版本号
     -DarchetypeArtifactId=macula-boot-archetype \ 
     -DarchetypeGroupId=dev.macula.boot \
-    -DarchetypeVersion=5.0.0 \
+    -DarchetypeVersion=6.1.0-SNAPSHOT \
     -Dgitignore=.gitignore -DinteractiveMode=false
 ```

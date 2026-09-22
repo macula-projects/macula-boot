@@ -18,14 +18,14 @@ package dev.macula.boot.result;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * {@code ResultModelJsonTest} 通用响应模型JSON契约单元测试
@@ -35,21 +35,21 @@ import org.junit.jupiter.api.Test;
  */
 class ResultModelJsonTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = JsonMapper.builder().build();
 
     @Test
-    void shouldOmitEmptyOptionChildren() throws JsonProcessingException {
+    void shouldOmitEmptyOptionChildren() throws JacksonException {
         Option<Integer> option = new Option<>(1, "一级选项");
 
         JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(option));
 
         assertThat(json.get("value").asInt()).isEqualTo(1);
-        assertThat(json.get("label").asText()).isEqualTo("一级选项");
+        assertThat(json.get("label").asString()).isEqualTo("一级选项");
         assertThat(json.has("children")).isFalse();
     }
 
     @Test
-    void shouldSerializeNestedOptionChildren() throws JsonProcessingException {
+    void shouldSerializeNestedOptionChildren() throws JacksonException {
         Option<Integer> child = new Option<>(2, "二级选项");
         Option<Integer> parent = new Option<>(1, "一级选项", List.of(child));
 
@@ -60,7 +60,7 @@ class ResultModelJsonTest {
     }
 
     @Test
-    void shouldDeserializePageResponse() throws JsonProcessingException {
+    void shouldDeserializePageResponse() throws JacksonException {
         String json = """
             {"records":["A","B"],"total":12,"size":2,"current":3}
             """;

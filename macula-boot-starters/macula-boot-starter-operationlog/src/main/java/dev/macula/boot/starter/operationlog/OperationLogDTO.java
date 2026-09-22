@@ -17,8 +17,8 @@
 
 package dev.macula.boot.starter.operationlog;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
+import tools.jackson.databind.JsonNode;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

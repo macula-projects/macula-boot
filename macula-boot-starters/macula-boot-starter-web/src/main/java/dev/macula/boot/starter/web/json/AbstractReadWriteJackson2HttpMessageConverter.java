@@ -16,131 +16,109 @@
  */
 package dev.macula.boot.starter.web.json;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.PrettyPrinter;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import lombok.NonNull;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.TypeUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonEncoding;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.exc.InvalidDefinitionException;
+import tools.jackson.databind.ser.FilterProvider;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * 分读写的 json 消息 处理器
+ * 分读写的 JSON 消息处理器。
+ *
+ * <p>保留历史类名以兼容已有调用方，内部实现使用 Spring Framework 7 和 Jackson 3。</p>
  *
  * @author L.cm
  * @since 5.0.0
  */
-public abstract class AbstractReadWriteJackson2HttpMessageConverter extends AbstractJackson2HttpMessageConverter {
-	private static final java.nio.charset.Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+public abstract class AbstractReadWriteJackson2HttpMessageConverter
+    extends AbstractJacksonHttpMessageConverter<ObjectMapper> {
 
-	private final ObjectMapper writeObjectMapper;
-	@Nullable
-	private PrettyPrinter ssePrettyPrinter;
+    private static final String JSON_VIEW_HINT = "com.fasterxml.jackson.annotation.JsonView";
+    private static final String FILTER_PROVIDER_HINT = FilterProvider.class.getName();
 
-	public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper, ObjectMapper writeObjectMapper) {
-		super(readObjectMapper);
-		this.writeObjectMapper = writeObjectMapper;
-		initSsePrettyPrinter();
-	}
+    private final ObjectMapper writeObjectMapper;
 
-	public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper, ObjectMapper writeObjectMapper, MediaType supportedMediaType) {
-		this(readObjectMapper, writeObjectMapper);
-		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
-		initSsePrettyPrinter();
-	}
+    public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper,
+        ObjectMapper writeObjectMapper) {
+        super(readObjectMapper);
+        this.writeObjectMapper = writeObjectMapper;
+    }
 
-	public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper, ObjectMapper writeObjectMapper, List<MediaType> supportedMediaTypes) {
-		this(readObjectMapper, writeObjectMapper);
-		setSupportedMediaTypes(supportedMediaTypes);
-	}
+    public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper,
+        ObjectMapper writeObjectMapper, MediaType supportedMediaType) {
+        super(readObjectMapper, supportedMediaType);
+        this.writeObjectMapper = writeObjectMapper;
+    }
 
-	private void initSsePrettyPrinter() {
-		setDefaultCharset(DEFAULT_CHARSET);
-		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
-		this.ssePrettyPrinter = prettyPrinter;
-	}
+    public AbstractReadWriteJackson2HttpMessageConverter(ObjectMapper readObjectMapper,
+        ObjectMapper writeObjectMapper, List<MediaType> supportedMediaTypes) {
+        super(readObjectMapper, supportedMediaTypes.toArray(MediaType[]::new));
+        this.writeObjectMapper = writeObjectMapper;
+    }
 
-	@Override
-	public boolean canWrite(@NonNull Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!canWrite(mediaType)) {
-			return false;
-		}
-		AtomicReference<Throwable> causeRef = new AtomicReference<>();
-		if (this.defaultObjectMapper.canSerialize(clazz, causeRef)) {
-			return true;
-		}
-		logWarningIfNecessary(clazz, causeRef.get());
-		return false;
-	}
+    @Override
+    protected void writeInternal(Object object, ResolvableType resolvableType, HttpOutputMessage outputMessage,
+        @Nullable Map<String, Object> hints) throws IOException, HttpMessageNotWritableException {
+        MediaType contentType = outputMessage.getHeaders().getContentType();
+        JsonEncoding encoding = getJsonEncoding(contentType);
+        OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
 
-	@Override
-	protected void writeInternal(@NonNull Object object, @Nullable Type type, HttpOutputMessage outputMessage)
-		throws IOException, HttpMessageNotWritableException {
+        Class<?> serializationView = null;
+        FilterProvider filters = null;
+        JavaType javaType = null;
+        Type type = resolvableType.getType();
+        if (TypeUtils.isAssignable(type, object.getClass())) {
+            javaType = getJavaType(type, null);
+        }
+        if (hints != null) {
+            serializationView = (Class<?>)hints.get(JSON_VIEW_HINT);
+            filters = (FilterProvider)hints.get(FILTER_PROVIDER_HINT);
+        }
 
-   		MediaType contentType = outputMessage.getHeaders().getContentType();
-		JsonEncoding encoding = getJsonEncoding(contentType);
-		JsonGenerator generator = this.writeObjectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
-		try {
-			writePrefix(generator, object);
+        ObjectWriter objectWriter = serializationView != null ?
+            writeObjectMapper.writerWithView(serializationView) : writeObjectMapper.writer();
+        if (filters != null) {
+            objectWriter = objectWriter.with(filters);
+        }
+        if (javaType != null && (javaType.isContainerType() || javaType.isTypeOrSubTypeOf(Optional.class))) {
+            objectWriter = objectWriter.forType(javaType);
+        }
+        SerializationConfig config = objectWriter.getConfig();
+        if (contentType != null && contentType.isCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+            && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+            objectWriter = objectWriter.withDefaultPrettyPrinter();
+        }
 
-			Object value = object;
-			Class<?> serializationView = null;
-			FilterProvider filters = null;
-			JavaType javaType = null;
-
-			if (object instanceof MappingJacksonValue container) {
-                value = container.getValue();
-				serializationView = container.getSerializationView();
-				filters = container.getFilters();
-			}
-			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
-				javaType = getJavaType(type, null);
-			}
-
-			ObjectWriter objectWriter = (serializationView != null ?
-				this.writeObjectMapper.writerWithView(serializationView) : this.writeObjectMapper.writer());
-			if (filters != null) {
-				objectWriter = objectWriter.with(filters);
-			}
-			if (javaType != null && javaType.isContainerType()) {
-				objectWriter = objectWriter.forType(javaType);
-			}
-			SerializationConfig config = objectWriter.getConfig();
-			if (contentType != null && contentType.isCompatibleWith(MediaType.TEXT_EVENT_STREAM) &&
-				config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-				objectWriter = objectWriter.with(this.ssePrettyPrinter);
-			}
-			objectWriter.writeValue(generator, value);
-
-			writeSuffix(generator, object);
-			generator.flush();
-		} catch (InvalidDefinitionException ex) {
-			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
-		} catch (JsonProcessingException ex) {
-			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
-		}
-	}
+        try (JsonGenerator generator = objectWriter.createGenerator(outputStream, encoding)) {
+            writePrefix(generator, object);
+            objectWriter.writeValue(generator, object);
+            writeSuffix(generator, object);
+            generator.flush();
+        } catch (InvalidDefinitionException ex) {
+            throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
+        } catch (JacksonException ex) {
+            throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
+        }
+    }
 }

@@ -17,9 +17,10 @@ binlog4j是一个读取MySQL binlog的组件，以slave的方式接入mysql，�
 
 ```yaml
 spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 binlog4j:
   client-configs:

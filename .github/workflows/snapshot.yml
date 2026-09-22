@@ -4,8 +4,6 @@ name: Sonatype Snapshot Repo Deployment
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 # 定义一个发行任务
 jobs:
   publish:

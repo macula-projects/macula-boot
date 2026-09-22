@@ -17,9 +17,6 @@
 
 package dev.macula.boot.starter.web.advice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
@@ -35,6 +32,9 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code ControllerResponseAdvice} 对于非Result的返回值进行包装
@@ -69,7 +69,7 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
         }
 
         // Feign请求时通过拦截器设置请求头，如果是Feign请求则直接返回实体对象
-        if (request.getHeaders().containsKey(GlobalConstants.FEIGN_REQ_ID)) {
+        if (request.getHeaders().containsHeader(GlobalConstants.FEIGN_REQ_ID)) {
             return data;
         }
 
@@ -83,7 +83,7 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
                     data = JsonToken.START_OBJECT.asString() + JsonToken.END_OBJECT.asString();
                 }
                 return objectMapper.writeValueAsString(Result.success(data));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new BizException(ApiResultCode.RESPONSE_PACK_ERROR, e.getMessage());
             }
         }

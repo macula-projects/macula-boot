@@ -19,16 +19,17 @@ package dev.macula.boot.starter.operationlog;
 
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.StringNode;
 
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,10 +57,11 @@ public class OperationLogUtils {
 
     private static final int MAX_JSON_LENGTH = 4000;
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
         .disable(SerializationFeature.FAIL_ON_SELF_REFERENCES)
         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-        .enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL);
+        .enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL)
+        .build();
 
     public static OperationLogDTO getOperationLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) {
         HttpServletRequest httpRequest = ((ServletRequestAttributes) Objects
@@ -111,7 +113,7 @@ public class OperationLogUtils {
             return null;
         }
         if (isNonSerializable(obj)) {
-            return TextNode.valueOf(obj.getClass().getSimpleName());
+            return StringNode.valueOf(obj.getClass().getSimpleName());
         }
         try {
             JsonNode node = MAPPER.valueToTree(obj);
@@ -120,13 +122,13 @@ public class OperationLogUtils {
                 return node;
             }
             log.debug("JSON truncated from {} to {} characters", str.length(), MAX_JSON_LENGTH);
-            return TextNode.valueOf(str.substring(0, MAX_JSON_LENGTH) + "...(truncated)");
+            return StringNode.valueOf(str.substring(0, MAX_JSON_LENGTH) + "...(truncated)");
         } catch (Exception e) {
             log.warn("Failed to serialize object to JSON: {}", e.getMessage());
             try {
-                return TextNode.valueOf(obj.toString());
+                return StringNode.valueOf(obj.toString());
             } catch (Exception ex) {
-                return TextNode.valueOf(obj.getClass().getName() + "(toString failed)");
+                return StringNode.valueOf(obj.getClass().getName() + "(toString failed)");
             }
         }
     }

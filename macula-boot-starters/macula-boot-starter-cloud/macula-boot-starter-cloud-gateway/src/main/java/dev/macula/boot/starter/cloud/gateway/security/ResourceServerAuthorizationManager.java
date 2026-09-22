@@ -30,6 +30,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -65,7 +66,8 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     private String appName;
 
     @Override
-    public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
+    public Mono<AuthorizationResult> authorize(Mono<Authentication> mono,
+                                                AuthorizationContext authorizationContext) {
         ServerHttpRequest request = authorizationContext.getExchange().getRequest();
         // 预检请求放行
         if (request.getMethod() == HttpMethod.OPTIONS) {
@@ -104,10 +106,10 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
                 if (auth.getPrincipal() instanceof OAuth2AuthenticatedPrincipal) {
                     OAuth2AuthenticatedPrincipal principal = (OAuth2AuthenticatedPrincipal) auth.getPrincipal();
                     if ("apikey".equals(principal.getAttribute("authType"))) {
-                        return Mono.just(new AuthorizationDecision(true));
+                        return Mono.<AuthorizationResult>just(new AuthorizationDecision(true));
                     }
                 }
-                return Mono.just(new AuthorizationDecision(false));
+                return Mono.<AuthorizationResult>just(new AuthorizationDecision(false));
             }).defaultIfEmpty(new AuthorizationDecision(false));
         }
 
@@ -120,7 +122,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
      * <p>
      * 缓存取 [URL权限-角色集合] 规则数据 urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
      */
-    private Mono<AuthorizationDecision> checkPerm(Mono<Authentication> mono, String restfulPath) {
+    private Mono<AuthorizationResult> checkPerm(Mono<Authentication> mono, String restfulPath) {
 
         Map<String, Object> urlPermRolesRules =
             sysRedisTemplate.<String, Object>opsForHash().entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY);
@@ -170,6 +172,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
                             role.substring(SecurityConstants.NEGATED_ROLE_PREFIX.length())));
 
                 return containsRoles && !containsNegatedRoles;
-            }).map(AuthorizationDecision::new).defaultIfEmpty(new AuthorizationDecision(false));
+            }).map(authorized -> (AuthorizationResult)new AuthorizationDecision(authorized))
+            .defaultIfEmpty(new AuthorizationDecision(false));
     }
 }

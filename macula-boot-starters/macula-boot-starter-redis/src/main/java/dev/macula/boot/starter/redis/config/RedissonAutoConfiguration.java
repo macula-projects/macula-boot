@@ -26,9 +26,9 @@ import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -48,9 +48,9 @@ import java.util.List;
  * @author Rain
  * @since 2022-01-28
  */
-@AutoConfiguration(before = RedisAutoConfiguration.class)
+@AutoConfiguration(before = DataRedisAutoConfiguration.class)
 @ConditionalOnClass({Redisson.class, RedisOperations.class})
-@EnableConfigurationProperties({RedissonProperties.class, RedisProperties.class})
+@EnableConfigurationProperties({RedissonProperties.class, DataRedisProperties.class})
 public class RedissonAutoConfiguration {
 
     @Bean
@@ -75,7 +75,7 @@ public class RedissonAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedissonClient redissonClient(ApplicationContext ctx, RedisProperties redisProperties,
+    public RedissonClient redissonClient(ApplicationContext ctx, DataRedisProperties redisProperties,
         RedissonProperties redissonProperties,
         List<RedissonAutoConfigurationCustomizer> redissonAutoConfigurationCustomizers) throws IOException {
 

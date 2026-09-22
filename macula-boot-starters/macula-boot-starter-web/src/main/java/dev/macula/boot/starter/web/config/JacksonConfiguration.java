@@ -18,18 +18,23 @@
 package dev.macula.boot.starter.web.config;
 
 import cn.hutool.core.util.StrUtil;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalTimeDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer;
+import tools.jackson.databind.ext.javatime.ser.LocalTimeSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -50,32 +55,38 @@ public class JacksonConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Jackson2ObjectMapperBuilderCustomizer customizer() {
+    public JsonMapperBuilderCustomizer customizer() {
         return builder -> {
             // 序列化时，对象为 null，是否抛异常
-            builder.failOnEmptyBeans(false);
+            builder.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             // 反序列化时，json 中包含 pojo 不存在属性时，是否抛异常
-            builder.failOnUnknownProperties(false);
-            // 安装JSR310日期的序列化和反序列化
-            builder.modulesToInstall(new JavaTimeModule());
+            builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            SimpleModule javaTimeFormats = new SimpleModule("maculaJavaTimeFormats");
 
             // 设置LocalDate的日期格式
             if (StrUtil.isNotEmpty(properties.getLocalDateFormat())) {
-                builder.serializers(new LocalDateSerializer(DateTimeFormatter.ofPattern(properties.getLocalDateFormat())))
-                        .deserializers(new LocalDateDeserializer(DateTimeFormatter.ofPattern(properties.getLocalDateFormat())));
+                javaTimeFormats.addSerializer(LocalDate.class,
+                        new LocalDateSerializer(DateTimeFormatter.ofPattern(properties.getLocalDateFormat())));
+                javaTimeFormats.addDeserializer(LocalDate.class,
+                        new LocalDateDeserializer(DateTimeFormatter.ofPattern(properties.getLocalDateFormat())));
             }
 
             // 设置LocalTime的时间格式
             if (StrUtil.isNotEmpty(properties.getLocalTimeFormat())) {
-                builder.serializers(new LocalTimeSerializer(DateTimeFormatter.ofPattern(properties.getLocalTimeFormat())))
-                        .deserializers(new LocalTimeDeserializer(DateTimeFormatter.ofPattern(properties.getLocalTimeFormat())));
+                javaTimeFormats.addSerializer(LocalTime.class,
+                        new LocalTimeSerializer(DateTimeFormatter.ofPattern(properties.getLocalTimeFormat())));
+                javaTimeFormats.addDeserializer(LocalTime.class,
+                        new LocalTimeDeserializer(DateTimeFormatter.ofPattern(properties.getLocalTimeFormat())));
             }
 
             // 设置LocalDateTime的日期时间格式
             if (StrUtil.isNotEmpty(properties.getLocalDateTimeFormat())) {
-                builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(properties.getLocalDateTimeFormat())))
-                        .deserializers(new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(properties.getLocalDateTimeFormat())));
+                javaTimeFormats.addSerializer(LocalDateTime.class,
+                        new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(properties.getLocalDateTimeFormat())));
+                javaTimeFormats.addDeserializer(LocalDateTime.class,
+                        new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(properties.getLocalDateTimeFormat())));
             }
+            builder.addModule(javaTimeFormats);
         };
     }
 }

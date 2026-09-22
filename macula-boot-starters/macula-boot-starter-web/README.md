@@ -1,6 +1,6 @@
 ## 概述
 
-该模块为web开发所需的基本依赖包。是对spring-boot-starter-web模块的扩展，并且使用undertow替换了tomcat作为WEB服务器。有兴趣可以阅读[优雅的写Controller](https://mp.weixin.qq.com/s/i1iCiwhTxQRMqIQj6QzbiQ)。
+该模块为 Web 开发所需的基本依赖包，是对 `spring-boot-starter-web` 的扩展。Macula Boot 6.1 随 Spring Boot 4 使用其默认的 Tomcat Web 服务器；Spring Boot 4 不再提供 Undertow Starter。有兴趣可以阅读[优雅的写Controller](https://mp.weixin.qq.com/s/i1iCiwhTxQRMqIQj6QzbiQ)。
 
 ## 组件坐标
 
@@ -566,15 +566,22 @@ public @interface Sensitive {
 默认对Jackson做了如下配置
 
 ```java
-@Bean @ConditionalOnMissingBean public Jackson2ObjectMapperBuilderCustomizer customizer(){
-        return builder->{
-        builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        builder.serializerByType(Long.class,ToStringSerializer.instance);
-        builder.modulesToInstall(new JavaTimeModule());
-        };
-        }
+@Bean
+@ConditionalOnMissingBean
+public JsonMapperBuilderCustomizer customizer() {
+    return builder -> {
+        builder.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        SimpleModule module = new SimpleModule("customJacksonModule");
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        builder.addModule(module);
+    };
+}
 ```
+
+Macula Boot 6.1 使用 Jackson 3：`JsonMapperBuilderCustomizer` 位于
+`org.springframework.boot.jackson.autoconfigure`，Jackson 数据绑定类型位于 `tools.jackson.databind`。
+Boot 3 的 `Jackson2ObjectMapperBuilderCustomizer` 与 `com.fasterxml.jackson.databind` 扩展不能直接用于该配置链。
 
 ### 租户ID
 
@@ -592,16 +599,6 @@ public @interface Sensitive {
    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <exclusions>
-         <exclusion>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-         </exclusion>
-      </exclusions>
-   </dependency>
-   <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-undertow</artifactId>
    </dependency>
    <dependency>
       <groupId>org.springframework.boot</groupId>

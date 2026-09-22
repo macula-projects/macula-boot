@@ -23,7 +23,7 @@
 
 ## 使用配置
 
-在bootstrap.yml中如下配置，主要是配置中心的相关配置
+Spring Cloud Alibaba 2025.1 不再使用旧的 bootstrap 配置路径。请在 `application.yml` 中通过 Config Data 导入 Nacos 配置：
 
 ```yaml
 server:
@@ -35,6 +35,10 @@ spring:
     active: @profile.active@
   application:
     name: macula-cloud-system
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
       username: ${nacos.username}
@@ -48,11 +52,11 @@ spring:
 
 # 和环境有关的配置信息，不同环境覆盖此处的配置
 nacos:
-  username: nacos
-  password: nacos
+  username: ${NACOS_USERNAME:nacos}
+  password: ${NACOS_PASSWORD:nacos}
   config:
-    server-addr: 127.0.0.1:8848
-    namespace: MACULA5
+    server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+    namespace: ${NACOS_NAMESPACE:MACULA5}
 
 ---
 spring:
@@ -100,11 +104,6 @@ spring:
 
     <dependency>
         <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-bootstrap</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-loadbalancer</artifactId>
     </dependency>
 
@@ -139,11 +138,6 @@ spring:
     <dependency>
         <groupId>dev.macula.boot</groupId>
         <artifactId>macula-boot-starter-cloud-gateway</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-bootstrap</artifactId>
     </dependency>
 
     <dependency>

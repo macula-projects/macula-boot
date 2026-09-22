@@ -79,7 +79,7 @@ docker compose up -d redis polaris
 
 ## 配置约定
 
-- `bootstrap.yml` 放置应用名、端口和配置中心连接信息。
-- `application.yml` 放置业务 Starter 和客户端配置。
+- 所有配置统一放在 `application.yml`；Spring Cloud Alibaba 2025.1 通过 `spring.config.import` 导入 Nacos 配置，Spring Cloud Tencent 通过 `optional:polaris` 导入 Polaris 配置。
+- Alibaba 默认导入 `${spring.application.name}.yml` 和 `${spring.application.name}-${spring.profiles.active}.yml`，保留基础配置与环境配置两层覆盖关系。
 - 可变的基础设施参数使用 `${ENV_NAME:默认值}`，本地可直接运行，其他环境显式覆盖。
 - Maven profile 通过 `@profile.active@` 写入 Spring profile，可选 `local`、`dev`、`stg`、`pet`、`prd`。

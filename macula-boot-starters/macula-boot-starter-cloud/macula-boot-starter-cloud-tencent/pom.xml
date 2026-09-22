@@ -37,15 +37,17 @@
             <artifactId>macula-boot-starter-feign</artifactId>
         </dependency>
 
-        <!-- Spring Cloud -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-        </dependency>
         <!-- Spring Cloud Tencent -->
-        <dependency>
+		<dependency>
 			<groupId>com.tencent.cloud</groupId>
 			<artifactId>spring-cloud-starter-tencent-all</artifactId>
+			<exclusions>
+				<!-- The contract reporter still targets Springdoc 2.x. -->
+				<exclusion>
+					<groupId>com.tencent.cloud</groupId>
+					<artifactId>spring-cloud-starter-tencent-polaris-contract</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
     </dependencies>

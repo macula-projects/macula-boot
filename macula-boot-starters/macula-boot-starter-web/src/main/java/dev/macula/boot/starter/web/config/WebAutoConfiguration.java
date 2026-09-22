@@ -17,7 +17,6 @@
 
 package dev.macula.boot.starter.web.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
 import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
 import dev.macula.boot.starter.web.filter.TenantFilter;
@@ -27,6 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 

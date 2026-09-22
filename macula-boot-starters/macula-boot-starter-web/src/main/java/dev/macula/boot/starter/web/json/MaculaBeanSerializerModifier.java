@@ -17,21 +17,20 @@
 
 package dev.macula.boot.starter.web.json;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
-
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.BeanPropertyWriter;
+import tools.jackson.databind.ser.ValueSerializerModifier;
 
 /**
  * {@code MaculaBeanSerializerModifier} jackson 默认值为 null 时的处理，主要是为了避免 app 端出现null导致闪退
@@ -49,9 +48,9 @@ import java.util.List;
  * @author L.cm, Rain
  * @since 2024/3/14 21:09
  */
-public class MaculaBeanSerializerModifier extends BeanSerializerModifier {
+public class MaculaBeanSerializerModifier extends ValueSerializerModifier {
     @Override
-    public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
+    public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription.Supplier beanDesc,
         List<BeanPropertyWriter> beanProperties) {
         // 循环所有的beanPropertyWriter
         beanProperties.forEach(writer -> {
@@ -89,38 +88,43 @@ public class MaculaBeanSerializerModifier extends BeanSerializerModifier {
      */
     public interface NullJsonSerializers {
 
-        JsonSerializer<Object> STRING_JSON_SERIALIZER = new JsonSerializer<Object>() {
+        ValueSerializer<Object> STRING_JSON_SERIALIZER = new ValueSerializer<Object>() {
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            public void serialize(Object value, JsonGenerator gen, SerializationContext serializers)
+                throws JacksonException {
                 gen.writeString("");
             }
         };
 
-        JsonSerializer<Object> NUMBER_JSON_SERIALIZER = new JsonSerializer<Object>() {
+        ValueSerializer<Object> NUMBER_JSON_SERIALIZER = new ValueSerializer<Object>() {
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            public void serialize(Object value, JsonGenerator gen, SerializationContext serializers)
+                throws JacksonException {
                 gen.writeNumber(-1);
             }
         };
 
-        JsonSerializer<Object> BOOLEAN_JSON_SERIALIZER = new JsonSerializer<Object>() {
+        ValueSerializer<Object> BOOLEAN_JSON_SERIALIZER = new ValueSerializer<Object>() {
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                gen.writeObject(Boolean.FALSE);
+            public void serialize(Object value, JsonGenerator gen, SerializationContext serializers)
+                throws JacksonException {
+                gen.writeBoolean(false);
             }
         };
 
-        JsonSerializer<Object> ARRAY_JSON_SERIALIZER = new JsonSerializer<Object>() {
+        ValueSerializer<Object> ARRAY_JSON_SERIALIZER = new ValueSerializer<Object>() {
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            public void serialize(Object value, JsonGenerator gen, SerializationContext serializers)
+                throws JacksonException {
                 gen.writeStartArray();
                 gen.writeEndArray();
             }
         };
 
-        JsonSerializer<Object> OBJECT_JSON_SERIALIZER = new JsonSerializer<Object>() {
+        ValueSerializer<Object> OBJECT_JSON_SERIALIZER = new ValueSerializer<Object>() {
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            public void serialize(Object value, JsonGenerator gen, SerializationContext serializers)
+                throws JacksonException {
                 gen.writeStartObject();
                 gen.writeEndObject();
             }

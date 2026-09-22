@@ -53,7 +53,7 @@ public class GrayscalePublishGlobalFilter implements GlobalFilter, Ordered {
             GrayVersionContextHolder.clear();
             if (gatewayProperties.getGray().isEnabled()) {
                 HttpHeaders headers = exchange.getRequest().getHeaders();
-                if (headers.containsKey(GlobalConstants.GRAY_VERSION_TAG)) {
+                if (headers.containsHeader(GlobalConstants.GRAY_VERSION_TAG)) {
                     List<String> grayValues = headers.get(GlobalConstants.GRAY_VERSION_TAG);
                     if (!Objects.isNull(grayValues) && !grayValues.isEmpty()) {
                         String grayVersion = grayValues.get(0);

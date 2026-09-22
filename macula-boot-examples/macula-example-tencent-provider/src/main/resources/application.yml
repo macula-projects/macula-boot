@@ -1,13 +1,33 @@
 server:
+  port: 4020
   servlet:
     encoding:
       force: true
 
+polaris:
+  namespace: ${POLARIS_NAMESPACE:macula-dev}
+  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
+
 spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: macula-example-tencent-provider
+  config:
+    import: optional:polaris
   cloud:
     nacos:
       discovery:
         enabled: true
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
+    polaris:
+      address: ${polaris.server-addr}
+      namespace: ${polaris.namespace}
+      config:
+        auto-refresh: true
+        groups:
+          - name: ${spring.application.name}
+# 以下为本地环境默认配置，可由 Polaris 配置中心的同名配置覆盖
   security:
     oauth2:
       resourceserver:
