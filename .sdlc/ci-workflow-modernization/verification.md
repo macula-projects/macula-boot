@@ -6,15 +6,15 @@
 
 基线：`ae3c8eadbe8dc07917b137767c8c875979e42972`（`origin/main`）
 
-受测实现：`fc8941d51956614c5ada2c4a9e72b4ecfc3564ae`（`feat/ci-workflow-modernization`）
+受测实现：原实现 `fc8941d51956614c5ada2c4a9e72b4ecfc3564ae`，GPG 兼容修复 `f81c5750907b8100aec0d4929fd48091f3107bf2`（`fix/ci-workflow-gpg-compat`）
 
 环境：macOS ARM64、Tencent Kona JDK 17.0.17、Apache Maven 3.9.6、Go `actionlint` 1.7.12；GitHub 托管 Runner 使用 `ubuntu-latest` 和 Redis 7 Service。
 
 ## 结论
 
-验证尚未通过。Pull Request 门禁行为正确，但合并后的首次 Snapshot 发布暴露了 `actions/setup-java@v6` 与仓库 `maven-gpg-plugin:3.0.1` 的不兼容，当前不能进入审查交接。
+`Verification is green`。
 
-本次验证未合并 PR、未创建 Tag、未触发 Release，也未发布 Snapshot 或 Maven Central 正式版本。
+Pull Request 门禁、全仓测试和 GPG 兼容修复均已验证通过。PR #33 由维护者合并后触发的 Snapshot 因旧版 GPG Plugin 失败，未发布成功；本次修复未创建 Tag、未触发 Release，也未发布 Maven Central 正式版本。使用受保护 Secret 的最终 Snapshot 签名证明只能在 PR #34 经人工批准合并后观察。
 
 ## 本地工作流校验
 
@@ -119,14 +119,44 @@ gpg: signing failed: No pinentry
 [INFO] Macula Boot Parent ................................. FAILURE
 ```
 
-`actions/setup-java@v6` 官方说明其 GPG passphrase 改用 `gpg.passphraseEnvName`，要求 `maven-gpg-plugin` 3.2.0 或更高版本；仓库根 POM 与 `macula-boot-parent/pom.xml` 均固定为 3.0.1。修复需要升级 Maven GPG Plugin，并将工作流切换到 v6 的 `server-username-env-var`、`server-password-env-var` 和 `gpg-passphrase-env-var` 输入。这属于已接受规格“不得修改 Maven”之外的变更，尚待人工确认。
+`actions/setup-java@v6` 官方说明其 GPG passphrase 改用 `gpg.passphraseEnvName`，要求 `maven-gpg-plugin` 3.2.0 或更高版本；仓库根 POM 与 `macula-boot-parent/pom.xml` 当时均固定为 3.0.1。
+
+## GPG 兼容修复验证
+
+经人工确认，两个 POM 的 Maven GPG Plugin 已升级到 Maven Central 稳定版 3.2.8；Snapshot 和 Release 改用 `server-username-env-var`、`server-password-env-var`、`gpg-passphrase-env-var`。发布命令、Secret 名称、环境变量和权限未改变。
+
+修复后重新执行：
+
+```shell
+go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
+  .github/workflows/verification.yml \
+  .github/workflows/snapshot.yml \
+  .github/workflows/release.yml
+mvn --batch-mode verify
+mvn --batch-mode clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
+```
+
+实际结果：
+
+```text
+actionlint                退出状态 0，无错误输出
+Maven Verify              57/57 模块成功，BUILD SUCCESS，01:04 min
+Deploy Profile Install    57/57 模块成功，BUILD SUCCESS，01:53 min
+GPG Plugin                gpg:3.2.8:sign
+```
+
+修复 PR：[PR #34](https://github.com/macula-projects/macula-boot/pull/34)
+
+Maven Verification 运行：[35741736692](https://github.com/macula-projects/macula-boot/actions/runs/35741736692)
+
+PR #34 的实际检查汇总为 `6 successful, 1 skipped, 0 failing`：Checkstyle 和 Maven Verify 成功，Publish Snapshot 为 `skipped`，CodeQL 全部成功。
 
 ## 需求与证明对应关系
 
 - 需求 1、2、8、9：由 `actionlint`、结构断言和 PR 实际运行共同证明。
 - 需求 3：PR 的 Checkstyle、Maven Verify 成功，Publish Snapshot 明确为 `skipped`；发布 Secrets 只位于未执行的可复用工作流调用任务。
 - 需求 4、5：Snapshot Job 同时依赖两个验证 Job，且没有 `always()` 等绕过成功依赖语义的条件。
-- 需求 6：Java、Maven 命令、Profile、Server 配置、GPG 与 Sonatype 映射的差异检查无变化。
+- 需求 6：Java、Maven 命令、Profile、Server 配置、GPG 与 Sonatype 环境变量映射保持不变；为兼容 setup-java v6，仅更新输入名和 Maven GPG Plugin。
 - 需求 7：Build 阶段发现规格漏列了签名实际使用的既有 `GPG_SECRET`。经人工确认的实现按 `plan.md` 偏差记录显式传递四个既有发布 Secrets，未新增 Secret，也未扩大权限。
 - 需求 10：可复用 Snapshot 未指定其他 `ref`，checkout 继承调用方提交上下文；首次真实 `main` 发布的 SHA 证明只能在人工合并后观察，本阶段未通过合并或发布进行测试。
 
@@ -136,4 +166,4 @@ gpg: signing failed: No pinentry
 
 ## 交接
 
-Stage 4 当前为红色，必须回到 Build 修复 GPG 签名兼容性并重新验证；不得进入 `sdlc-deploy`。本报告不自行批准依赖范围扩展、审查、合并、Release 或发布。
+Stage 4 证据完整，可进入 `sdlc-deploy` 审查阶段。PR #34 仍需人工批准；本报告不自行批准合并、Release 或发布。人工合并后应观察首次 `main` 运行，确认 Snapshot 使用 GPG Plugin 3.2.8 完成签名和部署。
