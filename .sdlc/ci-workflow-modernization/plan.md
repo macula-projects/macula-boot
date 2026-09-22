@@ -38,3 +38,4 @@ Status: accepted
 
 ## 偏差
 - 实现校验发现 `snapshot.yml` 的 `actions/setup-java` 通过 `gpg-private-key` 实际使用了现有的 `GPG_SECRET`。为保持原有签名发布行为并让可复用工作流通过 GitHub Actions 表达式校验，Snapshot 接口及调用方改为显式传递四个发布 Secrets，而不是设计中误记的三个；未新增仓库 Secret，也未扩大权限。
+- 合并后的首次 Snapshot 运行证明 `actions/setup-java@v6` 通过 `gpg.passphraseEnvName` 传递签名口令，要求 `maven-gpg-plugin` 3.2.0 或更高版本；仓库原有 3.0.1 因无法读取该环境变量而报 `No pinentry`。经人工确认，根 POM 与 Parent POM 的插件升级到 Maven Central 当前稳定版 3.2.8，Snapshot/Release 同步改用 v6 的 `*-env-var` 输入名；发布命令、Secret、环境变量和权限不变。
