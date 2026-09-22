@@ -28,10 +28,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
+          server-username-env-var: MAVEN_USERNAME
+          server-password-env-var: MAVEN_CENTRAL_TOKEN
           gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-passphrase-env-var: MAVEN_GPG_PASSPHRASE
       # 3. 发布到Maven中央仓库
       - name: Publish to Maven Central Repo
         # 这里用到了其他人写的action脚本，详细可以去看他的文档。
