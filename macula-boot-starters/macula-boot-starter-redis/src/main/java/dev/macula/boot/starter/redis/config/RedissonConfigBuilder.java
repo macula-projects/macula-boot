@@ -22,6 +22,7 @@ import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +59,13 @@ public class RedissonConfigBuilder {
             redisProperties = new DataRedisProperties();
         }
 
+        if (StringUtils.hasText(redisProperties.getSsl().getBundle())) {
+            throw new IllegalArgumentException("Redisson does not support Spring Boot SSL bundles; "
+                + "configure Redisson TLS through spring.redis.redisson YAML instead");
+        }
+        String protocolPrefix = redisProperties.getSsl().isEnabled()
+            ? REDISS_PROTOCOL_PREFIX : REDIS_PROTOCOL_PREFIX;
+
         Config config = null;
         Method clusterMethod = ReflectionUtils.findMethod(DataRedisProperties.class, "getCluster");
         Method timeoutMethod = ReflectionUtils.findMethod(DataRedisProperties.class, "getTimeout");
@@ -90,9 +98,9 @@ public class RedissonConfigBuilder {
 
             String[] nodes;
             if (nodesValue instanceof String) {
-                nodes = convert(Arrays.asList(((String)nodesValue).split(",")));
+                nodes = convert(Arrays.asList(((String)nodesValue).split(",")), protocolPrefix);
             } else {
-                nodes = convert((List<String>)nodesValue);
+                nodes = convert((List<String>)nodesValue, protocolPrefix);
             }
 
             config = new Config().setUsername(redisProperties.getUsername())
@@ -104,7 +112,7 @@ public class RedissonConfigBuilder {
             Method nodesMethod = ReflectionUtils.findMethod(clusterObject.getClass(), "getNodes");
             List<String> nodesObject = (List)ReflectionUtils.invokeMethod(nodesMethod, clusterObject);
 
-            String[] nodes = convert(nodesObject);
+            String[] nodes = convert(nodesObject, protocolPrefix);
 
             config = new Config().setUsername(redisProperties.getUsername())
                 .setPassword(redisProperties.getPassword());
@@ -112,24 +120,21 @@ public class RedissonConfigBuilder {
         } else {
             config = new Config().setUsername(redisProperties.getUsername())
                 .setPassword(redisProperties.getPassword());
-            String prefix = REDIS_PROTOCOL_PREFIX;
-            Method method = ReflectionUtils.findMethod(DataRedisProperties.class, "isSsl");
-            if (method != null && (Boolean)ReflectionUtils.invokeMethod(method, redisProperties)) {
-                prefix = REDISS_PROTOCOL_PREFIX;
-            }
-
-            config.useSingleServer().setAddress(prefix + redisProperties.getHost() + ":" + redisProperties.getPort())
+            config.useSingleServer()
+                .setAddress(protocolPrefix + redisProperties.getHost() + ":" + redisProperties.getPort())
                 .setConnectTimeout(timeout).setDatabase(redisProperties.getDatabase());
         }
 
         return config;
     }
 
-    private String[] convert(List<String> nodesObject) {
+    private String[] convert(List<String> nodesObject, String protocolPrefix) {
         List<String> nodes = new ArrayList<String>(nodesObject.size());
         for (String node : nodesObject) {
-            if (!node.startsWith(REDIS_PROTOCOL_PREFIX) && !node.startsWith(REDISS_PROTOCOL_PREFIX)) {
-                nodes.add(REDIS_PROTOCOL_PREFIX + node);
+            if (REDISS_PROTOCOL_PREFIX.equals(protocolPrefix) && node.startsWith(REDIS_PROTOCOL_PREFIX)) {
+                nodes.add(REDISS_PROTOCOL_PREFIX + node.substring(REDIS_PROTOCOL_PREFIX.length()));
+            } else if (!node.startsWith(REDIS_PROTOCOL_PREFIX) && !node.startsWith(REDISS_PROTOCOL_PREFIX)) {
+                nodes.add(protocolPrefix + node);
             } else {
                 nodes.add(node);
             }

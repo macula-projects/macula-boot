@@ -6,7 +6,7 @@ Change: `main-6-1-upgrade`
 
 Baseline: `fbd20cfd4020734880ff4cc41f7cec95a0bfd70e`
 
-Change under test: branch `feat/main-6-1-upgrade`, commit `0e9b320583a52aff5378b5b9322b6e048f3e067c` plus the Stage 4 corrections listed below.
+Change under test: branch `feat/main-6-1-upgrade`, commit `c7392cbb284d557dbf88827d6542b003818ca1ef` plus the second Stage 5 corrections listed below.
 
 Environment: macOS, Java 17.0.17, Maven 3.9.6, OrbStack Docker Engine 29.4.0 on `linux/arm64`, Docker Compose v5.1.2.
 
@@ -33,7 +33,7 @@ No release, tag, merge, production deployment, or `5.x` modification was perform
 
 ```text
 branch=feat/main-6-1-upgrade
-HEAD=0e9b320583a52aff5378b5b9322b6e048f3e067c
+HEAD=c7392cbb284d557dbf88827d6542b003818ca1ef
 6.0.x=fbd20cfd4020734880ff4cc41f7cec95a0bfd70e
 origin/6.0.x=fbd20cfd4020734880ff4cc41f7cec95a0bfd70e
 local 5.x=beaa74b1639786306aa817bef0e522a23c995fd4
@@ -55,12 +55,12 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 Actual results:
 
 ```text
-clean verify reactor       57/57 modules successful, BUILD SUCCESS, 01:21 min
-Surefire                   133 tests, 0 failures, 0 errors, 0 skipped
+clean verify reactor       57/57 modules successful, BUILD SUCCESS, 01:18 min
+Surefire                   137 tests, 0 failures, 0 errors, 0 skipped
 Failsafe                    48 tests, 0 failures, 0 errors, 3 skipped
-Combined                   181 tests, 0 failures, 0 errors, 3 skipped
+Combined                   185 tests, 0 failures, 0 errors, 3 skipped
 Checkstyle                 0 violations, BUILD SUCCESS
-deploy-profile install     57/57 modules successful, BUILD SUCCESS, 42.030 s
+deploy-profile install     57/57 modules successful, BUILD SUCCESS, 39.602 s
 ```
 
 The three skipped integration tests require services not started by the Maven reactor:
@@ -71,7 +71,7 @@ OrderServiceIT (RocketMQ)
 TinyIdClientIT
 ```
 
-Focused correction proof also passed for Springdoc OpenAPI/Swagger UI (2 tests), Redis/Redisson (8 tests), and leader election (1 integration test). The final dependency trees contained:
+Focused correction proof also passed for Springdoc OpenAPI/Swagger UI (2 tests), Redis/Redisson (12 tests, including 4 TLS topology/bundle tests), and leader election (1 integration test). The final dependency trees contained:
 
 ```text
 org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1
@@ -124,6 +124,8 @@ Swagger UI /swagger-ui/index.html: HTTP 200
 
 Nacos Config Data supplied `example.test=nacos-initial`, overriding the local value. Publishing `example.test=nacos-stage4-refreshed` through the Nacos API changed the live provider response after 2 seconds without restart. The value was restored to `nacos-initial` afterward.
 
+The corrected `nacos-init` was also tested against persistent content: after publishing `example.test=nacos-preserved`, rerunning the initializer retained that exact value instead of replacing it. The canary was restored to `nacos-initial` afterward, containers were stopped, and named volumes were retained.
+
 The final application-log scan returned no matches for configuration placeholder failures, Nacos authentication failures, `APPLICATION FAILED`, `NoClassDefFoundError`, `NoSuchMethodError`, or `UnsatisfiedDependencyException`. Verification containers were stopped with normal `docker compose down`; named volumes were retained.
 
 ## Corrections made during this verification
@@ -133,6 +135,10 @@ The first renewed runtime attempt exposed a hidden incompatibility in `spring-cl
 Both Macula Tencent Starters now exclude only that incompatible contract sub-starter. Discovery, configuration, routing, and the remaining `tencent-all` capabilities remain enabled. The Tencent README documents how contract reporting can be explicitly restored after Spring Cloud Tencent provides Springdoc 3 compatibility. Rebuilt containers, dependency-tree checks, clean application logs, and repeated routed requests prove the correction.
 
 The stale-version search also corrected the archetype README from version `5.0.0` to `6.1.0-SNAPSHOT`.
+
+The second independent review found that Boot 4 Redis TLS was ignored because the builder still reflected the removed `isSsl()` method. The builder now reads `getSsl().isEnabled()` directly and applies `rediss://` consistently to single-server, Sentinel, and Cluster addresses. Spring Boot SSL bundles are rejected explicitly because their key/trust material cannot be translated safely into Redisson configuration; users needing that material are directed to Redisson YAML TLS options. Four unit tests cover the three topologies and bundle rejection. The Redis README now uses the Boot 4 `spring.data.redis` prefix and the matching `redisson-spring-data-40` adapter.
+
+That review also identified that the Stage 4 Nacos canary seed could overwrite persistent developer configuration. The Compose initializer now checks for the DataId first and only seeds it when absent; the preserve-on-rerun runtime check above proves this correction.
 
 ## Protected configuration and evals
 

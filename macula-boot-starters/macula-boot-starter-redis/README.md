@@ -18,19 +18,25 @@
 
 ```yaml
 spring:
-  redis:
-    database: 
-    host:
-    port:
-    password:
-    ssl: 
-    timeout:
-    cluster:
-      nodes:
-    sentinel:
-      master:
-      nodes:
+  data:
+    redis:
+      database:
+      host:
+      port:
+      password:
+      ssl:
+        enabled: false
+      timeout:
+      cluster:
+        nodes:
+      sentinel:
+        master:
+        nodes:
 ```
+
+启用 `spring.data.redis.ssl.enabled` 时，单机、Sentinel 和 Cluster 地址都会使用 `rediss://`。
+当前自动构建的 Redisson 配置不支持 Spring Boot SSL Bundle；如需自定义证书或信任库，请使用下面的
+`spring.redis.redisson` YAML 配置并按 Redisson TLS 选项显式配置。
 
 redisson的配置方式如下，包括单点、主从、集群，下面是集群模式：
 
@@ -40,7 +46,7 @@ Redisson 4 已移除 JSON 配置解析。固定的 `retryInterval` 应迁移为 
 ```yaml
 spring:
   redis:
-   redisson: 
+    redisson:
       file: classpath:redisson.yaml  # file和config选一个
       config: |
         clusterServersConfig:
@@ -145,11 +151,12 @@ public class Config {
 
 ```yaml
 spring:
-  redis:
-    one:
-    xxx
-    two:
-      xxx
+  data:
+    redis:
+      one:
+        xxx
+      two:
+        xxx
 ```
 
 然后添加配置Bean，注意其中一个要设置@Primary注解，以便给默认的RedisConnectionFactory使用
@@ -159,7 +166,7 @@ spring:
 @Configuration
 public class Config {
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis.one")
+    @ConfigurationProperties(prefix = "spring.data.redis.one")
     public DataRedisProperties redisPropertiesOne() {
         return new DataRedisProperties();
     }
@@ -173,7 +180,7 @@ public class Config {
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis.two")
+    @ConfigurationProperties(prefix = "spring.data.redis.two")
     public DataRedisProperties redisPropertiesTwo() {
         return new DataRedisProperties();
     }
@@ -200,7 +207,7 @@ public class Config {
 <dependencies>
     <dependency>
         <groupId>org.redisson</groupId>
-        <artifactId>redisson-spring-data-26</artifactId>
+        <artifactId>redisson-spring-data-40</artifactId>
     </dependency>
 
     <dependency>
