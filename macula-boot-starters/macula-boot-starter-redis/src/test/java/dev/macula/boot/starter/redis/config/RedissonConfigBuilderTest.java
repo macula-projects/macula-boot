@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.redisson.config.Config;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.mock.env.MockEnvironment;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,6 +34,20 @@ import java.util.List;
  * @since 6.1.0
  */
 public class RedissonConfigBuilderTest {
+
+    @Test
+    public void shouldBindBoot4RedisPropertyPrefix() {
+        MockEnvironment environment = new MockEnvironment()
+            .withProperty("spring.data.redis.host", "redis.example")
+            .withProperty("spring.data.redis.port", "6380");
+
+        DataRedisProperties properties = Binder.get(environment)
+            .bind("spring.data.redis", Bindable.of(DataRedisProperties.class))
+            .orElseThrow(() -> new IllegalStateException("Redis properties were not bound"));
+
+        Assertions.assertEquals("redis.example", properties.getHost());
+        Assertions.assertEquals(6380, properties.getPort());
+    }
 
     @Test
     public void shouldUseTlsForSingleServer() throws IOException {

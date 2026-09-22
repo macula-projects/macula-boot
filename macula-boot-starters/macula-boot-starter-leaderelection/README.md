@@ -20,9 +20,10 @@
 
 ```yaml
 spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 ```
 
 ## 核心功能
@@ -75,6 +76,5 @@ public class Application {
 ## 版权说明
 
 - redisson：https://github.com/redisson/redisson/blob/master/LICENSE.txt
-
 
 

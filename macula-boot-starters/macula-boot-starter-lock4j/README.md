@@ -19,9 +19,10 @@ lock4j是一个基于redisson的分布式锁组件，其提供了多种不同的
 
 ```yaml
 spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 ```
 
 ## 核心功能

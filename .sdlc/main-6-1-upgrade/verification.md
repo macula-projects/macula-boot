@@ -6,7 +6,7 @@ Change: `main-6-1-upgrade`
 
 Baseline: `fbd20cfd4020734880ff4cc41f7cec95a0bfd70e`
 
-Change under test: branch `feat/main-6-1-upgrade`, commit `c7392cbb284d557dbf88827d6542b003818ca1ef` plus the second Stage 5 corrections listed below.
+Change under test: branch `feat/main-6-1-upgrade`, commit `171837c752d9da27ba4e990a3f96c216ca363a3d` plus the third Stage 5 corrections listed below.
 
 Environment: macOS, Java 17.0.17, Maven 3.9.6, OrbStack Docker Engine 29.4.0 on `linux/arm64`, Docker Compose v5.1.2.
 
@@ -33,7 +33,7 @@ No release, tag, merge, production deployment, or `5.x` modification was perform
 
 ```text
 branch=feat/main-6-1-upgrade
-HEAD=c7392cbb284d557dbf88827d6542b003818ca1ef
+HEAD=171837c752d9da27ba4e990a3f96c216ca363a3d
 6.0.x=fbd20cfd4020734880ff4cc41f7cec95a0bfd70e
 origin/6.0.x=fbd20cfd4020734880ff4cc41f7cec95a0bfd70e
 local 5.x=beaa74b1639786306aa817bef0e522a23c995fd4
@@ -55,10 +55,10 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 Actual results:
 
 ```text
-clean verify reactor       57/57 modules successful, BUILD SUCCESS, 01:18 min
-Surefire                   137 tests, 0 failures, 0 errors, 0 skipped
+clean verify reactor       57/57 modules successful, BUILD SUCCESS, 01:20 min
+Surefire                   138 tests, 0 failures, 0 errors, 0 skipped
 Failsafe                    48 tests, 0 failures, 0 errors, 3 skipped
-Combined                   185 tests, 0 failures, 0 errors, 3 skipped
+Combined                   186 tests, 0 failures, 0 errors, 3 skipped
 Checkstyle                 0 violations, BUILD SUCCESS
 deploy-profile install     57/57 modules successful, BUILD SUCCESS, 39.602 s
 ```
@@ -71,7 +71,7 @@ OrderServiceIT (RocketMQ)
 TinyIdClientIT
 ```
 
-Focused correction proof also passed for Springdoc OpenAPI/Swagger UI (2 tests), Redis/Redisson (12 tests, including 4 TLS topology/bundle tests), and leader election (1 integration test). The final dependency trees contained:
+Focused correction proof also passed for Springdoc OpenAPI/Swagger UI (2 tests), Redis/Redisson (13 tests, including Boot 4 property binding and 4 TLS topology/bundle tests), and leader election (1 integration test). The final dependency trees contained:
 
 ```text
 org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1
@@ -139,6 +139,8 @@ The stale-version search also corrected the archetype README from version `5.0.0
 The second independent review found that Boot 4 Redis TLS was ignored because the builder still reflected the removed `isSsl()` method. The builder now reads `getSsl().isEnabled()` directly and applies `rediss://` consistently to single-server, Sentinel, and Cluster addresses. Spring Boot SSL bundles are rejected explicitly because their key/trust material cannot be translated safely into Redisson configuration; users needing that material are directed to Redisson YAML TLS options. Four unit tests cover the three topologies and bundle rejection. The Redis README now uses the Boot 4 `spring.data.redis` prefix and the matching `redisson-spring-data-40` adapter.
 
 That review also identified that the Stage 4 Nacos canary seed could overwrite persistent developer configuration. The Compose initializer now checks for the DataId first and only seeds it when absent; the preserve-on-rerun runtime check above proves this correction.
+
+The third independent pass found that five downstream Redis-consuming Starter READMEs plus the idempotent and Redis test resources still used Boot 3's standard `spring.redis` connection prefix. Cache, idempotent, leader-election, Lock4j, and Binlog4j documentation and both test resources now use `spring.data.redis`; the independent Macula Redisson namespace remains `spring.redis.redisson`. A direct binder test proves that Boot 4 consumes the documented host and port keys, and a repository-wide search found no remaining standard `spring.redis.host`/`port` examples.
 
 ## Protected configuration and evals
 

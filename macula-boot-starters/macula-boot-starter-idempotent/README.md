@@ -21,9 +21,10 @@
 
 ```yaml
 spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 ```
 
 ## 核心功能
