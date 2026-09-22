@@ -566,15 +566,22 @@ public @interface Sensitive {
 默认对Jackson做了如下配置
 
 ```java
-@Bean @ConditionalOnMissingBean public Jackson2ObjectMapperBuilderCustomizer customizer(){
-        return builder->{
-        builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        builder.featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        builder.serializerByType(Long.class,ToStringSerializer.instance);
-        builder.modulesToInstall(new JavaTimeModule());
-        };
-        }
+@Bean
+@ConditionalOnMissingBean
+public JsonMapperBuilderCustomizer customizer() {
+    return builder -> {
+        builder.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        SimpleModule module = new SimpleModule("customJacksonModule");
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        builder.addModule(module);
+    };
+}
 ```
+
+Macula Boot 6.1 使用 Jackson 3：`JsonMapperBuilderCustomizer` 位于
+`org.springframework.boot.jackson.autoconfigure`，Jackson 数据绑定类型位于 `tools.jackson.databind`。
+Boot 3 的 `Jackson2ObjectMapperBuilderCustomizer` 与 `com.fasterxml.jackson.databind` 扩展不能直接用于该配置链。
 
 ### 租户ID
 

@@ -92,6 +92,11 @@ polaris:
 </dependencies>
 ```
 
+Macula Boot 6.1 的 Tencent 与 Tencent SCG Starter 默认排除 Polaris Contract。该组件当前仍依赖 Springdoc
+2.x：在普通应用中会导致合约上报出现 `NoSuchMethodError`，在 reactive gateway 中会直接导致启动失败。
+确需合约上报时，请等待 Spring Cloud Tencent 提供 Springdoc 3 兼容版本后再显式引入
+`spring-cloud-starter-tencent-polaris-contract`。
+
 ## 版权说明
 
 - spring-cloud-tencent：https://github.com/Tencent/spring-cloud-tencent/blob/2021.0/LICENSE

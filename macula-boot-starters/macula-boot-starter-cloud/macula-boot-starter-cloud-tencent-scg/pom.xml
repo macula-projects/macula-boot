@@ -35,6 +35,13 @@
 		<dependency>
 			<groupId>com.tencent.cloud</groupId>
 			<artifactId>spring-cloud-starter-tencent-all</artifactId>
+			<exclusions>
+				<!-- The contract reporter still targets Springdoc 2.x and is not needed by a gateway. -->
+				<exclusion>
+					<groupId>com.tencent.cloud</groupId>
+					<artifactId>spring-cloud-starter-tencent-polaris-contract</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
         <dependency>

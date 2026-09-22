@@ -75,25 +75,14 @@ public class RedissonConfigBuilder {
         if (redissonProperties.getConfig() != null) {
             try {
                 config = Config.fromYAML(redissonProperties.getConfig());
-            } catch (IOException e) {
-                try {
-                    config = Config.fromJSON(redissonProperties.getConfig());
-                } catch (IOException e1) {
-                    throw new IllegalArgumentException("Can't parse config", e1);
-                }
+            } catch (RuntimeException e) {
+                throw new IllegalArgumentException("Can't parse Redisson YAML config", e);
             }
         } else if (redissonProperties.getFile() != null) {
-            try {
-                InputStream is = getConfigStream(ctx, redissonProperties);
+            try (InputStream is = getConfigStream(ctx, redissonProperties)) {
                 config = Config.fromYAML(is);
-            } catch (IOException e) {
-                // trying next format
-                try {
-                    InputStream is = getConfigStream(ctx, redissonProperties);
-                    config = Config.fromJSON(is);
-                } catch (IOException e1) {
-                    throw new IllegalArgumentException("Can't parse config", e1);
-                }
+            } catch (IOException | RuntimeException e) {
+                throw new IllegalArgumentException("Can't parse Redisson YAML config", e);
             }
         } else if (redisProperties.getSentinel() != null) {
             Method nodesMethod = ReflectionUtils.findMethod(DataRedisProperties.Sentinel.class, "getNodes");
@@ -106,10 +95,10 @@ public class RedissonConfigBuilder {
                 nodes = convert((List<String>)nodesValue);
             }
 
-            config = new Config();
-            config.useSentinelServers().setMasterName(redisProperties.getSentinel().getMaster())
-                .addSentinelAddress(nodes).setDatabase(redisProperties.getDatabase()).setConnectTimeout(timeout)
+            config = new Config().setUsername(redisProperties.getUsername())
                 .setPassword(redisProperties.getPassword());
+            config.useSentinelServers().setMasterName(redisProperties.getSentinel().getMaster())
+                .addSentinelAddress(nodes).setDatabase(redisProperties.getDatabase()).setConnectTimeout(timeout);
         } else if (clusterMethod != null && ReflectionUtils.invokeMethod(clusterMethod, redisProperties) != null) {
             Object clusterObject = ReflectionUtils.invokeMethod(clusterMethod, redisProperties);
             Method nodesMethod = ReflectionUtils.findMethod(clusterObject.getClass(), "getNodes");
@@ -117,11 +106,12 @@ public class RedissonConfigBuilder {
 
             String[] nodes = convert(nodesObject);
 
-            config = new Config();
-            config.useClusterServers().addNodeAddress(nodes).setConnectTimeout(timeout)
+            config = new Config().setUsername(redisProperties.getUsername())
                 .setPassword(redisProperties.getPassword());
+            config.useClusterServers().addNodeAddress(nodes).setConnectTimeout(timeout);
         } else {
-            config = new Config();
+            config = new Config().setUsername(redisProperties.getUsername())
+                .setPassword(redisProperties.getPassword());
             String prefix = REDIS_PROTOCOL_PREFIX;
             Method method = ReflectionUtils.findMethod(DataRedisProperties.class, "isSsl");
             if (method != null && (Boolean)ReflectionUtils.invokeMethod(method, redisProperties)) {
@@ -129,8 +119,7 @@ public class RedissonConfigBuilder {
             }
 
             config.useSingleServer().setAddress(prefix + redisProperties.getHost() + ":" + redisProperties.getPort())
-                .setConnectTimeout(timeout).setDatabase(redisProperties.getDatabase())
-                .setPassword(redisProperties.getPassword());
+                .setConnectTimeout(timeout).setDatabase(redisProperties.getDatabase());
         }
 
         return config;

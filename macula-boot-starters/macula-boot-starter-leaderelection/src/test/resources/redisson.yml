@@ -3,8 +3,8 @@ singleServerConfig:
   connectTimeout: 10000
   timeout: 3000
   retryAttempts: 3
-  retryInterval: 1500
-  password: null
+  retryDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT1S, maxDelay: PT2S}
+  reconnectionDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT0.1S, maxDelay: PT10S}
   subscriptionsPerConnection: 5
   clientName: null
   address: "redis://127.0.0.1:6379"
@@ -14,6 +14,7 @@ singleServerConfig:
   connectionPoolSize: 64
   database: 0
   dnsMonitoringInterval: 5000
+password: null
 threads: 16
 nettyThreads: 32
 codec: !<org.redisson.codec.JsonJacksonCodec> { }

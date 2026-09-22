@@ -34,6 +34,9 @@ spring:
 
 redisson的配置方式如下，包括单点、主从、集群，下面是集群模式：
 
+Macula Boot 6.1 使用 Redisson 4，`spring.redis.redisson.config` 和 `file` 仅支持 Redisson YAML 格式；
+Redisson 4 已移除 JSON 配置解析。固定的 `retryInterval` 应迁移为 `retryDelay`，并显式选择延迟策略。
+
 ```yaml
 spring:
   redis:
@@ -45,10 +48,9 @@ spring:
           connectTimeout: 10000
           timeout: 3000
           retryAttempts: 3
-          retryInterval: 1500
-          failedSlaveReconnectionInterval: 3000
-          failedSlaveCheckInterval: 60000
-          password: null
+          retryDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT1S, maxDelay: PT2S}
+          reconnectionDelay: !<org.redisson.config.EqualJitterDelay> {baseDelay: PT0.1S, maxDelay: PT10S}
+          failedSlaveNodeDetector: !<org.redisson.client.FailedConnectionDetector> {}
           subscriptionsPerConnection: 5
           clientName: null
           loadBalancer: !<org.redisson.connection.balancer.RoundRobinLoadBalancer> {}
@@ -68,6 +70,7 @@ spring:
           pingConnectionInterval: 0
           keepAlive: false
           tcpNoDelay: false
+        password: null
         threads: 16
         nettyThreads: 32
         codec: !<org.redisson.codec.Kryo5Codec> {}

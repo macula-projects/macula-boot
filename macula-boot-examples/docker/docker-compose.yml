@@ -122,6 +122,14 @@ services:
         namespaces="$$(curl --fail --silent http://nacos:8848/nacos/v1/console/namespaces)"
         printf '%s' "$${namespaces}" | grep -q "${NACOS_NAMESPACE:-MACULA5}"
         printf '%s' "$${namespaces}" | grep -q 'SENTINEL'
+        curl --fail --silent --show-error --request POST \
+          --data-urlencode "dataId=macula-example-alibaba-provider1-local.yml" \
+          --data-urlencode "group=DEFAULT_GROUP" \
+          --data-urlencode "tenant=${NACOS_NAMESPACE:-MACULA5}" \
+          --data-urlencode "type=yaml" \
+          --data-urlencode "content=example:
+          test: nacos-initial" \
+          http://nacos:8848/nacos/v1/cs/configs >/dev/null
     networks:
       - examples
 

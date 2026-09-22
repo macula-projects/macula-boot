@@ -15,8 +15,8 @@
     <img src="https://img.shields.io/maven-central/v/dev.macula.boot/macula-boot-parent" alt="Maven Central">
   </a>
   <img src="https://img.shields.io/badge/JDK-17+-green.svg" alt="JDK 17+">
-  <img src="https://img.shields.io/badge/Spring%20Boot-3.5+-green.svg" alt="Spring Boot 3.5+">
-  <img src="https://img.shields.io/badge/Spring%20Cloud-2025.x-green.svg" alt="Spring Cloud 2025.x">
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.0-green.svg" alt="Spring Boot 4.0">
+  <img src="https://img.shields.io/badge/Spring%20Cloud-2025.1-green.svg" alt="Spring Cloud 2025.1">
 </p>
 
 Macula Boot 面向 Java 微服务应用提供统一的依赖管理、自动配置和基础能力 Starter。项目同时支持 Spring Cloud Alibaba、Spring Cloud Tencent 等技术体系，业务项目可以按需引入模块，不必绑定完整平台。
@@ -69,6 +69,19 @@ macula-boot
 ```
 
 将示例版本替换为项目实际采用的 Macula Boot 发布版本。具体属性与扩展点请查看对应 Starter 的 README，完整应用组合可参考 [`macula-boot-examples`](./macula-boot-examples)。
+
+## 从 6.0 升级到 6.1
+
+Macula Boot 6.1 基于 Spring Boot 4、Spring Framework 7、Spring Cloud 2025.1 和 Jackson 3。升级应用时需要同步处理以下源码与配置变化：
+
+- Jackson 数据绑定 API 从 `com.fasterxml.jackson.databind` 迁移到 `tools.jackson.databind`；自定义 Boot JSON 构建器改用 `org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer`。`OperationLogDTO` 暴露的 `JsonNode` 类型也相应变为 Jackson 3 类型。
+- WebSocket 鉴权扩展 `MessageSecurityMetaSourceCustomizer` 的参数改为 Spring Security 7 的 `MessageMatcherDelegatingAuthorizationManager.Builder`。
+- Redis 配置属性使用 `org.springframework.boot.data.redis.autoconfigure.DataRedisProperties`；Redisson 使用与 Spring Data Redis 4 对应的 `redisson-spring-data-40`。Redisson 4 的 `config`/`file` 仅支持 YAML，旧 JSON 配置和固定 `retryInterval` 需要分别迁移为 YAML 与 `retryDelay` 策略。
+- Springdoc 升级到 3.x；OpenAPI JSON 和 Swagger UI 地址仍分别为 `/v3/api-docs` 与 `/swagger-ui/index.html`。
+- Spring Boot 4 不再提供 Undertow Starter，Web Starter 使用 Boot 默认 Tomcat。如应用依赖 Undertow 特性，需要在升级前评估替代实现。
+- Alibaba 应用不再依赖 `bootstrap.yml`，通过 `spring.config.import` 导入 Nacos 配置。默认示例导入 `${spring.application.name}.yml` 和 `${spring.application.name}-${spring.profiles.active}.yml`，并保留原有地址、命名空间和凭据环境变量。
+
+这些变化会影响实现 Macula 扩展接口、直接操作 Jackson 节点或自定义基础设施 Bean 的下游源码；升级到 6.1 时应重新编译并运行应用集成测试。
 
 ## 构建与测试
 

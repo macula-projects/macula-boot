@@ -1,6 +1,6 @@
 ## 概述
 
-该模块是基于[SpringDoc](https://springdoc.org/)的OpenAPI V3规范的API接口文档生成工具。
+该模块是基于 [SpringDoc](https://springdoc.org/) 3.x 的 OpenAPI V3 规范 API 接口文档生成工具，兼容 Spring Boot 4。
 
 ## 组件坐标
 
@@ -122,7 +122,7 @@ public class DeptForm {
 <dependencies>
     <dependency>
         <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-ui</artifactId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     </dependency>
     <dependency>
         <groupId>org.springframework.boot</groupId>
