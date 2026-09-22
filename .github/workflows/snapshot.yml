@@ -1,9 +1,21 @@
 # 相当于脚本用途的一个声明
 name: Sonatype Snapshot Repo Deployment
-# 触发脚本的事件  这里为提交main分支之后触发
+# 由 verification.yml 在 main 验证成功后调用
 on:
-  push:
-    branches: [ main ]
+  workflow_call:
+    secrets:
+      OSSRH_USER:
+        required: true
+      OSSRH_PASSWORD:
+        required: true
+      GPG_SECRET:
+        required: true
+      GPG_PASSWORD:
+        required: true
+
+permissions:
+  contents: read
+
 # 定义一个发行任务
 jobs:
   publish:
@@ -13,11 +25,11 @@ jobs:
     steps:
       # 1. 声明 checkout 仓库代码到工作区
       - name: Checkout Git Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       # 2. 安装Java 环境 这里会用到的参数就是 Git Action secrets中配置的，
       #    取值要在key前面加  secrets.
       - name: Set up Maven Central Repo
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: '17'
