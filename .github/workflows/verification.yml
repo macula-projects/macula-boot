@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -70,12 +70,23 @@ jobs:
           --health-retries 10
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
           cache: maven
       - name: Run Maven verification
         run: mvn --batch-mode verify
+
+  snapshot:
+    name: Publish Snapshot
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [checkstyle, verify]
+    uses: ./.github/workflows/snapshot.yml
+    secrets:
+      OSSRH_USER: ${{ secrets.OSSRH_USER }}
+      OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      GPG_SECRET: ${{ secrets.GPG_SECRET }}
+      GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}

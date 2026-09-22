@@ -37,4 +37,4 @@ Status: accepted
 - 边界证明：实施和 PR 验证期间不运行 Release、不创建 Tag、不合并、不发布 Snapshot；首次真实发布证明只能在后续人工合并后观察。
 
 ## 偏差
-暂无。
+- 实现校验发现 `snapshot.yml` 的 `actions/setup-java` 通过 `gpg-private-key` 实际使用了现有的 `GPG_SECRET`。为保持原有签名发布行为并让可复用工作流通过 GitHub Actions 表达式校验，Snapshot 接口及调用方改为显式传递四个发布 Secrets，而不是设计中误记的三个；未新增仓库 Secret，也未扩大权限。
