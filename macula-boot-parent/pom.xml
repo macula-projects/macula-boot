@@ -61,41 +61,41 @@
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <spring-boot.version>4.0.8</spring-boot.version>
-        <spring-cloud.version>2025.1.1</spring-cloud.version>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <spring-cloud-tencent.version>2.1.2.0-2025.1.1</spring-cloud-tencent.version>
         <mysql.connector.version>9.5.0</mysql.connector.version>
-        <mysql.binlog.version>0.40.3</mysql.binlog.version>
-        <druid.version>1.2.27</druid.version>
-        <mybatis-plus.version>3.5.15</mybatis-plus.version>
-        <mybatis-spring-boot-starter.version>3.0.5</mybatis-spring-boot-starter.version>
+        <mysql.binlog.version>0.41.5</mysql.binlog.version>
+        <druid.version>1.2.28</druid.version>
+        <mybatis-plus.version>3.5.17</mybatis-plus.version>
+        <mybatis-spring-boot-starter.version>4.0.1</mybatis-spring-boot-starter.version>
         <fenix.version>4.0.0</fenix.version>
         <redisson.version>4.7.0</redisson.version>
-        <hutool.version>5.8.42</hutool.version>
+        <hutool.version>5.8.47</hutool.version>
         <easyexcel.version>4.0.3</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>
-        <fastjson2.version>2.0.60</fastjson2.version>
-        <liteflow.version>2.15.2</liteflow.version>
-        <oauth2-oidc-sdk.version>11.30.1</oauth2-oidc-sdk.version>
+        <fastjson2.version>2.0.65</fastjson2.version>
+        <liteflow.version>2.16.1</liteflow.version>
+        <oauth2-oidc-sdk.version>11.38.2</oauth2-oidc-sdk.version>
         <resilience4j.version>2.2.0</resilience4j.version>
         <swagger2.version>1.6.16</swagger2.version>
-        <swagger3.version>2.2.41</swagger3.version>
+        <swagger3.version>2.2.55</swagger3.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
+        <mapstruct-plus.version>1.5.3</mapstruct-plus.version>
         <lock4j.version>2.2.7</lock4j.version>
-        <rocketmq-spring.version>2.3.4</rocketmq-spring.version>
+        <rocketmq-spring.version>2.3.6</rocketmq-spring.version>
         <springdoc.version>3.1.1</springdoc.version>
         <xxl-job.version>3.3.0</xxl-job.version>
-        <snail-job.version>1.9.0</snail-job.version>
+        <snail-job.version>2.0.2</snail-job.version>
         <dubbo.version>3.2.19</dubbo.version>
         <seata.version>2.5.0</seata.version>
-        <bouncycastle.version>1.83</bouncycastle.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
         <xfile.version>2.3.0</xfile.version>
-        <minio.version>8.6.0</minio.version>
+        <minio.version>9.0.3</minio.version>
         <fastdfs.version>1.30-20230328</fastdfs.version>
         <qiniu-sdk-oss.version>7.19.0</qiniu-sdk-oss.version>
         <qcloud-sdk-oss.version>5.6.246.3</qcloud-sdk-oss.version>
-        <aliyun-sdk-oss.version>3.18.3</aliyun-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.18.5</aliyun-sdk-oss.version>
         <cola.version>5.0.0</cola.version>
         <logstash.version>9.0</logstash.version>
         <skywalking-toolkit.version>9.5.0</skywalking-toolkit.version>
