@@ -17,8 +17,6 @@
 
 package dev.macula.boot.context;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
-
 /**
  * {@code TenantContextHolder} 租户ID的上下文
  *
@@ -33,7 +31,7 @@ public class TenantContextHolder {
     private TenantContextHolder() {
     }
 
-    private final static ThreadLocal<Long> THREAD_LOCAL_VERSION = new TransmittableThreadLocal<>();
+    private final static ThreadLocal<Long> THREAD_LOCAL_VERSION = new ThreadLocal<>();
 
     /**
      * 获取当前上下文租户ID

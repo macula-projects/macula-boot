@@ -2,6 +2,9 @@
 
 该模块演示通过 Nacos 发现 Alibaba provider，并使用 OpenFeign 调用服务、Sentinel fallback 处理降级、STOMP over WebSocket 发送消息。
 
+模块使用统一 Observability Starter 和 Async Starter；OTLP Metrics、Traces、Logs 端点及独立开关均可通过环境变量覆盖。
+回声接口会额外产生一条受管异步日志，用于验证 Trace 上下文能够跨线程传播。
+
 ## 启动
 
 先启动 Nacos 和 `macula-example-alibaba-provider1`，再执行：

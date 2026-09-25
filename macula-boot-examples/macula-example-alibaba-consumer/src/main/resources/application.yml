@@ -29,7 +29,13 @@ spring:
         enabled: true
         namespace: ${nacos.namespace}
         # group:
-# 以下为本地环境默认配置，可由 Nacos 配置中心的同名配置覆盖
+---
+# 以下为 local Profile 本地默认配置；其他环境请在 Nacos 配置中心维护
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
       eager: true
@@ -69,10 +75,6 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:5000/oauth2/jwks}    # 网关地址
-  sleuth:
-    integration:
-      websockets:
-        enabled: false
   servlet:
     encoding:
       force: true
@@ -133,4 +135,40 @@ logging:
     org.redisson: info
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
-  #config: classpath:logback-skywalking.xml
+  structured:
+    format:
+      console: logstash
+      file: logstash
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_EXPORT_ENABLED:false}
+        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+    export:
+      otlp:
+        enabled: ${OTEL_TRACES_EXPORT_ENABLED:false}
+  logging:
+    export:
+      otlp:
+        enabled: ${OTEL_LOGS_EXPORT_ENABLED:false}
+  opentelemetry:
+    resource-attributes:
+      service:
+        name: ${OTEL_SERVICE_NAME:${spring.application.name}}
+        namespace: ${OTEL_SERVICE_NAMESPACE:macula-examples}
+      deployment:
+        environment:
+          name: ${DEPLOYMENT_ENVIRONMENT:local}
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}

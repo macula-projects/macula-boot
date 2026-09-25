@@ -30,7 +30,9 @@ import dev.macula.boot.starter.cloud.gateway.filter.RmOpaqueTokenEndpointFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.SignCheckGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.TraceIdGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
+import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -101,8 +103,10 @@ public class GatewayAutoConfiguration {
     }
 
     @Bean
-    public TraceIdGlobalFilter traceIdGlobalFilter() {
-        return new TraceIdGlobalFilter();
+    public TraceIdGlobalFilter traceIdGlobalFilter(ObjectProvider<Tracer> tracerProvider,
+                                                   GatewayProperties gatewayProperties) {
+        return new TraceIdGlobalFilter(tracerProvider.getIfAvailable(),
+            gatewayProperties.isTraceIdResponseHeaderEnabled());
     }
 
     @Bean

@@ -18,11 +18,6 @@ package dev.macula.boot.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.alibaba.ttl.TtlCallable;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,21 +66,4 @@ class ContextHolderTest {
         assertThat(GrayVersionMetaHolder.getGrayVersion()).isNull();
     }
 
-    @Test
-    void shouldTransmitRequestContextToThreadPoolTask() throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        try {
-            // 先创建工作线程，避免 InheritableThreadLocal 在线程创建时直接继承上下文。
-            assertThat(executor.submit(TenantContextHolder::getCurrentTenantId).get()).isNull();
-            TenantContextHolder.setCurrentTenantId(1001L);
-            GrayVersionContextHolder.setGrayVersion("gray-v2");
-
-            String context = executor.submit(TtlCallable.get(() -> TenantContextHolder
-                .getCurrentTenantId() + ":" + GrayVersionContextHolder.getGrayVersion())).get();
-
-            assertThat(context).isEqualTo("1001:gray-v2");
-        } finally {
-            executor.shutdownNow();
-        }
-    }
 }

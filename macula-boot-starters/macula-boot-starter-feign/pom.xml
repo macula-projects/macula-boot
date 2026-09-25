@@ -47,6 +47,12 @@
             <artifactId>feign-okhttp</artifactId>
         </dependency>
 
+        <!-- Enables Spring Cloud OpenFeign's MicrometerObservationCapability when an ObservationRegistry is present. -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-micrometer</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>

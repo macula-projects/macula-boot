@@ -1,6 +1,8 @@
 # Tencent Provider 示例
 
-该模块是 Tencent 微服务链路的服务提供方，演示 Polaris 服务注册、JWT 资源服务器、SpringDoc、Prometheus 和 OSS 配置。
+该模块是 Tencent 微服务链路的服务提供方，演示 Polaris 服务注册、JWT 资源服务器、SpringDoc、统一 OTLP 可观测性和 OSS 配置。
+
+OTLP Metrics、Traces、Logs 网络导出默认关闭，配置 Docker observability overlay 时开启。
 
 ## 启动
 

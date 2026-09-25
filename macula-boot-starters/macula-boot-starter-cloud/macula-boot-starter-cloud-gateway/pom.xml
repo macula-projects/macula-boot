@@ -68,15 +68,8 @@
         </dependency>
 
         <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-sleuth</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-skywalking</artifactId>
-            <optional>true</optional>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
         </dependency>
     </dependencies>
 

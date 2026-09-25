@@ -2,6 +2,8 @@
 
 该模块演示通过 Polaris 发现 `macula-example-tencent-provider`，再使用 OpenFeign 调用 provider 接口和 fallback 降级。
 
+模块使用统一 Observability Starter；OTLP Metrics、Traces、Logs 端点及独立开关均可通过环境变量覆盖。
+
 ## 启动
 
 先启动 Polaris 和 `macula-example-tencent-provider`，再执行：

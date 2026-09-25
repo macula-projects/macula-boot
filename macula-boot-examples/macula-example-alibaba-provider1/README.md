@@ -1,6 +1,8 @@
 # Alibaba Provider 示例
 
-该模块是 Alibaba 微服务链路的服务提供方，演示 Nacos 注册与配置刷新、JWT 资源服务器、SpringDoc、Prometheus 以及 OSS 配置。
+该模块是 Alibaba 微服务链路的服务提供方，演示 Nacos 注册与配置刷新、JWT 资源服务器、SpringDoc、统一 OTLP 可观测性以及 OSS 配置。
+
+OTLP Metrics、Traces、Logs 网络导出默认关闭，配置 Docker observability overlay 时开启。
 
 ## 启动
 
