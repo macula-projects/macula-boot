@@ -66,6 +66,17 @@ macula:
 
 ## 核心功能
 
+### Trace ID 响应头
+
+网关通过 Micrometer `Tracer` 读取当前 Span，并在有效上下文中返回兼容的 `x-traceId` 响应头。
+无 Tracer、无当前 Span或关闭以下开关时不会产生空响应头：
+
+```yaml
+macula:
+  gateway:
+    trace-id-response-header-enabled: true
+```
+
 ### Token认证
 
 将oauth2的token转换为JWT传递给微服务，微服务通过JWT获取用户信息和角色信息。

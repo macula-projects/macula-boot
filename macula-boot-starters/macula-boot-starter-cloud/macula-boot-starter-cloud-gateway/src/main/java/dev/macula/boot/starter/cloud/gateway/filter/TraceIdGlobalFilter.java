@@ -14,83 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.cloud.gateway.filter;
 
-import brave.Tracing;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.skywalking.apm.toolkit.trace.TraceContext;
-import org.apache.skywalking.apm.toolkit.webflux.WebFluxSkyWalkingOperators;
-import org.springframework.beans.BeansException;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * {@code TraceIdFilter} 获取线程中的traceId并添加到响应头中
+ * 将 Micrometer 当前 Span 的 Trace ID 添加到网关响应头。
  *
  * @author rain
  * @since 2024/1/26 17:30
  */
-@Slf4j
-public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationContextAware {
-    private static final String TRACE_TYPE_SLEUTH = "SLEUTH";
-    private static final String TRACE_TYPE_SKYWALKING = "SKYWALKING";
-    private ApplicationContext applicationContext;
+public class TraceIdGlobalFilter implements GlobalFilter, Ordered {
 
-    private Object tracing;
+    private static final String TRACE_ID_HEADER = "x-traceId";
+
+    @Nullable
+    private final Tracer tracer;
+
+    private final boolean responseHeaderEnabled;
+
+    public TraceIdGlobalFilter(@Nullable Tracer tracer, boolean responseHeaderEnabled) {
+        this.tracer = tracer;
+        this.responseHeaderEnabled = responseHeaderEnabled;
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if (!responseHeaderEnabled || tracer == null) {
+            return chain.filter(exchange);
+        }
         ServerHttpResponse response = exchange.getResponse();
         HttpHeaders headers = response.getHeaders();
-
-        String tracingType = this.tracingType();
-        
-        if (TRACE_TYPE_SLEUTH.equals(tracingType)) {
-            return chain.filter(exchange).doOnSuccess(signal -> {
-                brave.propagation.TraceContext traceContext = ((Tracing)tracing).currentTraceContext().get();
-                if (traceContext != null) {
-                    final String traceId = traceContext.traceIdString();
-                    headers.add("x-traceId", traceId);
-                }
-            });
-
-        } else if (TRACE_TYPE_SKYWALKING.equals(tracingType)) {
-            final String traceId = WebFluxSkyWalkingOperators.continueTracing(exchange, TraceContext::traceId);
-            headers.add("x-traceId", traceId);
-        }
-        
-        // 对于SkyWalking和没有追踪系统的情况，都直接执行filter
-        return chain.filter(exchange);
-    }
-
-    private String tracingType() {
-        Class<?> tracingClass = findClass("brave.Tracing");
-        if (tracing == null && tracingClass != null && applicationContext != null) {
-            tracing = applicationContext.getBeanProvider(tracingClass).getIfAvailable();
-        }
-        if (tracing != null) {
-            return TRACE_TYPE_SLEUTH;
-        }
-        if (isClassExists("org.apache.skywalking.apm.toolkit.trace.TraceContext")) {
-            return TRACE_TYPE_SKYWALKING;
-        }
-        return null;
-    }
-
-    private Class<?> findClass(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+        return chain.filter(exchange).doOnSuccess(signal -> addCurrentTraceId(headers));
     }
 
     @Override
@@ -98,12 +62,13 @@ public class TraceIdGlobalFilter implements GlobalFilter, Ordered, ApplicationCo
         return Ordered.LOWEST_PRECEDENCE;
     }
 
-    private boolean isClassExists(String className) {
-        return findClass(className) != null;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    private void addCurrentTraceId(HttpHeaders headers) {
+        Span span = tracer.currentSpan();
+        if (span != null && span.context() != null) {
+            String traceId = span.context().traceId();
+            if (traceId != null && !traceId.isBlank()) {
+                headers.set(TRACE_ID_HEADER, traceId);
+            }
+        }
     }
 }

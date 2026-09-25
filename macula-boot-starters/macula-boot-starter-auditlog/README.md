@@ -3,7 +3,7 @@
 本模块主要提供默认的日志格式配置、日志发送、日志审计等功能，由多个子模块组成。包括：
 
 - macula-boot-starter-auditlog 日志审计记录
-- macula-boot-starter-logstash 将日志发送给logstash
+- 业务审计日志可通过 macula-boot-starter-observability 统一导出到 OTLP 日志后端
 
 ## 组件坐标
 

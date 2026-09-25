@@ -21,6 +21,7 @@ import dev.macula.example.consumer.feign.GapiService;
 import dev.macula.example.consumer.feign.GatewayService;
 import dev.macula.example.consumer.feign.IpaasService;
 import dev.macula.example.consumer.feign.Provider1Service;
+import dev.macula.example.consumer.service.AsyncObservabilityProbe;
 import dev.macula.example.consumer.vo.CompanyDto;
 import dev.macula.example.consumer.vo.PoBaseDto;
 import dev.macula.example.consumer.vo.PoBaseResult;
@@ -56,10 +57,13 @@ public class ConsumerController {
 
     private final GatewayService gatewayService;
 
+    private final AsyncObservabilityProbe asyncObservabilityProbe;
+
     @GetMapping("/echo/{name}")
     public String echo(@RequestParam("str") String str, @PathVariable String name) {
         String hello = provider1Service.echo(str);
         log.info("consumer echo by {}: {}", name, hello);
+        asyncObservabilityProbe.logEcho(name);
         return hello + "," + name;
     }
 

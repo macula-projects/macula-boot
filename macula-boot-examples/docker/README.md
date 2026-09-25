@@ -115,6 +115,35 @@ POLARIS_NACOS_SERVER_ADDR=127.0.0.1:18849 \
 
 也可以在 IDE 中以相同顺序启动。不设置容器环境变量时，应用保持原有的 `127.0.0.1` 地址和端口默认值。
 
+## 可观测性 Overlay
+
+复制 `.env.example` 后，把三类导出开关设为 `true`，再将 overlay 与任一现有 profile 组合：
+
+```shell
+OTEL_METRICS_EXPORT_ENABLED=true \
+OTEL_TRACES_EXPORT_ENABLED=true \
+OTEL_LOGS_EXPORT_ENABLED=true \
+docker compose -f docker-compose.yml -f observability/docker-compose.observability.yml \
+  --profile alibaba up -d --build
+```
+
+Tencent 链路将 profile 改为 `tencent`。默认入口为 Collector `4317/4318`、Prometheus `9090`、
+Loki `3100`、Tempo `3200`，均只绑定 `127.0.0.1`。验证配置与端到端关联：
+
+```shell
+docker compose -f observability/docker-compose.observability.yml config
+observability/verify-observability.sh \
+  "http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello"
+```
+
+脚本针对 Alibaba 的确定性回声链路，读取响应 `x-traceId`，随后校验 Tempo 中的链路、Loki 中同一
+Trace ID 的同步与受管异步日志，以及 Prometheus 中带 Consumer 服务身份的指标。Tencent overlay 使用
+同一套 Collector 与后端配置，但不作为该关联脚本的默认验收链路。验证环境强制使用
+`OTEL_TRACES_SAMPLER_PROBABILITY=1.0`；生产采样率与容量不以本示例为基线。
+Collector、Loki 和 Tempo 的运行镜像不包含 HTTP 客户端，因此 overlay 使用固定版本的
+`curlimages/curl` 探针容器分别查询 Collector health extension、Loki `/ready` 和 Tempo `/ready`；
+`docker compose ps` 中对应的 `*-health` 服务为 `healthy` 才表示后端真正就绪。
+
 ## 状态与日志
 
 查看全部服务：

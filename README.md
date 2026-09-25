@@ -33,10 +33,12 @@ Macula Boot 面向 Java 微服务应用提供统一的依赖管理、自动配�
 | 分布式能力 | `lock4j`、`idempotent`、`leaderelection`、`seata`、`springretry` | 分布式锁、幂等、Leader 选举、事务与重试 |
 | 消息与任务 | `rocketmq`、`kafka`、`sender`、`task` | 消息队列、可靠消息、任务调度 |
 | 云原生 | `cloud-gateway`、`cloud-alibaba`、`cloud-tencent` | 网关、Nacos/Sentinel、Polaris 等服务治理能力 |
-| 可观测性 | `auditlog`、`operationlog`、`prometheus`、`skywalking`、`sleuth`、`logstash` | 审计、操作日志、指标、链路追踪和日志采集 |
+| 可观测性 | `observability`、`auditlog`、`operationlog` | 统一 OTLP 指标、链路与日志，以及业务审计和操作日志 |
 | 业务集成 | `oss`、`tinyid`、`binlog4j`、`websocket`、`wechat` | 对象存储、ID、Binlog、WebSocket、微信生态 |
 
 完整模块位于 [`macula-boot-starters`](./macula-boot-starters)，每个主要 Starter 的目录中均提供独立 README 和配置示例。
+统一可观测性接入见 [`macula-boot-starter-observability`](./macula-boot-starters/macula-boot-starter-observability)，
+从 6.0 迁移请参考[统一可观测性迁移指南](./docs/migration/unified-observability.md)。
 
 ## 项目结构
 
