@@ -26,7 +26,13 @@ spring:
       discovery:
         enabled: true
 
-# 以下为本地环境默认配置，可由 Polaris 配置中心的同名配置覆盖
+---
+# 以下为 local Profile 本地默认配置；其他环境请在 Polaris 配置中心维护
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
     gateway:
       server:
         webflux:
@@ -44,6 +50,8 @@ spring:
           client-id: e4da4a32-592b-46f0-ae1d-784310e88423
           client-secret: secret
           introspection-uri: ${OAUTH2_INTROSPECTION_URI:http://127.0.0.1:9010/oauth2/introspect}
+  reactor:
+    context-propagation: auto
 
 macula:
   gateway:
@@ -57,4 +65,40 @@ logging:
     dev.macula.boot.starter.cloud.gateway: debug
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
-  #config: classpath:logback-skywalking.xml
+  structured:
+    format:
+      console: logstash
+      file: logstash
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_EXPORT_ENABLED:false}
+        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+    export:
+      otlp:
+        enabled: ${OTEL_TRACES_EXPORT_ENABLED:false}
+  logging:
+    export:
+      otlp:
+        enabled: ${OTEL_LOGS_EXPORT_ENABLED:false}
+  opentelemetry:
+    resource-attributes:
+      service:
+        name: ${OTEL_SERVICE_NAME:${spring.application.name}}
+        namespace: ${OTEL_SERVICE_NAMESPACE:macula-examples}
+      deployment:
+        environment:
+          name: ${DEPLOYMENT_ENVIRONMENT:local}
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}

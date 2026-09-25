@@ -54,6 +54,11 @@ public class GatewayProperties {
     private boolean forceSign = true;
 
     /**
+     * 是否在存在有效 Span 时返回 {@code x-traceId} 响应头。
+     */
+    private boolean traceIdResponseHeaderEnabled = true;
+
+    /**
      * 需要加解密的接口清单
      */
     private ProtectUrl protectUrls = new ProtectUrl();

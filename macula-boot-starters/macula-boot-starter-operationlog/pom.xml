@@ -53,6 +53,11 @@
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-async</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

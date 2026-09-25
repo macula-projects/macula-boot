@@ -62,10 +62,7 @@
         <module>macula-boot-starter-binlog4j</module>
         <module>macula-boot-starter-wechat</module>
         <module>macula-boot-starter-auditlog</module>
-        <module>macula-boot-starter-logstash</module>
-        <module>macula-boot-starter-prometheus</module>
-        <module>macula-boot-starter-sleuth</module>
-        <module>macula-boot-starter-skywalking</module>
+        <module>macula-boot-starter-observability</module>
         <module>macula-boot-starter-cloud</module>
         <module>macula-boot-starter-kafka</module>
         <module>macula-boot-starter-websocket</module>

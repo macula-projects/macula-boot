@@ -2,6 +2,8 @@
 
 该模块演示 `macula-boot-starter-cloud-alibaba-scg` 的网关接入：从 Nacos 发现 consumer，转发 HTTP 和 WebSocket 请求，并接入 Sentinel 与 OAuth2 资源服务器。
 
+模块使用统一 Observability Starter；OTLP 网络导出默认关闭，配置 Docker observability overlay 时开启。WebFlux 已启用 Reactor 自动上下文传播。
+
 ## 前置条件
 
 - Nacos，默认地址 `127.0.0.1:8848`、命名空间 `MACULA5`。

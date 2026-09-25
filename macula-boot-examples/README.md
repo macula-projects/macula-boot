@@ -77,6 +77,10 @@ docker compose up -d redis polaris
 
 完整命令、端口覆盖、日志、停止、数据保留与重置方式见 [`docker/README.md`](docker/README.md)。默认密码只用于回环地址绑定的本地示例，禁止用于共享或生产环境。
 
+Docker 目录还提供独立的可观测性 overlay，通过 OpenTelemetry Collector 将 Metrics、Logs、Traces
+分别送往 Prometheus、Loki、Tempo。六个可运行的 Alibaba/Tencent 示例均使用
+`macula-boot-starter-observability`，默认关闭网络导出；组合 overlay 时通过环境变量开启三类信号。
+
 ## 配置约定
 
 - 所有配置统一放在 `application.yml`；Spring Cloud Alibaba 2025.1 通过 `spring.config.import` 导入 Nacos 配置，Spring Cloud Tencent 通过 `optional:polaris` 导入 Polaris 配置。

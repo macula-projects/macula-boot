@@ -1,0 +1,2 @@
+dev.macula.boot.context.TenantContextThreadLocalAccessor
+dev.macula.boot.context.GrayVersionContextThreadLocalAccessor

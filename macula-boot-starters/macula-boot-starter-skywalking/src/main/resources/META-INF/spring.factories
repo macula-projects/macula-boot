@@ -1,3 +1,0 @@
-# Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
-dev.macula.boot.starter.skywalking.config.TraceEnvironmentPostProcessor

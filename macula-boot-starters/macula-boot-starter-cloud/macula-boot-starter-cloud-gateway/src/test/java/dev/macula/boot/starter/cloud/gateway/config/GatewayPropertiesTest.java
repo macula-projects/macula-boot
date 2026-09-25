@@ -33,7 +33,7 @@ class GatewayPropertiesTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withUserConfiguration(PropertiesConfiguration.class)
-        .withPropertyValues("macula.gateway.crypto-switch=false", "macula.gateway.sign-switch=true", "macula.gateway.force-crypto=true", "macula.gateway.protect-urls.crypto[0]=/api/crypto/**", "macula.gateway.protect-urls.crypto[1]=/api/encrypt/**", "macula.gateway.protect-urls.sign[0]=/api/sign/**", "macula.gateway.gray.enabled=true");
+        .withPropertyValues("macula.gateway.crypto-switch=false", "macula.gateway.sign-switch=true", "macula.gateway.force-crypto=true", "macula.gateway.trace-id-response-header-enabled=false", "macula.gateway.protect-urls.crypto[0]=/api/crypto/**", "macula.gateway.protect-urls.crypto[1]=/api/encrypt/**", "macula.gateway.protect-urls.sign[0]=/api/sign/**", "macula.gateway.gray.enabled=true");
 
     @Test
     void hasDocumentedDefaults() {
@@ -43,6 +43,7 @@ class GatewayPropertiesTest {
         assertThat(properties.isSignSwitch()).isTrue();
         assertThat(properties.isForceCrypto()).isFalse();
         assertThat(properties.isForceSign()).isTrue();
+        assertThat(properties.isTraceIdResponseHeaderEnabled()).isTrue();
         assertThat(properties.getProtectUrls().getCrypto()).isEmpty();
         assertThat(properties.getProtectUrls().getSign()).isEmpty();
         assertThat(properties.getGray().isEnabled()).isFalse();
@@ -57,6 +58,7 @@ class GatewayPropertiesTest {
             assertThat(properties.isCryptoSwitch()).isFalse();
             assertThat(properties.isSignSwitch()).isTrue();
             assertThat(properties.isForceCrypto()).isTrue();
+            assertThat(properties.isTraceIdResponseHeaderEnabled()).isFalse();
             assertThat(properties.getProtectUrls().getCrypto()).containsExactly("/api/crypto/**", "/api/encrypt/**");
             assertThat(properties.getProtectUrls().getSign()).containsExactly("/api/sign/**");
             assertThat(properties.getGray().isEnabled()).isTrue();

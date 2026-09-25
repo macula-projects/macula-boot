@@ -17,8 +17,6 @@
 
 package dev.macula.boot.context;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
-
 /**
  * {@code GrayVersionContextHolder} 请求上下文的grayVersion标识
  *
@@ -32,10 +30,10 @@ public class GrayVersionContextHolder {
     private GrayVersionContextHolder() {
     }
     
-    private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new TransmittableThreadLocal<>();
+    private final static ThreadLocal<String> THREAD_LOCAL_GRAY_VERSION = new ThreadLocal<>();
 
     /**
-     * 获取TTL中的灰度版本
+     * 获取当前线程中的灰度版本
      *
      * @return 灰度版本号
      */
@@ -44,7 +42,7 @@ public class GrayVersionContextHolder {
     }
 
     /**
-     * TTL 设置灰度版本
+     * 设置当前线程的灰度版本
      *
      * @param version 灰度版本号
      */

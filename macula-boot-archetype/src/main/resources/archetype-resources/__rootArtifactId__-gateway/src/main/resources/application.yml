@@ -1,3 +1,11 @@
+# 配置中心连接信息，必须保留在本地 application.yml 中
+nacos:
+  username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+  password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
+  config:
+    server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:8848}
+    namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+
 server:
   port: 8080
 
@@ -10,14 +18,6 @@ spring:
     import:
       - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
-  redis: # 网关自己的redis配置
-    database: 0
-    host: 127.0.0.1
-    port: 6379
-    system: # macula-cloud的system模块的redis配置
-      database: 0
-      host: 127.0.0.1
-      port: 6379
   cloud:
     nacos:
       username: ${nacos.username}
@@ -31,6 +31,13 @@ spring:
         server-addr: ${nacos.config.server-addr}
         namespace: ${nacos.config.namespace}
         # group:
+---
+# 以下为 local Profile 本地默认配置；其他环境请在 Nacos 配置中心维护
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
     sentinel:
       enabled: false
     gateway:
@@ -49,6 +56,16 @@ spring:
                 - Path=/openapi/**
               filters:
                 - StripPrefix=1
+  reactor:
+    context-propagation: auto
+  redis: # 网关自己的redis配置
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    system: # macula-cloud的system模块的redis配置
+      database: 0
+      host: 127.0.0.1
+      port: 6379
   security:
     oauth2:
       resourceserver:
@@ -66,14 +83,43 @@ logging:
     root: info
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
+  structured:
+    format:
+      console: logstash
+      file: logstash
 
-# 和环境有关的配置信息，不同环境覆盖此处的配置
-nacos:
-  username: ${symbol_dollar}{NACOS_USERNAME:nacos}
-  password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
-  config:
-    server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:8848}
-    namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: ${symbol_dollar}{OTEL_METRICS_EXPORT_ENABLED:false}
+        url: ${symbol_dollar}{OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+  tracing:
+    sampling:
+      probability: ${symbol_dollar}{OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+    export:
+      otlp:
+        enabled: ${symbol_dollar}{OTEL_TRACES_EXPORT_ENABLED:false}
+  logging:
+    export:
+      otlp:
+        enabled: ${symbol_dollar}{OTEL_LOGS_EXPORT_ENABLED:false}
+  opentelemetry:
+    resource-attributes:
+      service:
+        name: ${symbol_dollar}{OTEL_SERVICE_NAME:${spring.application.name}}
+        namespace: ${symbol_dollar}{OTEL_SERVICE_NAMESPACE:${rootArtifactId}}
+      deployment:
+        environment:
+          name: ${symbol_dollar}{DEPLOYMENT_ENVIRONMENT:local}
+    tracing:
+      export:
+        otlp:
+          endpoint: ${symbol_dollar}{OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+    logging:
+      export:
+        otlp:
+          endpoint: ${symbol_dollar}{OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}
 
 ---
 spring:

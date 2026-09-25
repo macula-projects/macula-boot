@@ -17,15 +17,21 @@
 
 package dev.macula.boot.starter.async.config;
 
-import com.alibaba.ttl.TtlRunnable;
+import io.micrometer.context.ContextRegistry;
+import io.micrometer.context.ContextSnapshotFactory;
+import io.micrometer.context.integration.Slf4jThreadLocalAccessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.task.TaskDecorator;
+import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * {@code AsyncAutoConfiguration} transmit-thread-local配置
+ * {@code AsyncAutoConfiguration} 异步上下文传播配置。
  *
  * @author Rain
  * @since 2024/5/24 19:24
@@ -35,8 +41,19 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class AsyncAutoConfiguration {
 
-    @Bean
-    public TaskDecorator ttlTaskDecorator() {
-        return TtlRunnable::get;
+    @Bean("maculaContextPropagatingTaskDecorator")
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnMissingBean(name = "maculaContextPropagatingTaskDecorator")
+    public TaskDecorator contextPropagatingTaskDecorator() {
+        ContextRegistry registry = ContextRegistry.getInstance();
+        boolean mdcAccessorRegistered = registry.getThreadLocalAccessors().stream()
+            .anyMatch(accessor -> Slf4jThreadLocalAccessor.KEY.equals(accessor.key()));
+        if (!mdcAccessorRegistered) {
+            registry.registerThreadLocalAccessor(new Slf4jThreadLocalAccessor());
+        }
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .build();
+        return new ContextPropagatingTaskDecorator(snapshotFactory);
     }
 }

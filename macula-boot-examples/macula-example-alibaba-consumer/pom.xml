@@ -60,7 +60,12 @@
 
         <dependency>
             <groupId>dev.macula.boot</groupId>
-            <artifactId>macula-boot-starter-sleuth</artifactId>
+            <artifactId>macula-boot-starter-observability</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.macula.boot</groupId>
+            <artifactId>macula-boot-starter-async</artifactId>
         </dependency>
     </dependencies>
 
