@@ -470,7 +470,7 @@
             <!-- liteflow -->
             <dependency>
                 <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-spring-boot-starter</artifactId>
+                <artifactId>liteflow-spring-boot4-starter</artifactId>
                 <version>${liteflow.version}</version>
             </dependency>
             <dependency>
