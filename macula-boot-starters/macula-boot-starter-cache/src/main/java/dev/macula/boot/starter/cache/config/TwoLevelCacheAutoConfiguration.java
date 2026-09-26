@@ -21,9 +21,6 @@ import dev.macula.boot.starter.cache.CacheEvictMessage;
 import dev.macula.boot.starter.cache.TwoLevelCache;
 import dev.macula.boot.starter.cache.TwoLevelCacheManager;
 import dev.macula.boot.starter.cache.TwoLevelCacheProperties;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -44,7 +41,6 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -61,9 +57,6 @@ import java.util.Objects;
 public class TwoLevelCacheAutoConfiguration {
 
     public static final String CACHE_REDIS_TEMPLATE_NAME = "twoLevelCacheRedisTemplate";
-    public static final String CIRCUIT_BREAKER_NAME = "twoLevelCacheCircuitBreaker";
-    public static final String CIRCUIT_BREAKER_CONFIGURATION_NAME = "twoLevelCacheCircuitBreakerConfiguration";
-
     /**
      * Instantiates {@link RedisTemplate} to use for sending {@link CacheEvictMessage}
      *
@@ -80,53 +73,6 @@ public class TwoLevelCacheAutoConfiguration {
         template.setHashKeySerializer(RedisSerializer.string());
         template.afterPropertiesSet();
         return template;
-    }
-
-    /**
-     * @param cacheProperties to get circuit breaker properties for fault tolerance
-     * @return circuit breaker to handle Redis connection exceptions and fallback to use local cache
-     */
-    static CircuitBreaker cacheCircuitBreaker(TwoLevelCacheProperties cacheProperties) {
-        CircuitBreakerRegistry cbr = CircuitBreakerRegistry.ofDefaults();
-
-        if (cbr.getConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME).isEmpty()) {
-            TwoLevelCacheProperties.CircuitBreakerProperties props = cacheProperties.getCircuitBreaker();
-
-            CircuitBreakerConfig.Builder cbc = CircuitBreakerConfig.custom();
-            cbc.failureRateThreshold(props.getFailureRateThreshold());
-            cbc.slowCallRateThreshold(props.getSlowCallRateThreshold());
-            cbc.slowCallDurationThreshold(props.getSlowCallDurationThreshold());
-            cbc.permittedNumberOfCallsInHalfOpenState(props.getPermittedNumberOfCallsInHalfOpenState());
-            cbc.maxWaitDurationInHalfOpenState(props.getMaxWaitDurationInHalfOpenState());
-            cbc.slidingWindowType(props.getSlidingWindowType());
-            cbc.slidingWindowSize(props.getSlidingWindowSize());
-            cbc.minimumNumberOfCalls(props.getMinimumNumberOfCalls());
-            cbc.waitDurationInOpenState(props.getWaitDurationInOpenState());
-
-            Duration recommendedMaxDurationInOpenState =
-                cacheProperties.getDefaultTimeToLive().multipliedBy(cacheProperties.getLocal().getExpiryJitter() - 100L)
-                    .dividedBy(200);
-
-            if (props.getWaitDurationInOpenState().compareTo(recommendedMaxDurationInOpenState) <= 0) {
-                log.warn(
-                    "Cache circuit breaker wait duration in open state {} is more than recommended value of {}, " + "this can result in local cache expiry while circuit breaker is still in OPEN state.",
-                    props.getWaitDurationInOpenState(), recommendedMaxDurationInOpenState);
-            }
-
-            cbr.addConfiguration(CIRCUIT_BREAKER_CONFIGURATION_NAME, cbc.build());
-        }
-
-        CircuitBreaker cb = cbr.circuitBreaker(CIRCUIT_BREAKER_NAME, CIRCUIT_BREAKER_CONFIGURATION_NAME);
-        cb.getEventPublisher().onError(
-                event -> log.trace("Cache circuit breaker error occurred in {}", event.getElapsedDuration(),
-                    event.getThrowable())).onSlowCallRateExceeded(
-                event -> log.trace("Cache circuit breaker {} calls were slow, rate exceeded", event.getSlowCallRate()))
-            .onFailureRateExceeded(
-                event -> log.trace("Cache circuit breaker {} calls failed, rate exceeded", event.getFailureRate()))
-            .onStateTransition(event -> log.trace("Cache circuit breaker {} state transitioned from {} to {}",
-                event.getCircuitBreakerName(), event.getStateTransition().getFromState(),
-                event.getStateTransition().getToState()));
-        return cb;
     }
 
     /**
@@ -178,9 +124,7 @@ public class TwoLevelCacheAutoConfiguration {
     @Bean
     public TwoLevelCacheManager cacheManager(ObjectProvider<CacheProperties> highLevelCacheProperties,
         TwoLevelCacheProperties cacheProperties, RedisTemplate<Object, Object> twoLevelCacheRedisTemplate) {
-        CircuitBreaker circuitBreaker = cacheCircuitBreaker(cacheProperties);
-        return new TwoLevelCacheManager(highLevelCacheProperties, cacheProperties, twoLevelCacheRedisTemplate,
-            circuitBreaker);
+        return new TwoLevelCacheManager(highLevelCacheProperties, cacheProperties, twoLevelCacheRedisTemplate);
     }
 
     /**

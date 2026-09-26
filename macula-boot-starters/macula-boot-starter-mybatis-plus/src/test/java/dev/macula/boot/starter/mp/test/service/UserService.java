@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.mp.test.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import dev.macula.boot.starter.mp.test.entity.User;
 
 /**

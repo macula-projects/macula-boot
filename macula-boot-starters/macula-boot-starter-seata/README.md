@@ -165,7 +165,7 @@ TCC模式，全称Try-Confirm-Cancel，通过名称也能看出来其流程主�
 订单新增方法上要添加`@TwoPhaseBusinessAction`注解，并且声明confirm,cancel方法
 
 ```java
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import com.example.orderserver.entity.Order;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -200,7 +200,7 @@ public interface IOrderTccService extends IService<Order> {
 ```java
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.example.orderserver.entity.Order;
 import com.example.orderserver.feign.ProductApi;
 import com.example.orderserver.mapper.OrderMapper;
@@ -261,7 +261,7 @@ public class IOrderTccServiceImpl extends ServiceImpl<OrderMapper, Order> implem
 ###### 商品服务
 
 ```java
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import com.example.productserver.entity.Product;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -297,7 +297,7 @@ public interface IProductTccService extends IService<Product> {
 
 ```java
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.example.productserver.entity.Product;
 import com.example.productserver.mapper.ProductMapper;
 import com.example.productserver.service.IProductTccService;

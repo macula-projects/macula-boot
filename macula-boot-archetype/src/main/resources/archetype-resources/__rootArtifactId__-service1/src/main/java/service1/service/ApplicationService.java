@@ -21,7 +21,7 @@
 package ${package}.service1.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import ${package}.service1.form.ApplicationForm;
 import ${package}.service1.pojo.entity.Application;
 import ${package}.service1.query.ApplicationPageQuery;
