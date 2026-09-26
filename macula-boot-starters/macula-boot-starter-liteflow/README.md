@@ -94,7 +94,7 @@ liteflow:
 <dependencies>
     <dependency>
         <groupId>com.yomahub</groupId>
-        <artifactId>liteflow-spring-boot-starter</artifactId>
+        <artifactId>liteflow-spring-boot4-starter</artifactId>
     </dependency>
 
     <dependency>

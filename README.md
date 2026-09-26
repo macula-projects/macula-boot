@@ -79,6 +79,7 @@ Macula Boot 6.1 基于 Spring Boot 4、Spring Framework 7、Spring Cloud 2025.1 
 - Jackson 数据绑定 API 从 `com.fasterxml.jackson.databind` 迁移到 `tools.jackson.databind`；自定义 Boot JSON 构建器改用 `org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer`。`OperationLogDTO` 暴露的 `JsonNode` 类型也相应变为 Jackson 3 类型。
 - WebSocket 鉴权扩展 `MessageSecurityMetaSourceCustomizer` 的参数改为 Spring Security 7 的 `MessageMatcherDelegatingAuthorizationManager.Builder`。
 - Redis 配置属性使用 `org.springframework.boot.data.redis.autoconfigure.DataRedisProperties`；Redisson 使用与 Spring Data Redis 4 对应的 `redisson-spring-data-40`。Redisson 4 的 `config`/`file` 仅支持 YAML，旧 JSON 配置和固定 `retryInterval` 需要分别迁移为 YAML 与 `retryDelay` 策略。
+- Cache Starter 不再依赖 Resilience4j，删除 `spring.cache.two-level.open-circuit-breaker` 和 `spring.cache.two-level.circuit-breaker.*` 配置。Redis 可用性故障改为 fail-open：当前实例继续使用 Caffeine，但跨实例失效通知可能延迟到本地 TTL 到期。
 - Springdoc 升级到 3.x；OpenAPI JSON 和 Swagger UI 地址仍分别为 `/v3/api-docs` 与 `/swagger-ui/index.html`。
 - Spring Boot 4 不再提供 Undertow Starter，Web Starter 使用 Boot 默认 Tomcat。如应用依赖 Undertow 特性，需要在升级前评估替代实现。
 - Alibaba 应用不再依赖 `bootstrap.yml`，通过 `spring.config.import` 导入 Nacos 配置。默认示例导入 `${spring.application.name}.yml` 和 `${spring.application.name}-${spring.profiles.active}.yml`，并保留原有地址、命名空间和凭据环境变量。

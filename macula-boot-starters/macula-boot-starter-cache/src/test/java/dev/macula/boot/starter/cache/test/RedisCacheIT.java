@@ -16,6 +16,7 @@
  */
 package dev.macula.boot.starter.cache.test;
 
+import dev.macula.boot.starter.cache.TwoLevelCache;
 import dev.macula.boot.starter.cache.test.service.UserService;
 import dev.macula.boot.starter.cache.test.vo.User;
 import org.junit.jupiter.api.Assertions;
@@ -68,10 +69,34 @@ public class RedisCacheIT {
         Assertions.assertEquals(user3, getCachedUser(cache, SimpleKey.EMPTY));
     }
 
+    /**
+     * 验证真实 Redis 环境下手动写入、删除和清空缓存的正常路径。
+     */
+    @Test
+    void testPutEvictAndClear() {
+        Cache cache = getUserCache();
+        User first = new User("manual-1", "Rain", "password");
+        User second = new User("manual-2", "Rain2", "password2");
+
+        cache.put("manual-1", first);
+        Assertions.assertEquals(first, getCachedUser(cache, "manual-1"));
+        Assertions.assertTrue(cache.evictIfPresent("manual-1"));
+        Assertions.assertNull(asTwoLevelCache(cache).getLocalCache().getIfPresent("manual-1"));
+
+        cache.put("manual-1", first);
+        cache.put("manual-2", second);
+        Assertions.assertTrue(cache.invalidate());
+        Assertions.assertEquals(0, asTwoLevelCache(cache).getLocalCache().estimatedSize());
+    }
+
     private Cache getUserCache() {
         Cache cache = cacheManager.getCache("user-service");
         Assertions.assertNotNull(cache, "user-service cache should be configured");
         return cache;
+    }
+
+    private TwoLevelCache asTwoLevelCache(Cache cache) {
+        return Assertions.assertInstanceOf(TwoLevelCache.class, cache);
     }
 
     private User getCachedUser(Cache cache, Object key) {

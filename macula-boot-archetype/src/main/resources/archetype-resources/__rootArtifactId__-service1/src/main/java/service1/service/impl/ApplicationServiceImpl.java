@@ -23,7 +23,7 @@ package ${package}.service1.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import ${package}.service1.converter.ApplicationConverter;
 import ${package}.service1.form.ApplicationForm;
 import ${package}.service1.mapper.ApplicationMapper;

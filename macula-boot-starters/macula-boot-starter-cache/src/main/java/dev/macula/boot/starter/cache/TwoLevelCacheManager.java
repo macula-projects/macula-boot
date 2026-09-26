@@ -19,7 +19,6 @@ package dev.macula.boot.starter.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -51,20 +50,16 @@ public class TwoLevelCacheManager implements CacheManager {
     private final Set<String> requestedCacheNames;
     private final TwoLevelCacheProperties properties;
     private final RedisTemplate<Object, Object> redisTemplate;
-    private final CircuitBreaker circuitBreaker;
-
     private final Map<String, Cache> availableCaches;
 
     public TwoLevelCacheManager(ObjectProvider<CacheProperties> highLevelProperties, TwoLevelCacheProperties properties,
-        RedisTemplate<Object, Object> redisTemplate, CircuitBreaker circuitBreaker) {
+        RedisTemplate<Object, Object> redisTemplate) {
         CacheProperties hlp = highLevelProperties.getIfAvailable();
         this.requestedCacheNames =
             hlp == null ? Collections.emptySet() : Collections.unmodifiableSet(new HashSet<>(hlp.getCacheNames()));
 
         this.properties = properties;
         this.redisTemplate = redisTemplate;
-        this.circuitBreaker = circuitBreaker;
-
         this.availableCaches = new ConcurrentHashMap<>();
 
         this.requestedCacheNames.forEach(this::getCache);
@@ -76,9 +71,6 @@ public class TwoLevelCacheManager implements CacheManager {
         return properties;
     }
 
-    CircuitBreaker getCircuitBreaker() {
-        return circuitBreaker;
-    }
     // Workarounds for tests
 
     /**
@@ -95,7 +87,7 @@ public class TwoLevelCacheManager implements CacheManager {
 
         return availableCaches.computeIfAbsent(name, key -> new TwoLevelCache(key, properties, redisTemplate,
             Caffeine.newBuilder().maximumSize(properties.getLocal().getMaxSize())
-                .expireAfter(new RandomizedLocalExpiryOnWrite(key, properties)).build(), circuitBreaker));
+                .expireAfter(new RandomizedLocalExpiryOnWrite(key, properties)).build()));
     }
 
     /**

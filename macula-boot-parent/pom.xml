@@ -77,7 +77,6 @@
         <fastjson2.version>2.0.65</fastjson2.version>
         <liteflow.version>2.16.1</liteflow.version>
         <oauth2-oidc-sdk.version>11.38.2</oauth2-oidc-sdk.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
         <swagger2.version>1.6.16</swagger2.version>
         <swagger3.version>2.2.55</swagger3.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -86,7 +85,7 @@
         <rocketmq-spring.version>2.3.6</rocketmq-spring.version>
         <springdoc.version>3.1.1</springdoc.version>
         <xxl-job.version>3.3.0</xxl-job.version>
-        <snail-job.version>2.0.2</snail-job.version>
+        <snail-job.version>1.9.0</snail-job.version>
         <dubbo.version>3.2.19</dubbo.version>
         <seata.version>2.5.0</seata.version>
         <bouncycastle.version>1.86</bouncycastle.version>
@@ -97,8 +96,7 @@
         <qcloud-sdk-oss.version>5.6.246.3</qcloud-sdk-oss.version>
         <aliyun-sdk-oss.version>3.18.5</aliyun-sdk-oss.version>
         <cola.version>5.0.0</cola.version>
-        <logstash.version>9.0</logstash.version>
-        <skywalking-toolkit.version>9.5.0</skywalking-toolkit.version>
+        <opentelemetry-instrumentation.version>2.21.0-alpha</opentelemetry-instrumentation.version>
         <weixin-java.version>4.7.0</weixin-java.version>
     </properties>
 
@@ -164,7 +162,7 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macuala-boot-starter-async</artifactId>
+                <artifactId>macula-boot-starter-async</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -259,11 +257,6 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-logstash</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-mapstruct</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -284,7 +277,7 @@
             </dependency>
             <dependency>
                 <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-prometheus</artifactId>
+                <artifactId>macula-boot-starter-observability</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -310,16 +303,6 @@
             <dependency>
                 <groupId>dev.macula.boot</groupId>
                 <artifactId>macula-boot-starter-sender</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-skywalking</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.macula.boot</groupId>
-                <artifactId>macula-boot-starter-sleuth</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -499,12 +482,6 @@
                 <version>${oauth2-oidc-sdk.version}</version>
             </dependency>
 
-            <!-- resilience4j -->
-            <dependency>
-                <groupId>io.github.resilience4j</groupId>
-                <artifactId>resilience4j-circuitbreaker</artifactId>
-                <version>${resilience4j.version}</version>
-            </dependency>
             <!-- Swagger2 -->
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -630,28 +607,11 @@
                 <version>${qiniu-sdk-oss.version}</version>
             </dependency>
 
-            <!-- logstash -->
+            <!-- OpenTelemetry Logback bridge aligned with OpenTelemetry SDK 1.55.0. -->
             <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>${logstash.version}</version>
-            </dependency>
-
-            <!-- skywalking -->
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-logback-1.x</artifactId>
-                <version>${skywalking-toolkit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-trace</artifactId>
-                <version>${skywalking-toolkit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-webflux</artifactId>
-                <version>${skywalking-toolkit.version}</version>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+                <version>${opentelemetry-instrumentation.version}</version>
             </dependency>
 
             <!-- 微信开放平台 -->

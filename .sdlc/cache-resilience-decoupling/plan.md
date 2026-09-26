@@ -44,3 +44,9 @@ Status: accepted
 - `mvn -pl macula-boot-starters/macula-boot-starter-cache -am test` 证明目标模块及上游依赖的单元测试通过；指定 Failsafe 命令证明 `RedisCacheIT` 通过；`mvn clean verify` 证明父 POM 依赖管理变更没有破坏全仓。
 - `mvn ... dependency:tree -Dincludes=io.github.resilience4j` 和 `rg` 证明有效依赖树、生产源码、模块 README 与测试配置中不再存在 Resilience4j；SDLC 历史文档和根迁移说明中的说明性文字允许保留。
 - 配置元数据检查证明旧熔断键不再生成；`git diff --check` 和项目 Checkstyle 验证新增及变更 Java 文件符合仓库质量要求。
+
+## Deviations
+- 根 Reactor 的 `-pl ... -am` 与全仓命令在测试编译前被当前 `main` 基线的 Maven 模型错误阻断：LiteFlow Starter 仍引用未受父 POM 管理的旧 artifact，Observability/Async 相关依赖管理项也在当前父 POM 中缺失。为避免扩大本变更范围，聚焦测试和 Redis 集成测试改用 `mvn -f macula-boot-starters/macula-boot-starter-cache/pom.xml ...` 直接验证目标模块；全仓 `mvn clean verify` 保留到测试阶段再次尝试并如实报告。
+- 经人工同意扩大验证修复范围：保留工作区中 LiteFlow Starter 的 Boot 4 artifact 修正，并恢复 `40030fa` 合并时误删或误拼写的 Async、Observability 和 OpenTelemetry Logback Appender 父 POM 版本管理；不在本变更中处理与 Maven 模型可读性无关的其他依赖升级。
+- 全仓验证进一步发现 `40030fa` 将 SnailJob 升至仅支持 Java 21 的 `2.0.2`，与仓库 Java 17 基线冲突；恢复到 class file 版本 61 且现有 API 兼容的 `1.9.0`。MyBatis-Plus `3.5.17` 则保留升级版本，并将其迁移后的 Service API 包名同步到测试、Archetype 与 README 示例。
+- 同一升级提交重新引入了已由统一可观测性迁移淘汰、且仓库中已不存在对应模块的 Logstash、Sleuth、SkyWalking 父 POM 管理项；静态确认无生产使用后移除这些死条目，保留新的 Observability/OpenTelemetry 管理。
