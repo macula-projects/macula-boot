@@ -78,27 +78,13 @@ feign:
   sentinel:
     enabled: true
 
-xxl:
-  job:
-    accessToken: ${XXL_JOB_ACCESS_TOKEN:default_token}
-    admin:
-      addresses: http://127.0.0.1:9084/macula-cloud-xxljob      # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
-      #name: macula-cloud-xxljob                                 # 注册到注册中心的Admin的服务名称[选填]，默认是xxl-job-admin
-    executor:
-      #  appname: xxl-job-executor-sample                # 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册
-      #  address:                                        # 服务注册地址,优先使用该配置作为注册地址 为空时使用内嵌服务 ”IP:PORT“ 作为注册地址 从而更灵活的支持容器类型执行器动态IP和动态映射端口问题
-      #  ip:                                             # 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP ，该IP不会绑定Host仅作为通讯实用；地址信息用于 "执行器注册" 和 "调度中心请求并触发任务"
-      #  port: 9999                                      # 执行器端口号 [选填]：小于等于0则自动获取；默认端口为9099，单机部署多个执行器时，注意要配置不同执行器端口；
-      logpath: ${user.home}/logs/${spring.application.name}    # 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
-      logretentiondays: 30                             # 执行器日志保存天数 [选填] ：值大于3时生效，启用执行器Log文件定期清理功能，否则不生效；
-
 snail-job:
   # 任务调度服务器信息
   server:
     # 服务器IP地址（或域名）；集群时建议通过 nginx 做负载均衡
-    host: 127.0.0.1
+    host: ${SNAIL_JOB_SERVER_HOST:127.0.0.1}
     # 服务器通讯端口（不是后台管理页面服务端口）
-    port: 17888
+    port: ${SNAIL_JOB_SERVER_PORT:17888}
   # 命名空间 【上面配置的空间的唯一标识】
   namespace: ${SNAIL_JOB_NAMESPACE:example}
   # 接入组名【上面配置的组名称】注意: 若通过注解配置了这里的配置不生效
@@ -107,5 +93,5 @@ snail-job:
   token: ${SNAIL_JOB_TOKEN:example}
   # 客户端绑定IP，必须服务器可以访问到；默认自动推断，在服务器无法调度客户端时需要手动配置
   # host: 127.0.0.1
-  # 客户端通讯端口，默认 1789
-  port: 17899
+  # 客户端通讯端口，默认 17889
+  port: ${SNAIL_JOB_PORT:17889}

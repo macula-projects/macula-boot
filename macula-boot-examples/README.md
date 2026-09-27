@@ -13,7 +13,7 @@
 | Tencent | `macula-example-tencent-gateway` | 4000 | Polaris 服务发现与 Spring Cloud Gateway |
 | Tencent | `macula-example-tencent-provider` | 4020 | REST 接口、JWT 资源服务器与 Polaris 服务注册 |
 | Tencent | `macula-example-tencent-consumer` | 4010 | OpenFeign 服务调用与 Polaris 服务发现 |
-| 任务 | `macula-example-task` | 7099 | XXL-JOB 与 SnailJob 执行器 |
+| 任务 | `macula-example-task` | 7099 | 单 SnailJob Server 下的原生与 XXL 兼容执行器 |
 | Binlog | `macula-example-binlog4j` | - | MySQL binlog 订阅与事件处理 |
 
 ## 环境要求
@@ -21,7 +21,7 @@
 - JDK 17、Maven 3.9+。
 - Alibaba 链路：本地 Nacos（默认 `127.0.0.1:8848`）；Sentinel Dashboard 为可选项。
 - Tencent 链路：本地 Polaris（默认 `grpc://127.0.0.1:8091`）。
-- Task 示例：按需启动 Nacos、XXL-JOB Admin 和 SnailJob Server。
+- Task 示例：按需启动 Nacos 和 SnailJob 1.9 Server；不需要 XXL-JOB Admin。
 - Binlog4j 示例：MySQL 需开启 binlog，并准备 Redis 用于消费位点持久化。
 
 示例中的认证信息均是占位值。真实地址、账号、密码和 token 应通过环境变量或配置中心注入，不要提交到仓库。

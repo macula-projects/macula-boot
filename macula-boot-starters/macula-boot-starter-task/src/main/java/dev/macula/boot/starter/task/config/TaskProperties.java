@@ -31,4 +31,28 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "macula.task")
 public class TaskProperties {
+
+    /**
+     * Whether the task starter is enabled.
+     */
+    private boolean enabled = true;
+
+    /**
+     * XXL-compatible handler adapter settings.
+     */
+    private XxlJobAdapter xxlJobAdapter = new XxlJobAdapter();
+
+    /**
+     * Controls the XXL-compatible handler adapter.
+     *
+     * @since 6.1.0
+     */
+    @Data
+    public static class XxlJobAdapter {
+
+        /**
+         * Whether XXL-compatible handlers are registered with SnailJob.
+         */
+        private boolean enabled = true;
+    }
 }

@@ -17,9 +17,16 @@
 
 package dev.macula.boot.starter.task.config;
 
-import dev.macula.boot.starter.task.config.xxljob.XxlJobConfiguration;
+import com.aizuda.snailjob.client.starter.EnableSnailJob;
+import com.aizuda.snailjob.client.starter.SnailJobClientJobCoreAutoConfiguration;
+import com.aizuda.snailjob.client.starter.SnailJobClientRetryCoreAutoConfiguration;
+import dev.macula.boot.starter.task.compat.xxljob.XxlJobClientConflictDetector;
+import dev.macula.boot.starter.task.compat.xxljob.XxlJobSnailJobConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -28,8 +35,17 @@ import org.springframework.context.annotation.Import;
  * @author rain
  * @since 2023/7/4 19:28
  */
-@AutoConfiguration
+@AutoConfiguration(before = {SnailJobClientJobCoreAutoConfiguration.class,
+    SnailJobClientRetryCoreAutoConfiguration.class})
+@ConditionalOnProperty(prefix = "macula.task", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(TaskProperties.class)
-@Import({XxlJobConfiguration.class})
+@EnableSnailJob
+@Import(XxlJobSnailJobConfiguration.class)
 public class TaskAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    XxlJobClientConflictDetector xxlJobClientConflictDetector() {
+        return new XxlJobClientConflictDetector();
+    }
 }

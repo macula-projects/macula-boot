@@ -37,33 +37,31 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!--xxl job-->
-        <dependency>
-            <groupId>com.xuxueli</groupId>
-            <artifactId>xxl-job-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- snail job-->
-        <!-- 核心依赖 -->
+        <!-- SnailJob client -->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-starter</artifactId>
-            <optional>true</optional>
         </dependency>
 
-        <!-- 重试模块(若不需要可以不引入) -->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-retry-core</artifactId>
-            <optional>true</optional>
         </dependency>
 
-        <!-- 定时任务(若不需要可以不引入) -->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-job-core</artifactId>
-            <optional>true</optional>
+        </dependency>
+
+        <!-- SnailJob 1.9 JsonUtil runtime dependencies omitted by its published POM -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!--提供服务发现能力-->
