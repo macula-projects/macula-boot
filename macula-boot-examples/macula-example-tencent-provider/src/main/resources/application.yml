@@ -16,17 +16,17 @@ spring:
   config:
     import: optional:polaris
   cloud:
-    nacos:
-      discovery:
-        enabled: true
-        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
     polaris:
       address: ${polaris.server-addr}
       namespace: ${polaris.namespace}
       config:
+        enabled: true
         auto-refresh: true
         groups:
           - name: ${spring.application.name}
+      discovery:
+        enabled: true
+        register: true
 ---
 # 以下为 local Profile 本地默认配置；其他环境请在 Polaris 配置中心维护
 spring:

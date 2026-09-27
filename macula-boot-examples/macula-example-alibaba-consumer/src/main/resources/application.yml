@@ -26,8 +26,8 @@ spring:
         refresh-enabled: true
         file-extension: yml
       discovery:
-        enabled: true
         namespace: ${nacos.namespace}
+        enabled: true
         # group:
 ---
 # 以下为 local Profile 本地默认配置；其他环境请在 Nacos 配置中心维护
