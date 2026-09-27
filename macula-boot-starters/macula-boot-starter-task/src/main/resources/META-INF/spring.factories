@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+dev.macula.boot.starter.task.config.TaskEnvironmentPostProcessor

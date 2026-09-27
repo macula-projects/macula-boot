@@ -62,3 +62,9 @@ Status: accepted
 - `rg` 证明目标生产 POM/配置/README 中无 PowerJob、XXL Admin 和 `com.xuxueli` 残留，同时允许最小 `com.xxl.job.*` 兼容包、示例 Handler 和迁移说明存在。
 - 对比 `git diff -- macula-boot-examples/macula-example-task/src/main/java/dev/macula/example/task/XxlJobDemoHandler.java` 为空，证明旧 XXL Handler 源码未改。
 - `mvn -N checkstyle:check`、`git diff --check` 和全仓 `mvn test` 验证 Java 规则、补丁完整性及跨模块回归；若外部环境或既有失败阻断，记录准确命令与证据，不误报成功。
+
+## Deviations
+- 父 POM 删除 `xxl-job-core` dependency management 后，Maven 在目标模块编译前会解析整个 Reactor，并因 `macula-example-task` 尚存的无版本官方 XXL 直依赖而失败。为恢复 Reactor 可读性，提前执行原计划第 7 步中的 example POM 依赖清理；示例源码、配置和文档仍按原顺序处理，风险与验证范围不变。
+- SnailJob 1.9.0 的 `JsonUtil` 直接链接 Jackson 2 的 `databind` 与 `jsr310` 类型，但其发布 POM 未把这两个运行必需构件传递给消费者；Spring Boot 4 的基础 Starter 也不再默认带入这些旧包名类型。为保证 SnailJob 1.9 自身及对象任务参数 JSON 映射在 Java 17/Boot 4 下可运行，task Starter POM 增加由现有 Spring Boot BOM 管理版本的 `com.fasterxml.jackson.core:jackson-databind` 与 `com.fasterxml.jackson.datatype:jackson-datatype-jsr310`。这偏离了“不新增第三方库”的原预计，但不引入新的序列化方案，只补齐固定版本 SnailJob 已编译依赖的缺失运行时；依赖树与 Boot 4 版本对齐检查加入验证范围。
+- 聚焦自动配置测试证明：SnailJob 1.9 的 `@EnableSnailJob` Registrar 在解析 `TaskAutoConfiguration` 时才写入 `snail-job.enabled`，晚于 Spring Boot 对 SnailJob AutoConfiguration 的条件过滤，因此仅靠原计划中的组合注解无法可靠自动启用官方 Job/Retry 配置。增加 `TaskEnvironmentPostProcessor` 及 `META-INF/spring.factories` 登记，在自动配置选择前以最低优先级提供 `snail-job.enabled=true`；它在 `macula.task.enabled=false` 或用户已显式配置 SnailJob 开关时不写入。保留 `@EnableSnailJob` 以复用其 AOP order/group 注册语义，并扩展 `TaskAutoConfigurationTest` 覆盖环境处理器和显式关闭优先级。这增加两个原清单外文件，但不改变公共配置契约。
+- 交付审查发现 `macula.task.enabled=false` 与显式 `snail-job.enabled=true` 同时存在时，SnailJob 自身自动配置仍可能启动，违背 task 总开关优先级。调整 `TaskEnvironmentPostProcessor`：总开关关闭时以最高优先级覆盖 `snail-job.enabled=false`，开启时仍只以最低优先级补默认 `true`；增加组合配置测试，并在修复后重新执行完整验证与审查。

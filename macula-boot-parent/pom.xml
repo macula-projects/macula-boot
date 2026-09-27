@@ -84,7 +84,6 @@
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.3.6</rocketmq-spring.version>
         <springdoc.version>3.1.1</springdoc.version>
-        <xxl-job.version>3.3.0</xxl-job.version>
         <snail-job.version>1.9.0</snail-job.version>
         <dubbo.version>3.2.19</dubbo.version>
         <seata.version>2.5.0</seata.version>
@@ -532,13 +531,6 @@
                 <groupId>com.alibaba.cola</groupId>
                 <artifactId>cola-component-statemachine</artifactId>
                 <version>${cola.version}</version>
-            </dependency>
-
-            <!-- xxl-job -->
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-job-core</artifactId>
-                <version>${xxl-job.version}</version>
             </dependency>
 
             <!-- snail-job -->

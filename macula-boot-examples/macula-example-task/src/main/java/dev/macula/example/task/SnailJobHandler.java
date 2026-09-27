@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SnailJobHandler {
-    @JobExecutor(name = "demoJobHandler")
+    @JobExecutor(name = "snailDemoJobHandler")
     public ExecuteResult demoJobHandler(JobArgs jobArgs) {
         SnailJobLog.REMOTE.info("哈哈，测试成功了");
         System.out.println(JsonUtil.toJsonString(jobArgs));
