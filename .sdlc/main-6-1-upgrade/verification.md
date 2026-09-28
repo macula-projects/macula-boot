@@ -148,6 +148,8 @@ Final PR-check inspection proved that the Snapshot workflow also contained a `pu
 
 Compared with the accepted baseline, `AGENTS.md` changes only the project description from Boot 3.5/Cloud 2025 to Boot 4.0/Cloud 2025.1. `CLAUDE.md` remains its symlink view. The only GitHub Actions workflow change removes the unintended Snapshot `pull_request` trigger described above; no AI-SDLC policy, skill, or hook changed. Repository search found no versioned eval suite guarding the descriptive instruction change, so no applicable eval command exists.
 
-## Handoff
+## Deployment review and merge closure
 
-Stage 4 evidence is complete. The change is ready for the human-gated `sdlc-deploy` review pass; this report does not self-approve review, merge, release, or deployment.
+Stage 4 evidence was accepted into the human-gated delivery review. Pull request `#32 feat: upgrade Macula Boot main to 6.1` used head commit `b49724718a2b5b58c71ff22d0e069f09d60b7f24`; its Maven Verify, Checkstyle, and CodeQL checks completed successfully. The pull request was merged into `main` on 2026-09-22 at commit `ae3c8eadbe8dc07917b137767c8c875979e42972`.
+
+The change is therefore closed at Stage 6 (Maintain). Merge evidence does not imply that a release artifact was published or that applications were deployed to production; no release tag or production deployment is claimed by this report.

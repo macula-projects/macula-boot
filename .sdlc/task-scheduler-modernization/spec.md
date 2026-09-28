@@ -17,7 +17,7 @@ Status: accepted
 1. 保持 `snail-job.version=1.9.0`；所有产物必须在 Java 17 下编译和运行，不升级到基于 Java 21 class format 的 SnailJob 2.0.0。
 2. 业务应用只声明 `macula-boot-starter-task` 后，必须获得 SnailJob starter、Job、Retry API，以及运行旧 Handler 所需的最小 XXL 兼容 API；不再直接或传递依赖官方 `xxl-job-core`。
 3. task Starter 必须以 SnailJob Server 作为唯一调度服务端；产物中不得包含 `XxlJobSpringExecutor`、XXL 网络通信、Admin 回调和日志拉取实现，应用不需要 `xxl.job.admin.*` 或 XXL-JOB Admin。
-4. 业务应用引入 task Starter 后必须默认获得与显式添加 `@EnableSnailJob` 相同的启用效果，不需要在启动类增加该注解，也不需要手工设置 `snail-job.enabled=true`；显式配置 `snail-job.enabled=false` 时，SnailJob 客户端和 XXL 兼容适配均不得启动。
+4. 业务应用引入 task Starter 后必须默认获得与显式添加 `@EnableSnailJob` 相同的启用效果，不需要在启动类增加该注解，也不需要手工设置 `snail-job.enabled=true`；默认值必须在 SnailJob 自动配置条件求值前生效。显式配置 `snail-job.enabled=false` 时，SnailJob 客户端和 XXL 兼容适配均不得启动。
 5. SnailJob 原生 `@JobExecutor`、`JobArgs`、`ExecuteResult` 和 `@Retryable` 客户端代码必须按 1.9.0 原生语义继续工作。
 6. Starter 必须扫描 Spring Bean 上的 `@XxlJob` 方法，并以注解的 `value` 作为 SnailJob executor name 注册到 SnailJob 1.9 客户端，使原任务方法无需增加或替换注解。
 7. XXL 兼容执行器必须把 SnailJob `JobArgs` 映射为当前线程的 `XxlJobContext`：`jobParams` 映射到字符串任务参数，`jobId` 映射任务 ID，`taskBatchId` 映射日志 ID，分片任务的 index/total 映射到 XXL 分片上下文，非分片任务使用 `0/1`。
@@ -28,11 +28,12 @@ Status: accepted
 12. XXL Handler 名称为空、同一应用中重复，或与 SnailJob 原生 executor name 冲突时必须启动失败并给出明确冲突信息，不允许静默覆盖。
 13. XXL Handler 方法遵循既有 Bean Handler 调用兼容性：支持无参数方法；引用类型参数按原行为传入 `null`；包含 primitive 参数的方法必须在启动扫描时明确拒绝。
 14. XXL-to-Snail 兼容适配默认开启，并提供 `macula.task.xxl-job-adapter.enabled=false` 关闭开关；关闭后 SnailJob 原生 Handler 仍可运行。
-15. `macula-example-task` 必须删除对 XXL-JOB 和 SnailJob 的重复直接依赖，移除 `@EnableSnailJob`，仅用 task Starter 与 `snail-job.enabled=true` 完成启动；保留原 XXL Handler 代码，通过 SnailJob 执行，并保留一个不重名的 SnailJob 原生 Handler 示例。
+15. `macula-example-task` 必须删除对 XXL-JOB 和 SnailJob 的重复直接依赖，移除 `@EnableSnailJob`，仅用 task Starter 且无需显式配置 `snail-job.enabled=true` 即可完成装配；保留原 XXL Handler 代码，通过 SnailJob 执行，并保留一个不重名的 SnailJob 原生 Handler 示例。
 16. task Starter README 必须删除 PowerJob、XXL-JOB Admin 和双服务端部署内容，完整说明单 SnailJob Server 架构、1.9.0 配置、两种 Handler 写法、上下文映射、名称冲突、日志与迁移限制。
 17. 目标模块与 task example 中不得残留 PowerJob 依赖、配置、示例或许可证引用；不得修改无关的 `polaris/` 等用户文件。
 18. 若应用显式或通过其他依赖再次引入官方 `xxl-job-core`，Starter 必须检测官方 executor 类型并启动失败，明确提示移除冲突依赖，避免同包同名类由 classpath 顺序随机覆盖。
 19. task Starter 必须提供 `macula.task.enabled=false` 总开关；关闭后不得自动启用 SnailJob、注册兼容桥或建立任何调度服务连接。
+20. SnailJob 1.9.0 运行时所需但其发布 POM 未传递的 Jackson 2 `databind` 与 `jsr310` 构件，必须由 task Starter 显式补齐并继续受 Spring Boot BOM 管理；该兼容路径仅服务于固定的 SnailJob 1.9 客户端，不得扩展为新的应用序列化方案。
 
 ## Non-goals
 - 不部署、管理或兼容 XXL-JOB Admin；不支持由 XXL-JOB Server 触发本次适配后的任务。
@@ -47,7 +48,9 @@ Status: accepted
 ### Dependency and activation
 `macula-boot-parent` 保持 SnailJob `1.9.0`，删除仅供 task Starter 使用的 `xxl-job.version` 和 `xxl-job-core` dependency management。task Starter 完全删除 `xxl-job-core`，将 `snail-job-client-starter`、`snail-job-client-job-core`、`snail-job-client-retry-core` 改为可传递依赖，并在自身 jar 中提供最小 XXL 兼容 API。
 
-删除旧的 `XxlJobConfiguration`、`XxlJobProperties`、`XxlAdminProperties` 和 `XxlExecutorProperties`。`TaskAutoConfiguration` 在 `macula.task.enabled=true`（默认）时组合 `@EnableSnailJob`，让 SnailJob 1.9 官方 Registrar 设置默认的 `snail-job.enabled=true`，随后由 SnailJob 自己的 `AutoConfiguration.imports` 加载 Job/Retry 客户端。Registrar 已有逻辑会尊重用户显式提供的 `snail-job.enabled`，因此显式 `false` 优先于 Starter 默认启用。Macula 桥接配置同时受 task 总开关、`snail-job.enabled` 和适配器开关约束。
+删除旧的 `XxlJobConfiguration`、`XxlJobProperties`、`XxlAdminProperties` 和 `XxlExecutorProperties`。`TaskAutoConfiguration` 保留 `@EnableSnailJob` 以复用官方 AOP order、group 和注册语义；同时由 `TaskEnvironmentPostProcessor` 在自动配置选择前提供启用值：`macula.task.enabled=false` 时以最高优先级强制 `snail-job.enabled=false`，总开关开启时仅在用户未显式配置 SnailJob 开关的情况下，以最低优先级补充默认 `true`。因此 task 总开关优先于冲突的显式 SnailJob 启用值，而用户显式 `snail-job.enabled=false` 仍优先于默认启用。Macula 桥接配置同时受 task 总开关、`snail-job.enabled` 和适配器开关约束。
+
+SnailJob 1.9.0 的 `JsonUtil` 直接链接 Jackson 2 `databind` 与 `jsr310` 类型，但其发布 POM 没有把这些运行时必需构件传递给消费者。task Starter 显式声明由现有 Spring Boot BOM 管理版本的 `jackson-databind` 与 `jackson-datatype-jsr310`，用于保证 SnailJob 对象任务参数 JSON 映射在 Java 17 / Boot 4 下可运行；Macula 应用侧仍遵循仓库既定的 Jackson 3 主路径。
 
 ### Minimal XXL compatibility API
 为保持旧业务源码 import 不变，task Starter 使用原有公开包名提供独立实现的最小兼容类型：
@@ -80,7 +83,7 @@ Status: accepted
 example 删除官方 XXL-JOB 与三个 SnailJob 客户端直依赖，并从 `MaculaExampleTaskApplication` 移除 `@EnableSnailJob`；配置文件只保留 SnailJob Server、namespace、group、token、host、port 等连接参数，以证明“引入 task Starter 即自动启用”的契约。现有 `XxlJobDemoHandler` 的 import、注解和方法体保持不改，由 task Starter 自带的兼容 API 编译；当前与它重名的 SnailJob `demoJobHandler` 改为唯一名称。
 
 ## Data and interfaces
-- Maven 契约：task Starter 的消费者只传递获得 SnailJob 1.9.0 客户端；XXL 兼容类型直接包含在 task Starter jar 中，不再出现官方 `xxl-job-core`。
+- Maven 契约：task Starter 的消费者传递获得 SnailJob 1.9.0 客户端及其缺失的 Jackson 2 运行时兼容构件；XXL 兼容类型直接包含在 task Starter jar 中，不再出现官方 `xxl-job-core`。
 - Java 兼容契约：仅保证 `@XxlJob`、`XxlJobContext`、`XxlJobHelper` 上述最小公开方法的源码和二进制链接兼容。
 - 服务端契约：只连接 `snail-job.server.host/port` 指向的 SnailJob Server；不读取或连接 XXL-JOB Admin。
 - 启用契约：引入 task Starter 默认自动启用 SnailJob；`macula.task.enabled=false` 关闭整个 Starter；显式 `snail-job.enabled=false` 关闭 SnailJob 客户端及桥接；`macula.task.xxl-job-adapter.enabled=false` 只关闭 XXL Handler 桥接。三个开关均以显式关闭优先。

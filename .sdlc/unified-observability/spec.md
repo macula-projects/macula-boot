@@ -60,7 +60,7 @@ Status: accepted
 - `micrometer-registry-otlp`：Micrometer 指标的 OTLP/HTTP push。
 - `opentelemetry-logback-appender-1.0`：把 Logback 事件转换为 OpenTelemetry LogRecord；其版本在父 POM 中固定并接受依赖兼容测试。
 
-`ObservabilityAutoConfiguration` 只负责 Macula 增量行为：旧指标公共标签、Logback OTLP appender 的幂等安装、配置属性与用户扩展点。Metrics/Traces/Logs exporter 的网络参数、Resource、采样和批处理继续交给 Spring Boot/OpenTelemetry 的标准自动配置，避免复制 SDK 生命周期。
+`ObservabilityAutoConfiguration` 只负责 Macula 增量行为：旧指标公共标签、Logback OTLP appender 的幂等安装、配置属性与用户扩展点。该自动配置排在 Spring Boot `OpenTelemetrySdkAutoConfiguration` 之后；Metrics/Traces/Logs exporter 的网络参数、Resource、采样和批处理继续交给 Spring Boot/OpenTelemetry 的标准自动配置，避免复制 SDK 生命周期。
 
 `macula-boot-commons` 将 Tenant/GrayVersion Holder 的内部存储切换为普通 `ThreadLocal`，并提供对应的 Micrometer `ThreadLocalAccessor`；Accessors 通过 Micrometer 支持的 SPI 或等价的幂等自动配置注册到全局 `ContextRegistry`。`io.micrometer:context-propagation` 版本由 Spring Boot BOM/父 POM 管理。
 
@@ -75,9 +75,9 @@ Status: accepted
 6. Gateway 的 `TraceIdGlobalFilter` 只依赖 Micrometer `Tracer`，在响应提交前写入当前 Trace ID，保持既有 `x-traceId` 外部契约。
 
 ### Auto-configuration and override model
-- `ObservabilityProperties` 使用前缀 `macula.observability`，总开关默认开启；日志 appender 的安装服从 `management.logging.export.enabled`、`management.logging.export.otlp.enabled`、`management.opentelemetry.enabled` 和缺失类条件。
+- `ObservabilityProperties` 使用前缀 `macula.observability`，总开关默认开启；日志 appender 的安装服从 `management.logging.export.enabled`、`management.logging.export.otlp.enabled` 和缺失类条件。Spring Boot 4.0.8 不提供 `management.opentelemetry.enabled` 总开关，`macula.observability.enabled` 只控制 Macula 增量配置，不冒充 Boot SDK 总开关。
 - 自动配置使用 `@ConditionalOnClass`、`@ConditionalOnProperty`、`@ConditionalOnBean(OpenTelemetry.class)` 与 `@ConditionalOnMissingBean`；无 Logback 时不创建 Logback 相关对象。
-- Logback appender 安装器先按固定名称检查已有 appender，存在时只完成必要初始化，不重复挂载；用户自定义安装器或关闭 Macula 日志导出时完全退让。
+- Logback appender 安装器先按固定名称检查已有 appender；若用户已经声明官方 `MACULA_OTEL` appender，则使用容器管理的 `OpenTelemetry` 完成初始化但不接管所有权、不重复挂载；用户自定义安装器或关闭 Macula 日志导出时完全退让。
 - `capture-mdc-attributes` 仅把显式列出的键交给 appender；默认空 allowlist。Trace ID/Span ID 由 OpenTelemetry LogRecord 上下文字段承载，结构化控制台则使用 Micrometer Tracing 已提供的 MDC。
 - 指标 `application` 标签使用可替换的命名 Bean 或标准 `management.metrics.tags.application` 方式实现；不得覆盖用户已有同名定制。
 - 新自动配置登记到 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`；仅 Logback 在日志系统初始化前确需的扩展允许使用 `spring.factories`。
@@ -91,9 +91,9 @@ Status: accepted
 - 上下文传播只继续父上下文，不默认把每个 Runnable 都创建为新 Span；需要独立耗时与错误数据的异步业务必须显式创建子 Observation，且父子关系应可在 Tempo 验证。
 
 ### Example and archetype topology
-现有 Alibaba/Tencent 示例 POM 统一替换依赖。应用配置用环境变量给出 Collector endpoint，并允许本地默认值；采样率在验证 profile 中为 `1.0`，常规示例不得暗示生产必须全采样。
+现有 Alibaba/Tencent 示例 POM 统一替换依赖。应用配置用环境变量给出 Collector endpoint，并允许本地默认值；普通 Starter、示例与 Archetype 的采样示例为 `0.1`，Docker 验收显式覆盖为 `1.0`。生成项目优先接受标准 `OTEL_SERVICE_NAME`，常规示例不得暗示生产必须全采样。
 
-可观测性基础设施以独立 Compose overlay/文件提供，由文档明确与现有 `alibaba` 或 `tencent` profile 组合启动，避免给当前 profile 增加隐式服务。Collector、Prometheus、Loki、Tempo 使用固定镜像版本、显式健康检查和非冲突端口；Collector 配置作为版本化示例资源提交。验证脚本或步骤通过各后端 HTTP API 查询实际接收结果，不以“容器已启动”代替信号验证。
+可观测性基础设施以独立 Compose overlay/文件提供，由文档明确与现有 `alibaba` 或 `tencent` profile 组合启动，避免给当前 profile 增加隐式服务。Collector、Prometheus、Loki、Tempo 使用固定镜像版本、HTTP readiness 健康检查和非冲突端口；不再暴露无消费者的 Prometheus 应用端点。Collector 配置作为版本化示例资源提交。验证脚本或步骤通过各后端 HTTP API 查询实际接收结果，不以“容器已启动”代替信号验证。
 
 Archetype 的 Gateway、Admin BFF、OpenAPI、Basic、Service、Third-party 等可运行 Java 模块获得统一依赖与公共配置片段；使用 Async Starter 的模块同时获得组合上下文传播，WebFlux/Gateway 模块显式配置 Reactor automatic context propagation。模板变量与父子 POM 结构保持不变。生成式 smoke test 必须验证生成项目不存在旧 Starter，并能解析/编译统一依赖。
 
@@ -106,6 +106,7 @@ Archetype 的 Gateway、Admin BFF、OpenAPI、Basic、Service、Third-party 等�
 - 删除：`macula-boot-starter-prometheus`、`macula-boot-starter-logstash`、`macula-boot-starter-sleuth`、`macula-boot-starter-skywalking`。
 - 删除 `com.alibaba:transmittable-thread-local` 及父 POM 中的 `transmittable-thread.version`；Commons/Async 改用由 Spring Boot BOM 管理的 `io.micrometer:context-propagation`，不得硬编码版本。
 - Gateway 不再传递或可选引入 Brave/SkyWalking 类型；统一 Starter 的第三方类型不得出现在 Macula 公共 API 中。
+- `macula-boot-starter-feign` 提供 `io.github.openfeign:feign-micrometer`，使 Spring Cloud OpenFeign 使用 Observation 能力继续 W3C Trace Context。
 
 ### Configuration contract
 - Metrics endpoint：`management.otlp.metrics.export.url`，HTTP/Protobuf URL 包含 `/v1/metrics`。
@@ -114,11 +115,11 @@ Archetype 的 Gateway、Admin BFF、OpenAPI、Basic、Service、Third-party 等�
 - Resource identity：`management.opentelemetry.resource-attributes`，示例至少设置 `service.name`、`service.namespace`、`deployment.environment.name`；环境变量可使用 Spring Boot/OpenTelemetry 官方支持的 `OTEL_SERVICE_NAME` 与 `OTEL_RESOURCE_ATTRIBUTES`。
 - Sampling：`management.tracing.sampling.probability` 与 `management.opentelemetry.tracing.sampler`。
 - Structured logging：`logging.structured.format.console` / `logging.structured.format.file`。
-- Signal switches：`management.otlp.metrics.export.enabled=true`、`management.tracing.export.otlp.enabled=true`、`management.logging.export.otlp.enabled=true`；`management.opentelemetry.enabled=false` 可关闭整个 OpenTelemetry SDK。
+- Signal switches：`management.otlp.metrics.export.enabled=true`、`management.tracing.export.otlp.enabled=true`、`management.logging.export.otlp.enabled=true`。Spring Boot 4.0.8 无受支持的单一 OpenTelemetry SDK 总开关；完整停用需要分别关闭三个信号导出，`macula.observability.enabled=false` 只停用 Macula 增量行为。
 - Async/Reactive propagation：Spring Boot 4.0.8 自动配置 Executor 通过有序 `TaskDecorator` Bean 组成的 `CompositeTaskDecorator` 传播上下文，不新增虚构的配置键；Reactor/WebFlux 使用 `spring.reactor.context-propagation=auto`。自定义 Executor 必须显式应用同一组合链。
 - Macula controls：`macula.observability.enabled=true`、`macula.observability.logging.capture-mdc-attributes=[]`；Gateway 响应头使用现有 `x-traceId`，新增开关归入 `macula.gateway` 前缀且默认保持开启。
 
-配置文档必须分别给出关闭 Metrics、Traces、Logs 和整个 OpenTelemetry SDK 的标准属性；密钥与认证 header 只通过环境变量或外部配置示例表达，不提交真实值。
+配置文档必须分别给出关闭 Metrics、Traces、Logs 以及三者同时关闭的标准属性组合；密钥与认证 header 只通过环境变量或外部配置示例表达，不提交真实值。
 
 ### Telemetry contract
 - Metrics 必须包含稳定的 service identity，旧查询可继续按 `application` 标签筛选；同一资源还使用 `service.name`。

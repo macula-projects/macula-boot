@@ -49,6 +49,19 @@ The application configuration contract changes for Alibaba users: legacy `bootst
 
 The Git interface gains remote maintenance branch `6.0.x` at the exact accepted commit. No tag or release artifact is created.
 
+## Final implementation alignment
+The merged implementation and Stage 4/5 evidence refine the accepted compatibility contract as follows. These points incorporate the compiler-, runtime-, and review-driven deviations recorded in `plan.md`; they do not add new product scope.
+
+- Spring Boot 4 modular Starter coordinates and relocated APIs are used across Web, Gateway, Security, JPA, Redis, Cache, Kafka, Metrics, Alibaba, Audit Log, Operation Log, Commons, and related tests. Auto-configuration ordering, disable switches, configuration prefixes, and user-overridable Beans remain the compatibility boundary.
+- The Web Starter uses Boot 4's supported default Tomcat runtime because Boot 4.0.8 does not publish the former Undertow Starter. Spring Cloud Gateway configuration is read from the Framework 7 / Gateway 5 `spring.cloud.gateway.server.webflux` hierarchy.
+- Application JSON handling moves to Jackson 3 APIs, including Web, Commons, JPA/MyBatis entities, and Operation Log. RocketMQ retains an isolated Jackson 2 compatibility path because RocketMQ Spring 2.3.4 still constructs the legacy Framework message converter.
+- Redis integration uses Boot 4 `DataRedisAutoConfiguration` and `DataRedisProperties`, the `spring.data.redis` standard connection prefix, and the matching Redisson Spring Data adapter. TLS is applied consistently to single-server, Sentinel, and Cluster addresses; unsupported Boot SSL bundles fail with guidance to use Redisson YAML TLS material.
+- MyBatis Plus uses its Boot 4 Starter. Spring Security 7 and WebSocket Security use their supported authorization APIs; Spring Cloud Gateway filters, response advice, and reactive authorization preserve prior behavior through the Framework 7 contracts.
+- Alibaba examples and archetype templates use Config Data imports. Escaped Velocity placeholders preserve literal `${NACOS_*:default}` values in generated projects, and the generated project is part of compile verification.
+- Tencent Starters exclude only the incompatible Polaris contract-reporting sub-starter until it supports Springdoc 3; discovery, configuration, routing, and the remaining Tencent capabilities stay enabled. The migration limitation is documented in the Tencent README.
+- The Compose Nacos initializer preserves an existing DataId instead of overwriting developer configuration. Snapshot publication is triggered only by pushes to `main`, while pull requests use verification and CodeQL workflows without publishing.
+- `AGENTS.md` reflects the Boot 4.0 / Cloud 2025.1 baseline. The change does not modify AI-SDLC policy, skills, hooks, `5.x`, release tags, or production deployment configuration.
+
 ## Flagged concerns
 - Spring Boot patch selection: Maven Central lists `4.0.8` as the newest stable 4.0.x release at design time, while Spring Cloud `2025.1.1` records Boot `4.0.2` in its BOM metadata; the proposed target is `4.0.8`, and the reviewer must approve that newer compatible patch rather than the BOM baseline, blocking.
 - Platform migration breadth: Boot 4 and Framework 7 introduce breaking changes including Jackson 3 and Gateway 5, so accepting this spec authorizes compatibility changes across affected commons, Starters, examples, tests, documentation, and archetype sources while prohibiting unrelated refactors, blocking.
