@@ -94,7 +94,7 @@ router.beforeEach(async (to, from, next) => {
         let apiMenu = tool.data.get("MENU") || []
         let userInfo = tool.data.get("USER_INFO")
         let userMenu = treeFilter(userRoutes, node => {
-            return node.meta.roles ? node.meta.roles.filter(item => userInfo.roles.indexOf(item) > -1).length > 0 : true
+            return !node.meta.roles || node.meta.roles.length === 0 || node.meta.roles.some(item => userInfo.roles.includes(item))
         })
         let menu = [...userMenu, ...apiMenu]
         var menuRouter = filterAsyncRouter(menu)
@@ -130,7 +130,7 @@ router.sc_getMenu = () => {
     var apiMenu = tool.data.get("MENU") || []
     let userInfo = tool.data.get("USER_INFO")
     let userMenu = treeFilter(userRoutes, node => {
-        return node.meta.roles ? node.meta.roles.filter(item => userInfo.roles.indexOf(item) > -1).length > 0 : true
+        return !node.meta.roles || node.meta.roles.length === 0 || node.meta.roles.some(item => userInfo.roles.includes(item))
     })
     var menu = [...userMenu, ...apiMenu]
     return menu

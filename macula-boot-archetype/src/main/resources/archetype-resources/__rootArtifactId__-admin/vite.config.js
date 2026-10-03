@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {defineConfig} from "vite";
+import {defineConfig, loadEnv} from "vite";
+import {existsSync} from 'node:fs';
 import {fileURLToPath, URL} from 'node:url';
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
@@ -25,11 +26,28 @@ import {ElementPlusResolver} from "unplugin-vue-components/resolvers";
 import Inspect from 'vite-plugin-inspect';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({mode}) => {
+    const deployEnvDir = fileURLToPath(new URL('../deploy', import.meta.url));
+    const localEnv = loadEnv(mode, process.cwd(), '');
+    const deployEnv = existsSync(deployEnvDir) ? loadEnv(mode, deployEnvDir, '') : {};
+    const mergedEnv = {
+        ...localEnv,
+        ...deployEnv,
+        ...process.env
+    };
+    const env = {
+        ...Object.fromEntries(Object.entries(mergedEnv).filter(([key]) => key.startsWith('VITE_APP_')))
+    };
+    const iamUrl = mergedEnv.MACULA_CLOUD_IAM_URL || 'http://127.0.0.1:9010';
+    Object.assign(process.env, env);
+
+    return {
+    envDir: process.cwd(),
     define: {
         __VUE_I18N_FULL_INSTALL__: true,
         __VUE_I18N_LEGACY_API__: true,
-        __INTLIFY_PROD_DEVTOOLS__: false
+        __INTLIFY_PROD_DEVTOOLS__: false,
+        'import.meta.env.MACULA_CLOUD_IAM_URL': JSON.stringify(iamUrl)
     },
 
     resolve: {
@@ -76,7 +94,7 @@ export default defineConfig({
         proxy: {
             // https://cn.vitejs.dev/config/#server-proxy
             '/api': {
-                target: 'http://localhost:8080',
+                target: env.VITE_APP_GATEWAY_PROXY_TARGET || 'http://127.0.0.1:6000',
                 changeOrigin: true,
                 rewrite: (p) => p.replace(/^\/api/, '')
             }
@@ -98,4 +116,5 @@ export default defineConfig({
             ],
         },
     },
+    };
 });

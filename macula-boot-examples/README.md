@@ -19,12 +19,13 @@
 ## 环境要求
 
 - JDK 17、Maven 3.9+。
-- Alibaba 链路：本地 Nacos（默认 `127.0.0.1:8848`）；Sentinel Dashboard 为可选项。
-- Tencent 链路：本地 Polaris（默认 `grpc://127.0.0.1:8091`）。
+- Alibaba 链路：本地 Nacos（默认 `127.0.0.1:38848`）；Sentinel Dashboard 为可选项。
+- Tencent 链路：本地 Polaris（默认 `grpc://127.0.0.1:38091`）。
 - Task 示例：按需启动 Nacos 和 SnailJob 1.9 Server；不需要 XXL-JOB Admin。
 - Binlog4j 示例：MySQL 需开启 binlog，并准备 Redis 用于消费位点持久化。
 
 示例中的认证信息均是占位值。真实地址、账号、密码和 token 应通过环境变量或配置中心注入，不要提交到仓库。
+Examples 默认使用 `3xxxx` 中间件宿主机端口，可与使用标准端口的 Macula Cloud 同时运行；容器内部仍使用组件标准端口。
 
 ## 构建与检查
 
@@ -61,25 +62,28 @@ Tencent 链路将 Nacos 替换为 Polaris，并依次启动 provider、consumer 
 
 ```bash
 cd macula-boot-examples/docker
+cp .env.example .env
+
+# Alibaba Middleware-only，应用从 Maven/IDE 启动
+./scripts/compose.sh up alibaba
 
 # Alibaba 完整链路
-docker compose --profile alibaba up -d --build
-
-# Tencent 完整链路
-docker compose --profile tencent up -d --build
-
-# Alibaba Middleware-only
-docker compose up -d redis nacos-init
+./scripts/compose.sh up-apps alibaba
 
 # Tencent Middleware-only
-docker compose up -d redis polaris
+./scripts/compose.sh up tencent
+
+# Tencent 完整链路
+./scripts/compose.sh up-apps tencent
 ```
 
-完整命令、端口覆盖、日志、停止、数据保留与重置方式见 [`docker/README.md`](docker/README.md)。默认密码只用于回环地址绑定的本地示例，禁止用于共享或生产环境。
+脚本在 `.env` 不存在时自动使用 `.env.example`，并支持 `MACULA_COMPOSE_ENV` 指定其他环境文件。原有 `docker compose --profile ...` 命令继续兼容。完整命令、端口覆盖、日志、停止、数据保留与重置方式见 [`docker/README.md`](docker/README.md)。默认密码只用于回环地址绑定的本地示例，禁止用于共享或生产环境。
+完整容器模式只向宿主机发布 Alibaba/Tencent Gateway；provider 与 consumer 的模块端口仍用于 IDE 运行和容器内部通信，不由 Compose 映射到宿主机。
 
 Docker 目录还提供独立的可观测性 overlay，通过 OpenTelemetry Collector 将 Metrics、Logs、Traces
 分别送往 Prometheus、Loki、Tempo。六个可运行的 Alibaba/Tencent 示例均使用
-`macula-boot-starter-observability`，默认关闭网络导出；组合 overlay 时通过环境变量开启三类信号。
+`macula-boot-starter-observability`，默认关闭网络导出；组合 overlay 时叠加应用内的
+`observability` Spring Profile 开启三类信号，不由 Compose 注入 OTEL 应用参数。
 
 ## 配置约定
 
@@ -87,3 +91,4 @@ Docker 目录还提供独立的可观测性 overlay，通过 OpenTelemetry Colle
 - Alibaba 默认导入 `${spring.application.name}.yml` 和 `${spring.application.name}-${spring.profiles.active}.yml`，保留基础配置与环境配置两层覆盖关系。
 - 可变的基础设施参数使用 `${ENV_NAME:默认值}`，本地可直接运行，其他环境显式覆盖。
 - Maven profile 通过 `@profile.active@` 写入 Spring profile，可选 `local`、`dev`、`stg`、`pet`、`prd`。
+- 容器固定激活 Spring `docker` profile；该 profile 继承 `local` 默认值，只覆盖 Compose DNS 和容器端口。

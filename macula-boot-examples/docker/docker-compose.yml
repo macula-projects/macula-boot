@@ -1,4 +1,4 @@
-name: macula-boot-examples
+name: ${COMPOSE_PROJECT_NAME:-macula-boot-examples}
 
 x-app-build: &app-build
   context: ../..
@@ -11,38 +11,24 @@ x-app-healthcheck: &app-healthcheck
   start_period: 90s
 
 x-alibaba-environment: &alibaba-environment
+  SPRING_PROFILES_ACTIVE: docker
   NACOS_SERVER_ADDR: nacos:8848
   NACOS_NAMESPACE: ${NACOS_NAMESPACE:-MACULA5}
-  NACOS_USERNAME: ${NACOS_USERNAME-}
-  NACOS_PASSWORD: ${NACOS_PASSWORD-}
+  NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+  NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
   SENTINEL_NACOS_SERVER_ADDR: nacos:8848
   SPRING_DATA_REDIS_HOST: redis
   SPRING_DATA_REDIS_PORT: 6379
   SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
-  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
-  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
-  OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://otel-collector:4318/v1/logs
-  OTEL_METRICS_EXPORT_ENABLED: ${OTEL_METRICS_EXPORT_ENABLED:-false}
-  OTEL_TRACES_EXPORT_ENABLED: ${OTEL_TRACES_EXPORT_ENABLED:-false}
-  OTEL_LOGS_EXPORT_ENABLED: ${OTEL_LOGS_EXPORT_ENABLED:-false}
-  OTEL_TRACES_SAMPLER_PROBABILITY: ${OTEL_TRACES_SAMPLER_PROBABILITY:-1.0}
-  MANAGEMENT_OTLP_METRICS_EXPORT_STEP: ${OTEL_METRICS_EXPORT_STEP:-10s}
 
 x-tencent-environment: &tencent-environment
+  SPRING_PROFILES_ACTIVE: docker
   POLARIS_SERVER_ADDR: grpc://polaris:8091
   POLARIS_NAMESPACE: ${POLARIS_NAMESPACE:-macula-dev}
   SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: polaris:8848
   SPRING_DATA_REDIS_HOST: redis
   SPRING_DATA_REDIS_PORT: 6379
   SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
-  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
-  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
-  OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://otel-collector:4318/v1/logs
-  OTEL_METRICS_EXPORT_ENABLED: ${OTEL_METRICS_EXPORT_ENABLED:-false}
-  OTEL_TRACES_EXPORT_ENABLED: ${OTEL_TRACES_EXPORT_ENABLED:-false}
-  OTEL_LOGS_EXPORT_ENABLED: ${OTEL_LOGS_EXPORT_ENABLED:-false}
-  OTEL_TRACES_SAMPLER_PROBABILITY: ${OTEL_TRACES_SAMPLER_PROBABILITY:-1.0}
-  MANAGEMENT_OTLP_METRICS_EXPORT_STEP: ${OTEL_METRICS_EXPORT_STEP:-10s}
 
 services:
   mysql:
@@ -54,7 +40,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-nacos}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nacos}
     ports:
-      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+      - "${BIND_ADDRESS:-127.0.0.1}:${MYSQL_PORT:-33306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d:ro
@@ -74,7 +60,7 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
     ports:
-      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+      - "${BIND_ADDRESS:-127.0.0.1}:${REDIS_PORT:-36379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -104,8 +90,8 @@ services:
       JVM_XMX: 512m
       JVM_XMN: 128m
     ports:
-      - "127.0.0.1:${NACOS_HTTP_PORT:-8848}:8848"
-      - "127.0.0.1:${NACOS_GRPC_PORT:-9848}:9848"
+      - "${BIND_ADDRESS:-127.0.0.1}:${NACOS_HTTP_PORT:-38848}:8848"
+      - "${BIND_ADDRESS:-127.0.0.1}:${NACOS_GRPC_PORT:-39848}:9848"
     depends_on:
       mysql:
         condition: service_healthy
@@ -169,11 +155,11 @@ services:
           /root/conf/polaris-server.template.yaml > /root/conf/polaris-server.yaml
         exec /root/polaris-server start
     ports:
-      - "127.0.0.1:${POLARIS_HTTP_PORT:-8090}:8090"
-      - "127.0.0.1:${POLARIS_DISCOVERY_GRPC_PORT:-8091}:8091"
-      - "127.0.0.1:${POLARIS_CONFIG_GRPC_PORT:-8093}:8093"
-      - "127.0.0.1:${POLARIS_NACOS_PORT:-18849}:8848"
-      - "127.0.0.1:${POLARIS_NACOS_GRPC_PORT:-19849}:9848"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POLARIS_HTTP_PORT:-38090}:8090"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POLARIS_DISCOVERY_GRPC_PORT:-38091}:8091"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POLARIS_CONFIG_GRPC_PORT:-38093}:8093"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POLARIS_NACOS_PORT:-38849}:8848"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POLARIS_NACOS_GRPC_PORT:-39849}:9848"
     volumes:
       - ./polaris/polaris-server.yaml:/root/conf/polaris-server.template.yaml:ro
     depends_on:
@@ -198,9 +184,6 @@ services:
     restart: unless-stopped
     environment:
       <<: *alibaba-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:5000/oauth2/jwks
-    ports:
-      - "127.0.0.1:${ALIBABA_PROVIDER_PORT:-5020}:5020"
     depends_on:
       nacos-init:
         condition: service_completed_successfully
@@ -220,9 +203,6 @@ services:
     restart: unless-stopped
     environment:
       <<: *alibaba-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-alibaba-gateway:5000/oauth2/jwks
-    ports:
-      - "127.0.0.1:${ALIBABA_CONSUMER_PORT:-5010}:5010"
     depends_on:
       macula-example-alibaba-provider1:
         condition: service_healthy
@@ -244,10 +224,12 @@ services:
     restart: unless-stopped
     environment:
       <<: *alibaba-environment
-      OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
+      OAUTH2_INTROSPECTION_URI: ${MACULA_CLOUD_IAM_URL:-http://host.docker.internal:9010}/oauth2/introspect
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
-      - "127.0.0.1:${ALIBABA_GATEWAY_HTTP_PORT:-5000}:5000"
-      - "127.0.0.1:${ALIBABA_GATEWAY_HTTPS_PORT:-5443}:5443"
+      - "${BIND_ADDRESS:-127.0.0.1}:${ALIBABA_GATEWAY_HTTP_PORT:-5000}:5000"
+      - "${BIND_ADDRESS:-127.0.0.1}:${ALIBABA_GATEWAY_HTTPS_PORT:-5443}:5443"
     depends_on:
       macula-example-alibaba-consumer:
         condition: service_healthy
@@ -269,9 +251,6 @@ services:
     restart: unless-stopped
     environment:
       <<: *tencent-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4000/oauth2/jwks
-    ports:
-      - "127.0.0.1:${TENCENT_PROVIDER_PORT:-4020}:4020"
     depends_on:
       polaris:
         condition: service_healthy
@@ -291,10 +270,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *tencent-environment
-      GATEWAY_JWK_SET_URI: http://macula-example-tencent-gateway:4000/oauth2/jwks
       MACULA_SECURITY_IGNORE_URLS: /api/v1/consumer/echo
-    ports:
-      - "127.0.0.1:${TENCENT_CONSUMER_PORT:-4010}:4010"
     depends_on:
       macula-example-tencent-provider:
         condition: service_healthy
@@ -314,10 +290,12 @@ services:
     restart: unless-stopped
     environment:
       <<: *tencent-environment
-      OAUTH2_INTROSPECTION_URI: http://127.0.0.1:9010/oauth2/introspect
+      OAUTH2_INTROSPECTION_URI: ${MACULA_CLOUD_IAM_URL:-http://host.docker.internal:9010}/oauth2/introspect
       MACULA_GATEWAY_SECURITY_IGNORE_URLS: /consumer/api/v1/consumer/echo
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
-      - "127.0.0.1:${TENCENT_GATEWAY_PORT:-4000}:4000"
+      - "${BIND_ADDRESS:-127.0.0.1}:${TENCENT_GATEWAY_PORT:-4000}:4000"
     depends_on:
       macula-example-tencent-consumer:
         condition: service_healthy

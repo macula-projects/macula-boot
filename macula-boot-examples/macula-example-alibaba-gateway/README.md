@@ -6,7 +6,7 @@
 
 ## 前置条件
 
-- Nacos，默认地址 `127.0.0.1:8848`、命名空间 `MACULA5`。
+- Nacos，默认地址 `127.0.0.1:38848`、命名空间 `MACULA5`。
 - 已启动 `macula-example-alibaba-consumer`。
 - HTTPS 使用 `src/main/resources/jwk/springboot.p12` 中的示例证书，仅供本地演示。
 
@@ -16,7 +16,7 @@
 mvn -pl macula-boot-examples/macula-example-alibaba-gateway -am spring-boot:run
 ```
 
-可通过 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖 Nacos 配置。应用同时监听 HTTP `5000` 和 HTTPS `5443`。
+local 环境可通过 `NACOS_SERVER_PORT` 覆盖 Nacos 端口，共享环境可通过 `NACOS_SERVER_ADDR` 覆盖完整地址；命名空间和认证使用 `NACOS_NAMESPACE`、`NACOS_USERNAME`、`NACOS_PASSWORD`。应用同时监听 HTTP `5000` 和 HTTPS `5443`。
 
 ## 路由
 

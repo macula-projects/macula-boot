@@ -1,21 +1,20 @@
 server:
-  port: 4010
-
-polaris:
-  namespace: ${POLARIS_NAMESPACE:macula-dev}
-  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
+  port: ${SERVER_PORT:4010}
 
 spring:
   profiles:
     active: @profile.active@
+    group:
+      docker: local
   application:
     name: macula-example-tencent-consumer
+  servlet:
+    encoding:
+      force: true
   config:
     import: optional:polaris
   cloud:
     polaris:
-      address: ${polaris.server-addr}
-      namespace: ${polaris.namespace}
       config:
         enabled: true
         auto-refresh: true
@@ -25,19 +24,28 @@ spring:
         enabled: true
         register: true
 ---
-# 以下为 local Profile 本地默认配置；其他环境请在 Polaris 配置中心维护
+# local Profile 包含 IDE 本地开发所需的全部默认配置
 spring:
   config:
     activate:
       on-profile: local
+  data:
+    redis:
+      host: 127.0.0.1
+      port: ${REDIS_PORT:36379}
+      password: ${REDIS_PASSWORD:redis}
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:4000/oauth2/jwks}    # 网关地址
-  servlet:
-    encoding:
-      force: true
+          jwk-set-uri: http://127.0.0.1:4000/oauth2/jwks    # 网关地址
 feign:
   httpclient:
     enabled: false
@@ -97,31 +105,140 @@ management:
   otlp:
     metrics:
       export:
-        enabled: ${OTEL_METRICS_EXPORT_ENABLED:false}
-        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+        enabled: false
+        url: http://127.0.0.1:34318/v1/metrics
   tracing:
     sampling:
-      probability: ${OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+      probability: 0.1
     export:
       otlp:
-        enabled: ${OTEL_TRACES_EXPORT_ENABLED:false}
+        enabled: false
   logging:
     export:
       otlp:
-        enabled: ${OTEL_LOGS_EXPORT_ENABLED:false}
+        enabled: false
   opentelemetry:
     resource-attributes:
       service:
-        name: ${OTEL_SERVICE_NAME:${spring.application.name}}
-        namespace: ${OTEL_SERVICE_NAMESPACE:macula-examples}
+        name: ${spring.application.name}
+        namespace: macula-examples
       deployment:
         environment:
-          name: ${DEPLOYMENT_ENVIRONMENT:local}
+          name: local
     tracing:
       export:
         otlp:
-          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+          endpoint: http://127.0.0.1:34318/v1/traces
     logging:
       export:
         otlp:
-          endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}
+          endpoint: http://127.0.0.1:34318/v1/logs
+
+---
+# Docker Profile 覆盖容器内 DNS 连接信息，其余沿用 local 默认配置
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:polaris:8848}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://polaris:8091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://macula-example-tencent-gateway:4000/oauth2/jwks
+
+---
+# 共享环境只保留配置中心连接信息，其余配置由 Polaris 配置组提供
+spring:
+  config:
+    activate:
+      on-profile: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: stg
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: pet
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+
+---
+# observability Profile 由可观测部署叠加启用，应用配置直接指向 Collector
+spring:
+  config:
+    activate:
+      on-profile: observability
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://otel-collector:4318/v1/metrics
+        step: 10s
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      otlp:
+        enabled: true
+  logging:
+    export:
+      otlp:
+        enabled: true
+  opentelemetry:
+    resource-attributes:
+      deployment:
+        environment:
+          name: docker
+    tracing:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/logs

@@ -5,8 +5,15 @@ export default {
     systemToken: {
         url: `${config.IAM_URL}/oauth2/token`,
         name: "macula V5 system提供隐式获取登录token接口",
-        post: async function (data = {}, config = {}) {
-            return await http.post(this.url, data, config)
+        post: async function (data = {}, requestConfig = {}) {
+            return await http.post(this.url, new URLSearchParams(data), {
+                showErrorNotification: false,
+                ...requestConfig,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    ...requestConfig.headers
+                }
+            })
         }
     },
     getUserInfo: {

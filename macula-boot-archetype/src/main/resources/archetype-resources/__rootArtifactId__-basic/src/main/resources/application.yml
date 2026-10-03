@@ -1,20 +1,12 @@
-# 配置中心连接信息，必须保留在本地 application.yml 中
-nacos:
-  username: ${symbol_dollar}{NACOS_USERNAME:nacos}
-  password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
-  config:
-    server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:8848}
-    namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
-
+#set( $symbol_dollar = '$' )
 server:
-  port: 6004
-  servlet:
-    encoding:
-      force: true
+  port: ${symbol_dollar}{SERVER_PORT:6004}
 
 spring:
   profiles:
     active: @profile.active@
+    group:
+      docker: local
   application:
     name: ${rootArtifactId}-basic
   config:
@@ -23,32 +15,37 @@ spring:
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
-      username: ${nacos.username}
-      password: ${nacos.password}
-      config:
-        server-addr: ${nacos.config.server-addr}
-        namespace: ${nacos.config.namespace}
-        refresh-enabled: true
-        file-extension: yml
+      server-addr: ${spring.config.nacos.server-addr}
+      namespace: ${spring.config.nacos.namespace}
+      username: ${spring.config.nacos.username}
+      password: ${spring.config.nacos.password}
       discovery:
-        enabled: true
-        server-addr: ${nacos.config.server-addr}
-        namespace: ${nacos.config.namespace}
-        # group:
+        namespace: ${spring.cloud.nacos.namespace}
+        metadata:
+          version: v1
+  servlet:
+    encoding:
+      force: true
+
 ---
-# 以下为 local Profile 本地默认配置；其他环境请在 Nacos 配置中心维护
+# local Profile 包含 IDE 本地开发所需的全部默认配置
 spring:
   config:
     activate:
       on-profile: local
-  cloud:
-    sentinel:
-      enabled: false
+    nacos:
+      server-addr: 127.0.0.1:${symbol_dollar}{NACOS_SERVER_PORT:28848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:9000/oauth2/jwks    # 网关地址
+          jwk-set-uri: http://127.0.0.1:6000/oauth2/jwks
+  cloud:
+    sentinel:
+      enabled: false
 feign:
   httpclient:
     enabled: false
@@ -88,43 +85,93 @@ management:
   otlp:
     metrics:
       export:
-        enabled: ${symbol_dollar}{OTEL_METRICS_EXPORT_ENABLED:false}
-        url: ${symbol_dollar}{OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+        enabled: false
+        url: http://127.0.0.1:24318/v1/metrics
   tracing:
     sampling:
-      probability: ${symbol_dollar}{OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+      probability: 0.1
     export:
       otlp:
-        enabled: ${symbol_dollar}{OTEL_TRACES_EXPORT_ENABLED:false}
+        enabled: false
   logging:
     export:
       otlp:
-        enabled: ${symbol_dollar}{OTEL_LOGS_EXPORT_ENABLED:false}
+        enabled: false
   opentelemetry:
     resource-attributes:
       service:
-        name: ${symbol_dollar}{OTEL_SERVICE_NAME:${spring.application.name}}
-        namespace: ${symbol_dollar}{OTEL_SERVICE_NAMESPACE:${rootArtifactId}}
+        name: ${spring.application.name}
+        namespace: ${rootArtifactId}
       deployment:
         environment:
-          name: ${symbol_dollar}{DEPLOYMENT_ENVIRONMENT:local}
+          name: local
     tracing:
       export:
         otlp:
-          endpoint: ${symbol_dollar}{OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+          endpoint: http://127.0.0.1:24318/v1/traces
     logging:
       export:
         otlp:
-          endpoint: ${symbol_dollar}{OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}
+          endpoint: http://127.0.0.1:24318/v1/logs
+
+---
+# Docker Profile 覆盖容器内 DNS 连接信息，其余沿用 local 默认配置
+spring:
+  config:
+    activate:
+      on-profile: docker
+    nacos:
+      server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:nacos:8848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${rootArtifactId}-gateway:6000/oauth2/jwks
+
+---
+# 共享环境只保留配置中心连接信息，其余配置由 Nacos Data ID 提供
+spring:
+  config:
+    activate:
+      on-profile: dev
+    nacos:
+      server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:28848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
 
 ---
 spring:
   config:
     activate:
-      on-profile: dev
-nacos:
-  username: maculav5
-  #password: 请通过启动命令赋予密码
+      on-profile: stg
+    nacos:
+      server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:28848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
+
+---
+spring:
   config:
-    server-addr: 10.94.108.55:8848
-    namespace: MACULA5
+    activate:
+      on-profile: pet
+    nacos:
+      server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:28848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+    nacos:
+      server-addr: ${symbol_dollar}{NACOS_SERVER_ADDR:127.0.0.1:28848}
+      namespace: ${symbol_dollar}{NACOS_NAMESPACE:MACULA5}
+      username: ${symbol_dollar}{NACOS_USERNAME:nacos}
+      password: ${symbol_dollar}{NACOS_PASSWORD:nacos}

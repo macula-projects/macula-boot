@@ -7,7 +7,7 @@ server:
 nacos:
   username: ${NACOS_USERNAME:nacos}
   password: ${NACOS_PASSWORD:nacos}
-  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:38848}
   namespace: ${NACOS_NAMESPACE:MACULA5}
 
 spring:
@@ -39,7 +39,7 @@ spring:
       eager: true
       transport:
         # 控制台地址
-        dashboard: localhost:8080
+        dashboard: ${SENTINEL_DASHBOARD_ADDR:127.0.0.1:38080}
         # 客户端监控API的端口，默认8719，与Sentinel控制台做交互。有规则变化会把规则数据push给这个Http Server接收,然后注册到sentinel中
         port: 8719
       # Sentinel Nacos数据源配置，Nacos中的规则会⾃动同步到sentinel控制台的流控规则中
@@ -52,7 +52,7 @@ spring:
         flow:
           # 指定数据源类型
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:127.0.0.1:38848}
             data-id: ${spring.application.name}-flow-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP

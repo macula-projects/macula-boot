@@ -14,17 +14,19 @@
 ```shell
 cd macula-boot-examples/docker
 cp .env.example .env
-docker compose config --profiles
+./scripts/compose.sh config all
 ```
 
-`.env` 可覆盖镜像、宿主机端口、namespace 和本地示例密码，已被 Git 忽略。默认密码仅供绑定在 `127.0.0.1` 的本地环境使用，禁止复用于共享环境或生产环境。
+`.env` 可覆盖镜像、宿主机端口、Nacos `NACOS_NAMESPACE`/`NACOS_USERNAME`/`NACOS_PASSWORD`、外部 Macula Cloud IAM 地址和本地示例密码，已被 Git 忽略。完整容器模式下 Gateway 通过 `MACULA_CLOUD_IAM_URL` 访问外部 IAM，默认使用 Docker Desktop/host-gateway 可达的 `http://host.docker.internal:9010`。默认 Nacos 用户名和密码均为 `nacos`；这些值仅供绑定在 `127.0.0.1` 且关闭 Nacos 鉴权的本地示例使用，禁止复用于共享环境或生产环境。
+
+脚本找不到 `.env` 时会回退到 `.env.example`；也可通过 `MACULA_COMPOSE_ENV` 指定其他环境文件。原有 Docker Compose v2 命令继续兼容，脚本是推荐入口。
 
 ## 完整模式
 
 启动 Alibaba 链路：
 
 ```shell
-docker compose --profile alibaba up -d --build
+./scripts/compose.sh up-apps alibaba
 ```
 
 验证 gateway -> consumer -> provider：
@@ -36,7 +38,7 @@ curl "http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello"
 启动 Tencent 链路：
 
 ```shell
-docker compose --profile tencent up -d --build
+./scripts/compose.sh up-apps tencent
 ```
 
 验证 gateway -> consumer -> provider：
@@ -48,28 +50,29 @@ curl "http://127.0.0.1:4000/consumer/api/v1/consumer/echo"
 同时启动两条链路：
 
 ```shell
-docker compose --profile alibaba --profile tencent up -d --build
+./scripts/compose.sh up-apps all
 ```
 
 MySQL 与 Redis 由两条链路共享；Nacos 与 Alibaba 应用只属于 `alibaba` profile，Polaris 与 Tencent 应用只属于 `tencent` profile。
+完整模式只向宿主机发布 Gateway；provider 和 consumer 仅在 Compose 网络内提供服务，并继续由容器内 healthcheck 检查。
 
 ## Middleware-only
 
 只启动 Alibaba Middleware 与 namespace 初始化，不启动应用容器：
 
 ```shell
-docker compose up -d redis nacos-init
+./scripts/compose.sh up alibaba
 ```
 
-随后可从仓库根目录通过 Maven 或 IDE 启动 Alibaba 应用。默认连接地址为 Nacos `127.0.0.1:8848`、MySQL `127.0.0.1:3306`、Redis `127.0.0.1:6379`。
+随后可从仓库根目录通过 Maven 或 IDE 启动 Alibaba 应用。默认宿主机地址为 Nacos `127.0.0.1:38848`、MySQL `127.0.0.1:33306`、Redis `127.0.0.1:36379`。
 
 只启动 Tencent Middleware，不启动应用容器：
 
 ```shell
-docker compose up -d redis polaris
+./scripts/compose.sh up tencent
 ```
 
-随后可从仓库根目录通过 Maven 或 IDE 启动 Tencent 应用。默认 Polaris 地址为 `grpc://127.0.0.1:8091`，Spring Cloud Tencent 使用的 Nacos 兼容 HTTP/gRPC 端口为 `127.0.0.1:18849` / `127.0.0.1:19849`。
+随后可从仓库根目录通过 Maven 或 IDE 启动 Tencent 应用。默认 Polaris 地址为 `grpc://127.0.0.1:38091`，Spring Cloud Tencent 使用的 Nacos 兼容 HTTP/gRPC 端口为 `127.0.0.1:38849` / `127.0.0.1:39849`。
 
 Redis 已启动、健康并持久化，但当前两条 gateway-provider-consumer 回声链路不会主动访问 Redis。
 
@@ -101,13 +104,13 @@ mvn -pl macula-boot-examples/macula-example-tencent-gateway spring-boot:run
 如果在 `.env` 中覆盖了 Middleware 宿主机端口，Maven/IDE 进程不会自动读取该文件，需同步传入应用连接变量。例如：
 
 ```shell
-# Alibaba：当 NACOS_HTTP_PORT=18848时，NACOS_GRPC_PORT 应为 19848
-NACOS_SERVER_ADDR=127.0.0.1:18848 \
+# Alibaba：例如改成 NACOS_HTTP_PORT=48848 时，NACOS_GRPC_PORT 应为 49848
+NACOS_SERVER_PORT=48848 \
   mvn -pl macula-boot-examples/macula-example-alibaba-provider1 spring-boot:run
 
-# Tencent：对应 POLARIS_DISCOVERY_GRPC_PORT=18091、POLARIS_NACOS_PORT=18849
-POLARIS_SERVER_ADDR=grpc://127.0.0.1:18091 \
-POLARIS_NACOS_SERVER_ADDR=127.0.0.1:18849 \
+# Tencent：例如改成 POLARIS_DISCOVERY_GRPC_PORT=48091、POLARIS_NACOS_PORT=48849
+POLARIS_SERVER_ADDR=grpc://127.0.0.1:48091 \
+POLARIS_NACOS_SERVER_ADDR=127.0.0.1:48849 \
   mvn -pl macula-boot-examples/macula-example-tencent-provider spring-boot:run
 ```
 
@@ -117,21 +120,21 @@ POLARIS_NACOS_SERVER_ADDR=127.0.0.1:18849 \
 
 ## 可观测性 Overlay
 
-复制 `.env.example` 后，把三类导出开关设为 `true`，再将 overlay 与任一现有 profile 组合：
+将 overlay 与任一现有 profile 组合即可。Overlay 会为应用叠加 `observability` Spring Profile；
+Metrics、Traces、Logs 的开关、Collector 地址、采样率与导出周期均直接维护在各应用的
+`application.yml`，Compose 不再注入应用侧 OTEL 配置：
 
 ```shell
-OTEL_METRICS_EXPORT_ENABLED=true \
-OTEL_TRACES_EXPORT_ENABLED=true \
-OTEL_LOGS_EXPORT_ENABLED=true \
 docker compose -f docker-compose.yml -f observability/docker-compose.observability.yml \
   --profile alibaba up -d --build
 ```
 
-Tencent 链路将 profile 改为 `tencent`。默认入口为 Collector `4317/4318`、Prometheus `9090`、
-Loki `3100`、Tempo `3200`，均只绑定 `127.0.0.1`。验证配置与端到端关联：
+Tencent 链路将 profile 改为 `tencent`。默认宿主机入口为 Collector OTLP/HTTP `34318`、Prometheus `39090`、
+Loki `33100`、Tempo `33200`，均只绑定 `127.0.0.1`。验证配置与端到端关联：
 
 ```shell
-docker compose -f observability/docker-compose.observability.yml config
+docker compose -f docker-compose.yml -f observability/docker-compose.observability.yml \
+  --profile alibaba config
 observability/verify-observability.sh \
   "http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello"
 ```
@@ -139,7 +142,7 @@ observability/verify-observability.sh \
 脚本针对 Alibaba 的确定性回声链路，读取响应 `x-traceId`，随后校验 Tempo 中的链路、Loki 中同一
 Trace ID 的同步与受管异步日志，以及 Prometheus 中带 Consumer 服务身份的指标。Tencent overlay 使用
 同一套 Collector 与后端配置，但不作为该关联脚本的默认验收链路。验证环境强制使用
-`OTEL_TRACES_SAMPLER_PROBABILITY=1.0`；生产采样率与容量不以本示例为基线。
+`management.tracing.sampling.probability=1.0`；生产采样率与容量不以本示例为基线。
 Collector、Loki 和 Tempo 的运行镜像不包含 HTTP 客户端，因此 overlay 使用固定版本的
 `curlimages/curl` 探针容器分别查询 Collector health extension、Loki `/ready` 和 Tempo `/ready`；
 `docker compose ps` 中对应的 `*-health` 服务为 `healthy` 才表示后端真正就绪。
@@ -149,15 +152,15 @@ Collector、Loki 和 Tempo 的运行镜像不包含 HTTP 客户端，因此 over
 查看全部服务：
 
 ```shell
-docker compose --profile alibaba --profile tencent ps
+./scripts/compose.sh status all
 ```
 
 查看某个服务的日志：
 
 ```shell
-docker compose logs -f nacos
-docker compose logs -f polaris
-docker compose logs -f macula-example-alibaba-gateway
+./scripts/compose.sh logs alibaba nacos
+./scripts/compose.sh logs tencent polaris
+./scripts/compose.sh logs alibaba macula-example-alibaba-gateway
 ```
 
 容器按以下健康依赖启动：MySQL/Redis -> Nacos/Polaris -> provider -> consumer -> gateway。若启动失败，使用 `docker compose ps` 和对应服务日志定位第一个不健康服务。
@@ -167,7 +170,7 @@ docker compose logs -f macula-example-alibaba-gateway
 停止并删除容器和网络，保留 MySQL、Redis 数据：
 
 ```shell
-docker compose --profile alibaba --profile tencent down
+./scripts/compose.sh down all
 ```
 
 再次执行对应的 `up` 命令即可复用原数据。
@@ -175,26 +178,28 @@ docker compose --profile alibaba --profile tencent down
 删除容器、网络和全部本地示例数据卷：
 
 ```shell
-docker compose --profile alibaba --profile tencent down -v
+./scripts/compose.sh reset all --confirm
 ```
 
-`down -v` 不可恢复；只在需要从空数据库重新初始化时使用。
+`reset --confirm` 不可恢复；只在需要从空数据库重新初始化时使用。缺少 `--confirm` 时脚本会拒绝执行。
 
 ## 服务与默认端口
 
 | 服务 | 宿主机地址 |
 | --- | --- |
-| MySQL | `127.0.0.1:3306` |
-| Redis | `127.0.0.1:6379`，默认密码 `redis` |
-| Nacos | `http://127.0.0.1:8848/nacos` |
-| Polaris HTTP | `http://127.0.0.1:8090` |
-| Polaris discovery gRPC | `grpc://127.0.0.1:8091` |
-| Polaris config gRPC | `grpc://127.0.0.1:8093` |
-| Polaris Nacos 兼容 HTTP / gRPC | `127.0.0.1:18849` / `127.0.0.1:19849` |
-| Alibaba provider / consumer / gateway | `5020` / `5010` / `5000`、`5443` |
-| Tencent provider / consumer / gateway | `4020` / `4010` / `4000` |
+| MySQL | `127.0.0.1:33306` |
+| Redis | `127.0.0.1:36379`，默认密码 `redis` |
+| Nacos | `http://127.0.0.1:38848/nacos` |
+| Polaris HTTP | `http://127.0.0.1:38090` |
+| Polaris discovery gRPC | `grpc://127.0.0.1:38091` |
+| Polaris config gRPC | `grpc://127.0.0.1:38093` |
+| Polaris Nacos 兼容 HTTP / gRPC | `127.0.0.1:38849` / `127.0.0.1:39849` |
+| Alibaba Gateway | `http://127.0.0.1:5000` / `https://127.0.0.1:5443` |
+| Tencent Gateway | `http://127.0.0.1:4000` |
+| Collector OTLP/HTTP | `http://127.0.0.1:34318` |
+| Prometheus / Loki / Tempo | `39090` / `33100` / `33200` |
 
-端口均可在 `.env` 中覆盖。容器之间使用 Compose service name 通信，不使用宿主机回环地址。
+表中的宿主机端口均可在 `.env` 中覆盖。provider、consumer、Collector gRPC 与 Collector health 端口不向宿主机发布；容器之间使用 Compose service name 和容器端口通信，不使用宿主机回环地址，也不需要额外声明 `expose`。
 
 ## 上游数据文件
 

@@ -1,6 +1,30 @@
-name: macula-boot-examples
+name: ${COMPOSE_PROJECT_NAME:-macula-boot-examples}
 
 services:
+  macula-example-alibaba-provider1:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
+  macula-example-alibaba-consumer:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
+  macula-example-alibaba-gateway:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
+  macula-example-tencent-provider:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
+  macula-example-tencent-consumer:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
+  macula-example-tencent-gateway:
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,observability
+
   otel-collector:
     image: ${OTEL_COLLECTOR_IMAGE:-otel/opentelemetry-collector-contrib:0.161.0}
     restart: unless-stopped
@@ -8,9 +32,7 @@ services:
     volumes:
       - ${PWD}/observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
     ports:
-      - "127.0.0.1:${OTEL_GRPC_PORT:-4317}:4317"
-      - "127.0.0.1:${OTEL_HTTP_PORT:-4318}:4318"
-      - "127.0.0.1:${OTEL_HEALTH_PORT:-13133}:13133"
+      - "127.0.0.1:${OTEL_HTTP_PORT:-34318}:4318"
     depends_on:
       prometheus:
         condition: service_healthy
@@ -42,7 +64,7 @@ services:
       - ${PWD}/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     ports:
-      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+      - "127.0.0.1:${PROMETHEUS_PORT:-39090}:9090"
     healthcheck:
       test: ["CMD", "/bin/promtool", "check", "healthy", "--url=http://127.0.0.1:9090"]
       interval: 10s
@@ -59,7 +81,7 @@ services:
       - ${PWD}/observability/loki.yaml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
     ports:
-      - "127.0.0.1:${LOKI_PORT:-3100}:3100"
+      - "127.0.0.1:${LOKI_PORT:-33100}:3100"
     networks: [examples]
 
   loki-health:
@@ -85,7 +107,7 @@ services:
       - ${PWD}/observability/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo-data:/var/tempo
     ports:
-      - "127.0.0.1:${TEMPO_PORT:-3200}:3200"
+      - "127.0.0.1:${TEMPO_PORT:-33200}:3200"
     networks: [examples]
 
   tempo-health:

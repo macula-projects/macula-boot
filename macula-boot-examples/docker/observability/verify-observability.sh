@@ -2,9 +2,9 @@
 set -eu
 
 REQUEST_URL="${1:-http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello}"
-PROMETHEUS_URL="${PROMETHEUS_URL:-http://127.0.0.1:9090}"
-LOKI_URL="${LOKI_URL:-http://127.0.0.1:3100}"
-TEMPO_URL="${TEMPO_URL:-http://127.0.0.1:3200}"
+PROMETHEUS_URL="${PROMETHEUS_URL:-http://127.0.0.1:39090}"
+LOKI_URL="${LOKI_URL:-http://127.0.0.1:33100}"
+TEMPO_URL="${TEMPO_URL:-http://127.0.0.1:33200}"
 HEADER_FILE="${TMPDIR:-/tmp}/macula-observability-headers.$$"
 BODY_FILE="${TMPDIR:-/tmp}/macula-observability-body.$$"
 trap 'rm -f "$HEADER_FILE" "$BODY_FILE"' EXIT

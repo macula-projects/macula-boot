@@ -45,6 +45,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 @Configuration
 public class RedisConfiguration {
     @Bean
+    @Primary
     @ConfigurationProperties(prefix = "spring.redis")
     public DataRedisProperties redisProperties() {
         return new DataRedisProperties();
