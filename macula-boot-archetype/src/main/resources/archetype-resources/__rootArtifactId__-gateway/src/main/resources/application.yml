@@ -21,7 +21,22 @@ spring:
       password: ${spring.config.nacos.password}
       discovery:
         namespace: ${spring.cloud.nacos.namespace}
-
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: ${rootArtifactId}-admin-bff
+              uri: lb://${rootArtifactId}-admin-bff
+              predicates:
+                - Path=/admin/**
+              filters:
+                - StripPrefix=1
+            - id: ${rootArtifactId}-openapi
+              uri: lb://${rootArtifactId}-openapi
+              predicates:
+                - Path=/openapi/**
+              filters:
+                - StripPrefix=1
 macula:
   gateway:
     security:
@@ -56,22 +71,6 @@ spring:
   cloud:
     sentinel:
       enabled: false
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: ${rootArtifactId}-admin-bff
-              uri: lb://${rootArtifactId}-admin-bff
-              predicates:
-                - Path=/admin/**
-              filters:
-                - StripPrefix=1
-            - id: ${rootArtifactId}-openapi
-              uri: lb://${rootArtifactId}-openapi
-              predicates:
-                - Path=/openapi/**
-              filters:
-                - StripPrefix=1
   reactor:
     context-propagation: auto
 
