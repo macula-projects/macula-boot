@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+**/target
+**/node_modules
+**/dist
+deploy/.env
+*.iml
+.DS_Store

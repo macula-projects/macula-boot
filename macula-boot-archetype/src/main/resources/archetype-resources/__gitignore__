@@ -37,3 +37,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Local deployment ###
+deploy/.env
+**/node_modules/
+**/dist/

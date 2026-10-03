@@ -1,13 +1,27 @@
-FROM eclipse-temurin:17-jdk-alpine
-ARG JAR_FILE=target/*.jar
+#set( $symbol_dollar = '$' )
+# syntax=docker/dockerfile:1.7
+ARG MAVEN_IMAGE=maven:3.9.11-eclipse-temurin-17
+ARG RUNTIME_IMAGE=eclipse-temurin:17-jre-jammy
+ARG APP_PORT=6001
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV workdir /app
-WORKDIR ${workdir}
+FROM ${symbol_dollar}{MAVEN_IMAGE} AS build
+WORKDIR /workspace
+COPY . .
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    mvn -B -ntp -Plocal -pl ${rootArtifactId}-admin-bff -am clean package -DskipTests \
+    && jar_files=$(find ${rootArtifactId}-admin-bff/target -maxdepth 1 -type f -name '*.jar' \
+         ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*.original') \
+    && test "$(printf '%s\n' "${symbol_dollar}jar_files" | sed '/^${symbol_dollar}/d' | wc -l)" -eq 1 \
+    && cp "${symbol_dollar}jar_files" /tmp/application.jar
 
-ENV jar app.jar
-
-COPY ${JAR_FILE} ${workdir}/app.jar
-CMD ["sh", "-ec", "exec java -XX:+PrintGCDateStamps -XX:+PrintGCDetails -verbose:gc -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=8 -XX:GCLogFileSize=50M ${JAVA_OPTS} -Xshare:off -jar ${jar}"]
+FROM ${symbol_dollar}{RUNTIME_IMAGE} AS runtime
+ARG APP_PORT
+RUN groupadd --system --gid 10001 macula \
+    && useradd --system --uid 10001 --gid macula --home-dir /opt/macula --create-home macula
+WORKDIR /opt/macula
+COPY --from=build --chown=macula:macula /tmp/application.jar application.jar
+USER 10001:10001
+ENV SERVER_PORT=${symbol_dollar}{APP_PORT} \
+    JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+EXPOSE ${symbol_dollar}{APP_PORT}
+ENTRYPOINT ["sh", "-c", "exec java ${symbol_dollar}{JAVA_OPTS} -jar /opt/macula/application.jar"]

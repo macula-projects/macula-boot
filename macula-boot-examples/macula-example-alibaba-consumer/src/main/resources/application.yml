@@ -1,47 +1,55 @@
 server:
-  port: 5010
-
-nacos:
-  username: ${NACOS_USERNAME:nacos}
-  password: ${NACOS_PASSWORD:nacos}
-  server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
-  namespace: ${NACOS_NAMESPACE:MACULA5}
+  port: ${SERVER_PORT:5010}
 
 spring:
   profiles:
     active: @profile.active@
+    group:
+      docker: local
   application:
     name: macula-example-alibaba-consumer
+  servlet:
+    encoding:
+      force: true
   config:
     import:
       - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
-      server-addr: ${nacos.server-addr}
-      username: ${nacos.username}
-      password: ${nacos.password}
-      config:
-        namespace: ${nacos.namespace}
-        refresh-enabled: true
-        file-extension: yml
+      server-addr: ${spring.config.nacos.server-addr}
+      namespace: ${spring.config.nacos.namespace}
+      username: ${spring.config.nacos.username}
+      password: ${spring.config.nacos.password}
       discovery:
-        namespace: ${nacos.namespace}
         enabled: true
+        namespace: ${spring.cloud.nacos.namespace}
+        metadata:
+          version: v1
         # group:
 ---
-# 以下为 local Profile 本地默认配置；其他环境请在 Nacos 配置中心维护
+# local Profile 包含 IDE 本地开发所需的全部默认配置
 spring:
   config:
     activate:
       on-profile: local
+    nacos:
+      server-addr: 127.0.0.1:${NACOS_SERVER_PORT:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+  data:
+    redis:
+      host: 127.0.0.1
+      port: ${REDIS_PORT:36379}
+      password: ${REDIS_PASSWORD:redis}
   cloud:
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
       eager: true
       transport:
         # 控制台地址
-        dashboard: localhost:8080
+        dashboard: ${SENTINEL_DASHBOARD_ADDR:127.0.0.1:38080}
         # 客户端监控API的端口，默认8719，与Sentinel控制台做交互。有规则变化会把规则数据push给这个Http Server接收,然后注册到sentinel中
         port: 8719
       # Sentinel Nacos数据源配置，Nacos中的规则会⾃动同步到sentinel控制台的流控规则中
@@ -54,7 +62,7 @@ spring:
         flow:
           # 指定数据源类型
           nacos:
-            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:${NACOS_SERVER_ADDR:127.0.0.1:8848}}
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:127.0.0.1:${NACOS_SERVER_PORT:38848}}
             data-id: ${spring.application.name}-flow-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP
@@ -63,7 +71,7 @@ spring:
             rule-type: flow
         degrade:
           nacos:
-            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:${NACOS_SERVER_ADDR:127.0.0.1:8848}}
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:127.0.0.1:${NACOS_SERVER_PORT:38848}}
             data-id: ${spring.application.name}-degrade-rules
             namespace: SENTINEL
             # 默认分组：DEFAULT_GROUP
@@ -74,10 +82,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${GATEWAY_JWK_SET_URI:http://127.0.0.1:5000/oauth2/jwks}    # 网关地址
-  servlet:
-    encoding:
-      force: true
+          jwk-set-uri: http://127.0.0.1:5000/oauth2/jwks    # 网关地址
 
 feign:
   httpclient:
@@ -144,31 +149,130 @@ management:
   otlp:
     metrics:
       export:
-        enabled: ${OTEL_METRICS_EXPORT_ENABLED:false}
-        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://127.0.0.1:4318/v1/metrics}
+        enabled: false
+        url: http://127.0.0.1:34318/v1/metrics
   tracing:
     sampling:
-      probability: ${OTEL_TRACES_SAMPLER_PROBABILITY:0.1}
+      probability: 0.1
     export:
       otlp:
-        enabled: ${OTEL_TRACES_EXPORT_ENABLED:false}
+        enabled: false
   logging:
     export:
       otlp:
-        enabled: ${OTEL_LOGS_EXPORT_ENABLED:false}
+        enabled: false
   opentelemetry:
     resource-attributes:
       service:
-        name: ${OTEL_SERVICE_NAME:${spring.application.name}}
-        namespace: ${OTEL_SERVICE_NAMESPACE:macula-examples}
+        name: ${spring.application.name}
+        namespace: macula-examples
       deployment:
         environment:
-          name: ${DEPLOYMENT_ENVIRONMENT:local}
+          name: local
     tracing:
       export:
         otlp:
-          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+          endpoint: http://127.0.0.1:34318/v1/traces
     logging:
       export:
         otlp:
-          endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://127.0.0.1:4318/v1/logs}
+          endpoint: http://127.0.0.1:34318/v1/logs
+
+---
+# Docker Profile 覆盖容器内 DNS 连接信息，其余沿用 local 默认配置
+spring:
+  config:
+    activate:
+      on-profile: docker
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://macula-example-alibaba-gateway:5000/oauth2/jwks
+
+---
+# 共享环境只保留配置中心连接信息，其余配置由 Nacos Data ID 提供
+spring:
+  config:
+    activate:
+      on-profile: dev
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: stg
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: pet
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+
+---
+# observability Profile 由可观测部署叠加启用，应用配置直接指向 Collector
+spring:
+  config:
+    activate:
+      on-profile: observability
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://otel-collector:4318/v1/metrics
+        step: 10s
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      otlp:
+        enabled: true
+  logging:
+    export:
+      otlp:
+        enabled: true
+  opentelemetry:
+    resource-attributes:
+      deployment:
+        environment:
+          name: docker
+    tracing:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/logs

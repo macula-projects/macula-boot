@@ -29,9 +29,20 @@ const DEFAULT_CONFIG = {
     CORE_VER: "1.6.9",
 
     //接口地址
-    API_URL: import.meta.env.NODE_ENV === 'development' && import.meta.env.VITE_APP_PROXY === 'true' ? "/api" : import.meta.env.VITE_APP_API_BASEURL,
+    API_URL: import.meta.env.DEV && import.meta.env.VITE_APP_PROXY === 'true' ? "/api" : (import.meta.env.VITE_APP_API_BASEURL || "/api"),
 
-    IAM_URL: import.meta.env.VITE_APP_IAM_URL,
+    //外部 Macula Cloud IAM 地址，不经过 Vite/Nginx 代理
+    IAM_URL: import.meta.env.MACULA_CLOUD_IAM_URL || "http://127.0.0.1:9010",
+
+    OAUTH_CLIENT_ID: import.meta.env.VITE_APP_OAUTH_CLIENT_ID,
+
+    OAUTH_CLIENT_SECRET: import.meta.env.VITE_APP_OAUTH_CLIENT_SECRET,
+
+    OAUTH_SCOPE: import.meta.env.VITE_APP_OAUTH_SCOPE || "message.read message.write userinfo",
+
+    DEMO_USERNAME: import.meta.env.VITE_APP_DEMO_USERNAME || "admin",
+
+    DEMO_PASSWORD: import.meta.env.VITE_APP_DEMO_PASSWORD || "admin",
 
     //请求超时
     TIMEOUT: 10000,

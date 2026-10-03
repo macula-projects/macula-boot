@@ -34,12 +34,30 @@
                 <include>**/LICENSE</include>
                 <include>**/Dockerfile</include>
                 <include>__gitignore__</include>
+                <include>.dockerignore</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>deploy</directory>
+            <includes>
+                <include>.env.example</include>
+                <include>docker-compose.yml</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>deploy</directory>
+            <includes>
+                <include>scripts/**/*.sh</include>
+                <include>init/**/*.sh</include>
+                <include>init/**/*.sql</include>
             </includes>
         </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
             <directory>__rootArtifactId__-admin</directory>
             <includes>
                 <include>*</include>
+                <include>.env*</include>
+                <include>.dockerignore</include>
             </includes>
             <excludes>
                 <exclude>*.md</exclude>
@@ -59,9 +77,28 @@
             </includes>
         </fileSet>
         <fileSet filtered="false" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/tests</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
             <directory>__rootArtifactId__-admin/public</directory>
             <includes>
                 <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="false" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/nginx/entrypoint.d</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>__rootArtifactId__-admin/nginx</directory>
+            <includes>
+                <include>nginx.conf</include>
+                <include>templates/**/*</include>
             </includes>
         </fileSet>
     </fileSets>
@@ -154,10 +191,8 @@
                         <include>**/*.yml</include>
                         <include>**/*.properties</include>
                         <include>**/mapper/*.*</include>
+                        <include>**/db/migration/*.sql</include>
                     </includes>
-                </fileSet>
-                <fileSet filtered="true" encoding="UTF-8">
-                    <directory>docs</directory>
                 </fileSet>
             </fileSets>
         </module>

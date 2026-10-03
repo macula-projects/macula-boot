@@ -86,13 +86,15 @@ axios.interceptors.response.use(
                         loadQuitMsgBox = false
                     })
                 }
-            } else {
+            } else if (error.config?.showErrorNotification !== false) {
                 ElNotification.error({
                     title: '请求错误',
-                    message: error.message || `Status:${error.response.status}，未知错误！`
+                    message: error.response.data?.msg || error.response.data?.message ||
+                        error.response.data?.error_description || error.response.data?.error ||
+                        error.message || `Status:${error.response.status}，未知错误！`
                 });
             }
-        } else {
+        } else if (error.config?.showErrorNotification !== false) {
             ElNotification.error({
                 title: '请求错误',
                 message: "请求服务器无响应！"

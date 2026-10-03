@@ -12,7 +12,7 @@
 mvn -pl macula-boot-examples/macula-example-tencent-gateway -am spring-boot:run
 ```
 
-默认端口为 `4000`，Polaris 地址为 `grpc://127.0.0.1:8091`。可通过 `POLARIS_SERVER_ADDR` 和 `POLARIS_NAMESPACE` 覆盖。
+默认端口为 `4000`，Polaris 地址为 `grpc://127.0.0.1:38091`，Spring Cloud Tencent 的 Nacos 兼容 discovery 地址为 `127.0.0.1:38849`。可通过 `POLARIS_SERVER_ADDR`、`POLARIS_NACOS_SERVER_ADDR` 和 `POLARIS_NAMESPACE` 覆盖。
 
 ## 验证
 

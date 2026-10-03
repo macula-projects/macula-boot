@@ -22,6 +22,9 @@ const APP_CONFIG = {
     //标题
     //APP_NAME: "SCUI",
 
-    //接口地址，如遇跨域需使用nginx代理
-    //API_URL: "https://www.fastmock.site/mock/5039c4361c39a7e3252c5b55971f1bd3/api"
+    //业务接口固定使用同源 Nginx 代理
+    //API_URL: "/api",
+
+    //外部 IAM 地址；容器模式由运行时的 MACULA_CLOUD_IAM_URL 提供
+    //IAM_URL: "https://iam.example.com"
 }

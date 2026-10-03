@@ -3,7 +3,7 @@ spring:
     name: macula-example-binlog4j
   redis:
     host: 127.0.0.1
-    port: 6379
+    port: ${REDIS_PORT:36379}
 
 binlog4j:
   client-configs:
@@ -11,7 +11,7 @@ binlog4j:
       username: root
       password:
       host: 127.0.0.1
-      port: 3306
+      port: ${MYSQL_PORT:33306}
       serverId: 1991
       persistence: true
       mode: cluster

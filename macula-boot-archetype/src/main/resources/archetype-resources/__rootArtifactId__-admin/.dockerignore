@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.idea
+.env.local
+.env.*.local
+npm-debug.log*
+cypress/videos
+cypress/screenshots
