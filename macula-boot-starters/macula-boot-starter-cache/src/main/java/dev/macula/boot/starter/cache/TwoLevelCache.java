@@ -27,8 +27,8 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -139,9 +139,8 @@ public class TwoLevelCache extends RedisCache {
      * @see #get(Object)
      */
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public synchronized <T> T get(@NonNull Object key, @NonNull Callable<T> valueLoader) {
+    public synchronized <T> @NonNull T get(@NonNull Object key, @NonNull Callable<T> valueLoader) {
         Object result = lookup(key);
         if (result != null) {
             return (T)result;

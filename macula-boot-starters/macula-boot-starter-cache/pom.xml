@@ -49,11 +49,6 @@
             <artifactId>micrometer-core</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker-qual</artifactId>
-            <version>3.42.0</version>
-        </dependency>
     </dependencies>
 
 </project>

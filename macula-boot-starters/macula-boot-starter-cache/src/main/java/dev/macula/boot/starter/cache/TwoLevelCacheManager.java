@@ -20,13 +20,12 @@ package dev.macula.boot.starter.cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.cache.autoconfigure.CacheProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -141,15 +140,25 @@ public class TwoLevelCacheManager implements CacheManager {
             return expiry.toNanos();
         }
 
+        /**
+         * 保留更新前的剩余有效期。
+         *
+         * @param currentDuration 当前剩余有效期（纳秒），应为非负数
+         */
         @Override
         public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime,
-            @NonNegative long currentDuration) {
+            long currentDuration) {
             return currentDuration;
         }
 
+        /**
+         * 保留读取前的剩余有效期。
+         *
+         * @param currentDuration 当前剩余有效期（纳秒），应为非负数
+         */
         @Override
         public long expireAfterRead(@NonNull Object key, @NonNull Object value, long currentTime,
-            @NonNegative long currentDuration) {
+            long currentDuration) {
             return currentDuration;
         }
     }
