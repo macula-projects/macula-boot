@@ -17,7 +17,7 @@
 
 package dev.macula.example.binlog4j.handler;
 
-import com.alibaba.fastjson2.JSON;
+import tools.jackson.databind.json.JsonMapper;
 import dev.macula.boot.starter.binlog4j.IBinlogEventHandler;
 import dev.macula.boot.starter.binlog4j.config.annotation.BinlogSubscriber;
 import dev.macula.example.binlog4j.entity.User;
@@ -31,14 +31,16 @@ import dev.macula.example.binlog4j.entity.User;
 @BinlogSubscriber(clientName = "master", database = "macula-system", table = "sys_user")
 public class UserEventHandler implements IBinlogEventHandler<User> {
 
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
+
     @Override
     public void onInsert(User target) {
-        System.out.println("插入数据：" + JSON.toJSONString(target));
+        System.out.println("插入数据：" + JSON_MAPPER.writeValueAsString(target));
     }
 
     @Override
     public void onUpdate(User source, User target) {
-        System.out.println("修改数据:" + JSON.toJSONString(target));
+        System.out.println("修改数据:" + JSON_MAPPER.writeValueAsString(target));
     }
 
     @Override

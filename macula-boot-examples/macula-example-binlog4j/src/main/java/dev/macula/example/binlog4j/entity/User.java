@@ -17,8 +17,6 @@
 
 package dev.macula.example.binlog4j.entity;
 
-import com.alibaba.fastjson2.PropertyNamingStrategy;
-import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.Data;
 
 /**
@@ -28,7 +26,6 @@ import lombok.Data;
  * @since 5.0.0
  */
 @Data
-@JSONType(naming = PropertyNamingStrategy.SnakeCase)
 public class User {
     private Long id;
 

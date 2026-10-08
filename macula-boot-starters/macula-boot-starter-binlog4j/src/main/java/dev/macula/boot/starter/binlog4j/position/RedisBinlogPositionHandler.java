@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.binlog4j.position;
 
-import com.alibaba.fastjson2.JSON;
+import tools.jackson.databind.json.JsonMapper;
 import dev.macula.boot.starter.binlog4j.utils.CacheConstants;
 import org.redisson.api.RedissonClient;
 
@@ -29,6 +29,8 @@ import org.redisson.api.RedissonClient;
  */
 public class RedisBinlogPositionHandler implements BinlogPositionHandler {
 
+    private static final JsonMapper POSITION_MAPPER = JsonMapper.builder().build();
+
     private final RedissonClient redissonClient;
 
     public RedisBinlogPositionHandler(RedissonClient redissonClient) {
@@ -39,14 +41,14 @@ public class RedisBinlogPositionHandler implements BinlogPositionHandler {
     public BinlogPosition loadPosition(Long serverId) {
         Object value = redissonClient.getBucket(getKey(serverId)).get();
         if (value != null) {
-            return JSON.parseObject(value.toString(), BinlogPosition.class);
+            return POSITION_MAPPER.readValue(value.toString(), BinlogPosition.class);
         }
         return null;
     }
 
     @Override
     public void savePosition(BinlogPosition position) {
-        redissonClient.getBucket(getKey(position.getServerId())).set(JSON.toJSONString(position));
+        redissonClient.getBucket(getKey(position.getServerId())).set(POSITION_MAPPER.writeValueAsString(position));
     }
 
     private String getKey(Long serverId) {

@@ -47,17 +47,21 @@ binlog4j:
 ### 订阅binlog事件
 
 ```java
+import tools.jackson.databind.json.JsonMapper;
+
 @BinlogSubscriber(clientName = "master", database = "macula-system", table ="sys_user")
 public class UserEventHandler implements IBinlogEventHandler<User> {
 
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
+
     @Override
     public void onInsert(User target) {
-        System.out.println("插入数据：" + JSON.toJSONString(target));
+        System.out.println("插入数据：" + JSON_MAPPER.writeValueAsString(target));
     }
 
     @Override
     public void onUpdate(User source, User target) {
-        System.out.println("修改数据:" + JSON.toJSONString(target));
+        System.out.println("修改数据:" + JSON_MAPPER.writeValueAsString(target));
     }
 
     @Override
@@ -67,7 +71,6 @@ public class UserEventHandler implements IBinlogEventHandler<User> {
 }
 
 @Data
-@JSONType(naming = PropertyNamingStrategy.SnakeCase)
 public class User {
     private Long id;
     private String username;
@@ -82,7 +85,11 @@ public class User {
 }
 ```
 
-> 注意Entity要使用SnakeCase策略
+组件使用独立的 Jackson 3 Mapper，默认将下划线列名映射到驼峰属性，例如 `dept_id → deptId`，无需实体类声明命名策略。没有对应属性的列会忽略；无法转换的字段值会抛出异常。
+
+特殊列名可通过 `com.fasterxml.jackson.annotation.JsonProperty` 显式映射，例如 `@JsonProperty("user_no") private String account;`。原有 fastjson2 的 `@JSONType`、`@JSONField` 和自定义反序列化器不再生效，升级时须迁移为 Jackson 注解或对应实现。日期、枚举等自定义转换应针对业务实体验证。
+
+Redis 位点使用另一个独立 Mapper，保留 `serverId`、`position`、`filename`、`gtidSet` 字段名和原 Redis key，可读取历史位点 JSON。组件不修改应用全局 Mapper；位点 JSON 字段顺序和 null 输出不作为兼容性约定。
 
 ### 集群模式说明
 
@@ -105,20 +112,20 @@ redis锁，其他实例会单独一个线程等待锁，如果前面的实力出
         <artifactId>hutool-all</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.alibaba.fastjson2</groupId>
-        <artifactId>fastjson2</artifactId>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
         <groupId>com.alibaba</groupId>
         <artifactId>druid</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.zendesk</groupId>
+        <groupId>io.debezium</groupId>
         <artifactId>mysql-binlog-connector-java</artifactId>
     </dependency>
     <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
+        <groupId>com.mysql</groupId>
+        <artifactId>mysql-connector-j</artifactId>
         <optional>true</optional>
     </dependency>
 </dependencies>

@@ -17,8 +17,9 @@
 
 package dev.macula.boot.starter.binlog4j;
 
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.util.TypeUtils;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 import dev.macula.boot.starter.binlog4j.utils.JDBCUtils;
 import lombok.Data;
 
@@ -37,6 +38,11 @@ import java.util.Map;
 @Data
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class BinlogEventHandlerDetails {
+
+    private static final JsonMapper ENTITY_MAPPER = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     private String database;
     private String table;
@@ -75,6 +81,6 @@ public class BinlogEventHandlerDetails {
         if (entityClass == null) {
             return obj;
         }
-        return TypeUtils.cast(obj, entityClass, JSONFactory.getDefaultObjectReaderProvider());
+        return ENTITY_MAPPER.convertValue(obj, entityClass);
     }
 }
