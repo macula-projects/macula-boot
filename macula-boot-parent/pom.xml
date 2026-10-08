@@ -97,7 +97,7 @@
         <aliyun-sdk-oss.version>3.18.5</aliyun-sdk-oss.version>
         <cola.version>5.0.0</cola.version>
         <opentelemetry-instrumentation.version>2.21.0-alpha</opentelemetry-instrumentation.version>
-        <weixin-java.version>4.7.0</weixin-java.version>
+        <weixin-java.version>4.8.6.B</weixin-java.version>
     </properties>
 
     <dependencyManagement>

@@ -31,10 +31,6 @@
     <description>Macula Boot Starter Wechat</description>
     <url>https://macula.dev</url>
 
-    <properties>
-        <weixin-java.version>4.6.0</weixin-java.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>dev.macula.boot</groupId>
