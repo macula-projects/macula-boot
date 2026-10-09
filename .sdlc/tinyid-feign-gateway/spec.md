@@ -1,7 +1,7 @@
 # Spec: TinyID 号段客户端统一网关接入 (from intent.md 2026-10-09)
 
 最新已接受修订：四个发号接口均移除 TinyID token 参数及校验，只保留 bizType 和适用的 batchSize；Server 删除全部发号匿名白名单，网关精确路由四个接口并沿用共享认证，不新增 HMAC/个人 Token 区分。管理端历史 Token 数据及功能保留。本条覆盖下文旧 token 兼容说明，实施依据为 Boot 仓 plan-remove-issuing-token.md。
-本轮已同步 Controller、Service、配置、README 与测试用例；正式测试尚未执行，旧验证结果不代表本轮通过。
+本轮实现及最终复验已完成；最新测试结果以 Boot 仓 verification.md 的“2026-10-09 最新修订复验”节为准，下文早期状态仅作历史记录。
 Status: accepted.
 
 最新用户决定：撤销本次新增的 TinyID 专属 HMAC/个人 Token 区分，删除 TinyIdHmacGlobalFilter 及其专属拒绝测试，沿用共享网关认证授权逻辑；身份边界留待用户统一处理。此决定覆盖下文历史 HMAC-only 约束，不等同于该安全边界已修复；现有 HMAC 验签、URL 授权、JWT 校验及路由前缀处理保留。
