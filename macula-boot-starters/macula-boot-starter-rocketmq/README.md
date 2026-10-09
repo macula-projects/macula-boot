@@ -16,6 +16,12 @@
 
 ## 核心功能
 
+### 消息序列化
+
+Macula 的消息转换链使用 Jackson 3，保留字节数组、UTF-8 字符串和 JSON 消息支持。JSON 内置 Java 时间类型支持，日期仍输出 ISO 字符串，长整数仍输出数字；未知字段和基本类型的 `null` 值沿用历史兼容行为。转换链不再使用 Jackson 2 或 Fastjson 回退，自定义序列化器须使用 `tools.jackson` API。
+
+RocketMQ Spring 2.3.4 自身初始化仍依赖 Jackson 2，因此保留第三方传递依赖。不要因 Macula 已使用 Jackson 3 而排除这些依赖。
+
 ### RocketMQ最佳实践
 
 {{% alert title="提示" color="primary" %}}

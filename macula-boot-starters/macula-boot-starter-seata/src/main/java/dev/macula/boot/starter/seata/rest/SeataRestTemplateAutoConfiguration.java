@@ -20,7 +20,7 @@ package dev.macula.boot.starter.seata.rest;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;

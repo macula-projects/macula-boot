@@ -18,7 +18,7 @@
 package dev.macula.boot.starter.rocketmq;
 
 import dev.macula.boot.starter.rocketmq.config.Constants;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ObjectUtils;

@@ -61,6 +61,8 @@ public class JacksonConfiguration {
             builder.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             // 反序列化时，json 中包含 pojo 不存在属性时，是否抛异常
             builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            // 保留 Jackson 2 对基本类型 null 值的兼容行为（如 int -> 0）。
+            builder.disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
             SimpleModule javaTimeFormats = new SimpleModule("maculaJavaTimeFormats");
 
             // 设置LocalDate的日期格式

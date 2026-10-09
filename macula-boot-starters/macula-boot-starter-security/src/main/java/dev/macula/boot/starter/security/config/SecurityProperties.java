@@ -35,7 +35,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -69,27 +68,11 @@ public class SecurityProperties implements InitializingBean {
                 HandlerMethod handlerMethod = map.get(info);
                 Inner method = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Inner.class);
                 Inner controller = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Inner.class);
-                if (null != info.getPathPatternsCondition()) {
-                    // 获取方法上边的注解 替代path variable 为 *
-                    Optional.ofNullable(method).ifPresent(
-                            inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
-                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
-
-                    // 获取类上边的注解, 替代path variable 为 *
-                    Optional.ofNullable(controller).ifPresent(
-                            inner -> Objects.requireNonNull(info.getPathPatternsCondition()).getPatternValues()
-                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
-                } else {
-                    // 获取方法上边的注解 替代path variable 为 *
-                    Optional.ofNullable(method).ifPresent(
-                            inner -> Objects.requireNonNull(info.getPatternsCondition()).getPatterns()
-                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
-
-                    // 获取类上边的注解, 替代path variable 为 *
-                    Optional.ofNullable(controller).ifPresent(
-                            inner -> Objects.requireNonNull(info.getPatternsCondition()).getPatterns()
-                                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
-                }
+                // 统一获取当前匹配策略的路径，将 path variable 替换为 *。
+                Optional.ofNullable(method).ifPresent(inner -> info.getPatternValues()
+                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
+                Optional.ofNullable(controller).ifPresent(inner -> info.getPatternValues()
+                    .forEach(url -> ignoreUrls.add(ReUtil.replaceAll(url, PATTERN, "*"))));
             });
         }
     }

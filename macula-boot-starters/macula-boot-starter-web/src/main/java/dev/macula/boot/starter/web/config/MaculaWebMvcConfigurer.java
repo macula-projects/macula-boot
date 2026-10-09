@@ -19,20 +19,18 @@ package dev.macula.boot.starter.web.config;
 
 import cn.hutool.core.date.DateUtil;
 import dev.macula.boot.starter.web.interceptor.GrayHandlerInterceptor;
-import dev.macula.boot.starter.web.json.MappingApiJackson2HttpMessageConverter;
+import dev.macula.boot.starter.web.json.MappingApiJacksonHttpMessageConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -72,11 +70,8 @@ public class MaculaWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.removeIf(x -> x instanceof StringHttpMessageConverter);
-        converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
-
-        converters.removeIf(x -> x instanceof AbstractJacksonHttpMessageConverter<?>);
-        converters.add(new MappingApiJackson2HttpMessageConverter(objectMapper, jacksonProperties));
+    public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        builder.withStringConverter(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        builder.withJsonConverter(new MappingApiJacksonHttpMessageConverter(objectMapper, jacksonProperties));
     }
 }

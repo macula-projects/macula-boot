@@ -20,7 +20,7 @@ package dev.macula.boot.starter.websocket.stomp;
 import dev.macula.boot.starter.websocket.config.WebSocketProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;

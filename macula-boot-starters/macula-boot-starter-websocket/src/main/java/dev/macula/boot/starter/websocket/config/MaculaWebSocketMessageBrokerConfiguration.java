@@ -20,7 +20,7 @@ package dev.macula.boot.starter.websocket.config;
 import dev.macula.boot.starter.websocket.stomp.RedisSimpUserRegistry;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
 
