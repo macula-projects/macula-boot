@@ -21,10 +21,13 @@ import dev.macula.boot.starter.tinyid.base.factory.IdGeneratorFactory;
 import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
 import dev.macula.boot.starter.tinyid.factory.impl.CachedIdGeneratorFactory;
 import dev.macula.boot.starter.tinyid.service.impl.HttpSegmentIdServiceImpl;
+import dev.macula.boot.starter.tinyid.remote.TinyIdFeignClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * TinyId 分布式ID生成器自动配置类
@@ -33,17 +36,26 @@ import org.springframework.context.annotation.Bean;
  * @since 5.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties(TinyIdProperties.class)
 public class TinyIdAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public SegmentIdService segmentIdService(TinyIdProperties properties) {
-        return new HttpSegmentIdServiceImpl(properties);
+    /**
+     * 自定义号段服务存在时不注册 Feign，避免 Server 依赖客户端凭据。
+     * @since 6.1.0
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnMissingBean(SegmentIdService.class)
+    @EnableFeignClients(clients = TinyIdFeignClient.class)
+    static class RemoteClientConfiguration {
+
+        @Bean
+        SegmentIdService segmentIdService(TinyIdFeignClient client) {
+            return new HttpSegmentIdServiceImpl(client);
+        }
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(SegmentIdService.class)
     public IdGeneratorFactory idGeneratorFactory(SegmentIdService segmentIdService) {
         return new CachedIdGeneratorFactory(segmentIdService);
     }

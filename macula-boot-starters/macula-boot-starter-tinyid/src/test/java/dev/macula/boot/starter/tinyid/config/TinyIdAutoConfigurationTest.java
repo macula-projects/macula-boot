@@ -24,6 +24,9 @@ import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.FilteredClassLoader;
+import org.springframework.cloud.openfeign.FeignAutoConfiguration;
+import dev.macula.boot.starter.tinyid.remote.TinyIdFeignClient;
 
 /**
  * {@link TinyIdAutoConfiguration} 自动配置测试。
@@ -34,20 +37,17 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 class TinyIdAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(TinyIdAutoConfiguration.class));
+        .withConfiguration(AutoConfigurations.of(TinyIdAutoConfiguration.class, FeignAutoConfiguration.class));
 
     @Test
-    void bindsPropertiesAndCreatesClientBeansWithoutCallingServer() {
+    void createsClientBeansWithoutCallingServer() {
         contextRunner
-            .withPropertyValues("macula.cloud.tinyid.server=http://tinyid.internal", "macula.cloud.tinyid.token=secret", "macula.cloud.tinyid.read-timeout=1200")
+            .withPropertyValues("macula.cloud.endpoint=http://localhost:9000",
+                "macula.cloud.app-key=test-app", "macula.cloud.secret-key=test-only-secret")
             .run(context -> {
-                assertThat(context).hasSingleBean(TinyIdProperties.class);
                 assertThat(context).hasSingleBean(SegmentIdService.class);
                 assertThat(context).hasSingleBean(IdGeneratorFactory.class);
-                TinyIdProperties properties = context.getBean(TinyIdProperties.class);
-                assertThat(properties.getServer()).isEqualTo("http://tinyid.internal");
-                assertThat(properties.getToken()).isEqualTo("secret");
-                assertThat(properties.getReadTimeout()).isEqualTo(1_200);
+                assertThat(context).hasSingleBean(TinyIdFeignClient.class);
             });
     }
 
@@ -61,6 +61,16 @@ class TinyIdAutoConfigurationTest {
             .run(context -> {
                 assertThat(context.getBean(SegmentIdService.class)).isSameAs(segmentService);
                 assertThat(context.getBean(IdGeneratorFactory.class)).isSameAs(generatorFactory);
+                assertThat(context).doesNotHaveBean(TinyIdFeignClient.class);
+            });
+    }
+
+    @Test
+    void serverServiceCreatesLocalFactoryWithoutRemoteCredentialsOrMybatisPlus() {
+        contextRunner.withClassLoader(new FilteredClassLoader("com.baomidou.mybatisplus"))
+            .withBean(SegmentIdService.class, () -> mock(SegmentIdService.class)).run(context -> {
+                assertThat(context).hasSingleBean(IdGeneratorFactory.class);
+                assertThat(context).doesNotHaveBean(TinyIdFeignClient.class);
             });
     }
 }

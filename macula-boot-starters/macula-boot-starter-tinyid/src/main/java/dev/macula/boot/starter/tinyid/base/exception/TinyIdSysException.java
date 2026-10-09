@@ -17,27 +17,60 @@
 
 package dev.macula.boot.starter.tinyid.base.exception;
 
+import dev.macula.boot.exception.BizException;
+import dev.macula.boot.result.ApiResultCode;
+import dev.macula.boot.result.ResultCode;
+
 /**
- * TinyId 系统异常
+ * 携带统一结果码的 TinyID 系统异常，可由 BizException 异常处理器识别。
  * 
  * @author du_imba
  * @since 5.0.0
  */
-public class TinyIdSysException extends RuntimeException {
+public class TinyIdSysException extends BizException {
 
+    /** 使用默认系统错误码创建异常。 */
     public TinyIdSysException() {
-        super();
+        this(ApiResultCode.SYS_ERROR, null);
     }
 
+    /**
+     * @param message 异常详情
+     */
     public TinyIdSysException(String message) {
-        super(message);
+        this(ApiResultCode.SYS_ERROR, message);
     }
 
+    /**
+     * @param message 异常详情
+     * @param cause 原始异常
+     */
     public TinyIdSysException(String message, Throwable cause) {
-        super(message, cause);
+        this(ApiResultCode.SYS_ERROR, message, cause);
     }
 
+    /**
+     * @param cause 原始异常，其文本作为异常详情
+     */
     public TinyIdSysException(Throwable cause) {
-        super(cause);
+        this(cause == null ? null : cause.toString(), cause);
+    }
+
+    /**
+     * @param resultCode 结果码及对外消息，不得为 null
+     * @param message 异常详情，与对外消息分开保存
+     */
+    public TinyIdSysException(ResultCode resultCode, String message) {
+        super(resultCode, message);
+    }
+
+    /**
+     * @param resultCode 结果码及对外消息，不得为 null
+     * @param message 异常详情
+     * @param cause 原始异常
+     */
+    public TinyIdSysException(ResultCode resultCode, String message, Throwable cause) {
+        this(resultCode, message);
+        initCause(cause);
     }
 }

@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.tinyid.base.generator.impl;
 
 import dev.macula.boot.starter.tinyid.base.entity.Result;
+import dev.macula.boot.exception.BizException;
 import dev.macula.boot.starter.tinyid.base.entity.ResultCode;
 import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
 import dev.macula.boot.starter.tinyid.base.exception.TinyIdSysException;
@@ -65,16 +66,35 @@ public class CachedIdGenerator implements IdGenerator {
     }
 
     private SegmentId querySegmentId() {
-        String message = null;
         try {
             SegmentId segmentId = segmentIdService.getNextSegmentId(bizType);
             if (segmentId != null) {
                 return segmentId;
             }
+        } catch (TinyIdSysException e) {
+            throw e;
+        } catch (BizException e) {
+            throw new TinyIdSysException(new RemoteResultCode(e.getCode(), e.getMsg()), e.getMessage(), e);
         } catch (Exception e) {
-            message = e.getMessage();
+            throw new TinyIdSysException("error query segmentId: " + e.getMessage(), e);
         }
-        throw new TinyIdSysException("error query segmentId: " + message);
+        throw new TinyIdSysException("error query segmentId: empty response");
+    }
+
+    /**
+     * 将远程业务异常的结果码适配到 TinyID 异常构造契约。
+     * @since 6.1.0
+     */
+    private record RemoteResultCode(String code, String msg) implements dev.macula.boot.result.ResultCode {
+        @Override
+        public String getCode() {
+            return code;
+        }
+
+        @Override
+        public String getMsg() {
+            return msg;
+        }
     }
 
     public void loadNext() {
