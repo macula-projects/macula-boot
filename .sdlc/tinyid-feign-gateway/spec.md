@@ -51,3 +51,12 @@ Status: accepted.
 - Macula Boot AGENTS.md、REVIEW.md 及 architecture、starter-development、dependencies-release、testing 规则。
 - Macula Cloud AGENTS.md 及 architecture、backend-development 规则；安全契约默认拒绝未确认授权，破坏兼容变更需明确迁移过程。
 - sdlc-design 技能要求显式评审后方可接受；未发现额外适用的组织安全或合规技能。bands.yaml 尚为示例，不据此虚构性能 SLO。
+
+## MyBatis-Plus supplement
+用户在接受实施计划时追加：TinyID starter 提供 MyBatis-Plus 自定义 ID 生成器，MyBatis-Plus 依赖必须 optional。以下接入细节已随补充计划获用户明确批准。
+- 新增 TinyIdIdentifierGenerator，实现 IdentifierGenerator；构造参数为 IdGeneratorFactory，nextId(entity) 通过 MyBatis-Plus TableInfo 元数据取得映射表名及主键列名，按用户指定规则以单个下划线拼接 bizType：表名_主键列名，例如 sys_user_id、sales_order_order_id，再委托现有本地号段生成器。
+- 仅提供普通 Java 实现类，不添加组件注解、Bean 定义或 MyBatis-Plus 自动配置；Bean 注册、生成器选用及接入配置全部由使用方负责。使用元数据中的逻辑表名，不随动态物理分表后缀改变；缺少表或主键元数据时明确报错。
+- Server 需预先配置对应 bizType；同名映射及下划线拼接结果相同的映射会共享序列。表或主键列改名会改变 bizType，迁移时须处理序列连续性，不能直接重建从低值开始的序列。
+- 用于 ASSIGN_ID；不改变 ASSIGN_UUID 行为，不自动创建服务端业务配置，失败不回退到其他 ID 算法。
+- 仅依赖 mybatis-plus-core，声明 optional=true，版本统一由 parent 管理；未引入 MyBatis-Plus 的应用仍可正常使用 TinyID。
+- 验证实现类的元数据解析和发号委托，以及缺少 MyBatis-Plus 依赖时 TinyID 正常装配；不修改 MyBatis-Plus starter，不承担使用方 Bean 注册及全局生成器配置集成。
