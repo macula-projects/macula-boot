@@ -17,6 +17,15 @@ Starter 会传递提供 SnailJob starter、Job Core、Retry Core，以及旧 Han
 
 ## 自动启用与配置
 
+| 属性 | 默认值 / 要求 | 说明 |
+| --- | --- | --- |
+| `macula.task.enabled` | `true` | 总开关；为 `false` 时即使 `snail-job.enabled=true` 也不启用 |
+| `macula.task.xxl-job-adapter.enabled` | `true` | 仅控制旧 XXL Handler 兼容桥 |
+| `snail-job.enabled` | 本 Starter 默认启用 | 显式 `false` 关闭原生客户端及兼容桥 |
+| `snail-job.server.host` / `port` | 需匹配服务端 | 调度通信地址，不是管理页面地址 |
+| `snail-job.namespace` / `group` / `token` | 需匹配服务端 | 命名空间、分组和访问凭证 |
+| `snail-job.host` / `port` | 按部署配置 | 服务端可访问的客户端地址和端口 |
+
 引入 Starter 后会默认启用 SnailJob，启动类无需添加 `@EnableSnailJob`，也无需配置 `snail-job.enabled=true`。连接配置示例：
 
 ```yaml

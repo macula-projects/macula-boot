@@ -2,6 +2,20 @@
 
 用于生成 Macula Boot 多模块微服务项目。
 
+在新的空目录执行生成命令，避免覆盖已有项目。生成参数如下，均通过 `-D参数=值` 传入：
+
+| 参数 | 示例 / 默认值 | 说明 |
+| --- | --- | --- |
+| `groupId` | 示例 `dev.macula.samples` | 生成项目的 Maven 组名 |
+| `artifactId` | 示例 `macula-samples` | 根模块名及输出目录名 |
+| `version` | 示例 `1.0.0-SNAPSHOT` | 生成项目版本，不是框架版本 |
+| `package` | 未指定时通常沿用 groupId | Java 基础包名 |
+| `archetypeVersion` | 示例 `6.1.0-SNAPSHOT` | 使用的模板版本，需在本地或远程仓库可获取 |
+| `gitignore` | `.gitignore` | 生成的 Git 忽略文件名 |
+| `interactiveMode` | 示例 `false` | 非交互生成，需提供必要参数 |
+
+运行时环境变量见生成项目的 `deploy/.env.example` 和 `deploy/README.md`；Admin 是围绕 Service1 的轻量示例，不是完整的系统管理平台。
+
 ```shell
 mvn archetype:generate \
     -DgroupId=dev.macula.samples \

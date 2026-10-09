@@ -15,9 +15,11 @@
 
 ## 使用配置
 
+无独立 YAML 开关，使用 Redis 配置及方法上的 `@Idempotent`。还支持 `deleteOnException=false`（默认异常时保留键）和 `deleteForExceptions={}`（指定异常类型时删除键）；业务失败后是否允许重试需显式选择。
+
 ### 配置redis
 
-理论是支持 [macula-boot-starter-redis](../../框架基础/redis)全部配置
+理论是支持 [macula-boot-starter-redis](../macula-boot-starter-redis/README.md)全部配置
 
 ```yaml
 spring:

@@ -14,9 +14,11 @@
 
 ## 使用配置
 
+必须配置 `spring.application.name`，本模块以 `leader-lock-<应用名>` 为锁键。同一选举组的实例应共用 Redis 和应用名，不同业务组使用不同名称；无独立 `macula.leaderelection.*` 属性。
+
 ### 配置redis
 
-理论是支持 [macula-boot-starter-redis](../../框架基础/redis)全部配置
+理论是支持 [macula-boot-starter-redis](../macula-boot-starter-redis/README.md)全部配置
 
 ```yaml
 spring:
@@ -76,5 +78,4 @@ public class Application {
 ## 版权说明
 
 - redisson：https://github.com/redisson/redisson/blob/master/LICENSE.txt
-
 

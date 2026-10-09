@@ -202,6 +202,14 @@ public class ExtRocketMQTemplate extends RocketMQTemplate {
 
 #### Macula 额外扩展
 
+灰度消息配置前缀为 `macula.rocketmq.gray`，均为布尔值；不启用时使用常规生产、消费链路。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `enabled` | `false` | 开启按灰度泳道发送、消费消息 |
+| `gray-consume-main` | `false` | 灰度实例是否同时消费基线消息 |
+| `main-consume-gray` | `false` | 基线实例是否同时消费灰度消息 |
+
 - 引入TxMqMessage，通过发送TxMqMessage执行业务方法和检查方法
 - 引入@TxMqExecute和@TxMqCheck标识业务方法和检查方法
 

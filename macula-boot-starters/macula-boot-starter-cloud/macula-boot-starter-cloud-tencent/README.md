@@ -23,32 +23,70 @@
 
 ## 使用配置
 
-在 `application.yml` 中通过 Spring Config Data 导入 Polaris 配置：
+以下按当前 [Tencent Provider application.yml](../../../macula-boot-examples/macula-example-tencent-provider/src/main/resources/application.yml) 精简；网关差异见 [Tencent Gateway application.yml](../../../macula-boot-examples/macula-example-tencent-gateway/src/main/resources/application.yml)。
+
+| 属性 | 示例值 / 说明 |
+| --- | --- |
+| `spring.config.import` | `optional:polaris`，通过 Config Data 导入配置 |
+| `spring.profiles.group.docker` | `local`，Docker 复用本地默认配置 |
+| `spring.cloud.polaris.config.enabled` / `auto-refresh` | 示例均为 `true`，启用配置中心和刷新 |
+| `spring.cloud.polaris.config.groups[].name` | 应用名对应的配置组 |
+| `spring.cloud.polaris.discovery.enabled` / `register` | 示例均为 `true`，启用发现和注册 |
+| `spring.cloud.polaris.address` | local：`grpc://127.0.0.1:38091`；docker：`grpc://polaris:8091` |
+| `spring.cloud.polaris.namespace` | `POLARIS_NAMESPACE`，示例为 `macula-dev` |
+| `spring.cloud.nacos.discovery.server-addr` | Polaris Nacos 兼容地址：local `127.0.0.1:38849`，docker `polaris:8848` |
+
+本模块无额外自有属性；表中地址和开关是 samples 配置，不是所有应用的默认值。
 
 ```yaml
+server:
+  port: ${SERVER_PORT:4020}
 spring:
+  profiles:
+    active: '@profile.active@'
+    group:
+      docker: local
   application:
-    name: macula-cloud-system
+    name: macula-example-tencent-provider
   config:
     import: optional:polaris
   cloud:
-    nacos:
-      discovery:
-        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:18849}
     polaris:
-      address: ${polaris.server-addr}
-      namespace: ${polaris.namespace}
       config:
+        enabled: true
         auto-refresh: true
         groups:
           - name: ${spring.application.name}
-
-polaris:
-  namespace: ${POLARIS_NAMESPACE:macula-dev}
-  server-addr: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:8091}
+      discovery:
+        enabled: true
+        register: true
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:127.0.0.1:38849}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://127.0.0.1:38091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${POLARIS_NACOS_SERVER_ADDR:polaris:8848}
+    polaris:
+      address: ${POLARIS_SERVER_ADDR:grpc://polaris:8091}
+      namespace: ${POLARIS_NAMESPACE:macula-dev}
 ```
 
-`optional:polaris` 保留配置中心不可用时的本地启动能力；生产环境若要求配置中心强依赖，可移除 `optional:`。
+`dev/stg/pet/prd` 仅保留配置中心连接信息，其他配置由 Polaris 配置组提供。`optional:polaris` 只放宽配置导入，不代表服务发现等依赖可以完全离线运行。
 
 ## 核心功能
 

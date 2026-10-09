@@ -1,9 +1,6 @@
 ## 概述
 
-本模块主要提供默认的日志格式配置、日志发送、日志审计等功能，由多个子模块组成。包括：
-
-- macula-boot-starter-auditlog 日志审计记录
-- 业务审计日志可通过 macula-boot-starter-observability 统一导出到 OTLP 日志后端
+本模块通过 `@AuditLog` 采集审计事件，由应用监听 `OperLogEvent` 完成持久化。日志导出可结合 `macula-boot-starter-observability`，本模块不提供日志存储后端。
 
 ## 组件坐标
 
@@ -17,6 +14,8 @@
 ```
 
 ## 使用说明
+
+无独立 YAML 配置项；记录范围由下文 `@AuditLog` 参数控制。默认保存请求和响应数据，敏感字段应通过 `excludeParamNames` 排除，或关闭对应记录。异步监听示例需启用 `@EnableAsync` 或引入 Async Starter。
 
 ### AuditLog
 

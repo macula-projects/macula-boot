@@ -16,6 +16,16 @@ JPA和Fenix作为数据库操作框架。[ Fenix](https://github.com/blinkfox/fe
 
 ## 使用配置
 
+本模块没有自有配置前缀，使用 `spring.datasource.*`、`spring.jpa.*` 和 `fenix.*`。
+
+| 属性 | 默认值 / 行为 | 说明 |
+| --- | --- | --- |
+| `spring.data.jpa.repositories.enabled` | `true` | 控制本模块 Repository 自动配置 |
+| `spring.data.jpa.repositories.bootstrap-mode` | `default` | 可选 `deferred` / `lazy`；异步初始化可使用应用提供的 AsyncTaskExecutor |
+| `spring.jpa.hibernate.ddl-auto` | 按环境决定 | 示例 `update` 仅供开发；生产使用 `none` 或按迁移方案选择 `validate` |
+| `spring.jpa.show-sql` | `false` | 输出 SQL，生产慎用 |
+| `fenix.debug` | `false` | 实时读取 SQL XML，仅限开发环境 |
+
 配置上没有太特殊的，主要是数据源配置以及fenix配置。
 
 ```yaml
@@ -26,12 +36,12 @@ spring:
     username: xxx
     password: xxx
   jpa:
-    show-sql: true 		# 默认false，在日志里显示执行的sql语句
+    show-sql: true     # 默认false，在日志里显示执行的sql语句
     hibernate:
-    	# 指定为update，每次启动项目检测表结构有变化的时候会新增字段，表不存在时会 新建，如果指定create，
-    	# 则每次启动项目都会清空数据并删除表，再新建。生产要指定为none
-      ddl-auto: update 
-      
+      # 指定为update，每次启动项目检测表结构有变化的时候会新增字段，表不存在时会 新建，如果指定create，
+      # 则每次启动项目都会清空数据并删除表，再新建。生产要指定为none
+      ddl-auto: update
+
 # Fenix 的几个配置项、默认值及详细说明，通常情况下你不需要填写这些配置信息（下面的配置代码也都可以删掉）.
 fenix:
   # v2.4.1 版本新增，表示是否开启 debug 调试模式，默认 false。
@@ -192,8 +202,8 @@ Fenix具体使用请参考[官方文档](https://blinkfox.github.io/fenix/#/READ
 
     <!-- For Test -->
     <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
         <scope>test</scope>
     </dependency>
 

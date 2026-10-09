@@ -20,7 +20,7 @@
 MapStruct是一个类型转换工具，通过定义类型转换接口（如下所示），然后在编译的时候自动生成实现类来工作。
 
 ```java
-@Mapper
+@Mapper(componentModel = MappingConstants.ComponentModel.DEFAULT)
 public interface SourceTargetMapper {
 
     SourceTargetMapper MAPPER = Mappers.getMapper( SourceTargetMapper.class );
@@ -30,50 +30,9 @@ public interface SourceTargetMapper {
 }
 ```
 
-另外，使用mapstruct前，需要在你的父工程的Maven项目的pom中定义以下build插件：
+继承 `macula-boot-parent` 时已配置 Lombok、`mapstruct-plus-processor`、`lombok-mapstruct-binding` 和 `-Amapstruct.defaultComponentModel=spring`，不必重复复制编译插件配置。默认生成 Spring Bean，优先注入 Mapper；上面的 `Mappers.getMapper` 示例适用于显式使用默认组件模型且无 Spring 依赖的 Mapper。
 
-```xml
-
-<build>
-    <pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
-                    <!-- Classpath elements to supply as annotation processor path. If specified, the compiler   -->
-                    <!-- will detect annotation processors only in those classpath elements. If omitted, the     -->
-                    <!-- default classpath is used to detect annotation processors. The detection itself depends -->
-                    <!-- on the configuration of annotationProcessors.                                           -->
-                    <!--                                                                                         -->
-                    <!-- According to this documentation, the provided dependency processor is not considered!   -->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${mapstruct.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-        </plugins>
-    </pluginManagement>
-</build>
-```
+仅导入 BOM 不会继承构建插件，需在应用父 POM 中配置对应 annotation processor。此模块无运行时 YAML 属性；转换实现于编译期生成，IDE 也需启用注解处理。
 
 ***MapStruct更多功能可以[参考官方文档](https://mapstruct.plus/mapstruct/1-5-3-Final.html)***
 
@@ -154,4 +113,3 @@ public class QuickStartTest {
 - MapStruct：https://github.com/mapstruct/mapstruct/blob/main/LICENSE.txt
 
 - MapStruct Plus：https://github.com/linpeilie/mapstruct-plus/blob/main/LICENSE
-

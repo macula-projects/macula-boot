@@ -18,13 +18,24 @@
 ```yaml
 macula:
   crypto:
-    enabled: true   # 默认为true
-    algorithm: AES  # BASE64, AES, RSA, SM2, SM4 
+    enable: true    # 显式启用；未配置时不创建 CryptoManager
+    algorithm: AES  # BASE64, AES, RSA, SM2, SM4
     encode: HEX     # BASE64, HEX
     password: xxx   # 对称加密的密钥
     publicKey: xxx  # 非对称加密公钥
     privateKey: xxx # 非对称解密私钥
 ```
+
+配置前缀为 `macula.crypto`，密钥应由部署环境注入，不要提交到仓库。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `enable` | 未设置 | 必须为 `true` 才启用字段加解密自动配置 |
+| `algorithm` | 未设置 | 默认算法：`BASE64`、`AES`、`RSA`、`SM2`、`SM4` |
+| `encode` | 未设置 | 密文编码：`BASE64` 或 `HEX` |
+| `password` | 未设置 | 对称加密密钥 |
+| `public-key` / `private-key` | 未设置 | 非对称加密公钥 / 私钥 |
+| `key` | 未设置 | `mpw:` 配置解密密钥，与字段加密的 `password` 不同 |
 
 ## 核心功能
 

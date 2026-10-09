@@ -15,6 +15,8 @@ Retry来实现重试机制，通过配置retry策略来达到重试的目的。
 
 ## 使用配置
 
+Starter 已通过 `@EnableRetry` 开启 Spring Retry，无独立的 `macula.*` 配置项。使用 `org.springframework.retry.annotation` 下的注解，通过 Spring Bean 代理调用重试方法；同类内直接调用不会触发代理重试。涉及写操作时，业务需自行保证幂等。
+
 ## 核心功能
 
 ### @Retryable注解
@@ -47,7 +49,7 @@ public class RetryRequestService {
 - value：指定发生的异常进行重试
 - include：和value一样，默认空，当exclude也为空时，所有异常都重试
 - exclude：指定异常不重试，默认空，当include也为空时，所有异常都重试
-- maxAttemps：重试次数，默认3
+- maxAttempts：总尝试次数，默认3，包含首次调用（最多额外重试2次）
 - backoff：重试等待策略,下面会在@Backoff中介绍
 - recover：表示重试次数到达最大重试次数后的回调方法
 

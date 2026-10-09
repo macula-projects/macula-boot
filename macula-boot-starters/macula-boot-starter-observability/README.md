@@ -75,6 +75,11 @@ OTLP/HTTP endpoint 必须分别包含 `/v1/metrics`、`/v1/traces`、`/v1/logs`�
 
 ### 功能开关
 
+| 自有属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `macula.observability.enabled` | `true` | Macula 增量配置开关，不是所有 OTLP 导出的总开关 |
+| `macula.observability.logging.capture-mdc-attributes` | 空列表 | 允许导出的 MDC 键，避免使用 `*` |
+
 - `macula.observability.enabled=false`：关闭 Macula 提供的增量自动配置
 - `management.otlp.metrics.export.enabled=false`：关闭 Metrics 导出
 - `management.tracing.export.otlp.enabled=false`：关闭 Traces 导出

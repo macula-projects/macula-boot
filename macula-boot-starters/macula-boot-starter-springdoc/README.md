@@ -15,6 +15,17 @@
 
 ## 使用配置
 
+无自有配置前缀；生产环境按需关闭文档入口或限制访问。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `springdoc.api-docs.enabled` | `true` | 生成 OpenAPI 文档 |
+| `springdoc.api-docs.path` | `/v3/api-docs` | JSON 文档路径 |
+| `springdoc.swagger-ui.enabled` | `true` | 启用 Swagger UI |
+| `springdoc.swagger-ui.path` | `/swagger-ui.html` | UI 入口路径 |
+| `springdoc.packages-to-scan` | 未设置 | 限定扫描包 |
+| `springdoc.paths-to-match` | 未设置 | 限定文档接口路径 |
+
 ```yaml
 springdoc:
   api-docs:

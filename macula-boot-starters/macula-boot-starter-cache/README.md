@@ -46,6 +46,18 @@ spring:
 
 `expiry-jitter` 表示本地缓存过期时间的随机偏移百分比，用于避免大量缓存同时失效，取值必须大于等于 `0` 且小于 `100`。
 
+以下属性前缀为 `spring.cache.two-level`；自动配置生效时已通过 `@EnableCaching` 开启缓存注解。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `default-time-to-live` | `24h` | 未单独指定的缓存 TTL |
+| `time-to-live.<缓存名>` | 空映射 | 按缓存名覆盖 TTL，建议带 `s`、`m`、`h` 单位 |
+| `key-prefix` | `macula:cache:` | 附加 Redis 键前缀 |
+| `use-key-prefix` | `true` | 是否应用上述自定义前缀；关闭不等于移除 Spring Cache 的缓存名前缀 |
+| `topic` | `macula:cache:two-level:topic` | 跨实例失效通知频道，同一缓存集群需一致 |
+| `local.max-size` | `2000` | 本地缓存容量上限 |
+| `local.expiry-jitter` | `50` | 本地过期时间随机偏移百分比 |
+
 ### 使用 Spring Cache 注解
 
 ```java

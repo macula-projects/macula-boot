@@ -15,32 +15,44 @@ binlog4j是一个读取MySQL binlog的组件，以slave的方式接入mysql，�
 
 ## 使用配置
 
+先开启 MySQL ROW 格式 binlog 并授予专用账号必要的复制权限；使用持久化或集群选举时还需可用的 Redis。
+
 ```yaml
 spring:
   data:
     redis:
       host: 127.0.0.1
       port: 6379
-
 binlog4j:
   client-configs:
-    master: # clientID
-      username: root            # mysql的用户
-      password:                 # mysql的密码
-      host: 127.0.0.1           # mysql的host
-      port: 3306                # mysql的port
-      serverId: 1990            # 本实例的serverId，不同应用不能重复
-      persistence: true         # 是否将binlog位置持久化，默认false
-      inaugural: false          # 是否是首次启动，默认false
-      mode: cluster             # 启动模式，集群模式一个实例启动连接到mysql，其他standby，默认standalone
-      keepAlive: true           # 是否保持连接，默认是true
-      KeepAliveInterval: 60000L # 保持连接间隔，默认1分钟，单位毫秒
-      connectTimeout: 3000L     # 连接超时时间，默认3秒，单位毫秒
-      heartbeatInterval: 6000L  # 发送心跳间隔，默认6秒，单位毫秒  
-      gtidMode: true            # 开启GTID模式，默认为false
-      gtidPurged: true          # 当GTID SET为“”时，是否获取最近的purged的GTID SET，默认为true
-      gtidSetDefault: "xxx"     # 设置开始消费的GTID位置
+    master:
+      host: 127.0.0.1
+      username: ${BINLOG_USERNAME}
+      password: ${BINLOG_PASSWORD}
+      server-id: 1990
+      persistence: true
 ```
+
+每个客户端独立配置，前缀为 `binlog4j.client-configs.<名称>`，名称需与 `@BinlogSubscriber.clientName` 一致。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `host` / `username` / `password` | 未设置 | MySQL 地址及账号 |
+| `port` | `3306` | MySQL 端口 |
+| `server-id` | `0` | 应显式指定复制客户端 ID，避免与其他复制客户端冲突 |
+| `mode` | `standalone` | `cluster` 使用集群主备模式 |
+| `persistence` | `false` | 将消费位点持久化到 Redis |
+| `inaugural` | `false` | 为 `true` 时跳过恢复历史位点，勿作为常规重启配置 |
+| `keep-alive` | `true` | 保持连接 |
+| `keep-alive-interval` | `60000` | 保活间隔，毫秒 |
+| `connect-timeout` | `3000` | 建连超时，毫秒 |
+| `heartbeat-interval` | `5000` | 心跳间隔，毫秒 |
+| `time-offset` | `0` | Date 类型值的时间偏移，毫秒 |
+| `gtid-mode` | `false` | 使用 GTID 复制 |
+| `gtid-purged` | `true` | GTID 集为空时读取已清理 GTID 信息 |
+| `gtid-set-default` | 未设置 | 无缓存 GTID 位点时的起始集合 |
+
+时间数值不要加 Java 的 `L` 后缀；GTID 模式须与 MySQL 服务端配置匹配。
 
 ## 核心功能
 

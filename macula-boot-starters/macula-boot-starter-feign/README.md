@@ -15,60 +15,42 @@
 
 ## 使用配置
 
-由于feign默认是使用httpclient，建议按照以下配置启用okhttp
+HTTP 客户端配置使用 `spring.cloud.openfeign.*` 前缀，不再使用旧的 `feign.*`。
 
 ```yaml
-feign:
-  httpclient:
-    enabled: false
-    max-connections: 200 						# 线程池最大连接数，默认200
-    time-to-live: 900 							# 线程存活时间，单位秒，默认900
-    connection-timeout: 2000  			# 新建连接超时时间，单位ms, 默认2000
-    follow-redirects: true 					# 是否允许重定向，默认true
-    disable-ssl-validation: false 	# 是否禁止SSL检查， 默认false
-    okhttp:
-      read-timeout: 60s 						# 请求超时时间，Duration配置方式
-  okhttp:
-    enabled: true
+spring:
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: false
+        okhttp:
+          read-timeout: 60s
+      okhttp:
+        enabled: true
+macula:
+  feign:
+    header-relay:
+      enabled: false
+      headers: []
 ```
+
+| 属性 | 默认值 / 示例 | 说明 |
+| --- | --- | --- |
+| `macula.feign.header-relay.enabled` | 默认 `false` | 开启额外请求头透传，不控制内置 Authorization、请求 ID 和灰度头 |
+| `macula.feign.header-relay.headers` | 默认空列表 | 额外透传的头名称，只配置可信且必要的头 |
+| `spring.cloud.openfeign.okhttp.enabled` | 示例 `true` | 选择已引入的 OkHttp 客户端 |
+| `spring.cloud.openfeign.httpclient.hc5.enabled` | 示例 `false` | 使用 OkHttp 时禁用 HC5 客户端选择 |
+| `spring.cloud.openfeign.client.config.<客户端名>.connectTimeout` | 按需设置 | 单客户端建连超时，单位毫秒；`default` 表示全局配置 |
+| `spring.cloud.openfeign.client.config.<客户端名>.readTimeout` | 按需设置 | 单客户端读取超时，单位毫秒 |
 
 ## 核心功能
 
 ### 请求头传递
 
-默认已经启用该拦截器，主要是为了把Token传递到下级微服务，以便通过安全校验。
+Servlet 应用默认注册 `HeaderRelayInterceptor`，传递请求 ID、Authorization 及灰度上下文；已有 Authorization 不会被自动覆盖。没有请求 ID 时会生成新值。额外请求头仅在 `macula.feign.header-relay.enabled=true` 时按 `headers` 白名单传递。
 
-```java
-/**
- * {@code HeaderRelayInterceptor} 将请求头传递到下面的微服务
- *
- * @author rain
- * @since 2022/7/23 12:57
- */
-public class HeaderRelayInterceptor implements RequestInterceptor {
-
-    @Override
-    public void apply(RequestTemplate template) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
-        if (null != attributes) {
-            HttpServletRequest request = attributes.getRequest();
-
-            // 微服务之间传递的唯一标识,区分大小写所以通过httpServletRequest获取
-            String sid = request.getHeader(GlobalConstants.FEIGN_REQ_ID);
-            if (!StringUtils.hasText(sid)) {
-                sid = String.valueOf(UUID.randomUUID());
-            }
-            template.header(GlobalConstants.FEIGN_REQ_ID, sid);
-
-            // 传递Gateway生成的Authorization头
-            String token = request.getHeader(SecurityConstants.AUTHORIZATION_KEY);
-            if (StringUtils.hasText(token)) {
-                template.header(SecurityConstants.AUTHORIZATION_KEY, token);
-            }
-        }
-    }
-}
-```
+异步或非 HTTP 调用没有原始 Servlet 请求时，不能依赖请求头自动透传。
 
 ### 自动生成请求签名
 
@@ -299,8 +281,8 @@ public class UserFallbackFactory extends AbstractProviderFallbackFactory {
     </dependency>
 
     <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
         <scope>provided</scope>
     </dependency>
 </dependencies>

@@ -21,19 +21,28 @@
 
 ```yaml
 spring:
-	security:
+  security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:9000/oauth2/jwks 			# JWT KEY的URL，这里是网关提供
+          jwk-set-uri: http://127.0.0.1:9000/oauth2/jwks
 macula:
   security:
-    ignore-urls:																							# 忽略权限的列表
+    ignore-urls:
       - /api/token
       - /api/token/**
-      - /swagger-ui/index.html
-      - /v3/api-docs/swagger-config
 ```
+
+| 属性 | 默认值 / 行为 | 说明 |
+| --- | --- | --- |
+| `macula.security.ignore-urls` | 空列表，随后合并内置白名单和 `@Inner` 路径 | 无需认证的 URL，避免配置过宽 |
+| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | 应用指定 | JWT 公钥集地址，需与网关签发的 JWT 对应 |
+| `spring.security.oauth2.resourceserver.jwt.issuer-uri` | 未设置 | 通过签发者地址发现验证配置 |
+| `spring.security.oauth2.resourceserver.jwt.public-key-location` | 未设置 | 本地 RSA 公钥资源路径 |
+| `spring.security.oauth2.resourceserver.jwt.jws-algorithms` | Boot 默认 `RS256` | JWK / 公钥方式允许的签名算法 |
+| `spring.security.oauth2.resourceserver.jwt.secret` | 内置兼容值 | 对称密钥配置；生产环境应显式注入，不使用公开默认值 |
+
+当未配置 JWK、issuer 或公钥路径且无自定义 JwtDecoder 时，使用 `secret` 构造对称验签器；不要在不同验签模式间混配属性。
 
 ## 核心功能
 

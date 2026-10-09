@@ -68,6 +68,8 @@ liteflow:
 
 ### Nacos规则源配置
 
+`liteflow-rule-nacos` 为 optional 依赖，使用 Nacos 规则源时应用需显式引入，并提供连接地址和认证信息；仅使用本地规则文件则无需引入。
+
 依赖了插件包之后，你无需再配置`liteflow.ruleSource`路径。
 
 ```yaml

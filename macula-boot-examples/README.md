@@ -18,6 +18,26 @@
 
 ## 环境要求
 
+各示例的 `application.yml` 是配置入口，下面列出常用覆盖项；Maven/IDE 不会自动读取 Docker `.env`。Cloud Starter 的配置说明分别对照 [Alibaba Provider](macula-example-alibaba-provider1/src/main/resources/application.yml)、[Alibaba Gateway](macula-example-alibaba-gateway/src/main/resources/application.yml)、[Tencent Provider](macula-example-tencent-provider/src/main/resources/application.yml) 和 [Tencent Gateway](macula-example-tencent-gateway/src/main/resources/application.yml)。
+
+云平台示例按 profile 分层：公共段定义应用名和 Config Data 导入；`local` 提供本地开发默认值；`docker` 通过 `spring.profiles.group.docker=local` 复用 local 并覆盖连接信息；`dev/stg/pet/prd` 主要保留配置中心连接信息。`observability` 是额外叠加的导出配置，不是普通环境默认开启。
+
+| 配置 / 环境变量 | 说明 |
+| --- | --- |
+| `server.port` / `SERVER_PORT` | 应用 HTTP 端口；支持占位变量的模块可直接覆盖 |
+| `NACOS_SERVER_PORT` | Alibaba local 的本机 Nacos 端口，默认 `38848` |
+| `NACOS_SERVER_ADDR` / `NACOS_NAMESPACE` | Alibaba docker / 共享环境的完整地址及命名空间；local 远程地址直接覆盖 `spring.config.nacos.server-addr` |
+| `NACOS_USERNAME` / `NACOS_PASSWORD` | Nacos 认证信息 |
+| `POLARIS_SERVER_ADDR` / `POLARIS_NAMESPACE` | Tencent Polaris 地址及命名空间 |
+| `POLARIS_NACOS_SERVER_ADDR` | Polaris 的 Nacos 兼容服务发现地址 |
+| `spring.data.redis.*` | Redis 连接地址、数据库及认证信息 |
+| `management.otlp.metrics.export.*` | Metrics 导出开关和 URL |
+| `management.tracing.export.otlp.enabled` / `management.tracing.sampling.probability` | Trace 导出开关 / 采样比例 |
+| `management.logging.export.otlp.enabled` | Logs 导出开关 |
+| `management.opentelemetry.tracing.export.otlp.endpoint` / `management.opentelemetry.logging.export.otlp.endpoint` | Trace / Logs endpoint |
+
+OTLP 网络导出在云平台示例的普通环境默认关闭，Docker observability overlay 开启；不要把示例值当成 Starter 默认值。
+
 - JDK 17、Maven 3.9+。
 - Alibaba 链路：本地 Nacos（默认 `127.0.0.1:38848`）；Sentinel Dashboard 为可选项。
 - Tencent 链路：本地 Polaris（默认 `grpc://127.0.0.1:38091`）。

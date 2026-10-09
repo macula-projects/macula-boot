@@ -1,6 +1,6 @@
 ## 概述
 
-macula-cloud-system主要提供系统管理、权限、角色等功能，并提供连接macula-cloud-system应用的能力，生成获取菜单、获取当前用户的Controller。
+本模块是 `macula-cloud-system` 的客户端集成，提供菜单、当前用户查询及按钮权限校验，不包含系统管理服务端。
 
 ## 客户端接入
 
@@ -16,10 +16,18 @@ macula-cloud-system主要提供系统管理、权限、角色等功能，并提�
 
 ### 使用配置
 
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `macula.cloud.endpoint` | 无，必填 | 网关基础 URL，客户端自动追加 `/system` |
+| `macula.cloud.app-key` | 无，必填 | 在平台登记的应用标识 |
+| `macula.cloud.secret-key` | 无，必填 | HMAC 签名密钥，部署时注入 |
+
+请求超时通过 `spring.cloud.openfeign.client.config.systemFeignClient.*` 配置，参见 [Feign](../macula-boot-starter-feign/README.md)。
+
 ```yaml
 macula:
   cloud:
-    endpoint: http://127.0.0.1:9000					# 网关地址
+    endpoint: http://127.0.0.1:9000          # 网关地址
     app-key: example
     secret-key: example
 ```
@@ -86,6 +94,8 @@ public class SystemController {
 ```
 
 ## 服务端介绍
+
+`macula-cloud-system` 需独立部署，并通过网关暴露 `/system` 路由；应用标识、密钥及用户权限由服务端维护。
 
 ## 版权说明
 

@@ -20,13 +20,13 @@ macula:
     message-table: 你的表名 # 默认是MACULA_MSG
 ```
 
-RocketMQ的配置可以参考 macula-boot-starter-rocketmq
+唯一的自有属性 `macula.sender.message-table` 默认为 `MACULA_MSG`。应用需配置业务 `DataSource`、事务管理器及 RocketMQ 生产者，并自行建表、安排补偿任务；Starter 不会自动建表或启动定时补偿。RocketMQ 配置参考 [RocketMQ 模块](../macula-boot-starter-rocketmq/README.md)。
 
 ## 核心功能
 
-​ 事件消息首先和业务的事务一起存储到本地数据库表，然后再发送给RocketMQ，具体原理如下图：
+事件消息首先和业务事务一起存储到本地数据库表，然后再发送给 RocketMQ。
 
-![image-20230601195034276](../images/image-20230601195034276.png)
+业务事务提交后发送消息；发送失败由补偿任务重试。消费端仍需幂等处理，不能将该机制视为消息只投递一次。
 
 使用前，需要在你的业务库中创建如下表（建议定期归档）：
 
@@ -57,14 +57,21 @@ create table MACULA_MSG
 ```java
 import cn.hutool.core.date.DateUtil;
 import dev.macula.boot.starter.sender.ReliableMessageSender;
-import org.apache.commons.lang3.time.DateUtils;
+import dev.macula.boot.starter.sender.ReliableMessageCompensator;
+import dev.macula.boot.starter.sender.Message;
+import cn.hutool.json.JSONUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Date;
 
 // 在事务方法中，执行完业务逻辑后，调用MessageSender
+@Service
 @RequiredArgsConstructor
 public class OrderService {
-    private ReliableMessageSender sender;
+    private final ReliableMessageSender sender;
 
-    private ReliableMessageCompensator compensator;
+    private final ReliableMessageCompensator compensator;
 
     @Transactional
     public void createOrder(OrderDTO order) {
@@ -84,9 +91,9 @@ public class OrderService {
         return message;
     }
 
-    // 下面方法应该由任务系统定时调度，用户未成功发送消息的补充发送
+    // 下面方法应由任务系统定时调度，用于未成功发送消息的补偿
     public void compensator() {
-        compensator.compensator(DateUtil.addSeconds(new Date(), -120), 100);
+        compensator.compensate(DateUtil.offsetSecond(new Date(), -120), 100);
     }
 }
 ```
@@ -114,4 +121,4 @@ public class OrderService {
 
 ## 版权说明
 
-- 本模块代码主要来源于[lego](
+- 本模块代码主要来源于 [lego](https://gitee.com/litao851025/lego)。

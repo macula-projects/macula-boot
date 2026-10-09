@@ -21,14 +21,26 @@
 ```yaml
 macula:
   mybatis-plus:
-    tenant-id: 1L                                                            # 租户ID，默认1L
-    tenant-suffixes: xxx                                            # 默认是tenant,TENANT
+    tenant-id: 1                            # 默认租户 ID，YAML 使用整数，不加 L
+    tenant-suffixes: [tenant, TENANT]        # 需要租户隔离的表名后缀
     audit:
       create-by-name: createBy                # 创建人，默认createBy
       create-time-name: createTime            # 创建时间，默认createTime
       last-update-by-name: lastUpdateBy       # 最后更新人，默认lastUpdateBy
       last-update-time-name: lastUpdateTime   # 最后更新时间，默认lastUpdateTime
 ```
+
+配置前缀为 `macula.mybatis-plus`；数据库连接使用 `spring.datasource.*`，MyBatis-Plus 原生选项使用 `mybatis-plus.*`。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `tenant-enable` | `true` | 开启租户拦截器 |
+| `tenant-id` | `1` | 默认租户 ID |
+| `tenant-suffixes` | `[tenant, TENANT]` | 参与租户过滤的表名后缀 |
+| `data-permission-enable` | `true` | 开启数据权限拦截器 |
+| `max-limit` | `1000` | 分页单页记录数上限 |
+| `audit.create-by-name` / `audit.create-time-name` | `createBy` / `createTime` | 创建人 / 创建时间的 Java 属性名 |
+| `audit.last-update-by-name` / `audit.last-update-time-name` | `lastUpdateBy` / `lastUpdateTime` | 更新人 / 更新时间的 Java 属性名 |
 
 ## 核心功能
 
@@ -268,7 +280,7 @@ public class BasePageQuery {
 
 #### 字段加解密
 
-请参考 [Crypto章节](../crypto)
+请参考 [Crypto章节](../macula-boot-starter-crypto/README.md)
 
 ## 依赖引入
 

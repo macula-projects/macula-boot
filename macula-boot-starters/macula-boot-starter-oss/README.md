@@ -16,11 +16,32 @@ AWS S3及其它兼容 S3 协议的平台。详情可以参考[x-file-storage](ht
 
 ## 使用配置
 
+自有配置前缀为 `macula.oss`；默认平台必须指向一个已启用的平台标识，并不会自动创建名为 `local` 的存储实例。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `default-platform` | `local` | 默认存储平台标识 |
+| `thumbnail-suffix` | `.min.jpg` | 缩略图后缀 |
+| `upload-not-support-metadata-throw-exception` / `upload-not-support-acl-throw-exception` | `true` | 上传时不支持元数据 / ACL 是否报错 |
+| `copy-not-support-metadata-throw-exception` / `copy-not-support-acl-throw-exception` | `true` | 复制时不支持元数据 / ACL 是否报错 |
+| `move-not-support-metadata-throw-exception` / `move-not-support-acl-throw-exception` | `true` | 移动时不支持元数据 / ACL 是否报错 |
+| `enable-byte-file-wrapper` | `true` | byte[] 输入适配器 |
+| `enable-uri-file-wrapper` | `true` | URI、URL、String 输入适配器 |
+| `enable-input-stream-file-wrapper` | `true` | InputStream 输入适配器 |
+| `enable-local-file-wrapper` | `true` | 本地文件输入适配器 |
+| `enable-http-servlet-request-file-wrapper` | `true` | Servlet 请求文件适配器，需 Servlet 环境 |
+| `enable-multipart-file-wrapper` | `true` | MultipartFile 输入适配器，需对应 Web 类 |
+| `<平台类型>[].enable-storage` | `false` | 启用该存储实例，未启用的条目不参与构建 |
+| `local-plus[].enable-access` | `false` | 启用本地文件 HTTP 访问，需注意访问控制 |
+| `local-plus[].path-patterns` | 空数组 | 本地 HTTP 路径映射 |
+
+平台列表默认均为空，支持 `local-plus`、`huawei-obs`、`aliyun-oss`、`qiniu-kodo`、`tencent-cos`、`baidu-bos`、`upyun-uss`、`minio`、`amazon-s3`、`ftp`、`sftp`、`webdav`、`google-cloud-storage`、`fastdfs`、`azure-blob`。旧 `local` 已废弃，同样支持 `enable-access` 和 `path-patterns`。平台内部账号、桶、路径等字段参见下面示例及上游文档，只保留实际使用的平台配置。
+
 {{% alert title="提示" color="primary" %}}
 注意官网默认配置是以dromara.x-file-storage，由于macula oss没有使用官网的starter，所以这里是以macula.oss开头，其他保持不变。
 {{% /alert %}}
 ```yaml
-# 配置存储平台 ，第一位 test-minio 为默认存储平台
+# 默认存储由 default-platform 指定，与列表顺序无关
 macula:
   oss: #文件存储配置
     default-platform: local-1 #默认使用的存储平台
@@ -84,7 +105,7 @@ macula:
         bucket-name: ??
         domain: ?? # 访问域名，注意“/”结尾，例如：http://minio.abc.com/abc/
         base-path: hy/ # 基础路径
-    aws-s3: # AWS S3，其它兼容 AWS S3 协议的存储平台也都可配置在这里
+    amazon-s3: # AWS S3，其它兼容 AWS S3 协议的存储平台也都可配置在这里
       - platform: aws-s3-1 # 存储平台标识
         enable-storage: true  # 启用存储
         access-key: ??

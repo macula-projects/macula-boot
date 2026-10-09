@@ -15,7 +15,7 @@ lock4j是一个基于redisson的分布式锁组件，其提供了多种不同的
 
 ## 使用配置
 
-理论是支持 [macula-boot-starter-redis](../../框架基础/redis)全部配置
+理论是支持 [macula-boot-starter-redis](../macula-boot-starter-redis/README.md)全部配置
 
 ```yaml
 spring:
@@ -70,6 +70,18 @@ public @interface Lock4j {
 ```
 
 ### 配置全局默认的获取锁超时时间和锁过期时间
+
+配置前缀为 `lock4j`，方法注解可覆盖相应默认值；时间单位均为毫秒。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `acquire-timeout` | `3000` | 获取锁的等待上限 |
+| `expire` | `30000` | 锁过期时间，需覆盖业务执行时长 |
+| `retry-interval` | `100` | 获取失败后的重试间隔 |
+| `lock-key-prefix` | `lock4j` | 锁键前缀 |
+| `primary-executor` | 未指定 | 按容器顺序选择执行器，或指定实现类 |
+| `primary-failure-strategy` | 未指定 | 按顺序选择失败策略，或指定实现类 |
+| `primary-key-builder` | 未指定 | 按顺序选择键生成器，或指定实现类 |
 
 ```yaml
 lock4j:

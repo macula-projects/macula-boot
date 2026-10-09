@@ -9,10 +9,12 @@ OTLP Metrics、Traces、Logs 网络导出默认关闭，配置 Docker observabil
 先启动 Nacos，再在仓库根目录执行：
 
 ```bash
-mvn -pl macula-boot-examples/macula-example-alibaba-provider1 -am spring-boot:run
+# 在仓库根目录先安装所需框架依赖，再只启动当前应用
+mvn -pl macula-boot-examples/macula-example-alibaba-provider1 -am install -DskipTests -Dgpg.skip=true -Pdeploy
+mvn -f macula-boot-examples/macula-example-alibaba-provider1/pom.xml spring-boot:run
 ```
 
-默认端口是 `5020`。可使用 `NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖注册中心配置。
+默认端口是 `5020`。local 使用 `NACOS_SERVER_PORT` 覆盖本机 Nacos 端口，docker / 共享环境使用 `NACOS_SERVER_ADDR` 覆盖完整地址；命名空间和认证使用 `NACOS_NAMESPACE`、`NACOS_USERNAME`、`NACOS_PASSWORD`。local 连接远程 Nacos 时直接覆盖 `spring.config.nacos.server-addr`。
 
 ## 验证
 

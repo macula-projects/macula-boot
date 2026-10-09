@@ -13,7 +13,9 @@
 ## 启动
 
 ```bash
-mvn -pl macula-boot-examples/macula-example-alibaba-gateway -am spring-boot:run
+# 在仓库根目录先安装所需框架依赖，再只启动当前应用
+mvn -pl macula-boot-examples/macula-example-alibaba-gateway -am install -DskipTests -Dgpg.skip=true -Pdeploy
+mvn -f macula-boot-examples/macula-example-alibaba-gateway/pom.xml spring-boot:run
 ```
 
 local 环境可通过 `NACOS_SERVER_PORT` 覆盖 Nacos 端口，共享环境可通过 `NACOS_SERVER_ADDR` 覆盖完整地址；命名空间和认证使用 `NACOS_NAMESPACE`、`NACOS_USERNAME`、`NACOS_PASSWORD`。应用同时监听 HTTP `5000` 和 HTTPS `5443`。

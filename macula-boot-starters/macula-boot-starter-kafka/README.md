@@ -14,28 +14,42 @@
 
 ## 使用配置
 
+本模块沿用 `spring.kafka.*`，无自有配置前缀。下列为示例值，不是所有属性的默认值；生产环境需按吞吐、重试及重复消费要求选择。
+
 ```yaml
 spring:
   kafka:
-    bootstrap-servers: 197.168.25.196:9092        				# 指定kafka server的地址，集群配多个，中间，逗号隔开
+    bootstrap-servers: 127.0.0.1:9092
     producer:
-      batch-size: 1000																		# 批量发送的消息数量
-      buffer-memory: 33554432															# 32MB的批处理缓冲区
-      retries: 3																					# 重试次数    
+      batch-size: 16384
+      buffer-memory: 33554432
     consumer:
-      group-id: crm-user-service													# 默认消费者组
-      auto-offset-reset: earliest													# 最早未被消费的offset
-      max-poll-records: 4000															# 批量一次最大拉取数据量
-      enable-auto-commit: true														# 是否自动提交
-      auto-commit-interval: 1000													# 自动提交时间间隔，单位ms
+      group-id: example-consumer
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      enable-auto-commit: false
 ```
+
+| 属性（前缀 `spring.kafka`） | 说明 |
+| --- | --- |
+| `bootstrap-servers` | Broker 地址列表，多个地址以逗号分隔 |
+| `producer.batch-size` / `buffer-memory` | 批次大小 / 缓冲区容量，单位字节，不是消息条数 |
+| `producer.retries` / `acks` | 发送重试次数 / 确认策略 |
+| `producer.key-serializer` / `value-serializer` | 与消息类型匹配的序列化器 |
+| `consumer.group-id` | 消费者组标识 |
+| `consumer.auto-offset-reset` | 无有效已提交位点时的起点策略；`earliest` 不代表每次从头消费 |
+| `consumer.max-poll-records` | 每次 poll 最多返回的记录数 |
+| `consumer.enable-auto-commit` / `auto-commit-interval` | 是否自动提交 / 自动提交间隔；关闭自动提交后由监听容器策略管理 |
+| `consumer.key-deserializer` / `value-deserializer` | 与生产端匹配的反序列化器 |
+| `listener.type` / `concurrency` / `ack-mode` | 单条或批量监听 / 并发数 / 提交模式 |
+
+下面的字符串收发示例需配置 StringSerializer / StringDeserializer，或使用 Boot 对应默认配置。
 
 ## 核心功能
 
 ### 发送数据
 
 ```java
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class KafkaProducerTest {
 
@@ -45,12 +59,8 @@ public class KafkaProducerTest {
     @Test
     public void testSend(){
         for (int i = 0; i < 5000; i++) {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("datekey", 20210610);
-            map.put("userid", i);
-            map.put("salaryAmount", i);
-            //向kafka的big_data_topic主题推送数据
-            kafkaTemplate.send("big_data_topic", JSONObject.toJSONString(map));
+            // 向 big_data_topic 发送字符串，业务 JSON 可由应用自己的 Mapper 构造
+            kafkaTemplate.send("big_data_topic", "user-" + i);
         }
     }
 }
@@ -84,10 +94,10 @@ public class BigDataTopicListener {
 
 ```yaml
 spring:
-	kafka:
-		listener:
-			type: BATCH
-			concurrency: 3																	# 批消费并发量，小于或等于Topic的分区数
+  kafka:
+    listener:
+      type: BATCH
+      concurrency: 3                                  # 批消费并发量，小于或等于Topic的分区数
 ```
 
 ## 依赖引入

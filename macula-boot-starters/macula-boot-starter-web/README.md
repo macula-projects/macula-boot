@@ -18,9 +18,21 @@
 ```yaml
 macula:
   web:
-    exception-advie: true   # 统一异常处理器，默认true
+    exception-advice: true  # 统一异常处理器，默认true
     response-advice: true   # 统一响应处理器，默认true
 ```
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `macula.web.exception-advice` | `true` | 启用统一异常处理 |
+| `macula.web.response-advice` | `true` | 启用统一响应包装 |
+| `macula.jackson.long-to-string` | `true` | 将 Long、BigInteger、BigDecimal 序列化为字符串 |
+| `macula.jackson.null-to-empty` | `false` | 按字段类型将 null 输出为空值 |
+| `macula.jackson.local-date-time-format` | 未设置 | 自定义 LocalDateTime 格式 |
+| `macula.jackson.local-date-format` | 未设置 | 自定义 LocalDate 格式 |
+| `macula.jackson.local-time-format` | 未设置 | 自定义 LocalTime 格式 |
+
+通用 Jackson 开关使用 `spring.jackson.*`。
 
 ## 核心功能
 
@@ -29,6 +41,8 @@ JSON 转换器显式设置默认字符集为 UTF-8，自动生成的 JSON 响应
 Jackson 3 请求反序列化保留基本类型字段接收 `null` 的历史行为，例如 `int` 转为 `0`、`boolean` 转为 `false`。开启 JSON 缩进时，SSE 响应的后续行仍使用 `data:` 前缀。
 
 消息转换器通过 Spring 7 的 `configureMessageConverters(HttpMessageConverters.ServerBuilder builder)` 配置：字符串使用 UTF-8，JSON 使用 `MappingApiJacksonHttpMessageConverter`。通过 `withStringConverter` / `withJsonConverter` 替换对应默认转换器，其他格式保留框架默认注册行为。
+
+升级自定义扩展时，将 `AbstractReadWriteJackson2HttpMessageConverter`、`MappingApiJackson2HttpMessageConverter` 分别替换为去掉名称中 `2` 的新类。Jackson API 使用 `tools.jackson.*`；共享注解仍使用 `com.fasterxml.jackson.annotation.*`。
 
 ### 全局异常处理
 
@@ -41,17 +55,19 @@ Jackson 3 请求反序列化保留基本类型字段接收 `null` 的历史行�
 - NullPointerException
 - Exception（兜底）
 
-统一按照如下结构返回，HTTP Status返回是500：
+通常返回 HTTP 500；`BizCheckException` 返回 HTTP 510。失败结果的结构如下：
 
 ```json
 {
+  "success": false,
   "code": "10001",
   "msg": "异常说明",
-  "data": "具体的异常信息" 
+  "cause": "具体的异常信息",
+  "data": null
 }
 ```
 
-BizException异常的message信息会通过data字段返回，支持国际化code。其定义如下：
+BizException 异常的 message 通过 `cause` 字段返回，支持国际化 code。其定义如下：
 
 ```java
 public class BizException extends MaculaException {
@@ -101,6 +117,7 @@ public class Result<T> implements Serializable {
    private boolean success;
    private String code;
    private String msg;
+   private String cause;
    private T data;
 }
 ```
@@ -347,7 +364,7 @@ public ResultInfo update(@Validated({Update.class}) UserVO userVO) {
 ```
 
 细心的同学可能已经注意到，自定义的`Update`分组接口继承了`Default`接口。校验注解(如：` @NotBlank`)和`@validated`
-默认都属于`Default.class`分组，这一点在`javax.validation.groups.Default`注释中有说明
+默认都属于`Default.class`分组，这一点在`jakarta.validation.groups.Default`注释中有说明
 
 ```java
 /**

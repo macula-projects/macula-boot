@@ -16,6 +16,8 @@
 
 ## 核心功能
 
+本模块仅封装 COLA 状态机依赖，无 YAML 属性或自动持久化能力。规则通过 Java DSL 定义；业务状态的保存、事务和并发控制由应用负责。
+
 ### COLA状态机介绍
 
 COLA状态机是在Github开源的，作者也写了介绍文章：https://blog.csdn.net/significantfrank/article/details/104996419。
@@ -29,7 +31,7 @@ COLA状态机是在Github开源的，作者也写了介绍文章：https://blog.
 所以COLA状态机设计的目标很明确，有两个核心理念：简洁的仅支持状态流转的状态机，不需要支持嵌套、并行等高级玩法。状态机本身需要是Stateless（无状态）的，这样一个Singleton
 Instance就能服务所有的状态流转请求了。
 
-COLA状态机的核心概念如下图所示，主要包括：
+COLA 状态机的核心概念包括：
 
 - State：状态
 
@@ -46,7 +48,7 @@ COLA状态机的核心概念如下图所示，主要包括：
 
 - StateMachine：状态机
 
-  ![image.png](../images/statemachine.png)
+事件触发转换，经 Condition 判断后执行 Action，得到目标 State。
 
 ### COLA状态机实战
 

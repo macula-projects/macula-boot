@@ -26,6 +26,17 @@ Micrometer Context Propagation。
 
 ## 使用说明
 
+本模块没有独立的 `macula.async.*` 配置。Spring Boot 自动创建的线程池使用以下属性；自行声明 Executor 时需自行应用配置与 TaskDecorator。
+
+| 属性 | 说明 |
+| --- | --- |
+| `spring.task.execution.pool.core-size` / `max-size` | 异步线程池核心 / 最大线程数 |
+| `spring.task.execution.pool.queue-capacity` | 异步队列容量，影响扩容与拒绝行为 |
+| `spring.task.execution.thread-name-prefix` | 异步线程名前缀 |
+| `spring.task.scheduling.pool.size` | 定时任务线程池大小 |
+| `spring.task.scheduling.thread-name-prefix` | 定时任务线程名前缀 |
+| `spring.reactor.context-propagation` | Reactor 传播模式，WebFlux/Gateway 按下文设为 `auto` |
+
 ### `@Async` 上下文传播
 
 引入组件后，Spring Boot 管理的异步执行器会使用

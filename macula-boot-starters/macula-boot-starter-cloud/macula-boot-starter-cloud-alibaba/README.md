@@ -23,68 +23,71 @@
 
 ## 使用配置
 
-Spring Cloud Alibaba 2025.1 不再使用旧的 bootstrap 配置路径。请在 `application.yml` 中通过 Config Data 导入 Nacos 配置：
+以下按当前 [Alibaba Provider application.yml](../../../macula-boot-examples/macula-example-alibaba-provider1/src/main/resources/application.yml) 精简，Gateway / Consumer 使用相同的配置中心组织方式。示例值不是 Starter 默认值。
+
+| 属性 | 示例值 / 说明 |
+| --- | --- |
+| `spring.profiles.active` | `@profile.active@` 由 Maven 资源过滤，默认构建 profile 为 local |
+| `spring.profiles.group.docker` | `local`，Docker 复用本地配置并覆盖连接信息 |
+| `spring.config.import` | 导入应用及应用-profile 两个 Nacos Data ID |
+| `spring.config.nacos.*` | 示例自定义连接属性，按 profile 提供；通过占位符传入 `spring.cloud.nacos.*` |
+| `spring.cloud.nacos.server-addr` / `username` / `password` | Nacos 地址与认证信息 |
+| `spring.cloud.nacos.discovery.enabled` / `namespace` | 启用注册发现并显式指定命名空间 |
+| `spring.cloud.nacos.discovery.metadata.version` | 示例为 `v1`，服务实例版本标签 |
+| `spring.cloud.nacos.discovery.register-enabled` / `register-delayed` | 本模块延迟注册扩展，仅显式配置 `false` / `true` 时启用 |
+| `spring.cloud.sentinel.transport.dashboard` / `port` | Sentinel 控制台地址 / 客户端通信端口 |
+| `spring.cloud.sentinel.datasource.<名称>.nacos.*` | Sentinel 规则的 Nacos 地址、Data ID、namespace、data-type 和 rule-type |
 
 ```yaml
 server:
-  port: 8081
-
+  port: ${SERVER_PORT:5020}
 spring:
   profiles:
-    # maven打包的时候指定profile，包括local,dev,test,staging,pet,prd，默认启用local
-    active: @profile.active@
+    active: '@profile.active@'
+    group:
+      docker: local
   application:
-    name: macula-cloud-system
+    name: macula-example-alibaba-provider1
   config:
     import:
       - optional:nacos:${spring.application.name}.yml?refreshEnabled=true
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml?refreshEnabled=true
   cloud:
     nacos:
-      username: ${nacos.username}
-      password: ${nacos.password}
-      config:
-        server-addr: ${nacos.config.server-addr}
-        namespace: ${nacos.config.namespace}
-        # group:
-        refresh-enabled: true
-        file-extension: yml
-
-# 和环境有关的配置信息，不同环境覆盖此处的配置
-nacos:
-  username: ${NACOS_USERNAME:nacos}
-  password: ${NACOS_PASSWORD:nacos}
-  config:
-    server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
-    namespace: ${NACOS_NAMESPACE:MACULA5}
-
+      server-addr: ${spring.config.nacos.server-addr}
+      namespace: ${spring.config.nacos.namespace}
+      username: ${spring.config.nacos.username}
+      password: ${spring.config.nacos.password}
+      discovery:
+        enabled: true
+        namespace: ${spring.cloud.nacos.namespace}
+        metadata:
+          version: v1
 ---
 spring:
   config:
     activate:
-      on-profile: dev
-nacos:
-  username: maculav5
-  #password: 请通过启动命令赋予密码
-  config:
-    server-addr: 10.94.108.55:8848
-    namespace: MACULA5
-```
-
-在nacos中以spring.application.name命名dataId，如果有profile则加上-xxx命名，后缀是yml，配置注册中心
-
-```yaml
-spring:
-  cloud:
+      on-profile: local
     nacos:
-      discovery:
-        enabled: true
-        server-addr: 127.0.0.1:8848
-        namespace: MACULA5
-        # group:
-    sentinel:
-      enabled: false
+      server-addr: 127.0.0.1:${NACOS_SERVER_PORT:38848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
+      namespace: ${NACOS_NAMESPACE:MACULA5}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
 ```
+
+`local` 使用 `NACOS_SERVER_PORT` 覆盖本机端口；远程地址可直接覆盖 `spring.config.nacos.server-addr`。`docker` 及共享环境使用 `NACOS_SERVER_ADDR` 提供完整地址。`dev/stg/pet/prd` 只保留配置中心连接信息，业务配置由对应 Data ID 提供；完整 Redis、Sentinel 和可观测性配置见上面的源文件。
+
+`optional:` 仅表示导入可选，不保证注册中心等其他依赖不可用时应用仍可启动；生产环境是否允许缺失配置需明确选择。
 
 ## 核心功能
 

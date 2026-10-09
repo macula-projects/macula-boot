@@ -14,6 +14,8 @@
 
 ## 使用配置
 
+配置使用下文各 SDK 的 `wx.*` 前缀，无统一 `macula.wechat.*` 开关。应用需显式引入所用能力的 Starter；Secret、Token、AES Key 和支付证书应由环境注入。集群部署需选择共享配置存储，不应沿用单机内存存储。
+
 ### 开放平台
 
 1. 引入依赖
@@ -181,9 +183,9 @@ wx:
         token: '@token'
         aes-key: '@aes-key'
         msg-audit-lib-path: '@msg-audit-lib-path'
-        msg-audit-priKey: '@msg-audit-priKey' 
+        msg-audit-priKey: '@msg-audit-priKey'
     # 公共配置
-    ## ConfigStorage 配置（选填）    
+    ## ConfigStorage 配置（选填）
     config-storage:
       type: 'redistemplate'               # 配置类型: memory(默认), jedis, redisson, redistemplate'
       key-prefix: 'wx:cp'                 # 相关redis前缀配置: wx:cp(默认)
@@ -293,9 +295,9 @@ V2版本
 ```yaml
 wx:
   pay:
-    appId: 
-    mchId: 
-    mchKey: 
+    appId:
+    mchId:
+    mchKey:
     keyPath:
 ```
 
@@ -421,4 +423,3 @@ wx:
 ## 版本说明
 
 - WxJava: https://github.com/Wechat-Group/WxJava/blob/develop/LICENSE
-

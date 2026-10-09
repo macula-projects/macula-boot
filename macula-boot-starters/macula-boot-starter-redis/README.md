@@ -16,6 +16,20 @@
 
 使用时有两种方式配置，一种是spring-boot默认的配置形式，另一种是redisson的配置形式。如下所示：
 
+| 属性 | 默认值 / 行为 | 说明 |
+| --- | --- | --- |
+| `spring.data.redis.host` / `port` | `localhost` / `6379` | 单机地址 |
+| `spring.data.redis.database` | `0` | 数据库编号，Cluster 不支持切库 |
+| `spring.data.redis.username` / `password` | 未设置 | Redis 认证信息 |
+| `spring.data.redis.timeout` | 未设置时本模块使用 `10000ms` | 自动构造 Redisson 时用作建连超时 |
+| `spring.data.redis.ssl.enabled` | `false` | 自动构造连接地址时启用 TLS |
+| `spring.data.redis.sentinel.master` / `nodes` | 未设置 | Sentinel 主节点名称 / 哨兵地址列表 |
+| `spring.data.redis.cluster.nodes` | 未设置 | Cluster 节点地址列表 |
+| `spring.redis.redisson.config` | 未设置 | 内嵌 Redisson YAML，优先于 `file` |
+| `spring.redis.redisson.file` | 未设置 | Redisson YAML 资源路径 |
+
+两种命名空间有意不同；显式 Redisson YAML 与 `spring.data.redis.*` 不会逐项合并。
+
 ```yaml
 spring:
   data:

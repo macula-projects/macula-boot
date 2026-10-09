@@ -20,44 +20,56 @@
 
 ### websocket服务模块配置
 
+配置前缀为 `macula.websocket`。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `enabled` | `true` | 启用 WebSocket 自动配置 |
+| `permit-test` | `true` | 放行内置测试消息路径；生产环境应设为 `false` |
+| `endpoint` | `[/websocket]` | STOMP 握手端点列表 |
+| `broker-destination-prefixes` | `[/topic, /queue]` | 消息代理处理的目标前缀 |
+| `app-destination-prefixes` | `[/app]` | 应用消息处理前缀 |
+| `user-destination-prefix` | `/user` | 用户定向消息前缀 |
+| `heartbeat` | `[10000, 10000]` | 服务端发送 / 期望客户端发送的心跳间隔，单位毫秒 |
+
 ```yaml
 macula:
-  security:
-    ignore-urls: /, /index.html, /hello2/**				# 演示项目忽略权限认证，正式环境要走授权逻辑
-	websocket:
-  enabled: true																		# 是否开启websocket自动配置，默认true
-  permit-test: true   														# 是否允许测试白名单，/xxx/test/xxx的websocket路径默认开白，默认true
-		endpoint: websocket 													# websocket端点，默认是websocket
- 		broker-destination-prefixes: /topic, /queue		# 转发订阅的前缀，默认是/topic,/queue
-		app-destination-prefixes: /app								# SimpAnnotationMethodMessageHandler的处理前缀，默认/app
-		user-destination-prefix: /user								# UserDestinationMessageHandler的处理前缀，默认/user
-    heartbeat: 10000, 10000												# 默认是10000,10000，前面是服务端心跳，后面是客户端心跳间隔
+  websocket:
+    enabled: true
+    permit-test: false
+    endpoint: [/websocket]
+    broker-destination-prefixes: [/topic, /queue]
+    app-destination-prefixes: [/app]
+    user-destination-prefix: /user
+    heartbeat: [10000, 10000]
 ```
 
 ### 网关需要配置路由
 
 ```yaml
 spring:
-	gateway:
-		routes:
-			- id: macula-example-consumer-ws
-        uri: lb:ws://macula-example-consumer			# 要加ws
-        predicates:
-          - Path=/websocket/**
-        filters:
-          - StripPrefix=1
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: macula-example-consumer-ws
+              uri: lb:ws://macula-example-alibaba-consumer
+              predicates:
+                - Path=/websocket/**
+              filters:
+                - StripPrefix=1
 macula:
   gateway:
     security:
-      ignore-urls: /consumer/hello2/**						# 测试地址，正式环境建议使用授权
-      only-auth-urls: /api/**, /websocket/**      # /websocket前缀在握手时会请求，这里要设置为仅认证
+      only-auth-urls: [/websocket/**]
 ```
 
 
 
 ## Spring Websocket核心流程
 
-![message-flow](../images/message-flow.png)
+客户端完成 WebSocket/STOMP 连接后，发送到 `/app` 的消息由应用处理，发往 `/topic`、`/queue` 的消息由代理路由给订阅者；`/user` 用于用户定向消息。
 
 具体见[详细介绍](https://www.tony-bro.com/posts/3568303861/index.html)
 
@@ -621,48 +633,20 @@ public class WebSocketController {
 
 ### 安全配置
 
-通过实现以下接口可以自定义destionation路径的权限，与URL角色权限类似
+注册 `MessageSecurityMetaSourceCustomizer` Bean 自定义消息目标权限：
 
 ```java
-public interface MessageSecurityMetaSourceCustomizer {
-    void customize(MessageSecurityMetadataSourceRegistry messages);
+@Bean
+MessageSecurityMetaSourceCustomizer messageSecurityCustomizer() {
+    return messages -> messages
+        .simpDestMatchers("/app/admin/**").hasRole("ADMIN")
+        .simpSubscribeDestMatchers("/topic/admin/**").hasRole("ADMIN");
 }
 ```
 
-默认已经做了如下配置
+接口参数已改为 Spring Security 7 的 `MessageMatcherDelegatingAuthorizationManager.Builder`。自定义规则在内置测试放行之后、`anyMessage().authenticated()` 兜底之前执行。
 
-```java
-@Configuration
-@RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE + 99)
-public class WebSocketSecurityConfiguration extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-
-    private final WebSocketProperties properties;
-    private final Collection<MessageSecurityMetaSourceCustomizer> customizers;
-
-    @Override
-    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-
-        if (properties.isPermitTest()) {
-            messages.nullDestMatcher().permitAll()
-                    .simpDestMatchers("/app/test/**").permitAll()
-                    .simpSubscribeDestMatchers("/user/queue/test/**", "/topic/test/**").permitAll();
-        }
-
-        customizers.forEach(customizer -> {
-            customizer.customize(messages);
-        });
-
-        // 兜底，所有漏网之鱼都要登录认证通过
-        messages.anyMessage().authenticated();
-    }
-
-    @Override
-    protected boolean sameOriginDisabled() {
-        return true;
-    }
-}
-```
+`permit-test=true` 时放行无目标消息、`/app/test/**` 发送及 `/user/queue/test/**`、`/topic/test/**` 订阅。当前实现以空的 `csrfChannelInterceptor` 替代默认拦截器，不执行 STOMP CONNECT CSRF 校验；生产部署需结合 HTTP 握手认证、来源限制和消息授权评估安全边界。
 
 
 

@@ -21,48 +21,81 @@
 
 ## 使用配置
 
+下面摘取当前 [Alibaba Gateway application.yml](../../../macula-boot-examples/macula-example-alibaba-gateway/src/main/resources/application.yml) 的 local 网关配置，需与 [Alibaba 配置](../macula-boot-starter-cloud-alibaba/README.md) 的公共及 profile 段合并，不是完整启动文件。Tencent 对应配置见 [Tencent Gateway application.yml](../../../macula-boot-examples/macula-example-tencent-gateway/src/main/resources/application.yml)。
+
 ```yaml
 spring:
-  gateway:
-    routes:
-      - id: macula-cloud-system
-        uri: lb://macula-cloud-system
-        predicates:
-          - Path=/system/**
-        filters:
-          - StripPrefix=1
+  config:
+    activate:
+      on-profile: local
+  data:
+    redis:
+      host: 127.0.0.1
+      port: ${REDIS_PORT:36379}
+      password: ${REDIS_PASSWORD:redis}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: macula-example-alibaba-consumer
+              uri: lb://macula-example-alibaba-consumer
+              predicates:
+                - Path=/consumer/**
+              filters:
+                - StripPrefix=1
+            - id: macula-example-alibaba-consumer-ws
+              uri: lb:ws://macula-example-alibaba-consumer
+              predicates:
+                - Path=/websocket/**
+              filters:
+                - StripPrefix=1
   security:
     oauth2:
       resourceserver:
         opaquetoken:
           client-id: e4da4a32-592b-46f0-ae1d-784310e88423
-          client-secret: secret
-          introspection-uri: http://127.0.0.1:9010/oauth2/introspect     
-  redis:																# 网关自己的redis配置
-    database: 0										
-    host: 127.0.0.1
-    port: 6379
-    system:															# macula-cloud的system模块的redis配置
-      database: 0
-      host: 127.0.0.1
-      port: 6379
+          client-secret: secret # 仅为 samples 演示值，部署时替换
+          introspection-uri: ${OAUTH2_INTROSPECTION_URI:http://127.0.0.1:9010/oauth2/introspect}
+  reactor:
+    context-propagation: auto
 macula:
   gateway:
-    sign-switch: true                       # 接口签名全局开关，默认true
-    force-sign: false                       # 是否强制校验指定URL的接口签名，默认false
-    crypto-switch: true           			# 接口加解密全局开关，默认true
-    force-crypto: false           			# 是否强制校验指定URL的接口要不要加解密，默认false
-    protect-urls: 						    # 需要保护的URL，前端可通过/gateway/protect/urls获取
-      crypto:                               # 加密
-        - /system/xxx/**
-        - /mall/api/v1/xxx/**
-      sign:                                 # 签名
-        - /system/xxx/*
-        - /mall/api/v1/**
     security:
-      ignore-urls: /usr/xxx,/bbb/xxx  		# 忽略认证的路径，Ant Path格式
-      only-auth-urls: /usr/xx, /bbb/xxx 	# 仅需认证无需鉴权的路径
+      ignore-urls: /consumer/hello2/**,/consumer/api/v1/consumer/echo/**
+      only-auth-urls: /api/**, /websocket/**
 ```
+
+| samples 配置 | 说明 |
+| --- | --- |
+| `server.port` / `server.http.port` | Alibaba 为 HTTPS `5443` / HTTP `5000`，分别由 `SERVER_PORT` / `SERVER_HTTP_PORT` 覆盖；HTTP 扩展端口需示例中的配套 Java 配置 |
+| `server.ssl.*` | Alibaba 示例使用 classpath 证书；生产替换证书及口令 |
+| `spring.cloud.gateway.server.webflux.routes` | HTTP / WebSocket 路由；Tencent 示例转发到 `macula-example-tencent-consumer`，端口为 HTTP `4000` |
+| `spring.cloud.gateway.server.webflux.globalcors` | Alibaba 示例提供全局 CORS；生产应收窄来源，不照搬通配规则 |
+| `spring.data.redis.*` | samples 使用标准单 Redis 配置；独立 System Redis 见下文扩展 |
+| `spring.security.oauth2.resourceserver.opaquetoken.*` | Token introspection 地址及调用凭证 |
+| `spring.reactor.context-propagation` | `auto`，跨 Reactor 线程传播上下文 |
+
+示例普通环境关闭 OTLP 网络导出；`observability` profile 开启三类导出并指向 `otel-collector:4318`，适用于对应 Docker 网络。完整配置以源文件为准。
+
+下列属性前缀为 `macula.gateway`：
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `sign-switch` / `crypto-switch` | `true` / `true` | 签名 / 加解密全局开关；对应过滤器还需 CryptoService Bean |
+| `force-sign` / `force-crypto` | `true` / `false` | 是否强制校验已配置的受保护接口 |
+| `protect-urls.sign` / `protect-urls.crypto` | 空列表 | 需签名 / 加密的路径 |
+| `trace-id-response-header-enabled` | `true` | 有有效 Span 时输出 `x-traceId` |
+| `gray.enabled` | `false` | 启用网关灰度路由处理 |
+| `apikey.enabled` | `true` | 创建 API Key 认证过滤器 |
+| `rm-opaque-token.enabled` | `true` | 创建 Token 缓存移除端点过滤器 |
+| `rm-opaque-token-endpoint` | `/gateway/rm/opaqueToken` | 缓存移除路径 |
+| `force-hmac-rm-opaque-token-endpoint` | `true` | 移除 Token 缓存时强制 HMAC 校验 |
+| `security.ignore-urls` | 空列表并合并内置白名单 | 放行认证的路径 |
+| `security.only-auth-urls` | 空列表 | 只认证、不检查 URL 角色权限的路径 |
+| `security.default-url-require-check` | `false` | 未配置 URL 权限时是否要求鉴权，生产需明确评估 |
+
+灰度过滤器的创建另受 `macula.cloud.gray.enabled` 控制（默认 `true`），与 `macula.gateway.gray.enabled` 的运行开关不同。应用还需提供 `spring.application.name`，OAuth2 凭证和签名材料须由部署环境注入。
 
 ## 核心功能
 
@@ -79,9 +112,11 @@ macula:
 
 ### Token认证
 
+`spring.security.oauth2.resourceserver.jwt.issuer-uri` 用于下游 JWT 的签发者标识，默认 `http://127.0.0.1:9010`。默认签名密钥从 `jwk/jose.jks` 加载，目前没有对应的 YAML 密钥配置项；生产应用应提供自己的 `JWKSource<SecurityContext>` Bean 替换内置实现。
+
 将oauth2的token转换为JWT传递给微服务，微服务通过JWT获取用户信息和角色信息。
 
-1. 前端访问gateway接口，在HTTP请求头添加` Authorization Bear xxxxx`
+1. 前端访问gateway接口，在HTTP请求头添加`Authorization: Bearer xxxxx`
 2. gateway收到token后，调用iam服务器的introspect url返回用户信息和角色信息（同时会以token有效期来缓存用户信息）
 3. 通过AddJwtFilter将用户信息和角色信息转为JWT Token放入请求头给后续的微服务的安全模块校验认证（JWT也会缓存）
 
@@ -242,7 +277,22 @@ public class CryptoLocaleServiceImpl implements CryptoService, InitializingBean 
 
 ### 配置System的Redis
 
-网关的URL与角色对应关系数据、应用数据是缓存在macula-cloud的system模块的redis中，需要配置system的redis。利用多redis配置方式来进行配置：
+最新 samples 使用 `spring.data.redis.*` 配置单个 Redis，没有额外声明 System Redis 连接。若业务需要访问独立的 macula-cloud-system Redis，可按以下方式扩展；`spring.data.redis.system.*` 是此示例手动绑定的自定义前缀，并非 Boot 自带的第二数据源配置。
+
+```yaml
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: ${REDIS_PORT:36379}
+      password: ${REDIS_PASSWORD:redis}
+      system:
+        host: ${SYSTEM_REDIS_HOST:127.0.0.1}
+        port: ${SYSTEM_REDIS_PORT:6379}
+        password: ${SYSTEM_REDIS_PASSWORD}
+```
+
+此扩展示例新增的 `SYSTEM_REDIS_*` 变量需自行提供，最新 samples 中未定义这些变量。
 
 ```java
 /**
@@ -254,13 +304,14 @@ public class CryptoLocaleServiceImpl implements CryptoService, InitializingBean 
 @Configuration
 public class RedisConfiguration {
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis")
+    @Primary
+    @ConfigurationProperties(prefix = "spring.data.redis")
     public DataRedisProperties redisProperties() {
         return new DataRedisProperties();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.redis.system")
+    @ConfigurationProperties(prefix = "spring.data.redis.system")
     public DataRedisProperties sysRedisProperties() {
         return new DataRedisProperties();
     }

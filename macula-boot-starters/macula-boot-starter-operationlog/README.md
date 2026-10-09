@@ -31,6 +31,8 @@
 
 ### 2. 使用注解
 
+仅在 Web 应用中自动配置，无独立 YAML 开关；记录内容由注解参数控制。`spring.application.name` 用作应用名，未设置时为 `unknown-app`。避免两个日志注解重复记录同一方法，并对参数和结果中的敏感信息脱敏。
+
 #### Controller 层使用示例
 
 ```java
@@ -47,13 +49,7 @@ public class UserController {
         logResult = false
     )
 
-// 或使用常量
-@OperationLog(
-    module = "用户管理",
-    description = "查询用户详情",
-    operation = OperationLogConstant.OPERATION_TYPE_SELECT,
-    layer = OperationLogConstant.LAYER_CONTROLLER
-)
+    // 查询方法见下方常量写法；同一方法只添加一个 @OperationLog
     @PostMapping
     public Result<UserVO> createUser(@RequestBody UserCreateDTO dto) {
         // 业务逻辑

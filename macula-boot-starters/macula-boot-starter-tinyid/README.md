@@ -18,12 +18,21 @@ macula-cloud-tinyid是用Java开发的一款分布式id生成系统，基于数�
 
 ### 使用配置
 
+此 Starter 是号段客户端，不包含 TinyID 服务端。下列属性前缀为 `macula.cloud.tinyid`。
+
+| 属性 | 默认值 | 说明 |
+| --- | --- | --- |
+| `server` | 未设置 | 服务端地址，多个地址以逗号分隔 |
+| `token` | 未设置 | 服务端分配的访问凭证，须有对应 bizType 的授权 |
+| `connect-timeout` | `5000` | HTTP 建连超时，单位毫秒 |
+| `read-timeout` | `5000` | HTTP 读取超时，单位毫秒 |
+
 ```yaml
 macula:
   cloud:
     tinyid:
       server: localhost:9000 # 可以通过逗号隔开多个服务端IP
-      token: 0f673adf80504e2eaa552f5d791b644c
+      token: ${TINYID_TOKEN}
       connectTimeout: 5000
       readTimeout: 5000
 ```
@@ -98,9 +107,9 @@ macula:
 
 ### tinyid系统架构图
 
-![Code架构](../images/tinyid.png)
+客户端从 TinyID Server 申请号段，Server 从数据库分配号段；客户端缓存号段并在本地生成 ID。
 
-下面是一些关于这个架构图的说明:
+下面是关于该架构的说明：
 
 - nextId和getNextSegmentId是tinyid-server对外提供的两个http接口
 - nextId是获取下一个id，当调用nextId时，会传入bizType，每个bizType的id数据是隔离的，生成id会使用该bizType类型生成的IdGenerator。

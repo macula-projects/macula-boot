@@ -15,7 +15,9 @@
 ```bash
 export SNAIL_JOB_NAMESPACE=example
 export SNAIL_JOB_TOKEN=example
-mvn -pl macula-boot-examples/macula-example-task -am spring-boot:run
+# 在仓库根目录先安装所需框架依赖，再只启动当前应用
+mvn -pl macula-boot-examples/macula-example-task -am install -DskipTests -Dgpg.skip=true -Pdeploy
+mvn -f macula-boot-examples/macula-example-task/pom.xml spring-boot:run
 ```
 
 默认应用端口为 `7099`，SnailJob 客户端通信端口为 `17889`。可通过 `SNAIL_JOB_SERVER_HOST`、`SNAIL_JOB_SERVER_PORT`、`SNAIL_JOB_PORT`、`NACOS_SERVER_ADDR`、`NACOS_NAMESPACE`、`NACOS_USERNAME` 和 `NACOS_PASSWORD` 覆盖。

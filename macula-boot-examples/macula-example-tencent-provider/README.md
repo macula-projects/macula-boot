@@ -7,7 +7,9 @@ OTLP Metrics、Traces、Logs 网络导出默认关闭，配置 Docker observabil
 ## 启动
 
 ```bash
-mvn -pl macula-boot-examples/macula-example-tencent-provider -am spring-boot:run
+# 在仓库根目录先安装所需框架依赖，再只启动当前应用
+mvn -pl macula-boot-examples/macula-example-tencent-provider -am install -DskipTests -Dgpg.skip=true -Pdeploy
+mvn -f macula-boot-examples/macula-example-tencent-provider/pom.xml spring-boot:run
 ```
 
 默认端口为 `4020`，Polaris 地址为 `grpc://127.0.0.1:38091`，Spring Cloud Tencent 的 Nacos 兼容 discovery 地址为 `127.0.0.1:38849`。可通过 `POLARIS_SERVER_ADDR`、`POLARIS_NACOS_SERVER_ADDR` 和 `POLARIS_NAMESPACE` 覆盖。

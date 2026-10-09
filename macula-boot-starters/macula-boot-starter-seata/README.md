@@ -1,6 +1,6 @@
 ## 概述
 
-macula-cloud-seata是基于seata-server的服务端实现，以nacos作为注册和配置中心。同时提供starter，默认支持RestTemplate、FeignClient的分布式事务支持。
+本模块是 Seata 客户端 Starter，补充 RestTemplate、Feign 和 Web 请求的事务上下文传播，不包含 Seata Server。下文服务端章节说明独立部署配套。
 
 ## 客户端接入
 
@@ -16,6 +16,20 @@ macula-cloud-seata是基于seata-server的服务端实现，以nacos作为注册
 
 ### 使用配置
 
+本模块不增加独立的配置前缀，客户端沿用 `seata.*`；示例使用 Nacos，须先部署对应服务。
+
+| 属性 | 配置说明 |
+| --- | --- |
+| `seata.enabled` | Seata 客户端开关 |
+| `seata.application-id` | 应用标识，通常使用 `spring.application.name` |
+| `seata.tx-service-group` | 事务组，须与服务端 `service.vgroupMapping.*` 映射一致 |
+| `seata.enable-auto-data-source-proxy` | 是否自动代理数据源，按所用事务模式选择 |
+| `seata.saga.enabled` | 仅使用 Saga 状态机时开启 |
+| `seata.config.type` / `seata.registry.type` | 配置中心 / 注册中心类型 |
+| `seata.config.nacos.*` / `seata.registry.nacos.*` | 对应 Nacos 地址、命名空间和认证信息 |
+
+AT 模式还需在业务库准备与 Seata 版本对应的 `undo_log` 表；引入 Starter 不代表服务端或业务表已就绪。
+
 客户端加入如下配置
 
 ```yaml
@@ -23,20 +37,20 @@ seata:
   enabled: true
   application-id: ${spring.application.name}
   tx-service-group: ${spring.application.name}-tx-group
-  enable-auto-data-source-proxy: true			# 开启自动数据源代理，如果不使用AT模式，不要开启，默认为true
+  enable-auto-data-source-proxy: true      # 开启自动数据源代理，如果不使用AT模式，不要开启，默认为true
   saga:
-  	enabled: true													# 开启saga自动配置，默认是false
+    enabled: true                          # 开启saga自动配置，默认是false
   config:
     type: nacos
     nacos:
       serverAddr: 127.0.0.1:8848
-      dataId: "seata.properties"					# 默认是seata.properties
+      dataId: "seata.properties"          # 默认是seata.properties
       username: 'nacos'
       password: 'nacos'
   registry:
     type: nacos
     nacos:
-      application: seata-server						# seata服务器的ID
+      application: seata-server            # seata服务器的ID
       server-addr: 127.0.0.1:8848
       username: 'nacos'
       password: 'nacos'
@@ -124,7 +138,7 @@ AT模式分成两阶段来工作，我们先省略部分细节来整体了解其
 
 （2）但是如果发生了报错，就只需要根据undo_log来回退数据
 
-![在这里插入图片描述](../images/seata_at_01.png)
+第一阶段提交业务数据与回滚日志，第二阶段根据全局事务结果执行提交清理或回滚。
 
 这个就是AT模式执行的两阶段的整体视角，我们可以体会到的是AT模式下，自动帮助我们生成了undo_log、一阶段、二阶段的提交都是由seata完成的，并不需要我们写代码来实现，所以它的无代码入侵体现在这里。
 
@@ -148,7 +162,7 @@ TCC模式，全称Try-Confirm-Cancel，通过名称也能看出来其流程主�
 - 确认/提交 Confirm：业务确认和提交
 - 撤销/回滚 Cancel：业务回滚
 
-![在这里插入图片描述](../images/seata_tcc_01.png)
+Try 预留业务资源；全局成功执行 Confirm，失败执行 Cancel。
 
 理解TCC模式的关键在于理解Try-Confirm阶段，其中Try用来实现业务检查和资源预留，这个概念比较抽象，我们举个例子来看看：
 
