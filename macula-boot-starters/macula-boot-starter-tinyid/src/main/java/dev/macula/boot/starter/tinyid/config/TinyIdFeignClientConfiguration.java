@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2023 Macula
- *   macula.dev, China
+ * Copyright (c) 2026 Macula
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.macula.boot.starter.tinyid.config;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import dev.macula.boot.starter.feign.interceptor.KongApiInterceptor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 /**
- * TinyId 分布式 ID 生成器配置属性
- * 
- * @author du_imba
- * @since 5.0.0
+ * 仅在 TinyID Feign 子上下文中启用的应用签名配置。
+ *
+ * @author Rain
+ * @since 6.1.0
  */
-@ConfigurationProperties(prefix = "macula.cloud.tinyid")
-@Data
-public class TinyIdProperties {
+public class TinyIdFeignClientConfiguration {
 
-    private String token;
-    private String server;
-    private Integer readTimeout = 5000;
-    private Integer connectTimeout = 5000;
+    @Bean
+    public KongApiInterceptor tinyIdApiInterceptor(@Value("${macula.cloud.app-key}") String appKey,
+        @Value("${macula.cloud.secret-key}") String secretKey) {
+        return new KongApiInterceptor(appKey, secretKey);
+    }
 }

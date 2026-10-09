@@ -19,16 +19,10 @@ package dev.macula.boot.starter.tinyid.service.impl;
 
 import dev.macula.boot.starter.tinyid.base.entity.SegmentId;
 import dev.macula.boot.starter.tinyid.base.service.SegmentIdService;
-import dev.macula.boot.starter.tinyid.config.TinyIdProperties;
-import dev.macula.boot.starter.tinyid.utils.TinyIdHttpUtils;
-import org.springframework.util.StringUtils;
+import dev.macula.boot.starter.tinyid.remote.TinyIdFeignClient;
+import org.springframework.util.Assert;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 
 /**
  * 基于HTTP 的段ID服务实现
@@ -38,25 +32,24 @@ import java.util.logging.Logger;
  */
 public class HttpSegmentIdServiceImpl implements SegmentIdService {
 
-    private static final Logger logger = Logger.getLogger(HttpSegmentIdServiceImpl.class.getName());
-    private static final String serverUrl = "http://{0}/tinyid/api/v1/id/nextSegmentIdSimple?token={1}&bizType=";
-    private final TinyIdProperties properties;
-    private List<String> serverList;
+    private final TinyIdFeignClient client;
 
-    public HttpSegmentIdServiceImpl(TinyIdProperties properties) {
-        this.properties = properties;
+    public HttpSegmentIdServiceImpl(TinyIdFeignClient client) {
+        this.client = client;
     }
 
     @Override
     public SegmentId getNextSegmentId(String bizType) {
-        String url = chooseService(bizType);
-        String response = TinyIdHttpUtils.post(url, properties.getReadTimeout(), properties.getConnectTimeout());
-        logger.info("tinyId client getNextSegmentId end, response:" + response);
+        Assert.hasText(bizType, "bizType must not be blank");
+        String response = client.nextSegmentId(bizType);
         if (response == null || response.trim().isEmpty()) {
             return null;
         }
         SegmentId segmentId = new SegmentId();
-        String[] arr = response.split(",");
+        String[] arr = response.split(",", -1);
+        if (arr.length != 5) {
+            throw new IllegalStateException("Invalid TinyID segment response");
+        }
         segmentId.setCurrentId(new AtomicLong(Long.parseLong(arr[0])));
         segmentId.setLoadingId(Long.parseLong(arr[1]));
         segmentId.setMaxId(Long.parseLong(arr[2]));
@@ -65,27 +58,4 @@ public class HttpSegmentIdServiceImpl implements SegmentIdService {
         return segmentId;
     }
 
-    private String chooseService(String bizType) {
-        // 将tinyIdServer 转为需要的访问 URL
-        if (serverList == null) {
-            if (StringUtils.hasLength(properties.getServer()) && StringUtils.hasLength(properties.getToken())) {
-                String[] tinyIdServers = properties.getServer().split(",");
-                serverList = new ArrayList<>(tinyIdServers.length);
-                for (String server : tinyIdServers) {
-                    String url = MessageFormat.format(serverUrl, server, properties.getToken());
-                    serverList.add(url);
-                }
-            }
-        }
-
-        String url = "";
-        if (serverList != null && serverList.size() == 1) {
-            url = serverList.get(0);
-        } else if (serverList != null && serverList.size() > 1) {
-            Random r = new Random();
-            url = serverList.get(r.nextInt(serverList.size()));
-        }
-        url += bizType;
-        return url;
-    }
 }

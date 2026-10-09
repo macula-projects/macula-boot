@@ -17,7 +17,7 @@
 package dev.macula.boot.starter.tinyid;
 
 import dev.macula.boot.starter.tinyid.base.factory.IdGeneratorFactory;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,8 +28,9 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author du_imba
  * @since 2026/8/12
  */
-@SpringBootTest
-@Disabled("需要启动tinyid服务器才能运行此测试")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@EnabledIfEnvironmentVariable(named = "TINYID_E2E", matches = "true",
+    disabledReason = "需要隔离 Gateway、TinyID Server、test 业务及 MACULA_CLOUD_APP_KEY/SECRET_KEY")
 public class TinyIdClientIT {
 
     @Autowired
@@ -37,9 +38,10 @@ public class TinyIdClientIT {
 
     @Test
     public void testNextId() {
-        for (int i = 0; i < 100; i++) {
-            Long id = idGeneratorFactory.getIdGenerator("test").nextId();
-            System.out.println("current id is: " + id);
-        }
+        var generator = idGeneratorFactory.getIdGenerator("test");
+        java.util.Set<Long> ids = new java.util.HashSet<>();
+        ids.add(generator.nextId());
+        ids.addAll(generator.nextId(250));
+        org.assertj.core.api.Assertions.assertThat(ids).hasSize(251).allMatch(id -> id > 0);
     }
 }

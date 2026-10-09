@@ -4,6 +4,6 @@ spring:
 
 macula:
   cloud:
-    tinyid:
-      token: 0f673adf80504e2eaa552f5d791b644c
-      server: localhost:9082
+    endpoint: ${MACULA_CLOUD_ENDPOINT:http://localhost:9000}
+    app-key: ${MACULA_CLOUD_APP_KEY}
+    secret-key: ${MACULA_CLOUD_SECRET_KEY}
