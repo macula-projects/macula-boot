@@ -77,6 +77,7 @@ macula-boot
 Macula Boot 6.1 基于 Spring Boot 4、Spring Framework 7、Spring Cloud 2025.1 和 Jackson 3。升级应用时需要同步处理以下源码与配置变化：
 
 - Jackson 数据绑定 API 从 `com.fasterxml.jackson.databind` 迁移到 `tools.jackson.databind`；自定义 Boot JSON 构建器改用 `org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer`。`OperationLogDTO` 暴露的 `JsonNode` 类型也相应变为 Jackson 3 类型。
+- Macula 自有 Jackson 序列化代码（含 RocketMQ 消息转换链）统一使用 Jackson 3；`com.fasterxml.jackson.annotation` 是两代共享的注解包，继续保留。第三方组件所需的 Jackson 2 运行依赖不做全局排除。
 - WebSocket 鉴权扩展 `MessageSecurityMetaSourceCustomizer` 的参数改为 Spring Security 7 的 `MessageMatcherDelegatingAuthorizationManager.Builder`。
 - Redis 配置属性使用 `org.springframework.boot.data.redis.autoconfigure.DataRedisProperties`；Redisson 使用与 Spring Data Redis 4 对应的 `redisson-spring-data-40`。Redisson 4 的 `config`/`file` 仅支持 YAML，旧 JSON 配置和固定 `retryInterval` 需要分别迁移为 YAML 与 `retryDelay` 策略。
 - Cache Starter 不再依赖 Resilience4j，删除 `spring.cache.two-level.open-circuit-breaker` 和 `spring.cache.two-level.circuit-breaker.*` 配置。Redis 可用性故障改为 fail-open：当前实例继续使用 Caffeine，但跨实例失效通知可能延迟到本地 TTL 到期。

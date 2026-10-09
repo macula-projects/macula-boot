@@ -170,6 +170,8 @@ class TwoLevelCacheTest {
     }
 
     @Test
+    // Spring Data Redis 4.0 的 RedisCache.clear(String) 仍调用 clean，必须模拟实际异常路径。
+    @SuppressWarnings("removal")
     void evictAndClearAlwaysInvalidateLocalCacheOnRedisAvailabilityFailure() {
         localCache.put(KEY, "old-value");
         localCache.put("user-2", "old-value-2");

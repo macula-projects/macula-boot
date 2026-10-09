@@ -24,6 +24,12 @@ macula:
 
 ## 核心功能
 
+JSON 转换器显式设置默认字符集为 UTF-8，自动生成的 JSON 响应头包含 `charset=UTF-8`；SSE 专用 PrettyPrinter 在构造时初始化并复用。
+
+Jackson 3 请求反序列化保留基本类型字段接收 `null` 的历史行为，例如 `int` 转为 `0`、`boolean` 转为 `false`。开启 JSON 缩进时，SSE 响应的后续行仍使用 `data:` 前缀。
+
+消息转换器通过 Spring 7 的 `configureMessageConverters(HttpMessageConverters.ServerBuilder builder)` 配置：字符串使用 UTF-8，JSON 使用 `MappingApiJacksonHttpMessageConverter`。通过 `withStringConverter` / `withJsonConverter` 替换对应默认转换器，其他格式保留框架默认注册行为。
+
 ### 全局异常处理
 
 如果在Controller每个方法都catch异常，非常不方便，所以默认通过ControllerExceptionAdvice类处理，包括：

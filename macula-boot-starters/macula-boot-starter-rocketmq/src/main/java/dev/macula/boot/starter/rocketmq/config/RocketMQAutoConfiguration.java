@@ -17,8 +17,6 @@
 
 package dev.macula.boot.starter.rocketmq.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.macula.boot.starter.rocketmq.DefaultRocketMQLocalTransactionListener;
 import dev.macula.boot.starter.rocketmq.instrument.GrayDefaultRocketMQListenerContainerPostProcessor;
 import dev.macula.boot.starter.rocketmq.instrument.GrayFilterMessageHookImpl;
@@ -43,8 +41,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.converter.CompositeMessageConverter;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -61,21 +65,22 @@ public class RocketMQAutoConfiguration {
     @Bean
     @Primary
     public RocketMQMessageConverter rocketMQMessageConverter() {
-        RocketMQMessageConverter converter = new RocketMQMessageConverter();
-        CompositeMessageConverter compositeMessageConverter =
-                (CompositeMessageConverter) converter.getMessageConverter();
-        List<MessageConverter> messageConverterList = compositeMessageConverter.getConverters();
-        // 解决RocketMQ Jackson不支持Java时间类型配置
-        for (MessageConverter messageConverter : messageConverterList) {
-            if (messageConverter instanceof MappingJackson2MessageConverter) {
-                MappingJackson2MessageConverter jackson2MessageConverter =
-                        (MappingJackson2MessageConverter) messageConverter;
-                ObjectMapper objectMapper = jackson2MessageConverter.getObjectMapper();
-                // 增加Java8时间模块支持，实体类可以传递LocalDate/LocalDateTime
-                objectMapper.registerModules(new JavaTimeModule());
+        ByteArrayMessageConverter byteArrayConverter = new ByteArrayMessageConverter();
+        byteArrayConverter.setContentTypeResolver(null);
+        // 使用 Jackson 3，同时保留历史消息的日期格式和反序列化默认行为。
+        JsonMapper mapper = JsonMapper.builder().configureForJackson2()
+            .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
+        CompositeMessageConverter messageConverter = new CompositeMessageConverter(List.of(
+            byteArrayConverter, new StringMessageConverter(), new JacksonJsonMessageConverter(mapper)));
+        return new RocketMQMessageConverter() {
+            @Override
+            public MessageConverter getMessageConverter() {
+                return messageConverter;
             }
-        }
-        return converter;
+        };
     }
 
     @Bean

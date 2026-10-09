@@ -18,8 +18,8 @@
 package dev.macula.boot.starter.web.json;
 
 import dev.macula.boot.starter.web.config.JacksonProperties;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.ObjectMapper;
 
@@ -37,16 +37,16 @@ import java.util.List;
  * @author L.cm, Rain
  * @since 5.0.0
  */
-public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJackson2HttpMessageConverter {
+public class MappingApiJacksonHttpMessageConverter extends AbstractReadWriteJacksonHttpMessageConverter {
 
     @Nullable
     private String jsonPrefix;
 
     /**
-     * Construct a new {@link MappingApiJackson2HttpMessageConverter} with a custom {@link ObjectMapper}.
+     * Construct a new {@link MappingApiJacksonHttpMessageConverter} with a custom {@link ObjectMapper}.
      * @param objectMapper ObjectMapper
      */
-    public MappingApiJackson2HttpMessageConverter(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
+    public MappingApiJacksonHttpMessageConverter(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
         super(objectMapper, initWriteObjectMapper(objectMapper, jacksonProperties), initMediaType());
     }
 
@@ -76,7 +76,7 @@ public class MappingApiJackson2HttpMessageConverter extends AbstractReadWriteJac
      * @param jsonPrefix jsonPrefix
      * @see #setPrefixJson
      */
-    public void setJsonPrefix(String jsonPrefix) {
+    public void setJsonPrefix(@Nullable String jsonPrefix) {
         this.jsonPrefix = jsonPrefix;
     }
 
