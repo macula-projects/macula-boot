@@ -1,0 +1,11 @@
+# .cnb.yml
+main:
+  "crontab: 0 1 * * *": # 每天1点执行
+    - name: sync from github
+      stages:
+        - name: sync from github
+          image: tencentcom/git-sync
+          settings:
+            target_url: https://github.com/macula-projects/macula-boot.git
+            auth_type: https
+            sync_mode: pull
