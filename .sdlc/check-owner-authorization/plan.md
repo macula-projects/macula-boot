@@ -8,6 +8,7 @@ Status: accepted
 - macula-boot-starters/macula-boot-starter-security/src/test/java/dev/macula/boot/starter/security/test/SecurityAutoConfigurationTest.java（新增）
 - macula-boot-starters/macula-boot-starter-security/README.md
 - .sdlc/check-owner-authorization/intent.md、spec.md、plan.md、review-findings.md（流程记录）
+- .sdlc/check-owner-authorization/verification.md（实际测试证据）
 
 ## Order of work
 1. 添加仅方法可用、运行期保留的 CheckOwner 注解，value 必填。组合 isAuthenticated() 前置检查与已接受设计中的返回后 SpEL 模板检查。Java 文件使用标准版权头和含 author、since 的职责 Javadoc。
@@ -30,3 +31,12 @@ Status: accepted
 - 定向验证：mvn -pl macula-boot-starters/macula-boot-starter-security -am test -Dtest=CheckOwnerTest,SecurityAutoConfigurationTest -Dsurefire.failIfNoSpecifiedTests=false。
 - 模块验证：mvn -pl macula-boot-starters/macula-boot-starter-security -am test。
 - 检查变更 Java 的版权头、职责 Javadoc、格式及 git diff --check；无跨模块源代码改动，无需外部基础设施。
+
+## Implementation record
+- 已添加 CheckOwner、现有配置中的可替换模板 Bean、10 个方法鉴权测试和 2 个自动配置测试，并补充 README。
+- 实际偏差：无。生产代码未新增配置类、配置键或依赖。
+- 构建检查：mvn -pl macula-boot-starters/macula-boot-starter-security -am test-compile -DskipTests 成功，生产代码及测试代码均按 Java 17 编译通过。
+- git diff --check 通过。
+- 用户确认实现完成后已执行测试：新增 12 个、模块及依赖 46 个、全仓 230 个单元测试均通过；变更 Java 文件 Checkstyle 0 违规。详见 verification.md。
+- 测试修正：现有 SecurityProperties 依赖 SpringUtil 和 MVC 映射，自动配置测试补入静态 SpringUtil 与真实 RequestMappingHandlerMapping，并使用 WebApplicationContextRunner 自带的请求依赖。未修改原生产配置行为。
+- 补录 verification.md 作为测试证据文件；仅扩充流程记录文件集，无源码范围偏差。

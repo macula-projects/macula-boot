@@ -215,6 +215,38 @@ public class OrderService {
 - `@PostAuthorize` 不会逐条过滤集合。列表查询应在查询条件中限制用户、租户和数据范围，不能照搬单对象的归属表达式。
 - 入参相等只证明请求的用户名相符，查询仍应按该用户过滤；多租户场景还需校验租户边界。角色名、scope 和业务字段均应替换为应用真实定义。
 
+### 数据拥有者校验 @CheckOwner
+
+对无副作用的同步单对象查询，可以使用 `@CheckOwner` 统一检查返回值的归属。业务通过必填的 `value` 指定完整 SpEL 表达式；表达式结果必须非空，并与当前认证的 `authentication.name` 相等。默认 JWT 配置中的 name 来自 `sub`，与 `SecurityUtils.getCurrentUser()` 返回的标识一致。拥有者必须采用相同的身份标识及兼容类型，不能直接假定数字用户 ID 等于用户名。
+
+```java
+import dev.macula.boot.starter.security.annotation.CheckOwner;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+    private final OrderRepository orderRepository;
+
+    @CheckOwner("returnObject.buyerUsername")
+    public OrderView getOrder(Long orderId) {
+        return orderRepository.findViewById(orderId);
+    }
+}
+```
+
+其他业务可以指定不同属性，例如 `@CheckOwner("returnObject.createdBy")`。如果被标注的方法本身返回 `Result<OrderView>`，且订单在 `data` 中，则使用 `@CheckOwner("returnObject.data?.buyerUsername")`；`?.` 在 data 为空时返回 null，随后拒绝返回。如果 Result 是由 `ResponseBodyAdvice` 在后续包装的，表达式仍应按被标注方法的实际返回值填写，不加 `data`。
+
+Starter 在现有 `SecurityAutoConfiguration` 中注册 `AnnotationTemplateExpressionDefaults`，无需应用额外声明配置类。应用可以提供同类型 Bean 覆盖默认值；该 Bean 控制 Spring Security 的全局注解模板解析，替换时必须保持所需模板行为。
+
+安全边界：
+
+- 未登录会在方法执行前拒绝；返回值为空、拥有者为空或不匹配会在方法返回后拒绝。ADMIN、ROOT 不自动绕过。
+- 拥有者应从服务端真实数据取得，不得使用客户端自报的归属字段。表达式中不存在的属性或其他配置错误可能产生求值异常，不能作为允许访问处理。
+- 只适用于通过 Spring Bean 代理调用的公开方法；同类自调用、手动 new 对象不能依赖该注解。同一方法不要再重复声明与它冲突的 `@PreAuthorize`、`@PostAuthorize` 或组合安全注解。
+- 不过滤列表、分页、统计或导出；这些操作应在数据库查询中限制数据范围。不支持异步、流式返回值的拥有者解析。
+- 返回后检查不能撤销已经发生的写入、消息发送等副作用，修改、删除和退款应使用执行前鉴权及数据库条件约束。
+- 拥有者相等不代表租户授权成立；多租户业务仍需独立限制租户范围，尤其不能仅比较租户内局部唯一的用户编号。
+
 ### 内部接口注解@Inner
 
 默认情况下依赖了本模块的接口都要有token才能访问，对于一些内部接口，比如定时任务调用的接口，没有经过网关，没有token，这个时候你可以在你的Controller上的方法上加上@Inner注解。调用方需要设置请求header为`from=Y`

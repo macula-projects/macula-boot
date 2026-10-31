@@ -19,8 +19,10 @@ package dev.macula.boot.starter.security.config;
 
 import dev.macula.boot.starter.security.aspect.SecurityInnerAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.annotation.AnnotationTemplateExpressionDefaults;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -35,6 +37,18 @@ import jakarta.servlet.http.HttpServletRequest;
 @AutoConfiguration
 @Import({ResourceServerConfiguration.class})
 public class SecurityAutoConfiguration {
+
+    /**
+     * Enables method-security annotation templates unless the application provides its own defaults.
+     *
+     * @return annotation template defaults
+     */
+    @Bean
+    @ConditionalOnMissingBean(AnnotationTemplateExpressionDefaults.class)
+    static AnnotationTemplateExpressionDefaults templateExpressionDefaults() {
+        return new AnnotationTemplateExpressionDefaults();
+    }
+
     @Bean
     SecurityInnerAspect securityInnerAspect(HttpServletRequest request) {
         return new SecurityInnerAspect(request);
