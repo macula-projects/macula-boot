@@ -5,6 +5,8 @@ Status: accepted
 [intent.md](intent.md)。用户明确确认使用单个 CheckOwner 注解自动选择校验方式及时机。
 
 ## Requirements
+场景划分：能从返回数据明确判断当前用户归属的查询，使用 CheckOwner(returnObject...)；无法直接判断用户与资源编号关系、需通过已授权列表框定范围的操作，使用 CheckOwner(入参表达式) 验证 passkey。两者不是按 HTTP 动词或是否传凭证自动切换，也不互相兜底。直接归属查询不必实现 PasskeyResource 或先查询列表。
+
 1. returnObject 表达式返回后检查拥有者；入参表达式执行前验证 passkey。混合或不能明确分类的表达式拒绝，不能依据请求是否携带凭证切换模式。
 2. 所有模式要求登录，无 ADMIN/ROOT 隐式豁免。前置模式拒绝缺失、错误、过期、用户或资源不匹配的凭证，目标方法不执行；兼容标准参数绑定及 PMS PreAuthorize。
 3. 统一 PasskeyResource 接口声明资源编号和 passkey 的 getter/setter；隐藏辅助 resourceId 的 JSON 属性。不同列表、详情 DTO 可实现同一接口。
