@@ -17,6 +17,8 @@
 
 package dev.macula.boot.starter.web.advice;
 
+import dev.macula.boot.security.ResourceAccessDenied;
+import jakarta.servlet.http.HttpServletResponse;
 import dev.macula.boot.exception.BizCheckException;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
@@ -135,7 +137,20 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<?> exceptionHandler(Exception e, HttpServletResponse response) {
+        if (e instanceof ResourceAccessDenied) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            return Result.failed(ApiResultCode.TOKEN_ACCESS_FORBIDDEN);
+        }
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return exceptionHandler(e);
+    }
+
+    /**
+     * Preserves the original direct-call exception handling entry point.
+     * @param e exception to report
+     * @return existing system-error response
+     */
     public Result<?> exceptionHandler(Exception e) {
         log.error("Exception: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());

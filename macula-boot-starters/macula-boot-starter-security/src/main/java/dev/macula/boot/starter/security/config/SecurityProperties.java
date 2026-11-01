@@ -32,6 +32,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,4 +77,20 @@ public class SecurityProperties implements InitializingBean {
             });
         }
     }
+
+    /** Resource credential settings; disabled without an application signing key. */
+    private Passkey passkey = new Passkey();
+
+    /**
+     * Configures stateless resource credentials independently of login token signing.
+     * @since 6.1.0
+     */
+    @Getter
+    @Setter
+    public static class Passkey {
+        private boolean enabled;
+        private Duration ttl = Duration.ofMinutes(5);
+        private String secretBase64;
+    }
+
 }

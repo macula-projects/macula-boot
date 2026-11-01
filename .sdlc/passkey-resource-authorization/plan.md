@@ -45,11 +45,11 @@ Web Starter（下列相对 macula-boot-starters/macula-boot-starter-web）：
 场景原则：passkey 仅服务于需用前置授权列表确定用户可访问资源范围的接入方；明确拥有者的只读查询继续直接使用 returnObject 模式，无需 PasskeyResource、列表或凭证。文档与用例必须分别展示两类业务；任何模式失败不得降级到另一模式。HTTP 动词不决定归属模式；写操作仍不得用返回后校验来阻止副作用。
 
 1. 新增 Commons 的 DTO 接口（resourceId 仅辅助识别且 JsonIgnore；passkey getter/setter 正常序列化）与签发 SPI。提供受限的列表提取工具，只遍历 Collection/PageVO/Result，混合列表仅选接口实现元素；单对象不签发。防止循环包装或无限递归；ResponseEntity 由 Web 层处理，Commons 不引入 Spring。
-2. 在现有 SecurityProperties 增加 passkey 子配置：enabled=false、ttl=5m、secret-base64 无默认值。实现可替换 PasskeyService 及 HmacPasskeyService，注入 Clock（默认 Bean 可替换），使用 HMAC-SHA256、版本/到期/签名格式、长度前缀规范编码、Base64URL、常量时间比较。定义输入长度及 token 格式约束；禁用/缺少有效配置不能签发或验证。HmacPasskeyService 实现公共签发 SPI，真实登录后填充 DTO。
+2. 在现有 SecurityProperties 增加 passkey 子配置：enabled=false、ttl=5m、secret-base64 无默认值。实现可替换 PasskeyService 及 HmacPasskeyService，注入 Clock（默认 Bean 可替换，默认服务及 Clock 仅 enabled=true 时创建），使用 HMAC-SHA256、版本/到期/签名格式、长度前缀规范编码、Base64URL、常量时间比较。定义输入长度及 token 格式约束；禁用/缺少有效配置不能签发或验证。HmacPasskeyService 实现公共签发 SPI，真实登录后填充 DTO。
 3. 实现 Header/Query 提取，只解析 URL Query，拒绝重复、非法编码及冲突，同值双来源可接受。无当前 Servlet 请求的前置模式拒绝；不让客户端覆盖身份或签名配置。
 4. CheckOwner 去除固定 Pre/Post 元注解，保留原注解名称、参数及目标。统一 Advisor 解析具体方法及接口注解，使用 Spring 的参数名发现和 SpEL 求值能力。依据解析后的表达式引用分类，而非 contains 字符串匹配：returnObject 模式后置，参数模式前置；混合、未知或无来源拒绝。校验真实登录、拒绝空值，无角色绕过。前置从表达式取得单个 String/整数编号，采用稳定十进制字符串；不支持集合。后置保持原认证 name 相等语义。
 5. 在现有 SecurityAutoConfiguration 注册 Advisor 和可替换默认服务/Clock，配置缺失时仍保证后置兼容、前置拒绝。复用现有 AOP 基础设施；设置与 Spring Security 前置权限检查兼容的执行顺序。标准 PreAuthorize/PMS 和 CheckOwner 都必须通过，不相互覆盖。对 JDK/类代理、接口/实现、桥接方法、多个代理调用验证有效。
-6. 修改现有 ControllerResponseAdvice，在原包装和跳过判定之外处理候选列表并调用公共 PasskeyIssuer。兼容既有两参构造入口，工厂使用新增依赖入口。不新增响应 Advice。已包装 Result、ResponseEntity 正文、Feign/NotControllerResponseAdvice 不得绕过候选列表签发。无候选元素保持旧行为；有候选却无有效签发器则拒绝。关闭 response-advice 时不再自动签发，前置保护仍拒绝缺失凭证，文档明确开关边界。
+6. 修改现有 ControllerResponseAdvice，在原包装和跳过判定之外处理候选列表并调用公共 PasskeyIssuer。兼容既有两参构造入口，工厂使用带明确 enabled 参数的新增依赖入口。不新增响应 Advice。已包装 Result、ResponseEntity 正文、Feign/NotControllerResponseAdvice 不得绕过候选列表签发。无候选元素保持旧行为；enabled=false 时正常返回且跳过候选遍历和签发；enabled=true 有候选却无有效签发器则拒绝。关闭 response-advice 时不再自动签发，前置保护仍拒绝缺失凭证，文档明确开关边界。
 7. 复用现有 ControllerExceptionAdvice：识别公共资源拒绝标记，响应 HTTP 403 与 ApiResultCode.TOKEN_ACCESS_FORBIDDEN（A0312），不输出凭证或资源内容；其他异常保持旧处理。兼容原有公开 handler 调用入口。Security 抛出的专用拒绝异常仍是 AccessDeniedException，标记让 Web 无需依赖 Security 类型。补入安全模块对 Web Starter 的 test 范围依赖，联合实际 Advisor、响应 Advice 与异常 Advice 验证真实拒绝响应。未增加生产 Starter 依赖。
 8. 添加/更新上述测试与模块 README，说明统一注解模式、接口即授权签发声明、JSON 行为、Header/Query、5 分钟授权窗口、PMS/租户/实时业务状态及自调用边界。所有新 Java 类型遵循版权头和 Javadoc 要求。
 9. 完成实现并记录偏差后按 Build 门禁交付；用户确认实现完成后进入 Test 阶段执行 Proof 并记录真实输出。
@@ -76,3 +76,21 @@ Web Starter（下列相对 macula-boot-starters/macula-boot-starter-web）：
 
 ## Plan review adjustments
 第 1 轮发现现有异常 Advice 把 AccessDeniedException 归入 500（Minor）。计划补入公共拒绝标记与专用异常、现有异常 Advice 的 403 映射及安全模块仅测试范围的 Web 依赖，建立真实组合测试。设计中的异常兼容细化为资源拒绝返回 403/A0312；不改变其他异常或生产依赖。该增量随本计划交用户接受。
+
+
+## Implementation record
+- 用户回复 OK 接受计划后开始实施，分支 codex/passkey-resource-authorization。
+- 已实现公共契约、HMAC 服务与请求提取、统一 CheckOwner Advisor、现有配置和两个 Advice 的接入；Security 仅新增 Web Starter 的测试范围依赖。
+- 支持入参位置/命名/嵌套表达式的前置凭证检查，保留返回值后置归属语义，PMS 独立检查。列表接口实现自动签发，不新增签发注解。
+- 已编写/更新计划列出的单元及 MVC 测试和三个模块 README；构建使用 Java 17，mvn -pl macula-boot-starters/macula-boot-starter-security,macula-boot-starters/macula-boot-starter-web -am test-compile -DskipTests 成功。
+- 所有变更 Java 文件定向 Checkstyle 通过（0 violations）；git diff --check 通过。
+- 实施修正：403 分支采用现有异常 Advice 手动设置状态，通用分支显式保持 500，避免方法级 ResponseStatus 在调用后覆盖资源拒绝状态。原一参 handler 调用入口保留。
+- 文件范围偏差：无。用户回复“整体上代码我审查后是OK的”，确认实施完成并进入 Test。
+- 测试修正：两个手工测试上下文的 Advisor Bean 补齐与正式自动配置一致的 ROLE_INFRASTRUCTURE，避免 Spring 方法安全基础设施忽略自定义 Advisor；正式自动配置原已包含该标记。补充正式自动配置下的有效/换编号/禁用前置验证。
+
+## 用户补充的开关语义
+用户提出“enabled=false 不定义相关 Bean”，进一步明确“列表 issue 如果 enabled=false 就不用”。据此修订既有步骤 2/5/6：默认 HMAC 服务及专用 Clock 条件装配；既有 Advice 注入同一配置开关，关闭时不遍历、不签发且正常返回列表；即使存在用户自定义 issuer，关闭时也不调用。统一 Advisor 保留供后置归属检查，并继续在关闭时拒绝前置资源调用。文件范围不扩展，补充默认/显式关闭、关闭且有自定义 issuer、启用但缺 issuer 的验证。此调整由用户直接指定，取代此前关闭时拒绝列表的设计。
+
+- 用户补充语义已实施，最终目标模块 88 个、全仓单元 259 个、实际集成 47 个全部通过；既有可选集成跳过 3 个。clean verify、变更 Java Checkstyle 和 diff 检查成功，详见 verification.md。
+
+- Code review round 1 修复：采用 Spring MergedAnnotation 的实际声明方法统一识别参数名与建立求值上下文，避免类代理继承接口注解时实现参数改名导致误拒绝。新增泛型接口在 JDK/CGLIB 下的有效/换编号与方法计数回归；文件范围和业务语义未扩展。

@@ -19,16 +19,16 @@ Status: accepted
 ## Design
 CheckOwner 使用统一方法拦截组件替代固定 PostAuthorize 组合，根据表达式上下文确定前置/后置，保留现有模板 Bean。后置示例 returnObject.buyerUsername；前置示例 #p0、#p0.orderId 或命名入参。
 
-复用 SecurityAutoConfiguration、SecurityProperties 和 ControllerResponseAdvice。公共 DTO 接口及响应处理扩展契约放 commons；Web Advice 调用可选处理器，Security 提供实现，避免两个 Starter 相互依赖。处理与原包装判定分开，防止 Result 跳过、Feign 等包装规则造成漏签发；检测到需签发的列表元素却无有效处理器或签名配置时拒绝。未启用功能且不含此类元素的接口维持原行为。
+复用 SecurityAutoConfiguration、SecurityProperties 和 ControllerResponseAdvice。公共 DTO 接口及响应处理扩展契约放 commons；Web Advice 调用可选处理器，Security 提供实现，避免两个 Starter 相互依赖。处理与原包装判定分开，防止 Result 跳过、Feign 等包装规则造成漏签发；启用时检测到需签发的列表元素却无有效处理器或签名配置则拒绝；关闭时所有列表正常返回且跳过签发。
 
 签名采用服务端独占密钥、HMAC-SHA256、长度明确的字段编码、Base64URL、常量时间比较及可注入时间源。凭证包含版本、到期时间和签名，不记录凭证或密钥日志。
 
-现有 SecurityProperties 新增 passkey 子配置：enabled 默认 false，ttl 默认 5 分钟，secret-base64 无默认值；启用时验证至少 32 字节密钥及正 ttl，支持自定义服务 Bean。关闭后不影响后置 CheckOwner，但前置校验及需签发的列表不得静默放行。
+现有 SecurityProperties 新增 passkey 子配置：enabled 默认 false，ttl 默认 5 分钟，secret-base64 无默认值；启用时验证至少 32 字节密钥及正 ttl，支持自定义服务 Bean。用户补充确认关闭功能的语义：关闭后不创建默认 PasskeyService 与专用 Clock，列表正常返回且跳过资源遍历/签发；后置 CheckOwner 不受影响，前置 Passkey 校验仍拒绝。启用时有候选列表但无有效签发器仍拒绝。
 
 接受 X-Resource-Passkey Header 或 URL Query 的 passkey，拒绝重复和冲突，不读取表单参数。同值双来源可接受。校验失败使用 AccessDeniedException；异常处理与现有机制兼容。
 
 ## Data and interfaces
-保留 CheckOwner(value)，新增 PasskeyResource、公共响应处理扩展和签发验证服务。Result 外壳不变，仅接入 DTO 新增 passkey；新增 macula.security.passkey.* 配置。无计划中的 POM 或自动配置 imports 变化。
+保留 CheckOwner(value)，新增 PasskeyResource、公共响应处理扩展和签发验证服务。Result 外壳不变，仅接入 DTO 新增 passkey；新增 macula.security.passkey.* 配置。Security POM 仅新增 Web Starter 测试范围依赖，用于计划审查要求的真实 MVC 组合验证；生产依赖及自动配置 imports 不变。
 
 ## Flagged concerns
 - 业务必须保证所有返回 PasskeyResource 列表元素的入口均已完成当前用户的数据权限过滤；不得在未授权公共列表复用该 DTO。凭证授权持续至过期，non-blocking。
