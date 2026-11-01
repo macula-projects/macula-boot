@@ -38,6 +38,15 @@ class ResultModelJsonTest {
     private final ObjectMapper objectMapper = JsonMapper.builder().build();
 
     @Test
+    void passkeyInterfaceHidesAuxiliaryIdButKeepsCredential() {
+        var item = new ResourceItem();
+        item.setPasskey("credential");
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(item));
+        assertThat(json.has("resourceId")).isFalse();
+        assertThat(json.get("passkey").asString()).isEqualTo("credential");
+    }
+
+    @Test
     void shouldOmitEmptyOptionChildren() throws JacksonException {
         Option<Integer> option = new Option<>(1, "一级选项");
 
@@ -73,4 +82,22 @@ class ResultModelJsonTest {
         assertThat(page.getSize()).isEqualTo(2);
         assertThat(page.getCurrent()).isEqualTo(3);
     }
+
+    /**
+     * Verifies inherited JSON annotations on the resource contract.
+     * @since 6.1.0
+     */
+    public static class ResourceItem implements dev.macula.boot.security.PasskeyResource {
+        private String passkey;
+
+        @Override
+        public String getResourceId() { return "123"; }
+
+        @Override
+        public String getPasskey() { return passkey; }
+
+        @Override
+        public void setPasskey(String passkey) { this.passkey = passkey; }
+    }
+
 }

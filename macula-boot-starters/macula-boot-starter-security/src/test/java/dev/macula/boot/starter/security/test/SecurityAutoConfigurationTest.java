@@ -19,6 +19,10 @@ package dev.macula.boot.starter.security.test;
 
 import cn.hutool.extra.spring.SpringUtil;
 import dev.macula.boot.starter.security.config.SecurityAutoConfiguration;
+import dev.macula.boot.starter.security.passkey.PasskeyService;
+import dev.macula.boot.security.PasskeyIssuer;
+import java.time.Clock;
+import java.util.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -27,6 +31,9 @@ import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OA
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.annotation.AnnotationTemplateExpressionDefaults;
@@ -53,6 +60,7 @@ class SecurityAutoConfigurationTest {
     @AfterEach
     void clearAuthentication() {
         SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
     }
 
     @Test
@@ -76,6 +84,65 @@ class SecurityAutoConfigurationTest {
             assertThat(context).doesNotHaveBean("templateExpressionDefaults");
             assertThat(context.getBean(CheckOwnerTest.OwnerQueries.class).order("alice").buyerUsername())
                 .isEqualTo("alice");
+        });
+    }
+
+    @Test
+    void defaultsToDisabledAndRejectsInvalidEnabledConfiguration() {
+        CheckOwnerTest.authenticate("alice");
+        runner.run(context -> {
+            assertThat(context).hasNotFailed().doesNotHaveBean(PasskeyService.class)
+                .doesNotHaveBean(PasskeyIssuer.class).doesNotHaveBean(Clock.class);
+            assertThatThrownBy(() -> context.getBean(CheckOwnerTest.OwnerQueries.class).input("123"))
+                .isInstanceOf(AccessDeniedException.class);
+        });
+        runner.withPropertyValues("macula.security.passkey.enabled=true")
+            .run(context -> assertThat(context).hasFailed());
+        runner.withPropertyValues("macula.security.passkey.enabled=true",
+            "macula.security.passkey.secret-base64=" + Base64.getEncoder().encodeToString(new byte[32]),
+            "macula.security.passkey.ttl=0s").run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void explicitDisableSkipsSigningConfigurationAndKeepsOwnershipProtection() {
+        CheckOwnerTest.authenticate("alice");
+        runner.withPropertyValues("macula.security.passkey.enabled=false",
+            "macula.security.passkey.secret-base64=invalid", "macula.security.passkey.ttl=0s").run(context -> {
+                assertThat(context).hasNotFailed().doesNotHaveBean(PasskeyService.class)
+                    .doesNotHaveBean(PasskeyIssuer.class).doesNotHaveBean(Clock.class);
+                var queries = context.getBean(CheckOwnerTest.OwnerQueries.class);
+                assertThat(queries.order("alice").buyerUsername()).isEqualTo("alice");
+                assertThatThrownBy(() -> queries.order("bob")).isInstanceOf(AccessDeniedException.class);
+                assertThatThrownBy(() -> queries.input("123")).isInstanceOf(AccessDeniedException.class);
+            });
+    }
+
+    @Test
+    void enabledServiceUsesApplicationClockAndSupportsReplacement() {
+        CheckOwnerTest.authenticate("alice");
+        runner.withPropertyValues("macula.security.passkey.enabled=true",
+            "macula.security.passkey.secret-base64=" + Base64.getEncoder().encodeToString(new byte[32]))
+            .withBean(Clock.class, () -> PasskeyServiceTest.CLOCK).run(context -> {
+                assertThat(context).hasNotFailed().hasSingleBean(Clock.class);
+                var service = context.getBean(PasskeyService.class);
+                assertThat(service.verify("alice", "123", service.issue("alice", "123"))).isTrue();
+                assertThat(context.getBean(Clock.class)).isSameAs(PasskeyServiceTest.CLOCK);
+                MockHttpServletRequest request = new MockHttpServletRequest();
+                request.addHeader("X-Resource-Passkey", service.issue("alice", "123"));
+                RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+                var queries = context.getBean(CheckOwnerTest.OwnerQueries.class);
+                assertThat(queries.input("123")).isEqualTo("123");
+                assertThatThrownBy(() -> queries.input("456")).isInstanceOf(AccessDeniedException.class);
+            });
+        PasskeyService custom = new PasskeyService() {
+            @Override
+            public String issue(String subject, String resourceId) { return "custom"; }
+            @Override
+            public boolean verify(String subject, String resourceId, String token) { return "custom".equals(token); }
+        };
+        runner.withBean(PasskeyService.class, () -> custom).run(context -> {
+            assertThat(context).hasNotFailed().hasSingleBean(PasskeyService.class).hasSingleBean(PasskeyIssuer.class);
+            assertThat(context.getBean(PasskeyIssuer.class)).isSameAs(custom);
         });
     }
 
