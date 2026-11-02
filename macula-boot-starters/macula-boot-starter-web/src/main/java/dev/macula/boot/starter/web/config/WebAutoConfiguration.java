@@ -18,9 +18,12 @@
 package dev.macula.boot.starter.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.macula.boot.security.PasskeyIssuer;
 import dev.macula.boot.starter.web.advice.ControllerExceptionAdvice;
 import dev.macula.boot.starter.web.advice.ControllerResponseAdvice;
 import dev.macula.boot.starter.web.filter.TenantFilter;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -56,8 +59,10 @@ public class WebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "macula.web.response-advice", havingValue = "true", matchIfMissing = true)
-    public ControllerResponseAdvice controllerResponseAdvice(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
-        return new ControllerResponseAdvice(objectMapper, jacksonProperties);
+    public ControllerResponseAdvice controllerResponseAdvice(ObjectMapper objectMapper, JacksonProperties jacksonProperties,
+        ObjectProvider<PasskeyIssuer> issuers,
+        @Value("${macula.security.passkey.enabled:false}") boolean passkeyEnabled) {
+        return new ControllerResponseAdvice(objectMapper, jacksonProperties, issuers, passkeyEnabled);
     }
 
     @Bean

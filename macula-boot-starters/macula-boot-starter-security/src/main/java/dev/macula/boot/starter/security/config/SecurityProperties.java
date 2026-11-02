@@ -32,7 +32,12 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.util.*;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -54,6 +59,9 @@ public class SecurityProperties implements InitializingBean {
     private String jwtSecret;
 
     private List<String> ignoreUrls = new ArrayList<>();
+
+    /** Resource credential settings; disabled without an application signing key. */
+    private Passkey passkey = new Passkey();
 
     @Override
     public void afterPropertiesSet() {
@@ -88,5 +96,19 @@ public class SecurityProperties implements InitializingBean {
                 }
             });
         }
+    }
+
+    /**
+     * Configures stateless resource credentials independently of login token signing.
+     *
+     * @author Rain
+     * @since 5.0.21
+     */
+    @Getter
+    @Setter
+    public static class Passkey {
+        private boolean enabled;
+        private Duration ttl = Duration.ofMinutes(5);
+        private String secretBase64;
     }
 }

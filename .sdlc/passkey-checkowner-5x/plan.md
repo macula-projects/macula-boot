@@ -21,6 +21,7 @@ Security Starter：
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/authorization/CheckOwnerAdvisor.java`（新增）
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/config/SecurityAutoConfiguration.java`
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/config/SecurityProperties.java`
+- `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/config/ResourceServerConfiguration.java`（Test 阶段发现 Spring Security 5.7 旧方法安全 Advisor 默认与 CheckOwner 同为最低优先级，需显式提前一位）
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/passkey/PasskeyService.java`（新增）
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/passkey/HmacPasskeyService.java`（新增）
 - `macula-boot-starters/macula-boot-starter-security/src/main/java/dev/macula/boot/starter/security/passkey/PasskeyRequestResolver.java`（新增）
@@ -75,3 +76,10 @@ SDLC 证据：
 - `ControllerResponseAdviceTest` 与 `WebAutoConfigurationTest`：Jackson 2/MockMvc 覆盖所有列表包装、混合元素、单对象、Result/ResponseEntity、Feign/`@NotControllerResponseAdvice`、String 响应、关闭且存在自定义 issuer、启用但缺 issuer、旧构造和属性绑定。
 - `PasskeyMvcTest`：真实 CheckOwner Advisor、Passkey 服务、两个 Advice 联合覆盖列表签发到不同详情 DTO、PathVariable/RequestBody、Header/Query、PMS、写计数、HTTP 403/A0312、普通异常兼容及 tokenless/错误 token 拒绝。
 - Build 阶段先执行新增测试的 `test-compile` 和变更 Java Checkstyle；Test 阶段依次执行单类、Security/Web 目标模块 `-am test`、全仓 `mvn test`、`mvn clean verify`、精确变更 Java Checkstyle 与 `git diff --check`，并记录 Java 8 版本、测试总数和任何外部服务跳过项。
+
+## Implementation record
+- 已按计划顺序完成 Commons 公共契约、HMAC 签发验证、请求提取、统一 CheckOwner Advisor、Security/Web 自动配置和 Advice 接入、测试源码及三个模块 README。
+- 主线行为采用手工语义回移：Java 17 模式匹配、record、`String.isBlank`、Jakarta Servlet、Jackson 3 和新方法安全 API 分别改写为 Java 8 POJO/显式类型、Spring `StringUtils`、`javax.servlet`、Jackson 2 和 Spring Security 5.7 `@EnableGlobalMethodSecurity` 兼容实现；token 字段编码保持不变。
+- 初始实施文件范围无偏差；Test 阶段首轮定向测试发现 Spring Security 5.7 的 CheckOwner Advisor 实际位于旧方法安全 Advisor 之前，与计划要求的 PMS 先执行不符。计划新增 `ResourceServerConfiguration.java`，将 `@EnableGlobalMethodSecurity` 的 order 设为 `Ordered.LOWEST_PRECEDENCE - 1`，CheckOwner 保持最低优先级；测试配置同步相同顺序。这是实现既定顺序的 5.x 兼容修正，不改变外部契约。现有 Security/Web `AutoConfiguration.imports` 已核对，仍指向被修改的原配置类，无需变更。
+- Build 阶段使用真实 Tencent Kona JDK 8u472 执行目标模块及依赖的 `clean test-compile -DskipTests`，BUILD SUCCESS；随后 JDK 8 增量 `test-compile` 成功。这里只证明源码与测试源码可由 JDK 8 编译，不作为正式测试通过证据。
+- 本次全部变更 Java 文件的 Checkstyle 为 0 violations，`git diff --check` 无输出。尚未运行测试；正式定向、模块、全仓和 verify 验证留给获得人工实现确认后的 Test 阶段。
