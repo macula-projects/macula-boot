@@ -1,6 +1,17 @@
 # Verification: 将 PassKey 与 CheckOwner 资源鉴权回移至 5.x
 
-Status: scoped-green; repository-baseline-failure
+Status: scoped-green; repository-baseline-limitation-acknowledged
+
+## 最新验证与范围确认（2026-11-02）
+
+以下结果更新文末原始结论中关于 MyBatis 阻塞的描述：
+
+- 用户授权的 MyBatis 测试上下文隔离已提交为 `382afc4`，模块 7 个测试共同运行全部通过。
+- 使用真实 JDK `1.8.0_472` 执行 `mvn -q -pl macula-boot-starters/macula-boot-starter-security,macula-boot-starters/macula-boot-starter-web,macula-boot-starters/macula-boot-starter-mybatis-plus -am clean verify`，退出码 0。Commons 5、Web 8、Security 25、Crypto 1、MyBatis 7，共 46 个 Surefire 测试，0 failures、0 errors、0 skipped。该切片没有额外的 Failsafe 测试，不能将此结果描述为外部集成测试通过。
+- 全仓 `mvn test` 现已通过 MyBatis，随后在既有 Redis Starter 的 8 个测试中遇到 SnakeYAML `ParserImpl` 构造器 `NoSuchMethodError`。排除 Redis 的诊断运行继续到 LeaderElection，同样遇到此依赖冲突。
+- 依赖树显示 Redisson `3.25.2` 引入 Jackson YAML `2.15.3`，其 SnakeYAML `2.1` 被 Boot `2.7.18` 管理为 `1.30`。Redis、LeaderElection 与父 POM 在本分支未修改。用户说明这是 TSF 适配配置，明确要求保留该配置并继续评审、推送和创建 PR；此限制不扩展为本次依赖修复。
+- 排除 Redis 扫描期间，为解析 Cache 对本地 Redis SNAPSHOT 的依赖执行了 `mvn -pl macula-boot-starters/macula-boot-starter-redis -am install -DskipTests -Dgpg.skip=true -Pdeploy`，仅安装至本地 Maven 仓库，没有远程发布；这不是测试通过证据。
+- 范围内验证为绿；全仓验证受上述已确认的 TSF 基线依赖限制影响，不能声称全仓为绿。用户已明确同意按此范围继续 PR 流程。
 
 ## Environment
 
