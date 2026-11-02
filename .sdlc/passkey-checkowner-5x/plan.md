@@ -40,6 +40,9 @@ Web Starter：
 - `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/config/WebAutoConfigurationTest.java`（新增）
 - `macula-boot-starters/macula-boot-starter-web/README.md`
 
+验证基线修复：
+- `macula-boot-starters/macula-boot-starter-mybatis-plus/src/test/java/dev/macula/boot/starter/mp/test/UserSeqMapperTest.java`（用户授权增加测试上下文隔离，不改变生产行为）
+
 SDLC 证据：
 - `.sdlc/passkey-checkowner-5x/plan.md`
 - `.sdlc/passkey-checkowner-5x/review-findings.md`
@@ -83,3 +86,4 @@ SDLC 证据：
 - 初始实施文件范围无偏差；Test 阶段首轮定向测试发现 Spring Security 5.7 的 CheckOwner Advisor 实际位于旧方法安全 Advisor 之前，与计划要求的 PMS 先执行不符。计划新增 `ResourceServerConfiguration.java`，将 `@EnableGlobalMethodSecurity` 的 order 设为 `Ordered.LOWEST_PRECEDENCE - 1`，CheckOwner 保持最低优先级；测试配置同步相同顺序。这是实现既定顺序的 5.x 兼容修正，不改变外部契约。现有 Security/Web `AutoConfiguration.imports` 已核对，仍指向被修改的原配置类，无需变更。
 - Build 阶段使用真实 Tencent Kona JDK 8u472 执行目标模块及依赖的 `clean test-compile -DskipTests`，BUILD SUCCESS；随后 JDK 8 增量 `test-compile` 成功。这里只证明源码与测试源码可由 JDK 8 编译，不作为正式测试通过证据。
 - 本次全部变更 Java 文件的 Checkstyle 为 0 violations，`git diff --check` 无输出。尚未运行测试；正式定向、模块、全仓和 verify 验证留给获得人工实现确认后的 Test 阶段。
+- Test 阶段全仓运行暴露既有 `UserSeqMapperTest` 与 `UserMapperTest` 复用 H2 上下文、前者残留两行数据导致后者失败。用户于 2026-11-02 明确授权在同一 PR 中修复；在 `UserSeqMapperTest` 完成后标记上下文为 dirty，使后续测试重建数据库，不改变 MyBatis 生产代码或业务契约。

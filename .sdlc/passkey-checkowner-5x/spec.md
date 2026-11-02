@@ -15,7 +15,7 @@ Status: accepted
 8. 公开 API、配置键、JSON、HTTP 状态及鉴权时序与主线 PR #43 保持一致；实现源码、依赖和测试必须兼容 Java 8、Spring Boot 2.7.18、Spring Framework 5.3、Spring Security 5.7、Jackson 2 和 `javax.servlet`。
 
 ## Non-goals
-不修改网关、JWT 认证流程、数据库、MyBatis、租户或 PMS 权限模型；不新增批量资源写入、异步/流式签发、立即撤权、一次性凭证、在线密钥轮换或自动推导业务权限；不改变现有 `@Inner`、URL 白名单或资源服务器过滤链；不合并 PR，不发布、不打 tag、不部署。
+不修改网关、JWT 认证流程、数据库、MyBatis 生产行为、租户或 PMS 权限模型；不新增批量资源写入、异步/流式签发、立即撤权、一次性凭证、在线密钥轮换或自动推导业务权限；不改变现有 `@Inner`、URL 白名单或资源服务器过滤链；不合并 PR，不发布、不打 tag、不部署。全仓验证发现 MyBatis 两个测试类共享 H2 上下文并相互污染后，用户于 2026-11-02 明确同意在同一 PR 中增加测试上下文隔离；该修正不改变生产代码或接口。
 
 ## Design
 公共契约放在 Commons，保持对具体 Starter 和 Spring Security 的零依赖。`PasskeyResources` 仅遍历明确支持的响应容器并进行循环和深度保护，不扫描任意对象图。实现 `PasskeyResource` 仍表示业务已经完成当前用户的数据权限过滤；框架不尝试替代业务授权。
