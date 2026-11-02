@@ -44,6 +44,7 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 - 新增或移动自动配置时，同步检查 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。
 - 行为、配置键或公共 API 变化时，同步更新目标模块 README 和测试。
 - 根 README 是项目概览、构建和测试规范的统一入口；避免创建内容重复的根级说明文档。
+- 各模块的README内容包括概览、组件坐标、使用说明、依赖引入、版权说明等章节，保持统一。
 - 不提交生成物、凭据、密钥或本地环境配置。
 - 不主动执行 `release.sh`、发布、打 tag 或推送；只有用户明确要求发布时才进行。
 
