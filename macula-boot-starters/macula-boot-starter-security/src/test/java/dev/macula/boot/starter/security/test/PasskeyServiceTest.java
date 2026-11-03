@@ -52,6 +52,9 @@ class PasskeyServiceTest {
     void bindsUserResourceAndExpiry() {
         var service = new HmacPasskeyService(settings(), CLOCK);
         String token = service.issue("alice", "123");
+        String golden = "v1.1793491500.XQs-g6C8KpQN7Rtdlli16Lfy5T1s_IrIxwkUvUQLHQA";
+        assertThat(token).isEqualTo(golden);
+        assertThat(service.verify("alice", "123", golden)).isTrue();
         assertThat(service.verify("alice", "123", token)).isTrue();
         assertThat(service.verify("bob", "123", token)).isFalse();
         assertThat(service.verify("alice", "124", token)).isFalse();

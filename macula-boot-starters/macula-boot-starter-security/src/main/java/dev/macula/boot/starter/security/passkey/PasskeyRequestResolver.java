@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.security.passkey;
 
-import dev.macula.boot.starter.security.authorization.CheckOwnerAccessDeniedException;
+import dev.macula.boot.starter.security.authorization.PasskeyAccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,7 +39,7 @@ public class PasskeyRequestResolver {
      * Resolves the credential, never reading form parameters.
      * @param request current servlet request
      * @return one non-empty credential
-     * @throws CheckOwnerAccessDeniedException when the request is missing or ambiguous
+     * @throws PasskeyAccessDeniedException when the request is missing or ambiguous
      */
     public String resolve(HttpServletRequest request) {
         if (request == null) {
@@ -83,7 +83,7 @@ public class PasskeyRequestResolver {
         return result;
     }
 
-    private CheckOwnerAccessDeniedException denied() {
-        return new CheckOwnerAccessDeniedException("Invalid resource credential");
+    private PasskeyAccessDeniedException denied() {
+        return new PasskeyAccessDeniedException("Invalid resource credential");
     }
 }
