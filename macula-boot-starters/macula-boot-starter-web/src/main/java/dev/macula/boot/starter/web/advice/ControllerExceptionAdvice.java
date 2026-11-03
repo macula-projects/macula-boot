@@ -21,6 +21,7 @@ import dev.macula.boot.exception.BizCheckException;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
+import dev.macula.boot.security.ResourceAccessDenied;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.context.MessageSource;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 全局异常处理器
@@ -134,7 +136,20 @@ public class ControllerExceptionAdvice implements MessageSourceAware {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<?> exceptionHandler(Exception e, HttpServletResponse response) {
+        if (e instanceof ResourceAccessDenied) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            return Result.failed(ApiResultCode.TOKEN_ACCESS_FORBIDDEN);
+        }
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return exceptionHandler(e);
+    }
+
+    /**
+     * Preserves the original direct-call exception handling entry point.
+     * @param e exception to report
+     * @return existing system-error response
+     */
     public Result<?> exceptionHandler(Exception e) {
         log.error("Exception: ", e);
         return Result.failed(ApiResultCode.SYS_ERROR, e.getMessage());

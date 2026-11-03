@@ -18,11 +18,20 @@
 package dev.macula.boot.starter.security.config;
 
 import dev.macula.boot.starter.security.aspect.SecurityInnerAspect;
+import dev.macula.boot.starter.security.authorization.CheckOwnerAdvisor;
+import dev.macula.boot.starter.security.passkey.HmacPasskeyService;
+import dev.macula.boot.starter.security.passkey.PasskeyService;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Role;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Clock;
 
 /**
  * <p>
@@ -35,6 +44,46 @@ import javax.servlet.http.HttpServletRequest;
 @AutoConfiguration
 @Import({ResourceServerConfiguration.class})
 public class SecurityAutoConfiguration {
+
+    /**
+     * Supplies the default expiration clock, replaceable for application time policies.
+     * @return UTC clock
+     */
+    @Bean
+    @ConditionalOnProperty(name = "macula.security.passkey.enabled", havingValue = "true")
+    @ConditionalOnMissingBean(Clock.class)
+    Clock passkeyClock() {
+        return Clock.systemUTC();
+    }
+
+    /**
+     * Supplies the default credential implementation without requiring Web Starter.
+     * @param properties security settings
+     * @param clock expiration clock
+     * @return replaceable credential service and response issuer
+     */
+    @Bean
+    @ConditionalOnProperty(name = "macula.security.passkey.enabled", havingValue = "true")
+    @ConditionalOnMissingBean(PasskeyService.class)
+    PasskeyService passkeyService(SecurityProperties properties, Clock clock) {
+        return new HmacPasskeyService(properties.getPasskey(), clock);
+    }
+
+    /**
+     * Registers the unified ownership advisor without eagerly creating security properties.
+     * @param services replaceable credential service
+     * @param properties security settings provider
+     * @return resource authorization advisor
+     */
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @ConditionalOnMissingBean(CheckOwnerAdvisor.class)
+    static CheckOwnerAdvisor checkOwnerAdvisor(ObjectProvider<PasskeyService> services,
+        ObjectProvider<SecurityProperties> properties) {
+        return new CheckOwnerAdvisor(services::getObject,
+            () -> properties.getObject().getPasskey().isEnabled());
+    }
+
     @Bean
     SecurityInnerAspect securityInnerAspect(HttpServletRequest request) {
         return new SecurityInnerAspect(request);

@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -71,7 +72,7 @@ import java.util.Set;
  */
 
 @RequiredArgsConstructor
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, order = Ordered.LOWEST_PRECEDENCE - 1)
 @EnableConfigurationProperties(SecurityProperties.class)
 @Configuration
 public class ResourceServerConfiguration implements ApplicationContextAware {

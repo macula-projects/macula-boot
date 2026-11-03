@@ -24,9 +24,15 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.exception.BizException;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
+import dev.macula.boot.security.PasskeyIssuer;
+import dev.macula.boot.security.PasskeyResource;
+import dev.macula.boot.security.PasskeyResources;
+import dev.macula.boot.security.ResourceAccessException;
 import dev.macula.boot.starter.web.annotation.NotControllerResponseAdvice;
 import dev.macula.boot.starter.web.config.JacksonProperties;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +42,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.List;
+
 /**
  * {@code ControllerResponseAdvice} 对于非Result的返回值进行包装
  *
@@ -43,15 +51,46 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @since 2022/6/29 16:10
  */
 @RestControllerAdvice
-@RequiredArgsConstructor
 public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
 
     private final ObjectMapper objectMapper;
     private final JacksonProperties jacksonProperties;
+    private final ObjectProvider<PasskeyIssuer> issuers;
+    private final boolean passkeyEnabled;
+
+    /**
+     * Preserves the original construction contract without a signing provider.
+     * @param objectMapper JSON mapper
+     * @param jacksonProperties JSON settings
+     */
+    public ControllerResponseAdvice(ObjectMapper objectMapper, JacksonProperties jacksonProperties) {
+        this(objectMapper, jacksonProperties, null, false);
+    }
+
+    /**
+     * Creates response processing with an optional security-provided issuer.
+     * @param objectMapper JSON mapper
+     * @param jacksonProperties JSON settings
+     * @param issuers lazy issuer provider, null for the legacy constructor
+     * @param passkeyEnabled whether list credentials should be issued
+     */
+    @Autowired
+    public ControllerResponseAdvice(ObjectMapper objectMapper, JacksonProperties jacksonProperties,
+        ObjectProvider<PasskeyIssuer> issuers,
+        @Value("${macula.security.passkey.enabled:false}") boolean passkeyEnabled) {
+        this.objectMapper = objectMapper;
+        this.jacksonProperties = jacksonProperties;
+        this.issuers = issuers;
+        this.passkeyEnabled = passkeyEnabled;
+    }
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
-        // response是ResultVo类型，或者注释了NotControllerResponseAdvice都不进行包装
+        // Issuance is independent of the original wrapping opt-outs.
+        return true;
+    }
+
+    private boolean shouldWrap(MethodParameter methodParameter) {
         return !(methodParameter.getParameterType().isAssignableFrom(Result.class) || methodParameter.getParameterType()
             .isAssignableFrom(ResponseEntity.class) || methodParameter.hasMethodAnnotation(
             NotControllerResponseAdvice.class));
@@ -60,6 +99,23 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public Object beforeBodyWrite(Object data, MethodParameter returnType, MediaType mediaType,
         Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest request, ServerHttpResponse response) {
+        if (passkeyEnabled) {
+            Object payload = data instanceof ResponseEntity<?> ? ((ResponseEntity<?>)data).getBody() : data;
+            List<PasskeyResource> resources = PasskeyResources.find(payload);
+            if (!resources.isEmpty()) {
+                PasskeyIssuer issuer = issuers == null ? null : issuers.getIfAvailable();
+                if (issuer == null) {
+                    throw new ResourceAccessException("Resource credential issuer is unavailable");
+                }
+                for (PasskeyResource resource : resources) {
+                    issuer.issue(resource);
+                }
+            }
+        }
+        if (!shouldWrap(returnType)) {
+            return data;
+        }
+
         if (request.getURI().getPath().contains("v3/api-docs")) {
             return data;
         }
