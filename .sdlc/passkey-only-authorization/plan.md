@@ -53,3 +53,4 @@ Commons/Web 生产代码、POM、TSF 依赖、现有方法安全顺序、imports
 - 无额外文件范围偏差；Commons/Web 生产代码、POM、TSF 依赖、方法安全配置、imports 及历史 SDLC 文件未改。等待人工实现确认后进入 sdlc-test；当前只证明编译和静态检查，不声称测试通过。
 - 按用户要求，新增注解、解析器、安装处理器、拒绝异常和自动配置接入点补充中文职责与 API 文档；在委托绑定、凭证来源、受限属性路径、缺服务拒绝和幂等安装处解释设计原因。两分支同步，测试类职责说明也改为中文。
 - Test 阶段首轮定向测试发现新增 MVC 用例错误假设 Valid 错误返回 400；仓库原有 ControllerExceptionAdvice 明确返回 HTTP 500/A0400。仅修正两分支测试预期并断言 MethodArgumentNotValidException，不修改既有生产异常处理。之后定向测试主线 22、5.x 21 全部通过，相关模块 clean verify 主线 87、5.x 41 全部通过；完整证据以 verification.md 为准。
+- 用户最终确认 README 仅展示当前接入方式，不提旧注解名称；保留 PasskeyResource 接口源码、OrderListItem 实现、列表查询、前端 Query/Header 和参数注解示例，压缩其余说明。该文档要求替代早期计划的旧 API 迁移对照描述；最后几轮仅改 README，不影响既有测试结论。
