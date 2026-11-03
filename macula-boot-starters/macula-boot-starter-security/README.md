@@ -162,18 +162,33 @@ public OrderView getOrder(Long orderId) {
 
 ### 列表授权范围的 Passkey
 
-`dev.macula.boot.starter.security.annotation.Passkey` 标注在 Spring MVC Controller 参数上，参数绑定成功后、Controller 执行前检查资源凭证。`@Passkey` 使用参数本身作为 resourceId；`@Passkey("orderId")` 读取 DTO 的 JavaBean 属性，`@Passkey("order.id")` 读取嵌套属性。编号只支持非空 String 或整数，不需要参数名或 `#p0` 等 SpEL 表达式。属性必须可通过 getter 读取；属性缺失、中间值为 null、非法路径、class 导航、方法调用、Map、索引或集合编号均拒绝。
-
-凭证必须绑定当前真实登录用户与资源编号；ADMIN/ROOT 无隐式豁免。装饰器委托 Spring 原有解析器完成 PathVariable、RequestParam、RequestBody 的绑定及适用的 Valid 校验，只读取请求体一次，再验证请求凭证。未标注参数保持原处理。此功能只处理 MVC 请求，不保护 Service 方法或内部直接调用；Controller 上的 PreAuthorize/PMS 和 PostAuthorize 仍须通过，方法权限校验通过 Spring 代理执行。
-
-迁移说明：旧方法上的 `@CheckOwner("#p0")` 移到对应 Controller 参数并改为 `@Passkey`；旧 `@CheckOwner("#p0.orderId")` 改为参数上的 `@Passkey("orderId")`；旧返回值用法改为上面的 PreAuthorize/PostAuthorize。旧注解、CheckOwnerAdvisor 和 CheckOwnerAccessDeniedException 已删除，不保留兼容入口，也不再提供方法级 Advisor。自定义签发/验证继续使用 PasskeyService；MVC 装饰基础设施为 PasskeyArgumentResolverPostProcessor。资源拒绝异常为 PasskeyAccessDeniedException。主线保留已有 AnnotationTemplateExpressionDefaults Bean，5.x 沿用旧方法安全基础设施。
-
-先由业务按当前用户的数据权限查询列表；列表 DTO 实现 Commons 的 `dev.macula.boot.security.PasskeyResource`：
+列表 DTO 实现 `PasskeyResource`，框架自动填充 passkey；后续请求通过 Controller 参数上的 `@Passkey` 校验。接口定义如下：
 
 ```java
+package dev.macula.boot.security;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public interface PasskeyResource {
+    @JsonIgnore
+    String getResourceId();
+
+    String getPasskey();
+
+    void setPasskey(String passkey);
+}
+```
+
+列表 DTO 示例，`getResourceId()` 返回全局唯一且稳定的订单编号：
+
+```java
+import dev.macula.boot.security.PasskeyResource;
+import lombok.Data;
+
 @Data
 public class OrderListItem implements PasskeyResource {
     private String orderId;
+    private String orderName;
     private String passkey;
 
     @Override
@@ -183,7 +198,73 @@ public class OrderListItem implements PasskeyResource {
 }
 ```
 
-接口声明 `getResourceId()`、`getPasskey()`、`setPasskey(...)`，辅助 resourceId 带 JsonIgnore，不额外出现在 JSON 中；DTO 自己的 orderId 正常输出。无需签发注解。**所有返回此类列表元素的入口必须已经完成资源授权**，不能在未授权公共列表复用 DTO；单个对象实现接口不自动签发。列表与详情 DTO 可以不同，使用 PostAuthorize 的查询不要求实现该接口。
+Lombok 生成 `getPasskey()` 和 `setPasskey(...)`；`passkey` 由框架在列表响应时填充。下方 `UpdateOrderRequest` 提供 `getOrderId()`。
+
+#### 1. 查询已授权列表
+
+```java
+@PreAuthorize("isAuthenticated()")
+@GetMapping("/orders")
+public List<OrderListItem> list() {
+    // 业务查询必须先按当前用户的数据权限过滤，再由响应 Advice 自动填充 passkey。
+    return orderService.listVisibleTo(SecurityUtils.getCurrentUser());
+}
+```
+
+响应示例（passkey 仅为示意值）：
+
+```json
+{
+  "data": [
+    {
+      "orderId": "order-1001",
+      "passkey": "v1.<过期时间>.<签名>"
+    }
+  ]
+}
+```
+
+#### 2. 前端携带列表中的凭证
+
+从列表选中记录后，携带其 `orderId` 和 `passkey`，沿用现有登录认证。以下方式二选一。
+
+URL Query 参数：
+
+```http
+GET /orders/order-1001?passkey=<该记录的passkey，经URL编码>
+```
+
+Header（推荐）：
+
+```http
+GET /orders/order-1001
+X-Resource-Passkey: <该记录的passkey>
+```
+
+JSON 请求体只传业务数据，凭证仍放在 Header 或 URL Query 中。
+
+#### 3. 后端使用参数级 @Passkey
+
+```java
+import dev.macula.boot.starter.security.annotation.Passkey;
+
+// 参数本身就是资源编号。
+@GetMapping("/orders/{orderId}")
+public OrderDetail detail(@PathVariable("orderId") @Passkey String orderId) {
+    return orderService.getDetail(orderId);
+}
+
+// 从绑定完成的 DTO 中读取 orderId；嵌套属性可以写 @Passkey("order.id")。
+@PreAuthorize("@pms.hasPermission('order:update')")
+@PostMapping("/orders/update")
+public void update(@RequestBody @Valid @Passkey("orderId") UpdateOrderRequest request) {
+    orderService.update(request);
+}
+```
+
+`@Passkey` 校验当前用户、资源编号、签名和有效期，失败时 Controller 不执行。编号支持非空字符串或整数，DTO 属性通过 getter 读取。
+
+#### 配置与使用边界
 
 启用配置（没有默认签名密钥）：
 
@@ -202,27 +283,10 @@ macula:
 | `macula.security.passkey.ttl` | `5m` | 正数且至少 1 秒的凭证有效期 |
 | `macula.security.passkey.secret-base64` | 无 | Base64 编码、解码后至少 32 字节的独立服务端密钥 |
 
-所有实例使用相同签名配置；不要使用用户登录 JWT 的默认密钥，不要提交密钥。默认服务使用 HMAC-SHA256，将版本、可信 `authentication.name`、全局唯一资源编号和过期时间纳入明确字段编码；不包含租户、类型、action。应用可提供自己的 `PasskeyService` Bean 替换签发与验证，或提供 Clock Bean 替换时间源。服务契约同时继承公共签发 SPI，替换后签发与验证使用同一实例；自定义实现必须保留拒绝与身份校验约束。
-
-现有 Web Starter 的 ControllerResponseAdvice 为授权列表签发，支持 Collection、PageVO、成功 Result 包装及 ResponseEntity 正文，混合列表只处理接口实现元素。关闭/替换该 Advice 后须自行接入签发；`macula.security.passkey.enabled=false`（默认）时跳过列表遍历与签发，正常返回，即使有自定义签发器也不会调用。启用时有候选列表但无有效签发器则拒绝，配置无效时默认服务启动失败。只有 Security Starter 而未接入 Web Advice 时不会自动签发，前置保护仍要求有效凭证。
-
-```java
-@PreAuthorize("@pms.hasPermission('order:cancel')")
-@PostMapping("/{orderId}/cancel")
-public void cancel(@PathVariable @Passkey String orderId) {
-    orderService.cancel(orderId);
-}
-
-@PreAuthorize("@pms.hasPermission('order:update')")
-@PostMapping("/update")
-public void update(@RequestBody @Valid @Passkey("orderId") UpdateOrderRequest request) {
-    orderService.update(request);
-}
-```
-
-前端携带 `X-Resource-Passkey` Header（推荐）或 URL Query 的 `passkey`。两处同值可用，重复、冲突、非法编码或空值拒绝；不读取表单同名字段，也不使用请求或返回 DTO 内的 passkey 字段验证请求。参数绑定成功后，缺失/无效凭证拒绝且 Controller 不执行；绑定或校验错误继续按 Spring 和应用既有异常处理。接入现有异常 Advice 后，资源凭证拒绝返回 HTTP 403 与 A0312，且不包含详情。
-
-凭证在到期前可重复使用；业务授权变更不会立即撤销已签发凭证。编号必须全局唯一、表示稳定。PMS 继续负责按钮/操作权限，业务事务继续检查订单状态等条件；单资源凭证不能用于授权请求内的其他资源，也不能替代租户或其他业务边界控制。返回后鉴权仍只能用于无副作用的查询。
+- 列表必须先完成业务数据权限过滤。Web Starter 的响应 Advice 支持 Collection、PageVO、成功 Result 和 ResponseEntity 中的列表；单对象不自动签发。
+- 各实例使用同一独立签名密钥，默认采用 HMAC-SHA256；可用 `PasskeyService` Bean 替换签发与验证。
+- 凭证只从 Header/Query 读取，不读取表单或 DTO 字段；重复、冲突和空值拒绝。使用现有异常 Advice 时，凭证拒绝返回 HTTP 403/A0312。
+- 仅保护 MVC Controller 请求；操作权限和返回值鉴权分别使用 `@PreAuthorize`、`@PostAuthorize`。凭证到期前可复用，不能代替业务状态、租户或实时权限检查。
 
 ### 内部接口注解@Inner
 
