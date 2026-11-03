@@ -215,55 +215,49 @@ public class OrderService {
 - `@PostAuthorize` 不会逐条过滤集合。列表查询应在查询条件中限制用户、租户和数据范围，不能照搬单对象的归属表达式。
 - 入参相等只证明请求的用户名相符，查询仍应按该用户过滤；多租户场景还需校验租户边界。角色名、scope 和业务字段均应替换为应用真实定义。
 
-### 数据拥有者校验 @CheckOwner
+### 返回值鉴权 @PostAuthorize
 
-对无副作用的同步单对象查询，可以使用 `@CheckOwner` 统一检查返回值的归属。业务通过必填的 `value` 指定完整 SpEL 表达式；表达式结果必须非空，并与当前认证的 `authentication.name` 相等。默认 JWT 配置中的 name 来自 `sub`，与 `SecurityUtils.getCurrentUser()` 返回的标识一致。拥有者必须采用相同的身份标识及兼容类型，不能直接假定数字用户 ID 等于用户名。
+拥有者可从查询结果明确判断时，直接使用 Spring Security 的 `@PostAuthorize`。需要在查询前拦截未登录用户时，同时标注 `@PreAuthorize("isAuthenticated()")`。拥有者字段必须采用与 `authentication.name` 相同的身份标识；默认 JWT 的 name 来自 sub。
 
 ```java
-import dev.macula.boot.starter.security.annotation.CheckOwner;
-
-@Service
-@RequiredArgsConstructor
-public class OrderService {
-    private final OrderRepository orderRepository;
-
-    @CheckOwner("returnObject.buyerUsername")
-    public OrderView getOrder(Long orderId) {
-        return orderRepository.findViewById(orderId);
-    }
+@PreAuthorize("isAuthenticated()")
+@PostAuthorize("returnObject != null and returnObject.buyerUsername != null and returnObject.buyerUsername == authentication.name")
+public OrderView getOrder(Long orderId) {
+    return orderRepository.findViewById(orderId);
 }
 ```
 
-其他业务可以指定不同属性，例如 `@CheckOwner("returnObject.createdBy")`。如果被标注的方法本身返回 `Result<OrderView>`，且订单在 `data` 中，则使用 `@CheckOwner("returnObject.data?.buyerUsername")`；`?.` 在 data 为空时返回 null，随后拒绝返回。如果 Result 是由 `ResponseBodyAdvice` 在后续包装的，表达式仍应按被标注方法的实际返回值填写，不加 `data`。
+表达式按方法实际返回值编写，例如包装对象可以访问 `returnObject.data?.buyerUsername`；后续 Advice 的包装不属于方法返回值。ADMIN/ROOT 是否可放行由业务表达式明确决定。返回后拒绝不能撤销写入、消息发送等副作用，不用于阻止写操作；列表数据权限仍应在查询条件中落实。标准 PostAuthorize 异常由现有 Spring Security/业务异常处理负责，不自动套用 Passkey 的 HTTP 403/A0312 映射。
 
-Starter 在现有 `SecurityAutoConfiguration` 中注册 `AnnotationTemplateExpressionDefaults`，无需应用额外声明配置类。应用可以提供同类型 Bean 覆盖默认值；该 Bean 控制 Spring Security 的全局注解模板解析，替换时必须保持所需模板行为。
+### 列表授权范围的 Passkey
 
-安全边界：
-
-- 未登录会在方法执行前拒绝；返回值为空、拥有者为空或不匹配会在方法返回后拒绝。ADMIN、ROOT 不自动绕过。
-- 拥有者应从服务端真实数据取得，不得使用客户端自报的归属字段。表达式中不存在的属性或其他配置错误可能产生求值异常，不能作为允许访问处理。
-- 只适用于通过 Spring Bean 代理调用的公开方法；同类自调用、手动 new 对象不能依赖该注解。可以同时使用 `@PreAuthorize("@pms.hasPermission(...)")`，资源检查与操作权限都必须通过。
-- 不过滤列表、分页、统计或导出；这些操作应在数据库查询中限制数据范围。不支持异步、流式返回值的拥有者解析。
-- 返回后检查不能撤销已经发生的写入、消息发送等副作用，修改、删除和退款应使用执行前鉴权及数据库条件约束。
-- 拥有者相等不代表租户授权成立；多租户业务仍需独立限制租户范围，尤其不能仅比较租户内局部唯一的用户编号。
-
-### 列表授权范围的 Passkey 与统一 CheckOwner
-
-两种资源校验依据使用同一个注解，由表达式上下文确定时机，与 HTTP 动词或客户端是否携带凭证无关：
-
-| 场景 | 用法 | 时机 |
-| --- | --- | --- |
-| 数据有明确的当前用户归属 | `@CheckOwner("returnObject.buyerUsername")` | 方法返回后检查拥有者，无需列表或 passkey |
-| 无法直接判断用户与资源关系，依赖前置授权列表框定范围 | `@CheckOwner("#p0")` / `@CheckOwner("#p0.orderId")` | 方法执行前验证资源 passkey |
-
-位置参数支持 `#p0`、`#a0`；命名参数依赖参数名可发现，并按实际声明 `@CheckOwner` 的接口或实现方法解析；实现方法可以使用不同的参数名。只支持同步单对象，入参资源编号支持非空 String 或整数（规范十进制表示），不支持集合。混合引用返回值与入参、常量或无法明确分类的表达式拒绝。两种模式失败不会互相降级。现有 `AnnotationTemplateExpressionDefaults` Bean 保留供其他组合注解使用，CheckOwner 本身改由统一 Advisor 执行。
-
-先由业务按当前用户的数据权限查询列表；列表 DTO 实现 Commons 的 `dev.macula.boot.security.PasskeyResource`：
+列表 DTO 实现 `PasskeyResource`，框架自动填充 passkey；后续请求通过 Controller 参数上的 `@Passkey` 校验。接口定义如下：
 
 ```java
+package dev.macula.boot.security;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public interface PasskeyResource {
+    @JsonIgnore
+    String getResourceId();
+
+    String getPasskey();
+
+    void setPasskey(String passkey);
+}
+```
+
+列表 DTO 示例，`getResourceId()` 返回全局唯一且稳定的订单编号：
+
+```java
+import dev.macula.boot.security.PasskeyResource;
+import lombok.Data;
+
 @Data
 public class OrderListItem implements PasskeyResource {
     private String orderId;
+    private String orderName;
     private String passkey;
 
     @Override
@@ -273,7 +267,73 @@ public class OrderListItem implements PasskeyResource {
 }
 ```
 
-接口声明 `getResourceId()`、`getPasskey()`、`setPasskey(...)`，辅助 resourceId 带 JsonIgnore，不额外出现在 JSON 中；DTO 自己的 orderId 正常输出。无需签发注解。**所有返回此类列表元素的入口必须已经完成资源授权**，不能在未授权公共列表复用 DTO；单个对象实现接口不自动签发。列表与详情 DTO 可以不同，后置归属模式不要求实现该接口。
+Lombok 生成 `getPasskey()` 和 `setPasskey(...)`；`passkey` 由框架在列表响应时填充。下方 `UpdateOrderRequest` 提供 `getOrderId()`。
+
+#### 1. 查询已授权列表
+
+```java
+@PreAuthorize("isAuthenticated()")
+@GetMapping("/orders")
+public List<OrderListItem> list() {
+    // 业务查询必须先按当前用户的数据权限过滤，再由响应 Advice 自动填充 passkey。
+    return orderService.listVisibleTo(SecurityUtils.getCurrentUser());
+}
+```
+
+响应示例（passkey 仅为示意值）：
+
+```json
+{
+  "data": [
+    {
+      "orderId": "order-1001",
+      "passkey": "v1.<过期时间>.<签名>"
+    }
+  ]
+}
+```
+
+#### 2. 前端携带列表中的凭证
+
+从列表选中记录后，携带其 `orderId` 和 `passkey`，沿用现有登录认证。以下方式二选一。
+
+URL Query 参数：
+
+```http
+GET /orders/order-1001?passkey=<该记录的passkey，经URL编码>
+```
+
+Header（推荐）：
+
+```http
+GET /orders/order-1001
+X-Resource-Passkey: <该记录的passkey>
+```
+
+JSON 请求体只传业务数据，凭证仍放在 Header 或 URL Query 中。
+
+#### 3. 后端使用参数级 @Passkey
+
+```java
+import dev.macula.boot.starter.security.annotation.Passkey;
+
+// 参数本身就是资源编号。
+@GetMapping("/orders/{orderId}")
+public OrderDetail detail(@PathVariable("orderId") @Passkey String orderId) {
+    return orderService.getDetail(orderId);
+}
+
+// 从绑定完成的 DTO 中读取 orderId；嵌套属性可以写 @Passkey("order.id")。
+@PreAuthorize("@pms.hasPermission('order:update')")
+@PostMapping("/orders/update")
+public void update(@RequestBody @Valid @Passkey("orderId") UpdateOrderRequest request) {
+    orderService.update(request);
+}
+```
+
+`@Passkey` 校验当前用户、资源编号、签名和有效期，失败时 Controller 不执行。编号支持非空字符串或整数，DTO 属性通过 getter 读取。
+
+#### 配置与使用边界
 
 启用配置（没有默认签名密钥）：
 
@@ -288,33 +348,14 @@ macula:
 
 | 配置 | 默认 | 含义 |
 | --- | --- | --- |
-| `macula.security.passkey.enabled` | `false` | 开启资源凭证；关闭时列表正常返回且不签发，默认服务及 Clock 不装配；入参模式拒绝，后置归属模式不受影响 |
+| `macula.security.passkey.enabled` | `false` | 开启资源凭证；关闭时列表正常返回且不签发，默认服务及 Clock 不装配；标注 Passkey 的请求参数拒绝，标准 PostAuthorize 独立工作 |
 | `macula.security.passkey.ttl` | `5m` | 正数且至少 1 秒的凭证有效期 |
 | `macula.security.passkey.secret-base64` | 无 | Base64 编码、解码后至少 32 字节的独立服务端密钥 |
 
-所有实例使用相同签名配置；不要使用用户登录 JWT 的默认密钥，不要提交密钥。默认服务使用 HMAC-SHA256，将版本、可信 `authentication.name`、全局唯一资源编号和过期时间纳入明确字段编码；不包含租户、类型、action。应用可提供自己的 `PasskeyService` Bean 替换签发与验证，或提供 Clock Bean 替换时间源。服务契约同时继承公共签发 SPI，替换后签发与验证使用同一实例；自定义实现必须保留拒绝与身份校验约束。
-
-现有 Web Starter 的 ControllerResponseAdvice 为授权列表签发，支持 Collection、PageVO、成功 Result 包装及 ResponseEntity 正文，混合列表只处理接口实现元素。关闭/替换该 Advice 后须自行接入签发；`macula.security.passkey.enabled=false`（默认）时跳过列表遍历与签发，正常返回，即使有自定义签发器也不会调用。启用时有候选列表但无有效签发器则拒绝，配置无效时默认服务启动失败。只有 Security Starter 而未接入 Web Advice 时不会自动签发，前置保护仍要求有效凭证。
-
-```java
-@CheckOwner("#p0")
-@PreAuthorize("@pms.hasPermission('order:cancel')")
-@PostMapping("/{orderId}/cancel")
-public void cancel(@PathVariable String orderId) {
-    orderService.cancel(orderId);
-}
-
-@CheckOwner("#p0.orderId")
-@PreAuthorize("@pms.hasPermission('order:update')")
-@PostMapping("/update")
-public void update(@RequestBody UpdateOrderRequest request) {
-    orderService.update(request);
-}
-```
-
-前端携带 `X-Resource-Passkey` Header（推荐）或 URL Query 的 `passkey`。两处同值可用，重复、冲突、非法编码或空值拒绝；不读取表单同名字段，也不使用返回 DTO 中的凭证验证请求。缺失/无效凭证在执行前拒绝，不进入业务方法。接入现有异常 Advice 后，本功能的资源拒绝返回 HTTP 403 与 A0312，且不包含详情。
-
-凭证在到期前可重复使用；业务授权变更不会立即撤销已签发凭证。编号必须全局唯一、表示稳定。PMS 继续负责按钮/操作权限，业务事务继续检查订单状态等条件；单资源凭证不能用于授权请求内的其他资源，也不能替代租户或其他业务边界控制。后置归属检查仍只能用于无副作用的查询。
+- 列表必须先完成业务数据权限过滤。Web Starter 的响应 Advice 支持 Collection、PageVO、成功 Result 和 ResponseEntity 中的列表；单对象不自动签发。
+- 各实例使用同一独立签名密钥，默认采用 HMAC-SHA256；可用 `PasskeyService` Bean 替换签发与验证。
+- 凭证只从 Header/Query 读取，不读取表单或 DTO 字段；重复、冲突和空值拒绝。使用现有异常 Advice 时，凭证拒绝返回 HTTP 403/A0312。
+- 仅保护 MVC Controller 请求；操作权限和返回值鉴权分别使用 `@PreAuthorize`、`@PostAuthorize`。凭证到期前可复用，不能代替业务状态、租户或实时权限检查。
 
 ### 内部接口注解@Inner
 

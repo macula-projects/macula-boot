@@ -21,18 +21,18 @@ import dev.macula.boot.security.ResourceAccessDenied;
 import org.springframework.security.access.AccessDeniedException;
 
 /**
- * A Spring Security denial recognizable by the existing Web exception advice.
+ * 资源凭证校验拒绝异常，供现有 Web 异常处理识别并返回 HTTP 403/A0312。
  *
- * @author Macula
+ * @author Rain
  * @since 6.1.0
  */
-public class CheckOwnerAccessDeniedException extends AccessDeniedException implements ResourceAccessDenied {
+public class PasskeyAccessDeniedException extends AccessDeniedException implements ResourceAccessDenied {
 
     /**
-     * Creates a denial without disclosing signing material or protected data.
-     * @param message public failure description
+     * 创建拒绝异常，消息不应包含签名密钥、完整凭证或受保护数据。
+     * @param message 可对外展示的失败说明
      */
-    public CheckOwnerAccessDeniedException(String message) {
+    public PasskeyAccessDeniedException(String message) {
         super(message);
     }
 }

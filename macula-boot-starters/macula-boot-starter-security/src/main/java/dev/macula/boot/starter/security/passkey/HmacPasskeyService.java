@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.security.passkey;
 
-import dev.macula.boot.starter.security.authorization.CheckOwnerAccessDeniedException;
+import dev.macula.boot.starter.security.authorization.PasskeyAccessDeniedException;
 import dev.macula.boot.starter.security.config.SecurityProperties;
 
 import javax.crypto.Mac;
@@ -76,13 +76,13 @@ public class HmacPasskeyService implements PasskeyService {
     @Override
     public String issue(String subject, String resourceId) {
         if (key == null || !validIdentity(subject) || !validIdentity(resourceId)) {
-            throw new CheckOwnerAccessDeniedException("Resource credential cannot be issued");
+            throw new PasskeyAccessDeniedException("Resource credential cannot be issued");
         }
         long expiresAt;
         try {
             expiresAt = Math.addExact(clock.instant().getEpochSecond(), ttl.getSeconds());
         } catch (ArithmeticException ex) {
-            throw new CheckOwnerAccessDeniedException("Resource credential cannot be issued");
+            throw new PasskeyAccessDeniedException("Resource credential cannot be issued");
         }
         return "v1." + expiresAt + "." + Base64.getUrlEncoder().withoutPadding()
             .encodeToString(sign(subject, resourceId, expiresAt));
