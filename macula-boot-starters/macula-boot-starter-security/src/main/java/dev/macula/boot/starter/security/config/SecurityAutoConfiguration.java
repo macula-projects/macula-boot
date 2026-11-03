@@ -18,20 +18,21 @@
 package dev.macula.boot.starter.security.config;
 
 import dev.macula.boot.starter.security.aspect.SecurityInnerAspect;
-import dev.macula.boot.starter.security.authorization.CheckOwnerAdvisor;
+import dev.macula.boot.starter.security.web.PasskeyArgumentResolverPostProcessor;
 import dev.macula.boot.starter.security.passkey.HmacPasskeyService;
 import dev.macula.boot.starter.security.passkey.PasskeyService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Role;
+import java.time.Clock;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Role;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.Clock;
 
 /**
  * <p>
@@ -70,17 +71,18 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Registers the unified ownership advisor without eagerly creating security properties.
-     * @param services replaceable credential service
-     * @param properties security settings provider
-     * @return resource authorization advisor
+     * 在 MVC 参数绑定后接入资源凭证校验，服务和配置均延迟到请求处理时获取。
+     * @param services 可替换的凭证服务提供器
+     * @param properties 安全配置提供器
+     * @return MVC 参数解析装饰器的基础设施处理器
      */
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @ConditionalOnMissingBean(CheckOwnerAdvisor.class)
-    static CheckOwnerAdvisor checkOwnerAdvisor(ObjectProvider<PasskeyService> services,
+    @ConditionalOnMissingBean(PasskeyArgumentResolverPostProcessor.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    static PasskeyArgumentResolverPostProcessor passkeyArgumentResolverPostProcessor(ObjectProvider<PasskeyService> services,
         ObjectProvider<SecurityProperties> properties) {
-        return new CheckOwnerAdvisor(services::getObject,
+        return new PasskeyArgumentResolverPostProcessor(services::getIfAvailable,
             () -> properties.getObject().getPasskey().isEnabled());
     }
 

@@ -19,7 +19,7 @@ package dev.macula.boot.starter.security.passkey;
 
 import dev.macula.boot.security.PasskeyIssuer;
 import dev.macula.boot.security.PasskeyResource;
-import dev.macula.boot.starter.security.authorization.CheckOwnerAccessDeniedException;
+import dev.macula.boot.starter.security.authorization.PasskeyAccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,7 +54,7 @@ public interface PasskeyService extends PasskeyIssuer {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuthenticationTrustResolverImpl trustResolver = new AuthenticationTrustResolverImpl();
         if (authentication == null || !authentication.isAuthenticated() || trustResolver.isAnonymous(authentication)) {
-            throw new CheckOwnerAccessDeniedException("Resource access requires authentication");
+            throw new PasskeyAccessDeniedException("Resource access requires authentication");
         }
         resource.setPasskey(issue(authentication.getName(), resource.getResourceId()));
     }

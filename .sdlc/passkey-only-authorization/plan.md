@@ -45,4 +45,11 @@ Commons/Web 生产代码、POM、TSF 依赖、现有方法安全顺序、imports
 
 ## Implementation record
 - 第一版方法级实现仅通过编译/静态检查，尚未正式测试或提交源码。用户进一步确认参数解析器、直接属性路径与仅 Controller 后，该中间实现不再交付。
-- 此修订新增 MVC 装饰器并替换方法代理测试，属于用户明确变更带来的必要计划调整。旧编译/评审结果保留在历史提交及 review-findings，不作为新方案验证证据；待修订计划确认后实施。
+- 此修订新增 MVC 装饰器并替换方法代理测试，属于用户明确变更带来的必要计划调整。旧编译/评审结果保留在历史提交及 review-findings，不作为新方案验证证据；用户已回复“确认”，修订计划已接受并提交至两条分支。
+- 已在两条分支完成参数级 Passkey、受限 JavaBean 属性提取、原解析器委托、初始化后幂等安装与延迟服务/配置装配；未提交的 PasskeyAdvisor/PasskeyTest 已移除。既有 CheckOwner 源码与测试删除，拒绝异常更名，保留原服务与签发协议。
+- 已重写参数解析单测、真实 MVC 和自动配置测试源码，覆盖 PathVariable/RequestParam/RequestBody、Valid、body 单次实例化、嵌套属性、自定义解析器、未标注参数、默认关闭/缺服务及标准方法安全组合；README 使用参数级示例。主线固定向量断言保留，5.x 既有向量不改。
+- Build 编译：主线 Tencent JDK 17.0.17、5.x Tencent JDK 1.8.0_472，分别执行 Security 及依赖的 `clean test-compile -DskipTests`，退出码均为 0。此阶段未运行正式测试。
+- 对两条分支变更 Java 文件（含新增 web 包）使用主线版本化 Checkstyle 规则，均 0 violations；5.x 用 `checkstyle.source.root` 指向该工作树，确保实际扫描新源码。两条分支 git diff --check 均无输出。
+- 无额外文件范围偏差；Commons/Web 生产代码、POM、TSF 依赖、方法安全配置、imports 及历史 SDLC 文件未改。等待人工实现确认后进入 sdlc-test；当前只证明编译和静态检查，不声称测试通过。
+- 按用户要求，新增注解、解析器、安装处理器、拒绝异常和自动配置接入点补充中文职责与 API 文档；在委托绑定、凭证来源、受限属性路径、缺服务拒绝和幂等安装处解释设计原因。两分支同步，测试类职责说明也改为中文。
+- Test 阶段首轮定向测试发现新增 MVC 用例错误假设 Valid 错误返回 400；仓库原有 ControllerExceptionAdvice 明确返回 HTTP 500/A0400。仅修正两分支测试预期并断言 MethodArgumentNotValidException，不修改既有生产异常处理。之后定向测试主线 22、5.x 21 全部通过，相关模块 clean verify 主线 87、5.x 41 全部通过；完整证据以 verification.md 为准。
