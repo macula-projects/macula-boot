@@ -64,6 +64,7 @@
         <module>macula-boot-commons</module>
         <module>macula-boot-starters</module>
         <module>macula-boot-archetype</module>
+        <module>macula-boot-examples</module>
     </modules>
 
     <profiles>
