@@ -30,6 +30,7 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -54,6 +55,9 @@ import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 @Slf4j
 @RequiredArgsConstructor
 public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
+    @Value("${spring.application.name:}")
+    private String applicationName;
+
     private final GatewayProperties properties;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, Object> sysRedisTemplate;
@@ -98,7 +102,8 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
 
     private Mono<Void> rmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response, String restfulPath) {
         if (properties.isForceHmacRmOpaqueTokenEndpoint()) {
-            Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath);
+            Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath,
+                applicationName);
             if (!result.isSuccess()) {
                 if (log.isDebugEnabled()) {
                     log.debug("删除opaqueToken kong验证失败： header : {}",

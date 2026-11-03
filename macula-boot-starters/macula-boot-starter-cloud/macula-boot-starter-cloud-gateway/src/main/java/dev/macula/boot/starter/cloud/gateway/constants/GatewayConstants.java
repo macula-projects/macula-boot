@@ -27,6 +27,12 @@ public interface GatewayConstants {
 
     String CACHED_REQUEST_BODY_OBJECT_KEY = "CACHED_REQUEST_BODY_OBJECT_KEY";
 
+    /** 验签成功后保存的可信应用身份，仅在当前请求内传递。 */
+    String HMAC_IDENTITY_ATTRIBUTE = GatewayConstants.class.getName() + ".hmacIdentity";
+
+    /** 无法从应用名和租户编码缓存确认归属时拒绝接入。 */
+    long UNKNOWN_TENANT_ID = -1L;
+
     String HMAC_AUTH_PREFIX = "hmac username";
 
     String PROTECT_URLS_ENDPOINT = "/gateway/protect/urls";

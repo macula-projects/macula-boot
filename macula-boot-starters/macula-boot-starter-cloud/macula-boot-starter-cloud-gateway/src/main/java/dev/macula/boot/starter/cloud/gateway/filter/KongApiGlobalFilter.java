@@ -26,6 +26,7 @@ import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -47,6 +48,9 @@ import reactor.core.publisher.Mono;
 public class KongApiGlobalFilter implements GlobalFilter, Ordered {
     private final RedisTemplate<String, Object> sysRedisTemplate;
 
+    @Value("${spring.application.name:}")
+    private String applicationName;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -56,7 +60,8 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
         String restfulPath = method + ":" + path;
 
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-            Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath);
+            Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath,
+                applicationName);
             if (!result.isSuccess()) {
                 return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
             }

@@ -22,10 +22,10 @@ import com.nimbusds.jwt.JWTClaimNames;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.security.JwtClaimsCustomizer;
 import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils.HmacIdentity;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -135,7 +135,11 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
                 username = invokeUsername;
             }
 
-            Long tenantId = TenantContextHolder.getCurrentTenantId();
+            HmacIdentity identity = exchange.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
+            if (identity == null) {
+                return Mono.error(new BadCredentialsException("Missing verified HMAC identity"));
+            }
+            Long tenantId = identity.tenantId();
             Map<String, Object> attributes = new HashMap<>();
             attributes.put(JWTClaimNames.SUBJECT, username);
 

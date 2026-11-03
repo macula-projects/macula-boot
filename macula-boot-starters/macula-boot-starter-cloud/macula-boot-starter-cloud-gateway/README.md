@@ -394,3 +394,17 @@ public class RedisConfiguration {
 - oauth2-oidc-sdk：https://github.com/hidglobal/oauth-2.0-sdk-with-openid-connect-extensions/blob/master/LICENSE.txt
 - caffeine：https://github.com/ben-manes/caffeine/blob/master/LICENSE
 - spring-cloud-gateway：https://github.com/spring-cloud/spring-cloud-gateway/blob/main/LICENSE.txt
+
+## AK/SK 应用租户
+
+网关使用自己的 `spring.application.name`，从 System 缓存的“租户编码 → ID”映射中查找归属租户。匹配规则为 应用名以租户编码开头，不区分大小写；多个编码匹配时使用最长前缀。例如 `macula-samples-gateway` 匹配 `macula-samples`，对应租户 12。
+
+不再需要配置 `macula.gateway.tenant-id`。应用名缺失、映射缺失、无匹配前缀或命中的租户 ID 非法时，解析结果为 `-1`，拒绝 AK/SK 接入；应用归属租户必须与解析出的网关租户一致。该规则同时适用于启用 HMAC 的 opaque token 清理入口，API Key 不在本次控制范围。
+
+租户管理负责维护 `macula:cloud:system:tenants` Hash，字段为租户编码，值为租户 ID。System 启动时初始化，租户新增、修改和删除在事务提交成功后刷新，不依赖应用变更；映射未就绪或重建期间网关会拒绝未确认归属的请求。
+
+应用缓存的 `tenantId` 是归属租户，`authTenantId` 是认证后的业务租户。JWT 的 `tenantId` 优先使用 `authTenantId`，未配置时回退到归属租户；非法认证租户值拒绝认证。调用方不能通过租户头改变本网关的归属。
+
+先升级网关并准备好租户映射缓存，再启用不同于归属租户的认证租户。旧网关忽略 `authTenantId`；回滚旧网关前须恢复两者一致。
+
+自定义验签集成应将网关的 `applicationName` 传给四参数 `KongApiUtils.checkSign`，由工具类内部解析网关归属并校验，再从可信请求属性读取认证结果。旧三参数方法仍保留无归属限制的调用方式，不提供新增的接入隔离保证；所有入口均不写入 `TenantContextHolder`。

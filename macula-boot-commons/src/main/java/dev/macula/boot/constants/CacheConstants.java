@@ -33,8 +33,14 @@ public interface CacheConstants {
     /** 用户对应的应用缓存前缀 */
     String SECURITY_SYSTEM_APPS = "macula:cloud:system:apps:";
 
+    /** 租户编码到租户 ID 的映射，供网关按应用名前缀识别归属。 */
+    String SECURITY_SYSTEM_TENANTS = "macula:cloud:system:tenants";
+
     /** 应用缓存里面的密钥KEY */
     String SECURITY_SYSTEM_APPS_SECRIT_KEY = "secretKey";
+
+    /** 应用认证后的业务租户，与应用归属租户分别维护。 */
+    String SECURITY_SYSTEM_APPS_AUTH_TENANT_ID = "authTenantId";
 
     /** 应用缓存里面的允许URL KEY */
     String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";

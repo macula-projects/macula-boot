@@ -27,7 +27,6 @@ import cn.hutool.crypto.digest.HmacAlgorithm;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
@@ -40,6 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Comparator;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -51,6 +51,33 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @since 2023/2/20 12:38
  */
 public class KongApiUtils {
+
+    /**
+     * 按网关应用名忽略大小写匹配租户编码，多个匹配时使用最长前缀。
+     *
+     * @param sysRedisTemplate System 的租户编码缓存
+     * @param applicationName 网关的 spring.application.name
+     * @return 租户 ID；应用名缺失、缓存未命中或 ID 非法时返回 -1
+     */
+    public static Long resolveGatewayTenantId(RedisTemplate<String, ?> sysRedisTemplate, String applicationName) {
+        if (StrUtil.isBlank(applicationName)) {
+            return GatewayConstants.UNKNOWN_TENANT_ID;
+        }
+        Map<String, String> tenants = sysRedisTemplate.<String, String>opsForHash()
+            .entries(CacheConstants.SECURITY_SYSTEM_TENANTS);
+        String tenantId = tenants.entrySet().stream()
+            .filter(entry -> StrUtil.isNotBlank(entry.getKey()) && StrUtil.startWithIgnoreCase(applicationName, entry.getKey()))
+            .max(Comparator.comparingInt(entry -> entry.getKey().length()))
+            .map(Map.Entry::getValue).orElse(null);
+        if (StrUtil.isEmpty(tenantId)) {
+            return GatewayConstants.UNKNOWN_TENANT_ID;
+        }
+        try {
+            return Long.valueOf(tenantId);
+        } catch (NumberFormatException exception) {
+            return GatewayConstants.UNKNOWN_TENANT_ID;
+        }
+    }
 
     public static boolean isKongApiRequest(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
@@ -69,6 +96,36 @@ public class KongApiUtils {
      */
     public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
         String path) {
+        return checkSignForTenant(exchange, sysRedisTemplate, path, null);
+    }
+
+    /**
+     * 根据网关应用名解析归属租户，并校验应用接入资格、签名及接口权限。
+     *
+     * @param exchange 当前请求
+     * @param sysRedisTemplate System 的租户及应用缓存
+     * @param path 带 HTTP 方法的权限路径
+     * @param applicationName 网关的 spring.application.name
+     * @return 验证结果；未匹配到网关租户时拒绝接入
+     */
+    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
+        String path, String applicationName) {
+        return checkSignForTenant(exchange, sysRedisTemplate, path,
+            resolveGatewayTenantId(sysRedisTemplate, applicationName));
+    }
+
+    /**
+     * 校验应用归属、签名及接口权限，成功后在请求属性中保存可信身份。
+     *
+     * @param exchange 当前请求
+     * @param sysRedisTemplate 应用凭据缓存
+     * @param path 带 HTTP 方法的权限路径
+     * @param gatewayTenantId 网关所属租户，null 表示保持旧接入行为
+     * @return 验证结果；失败时不保留可信身份
+     */
+    private static Result<String> checkSignForTenant(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
+        String path, Long gatewayTenantId) {
+        exchange.getAttributes().remove(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
         try {
             ServerHttpRequest request = exchange.getRequest();
 
@@ -79,12 +136,6 @@ public class KongApiUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
             }
 
-            // 演示用的应用配置（正式环境要删除）
-            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-            //                .put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "xx");
-            //            sysRedisTemplate.<String, String>boundHashOps(CacheConstants.SECURITY_SYSTEM_APPS + username)
-            //                .put(GlobalConstants.TENANT_ID_NAME, "0");
-
             Map<String, String> apps =
                 sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
 
@@ -94,11 +145,14 @@ public class KongApiUtils {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
             }
 
-            // 如果应用有租户ID，则设置到上下文给生成JWT时使用
-            String tenantId = apps.get(GlobalConstants.TENANT_ID_NAME);
-            if (StrUtil.isNotEmpty(tenantId)) {
-                TenantContextHolder.setCurrentTenantId(Long.parseLong(tenantId));
+            String ownerTenant = apps.get(GlobalConstants.TENANT_ID_NAME);
+            Long ownerTenantId = StrUtil.isEmpty(ownerTenant) ? null : Long.valueOf(ownerTenant);
+            if (gatewayTenantId != null && (gatewayTenantId == GatewayConstants.UNKNOWN_TENANT_ID
+                || !gatewayTenantId.equals(ownerTenantId))) {
+                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "应用归属租户不允许接入本网关");
             }
+            String authTenant = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_AUTH_TENANT_ID);
+            Long authTenantId = StrUtil.isEmpty(authTenant) ? ownerTenantId : Long.valueOf(authTenant);
 
             // 检查URL是否允许，默认允许[多个URL表达式用逗号隔开，'GET:/i18n-base/v1/users/*, POST:/xxx/**']
             String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
@@ -162,6 +216,8 @@ public class KongApiUtils {
             }
 
             if (StrUtil.isNotBlank(signature) && signature.equals(signatureNew)) {
+                exchange.getAttributes().put(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE,
+                    new HmacIdentity(username, authTenantId));
                 return Result.success();
             } else {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "验签失败");
@@ -170,4 +226,15 @@ public class KongApiUtils {
             return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, e.getMessage());
         }
     }
+
+    /**
+     * 当前请求通过验签的应用及其有效业务租户。
+     *
+     * @param applicationCode 验签使用的应用编码
+     * @param tenantId 业务租户，可为 null 以兼容旧无租户配置
+     * @since 6.1.0
+     */
+    public record HmacIdentity(String applicationCode, Long tenantId) {
+    }
+
 }
