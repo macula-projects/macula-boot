@@ -1,38 +1,37 @@
-# Spec: Passkey 单一前置资源凭证校验 (from intent.md 2026-11-03)
+# Spec: Passkey 请求参数资源凭证校验 (from intent.md 2026-11-03)
 Status: accepted
 
 ## Source intent
-[intent.md](intent.md)：用户已确认主线与 5.x 同步改为 Passkey，仅执行前置凭证检查，直接删除 CheckOwner，返回后鉴权交给 PostAuthorize。
+[intent.md](intent.md)。用户在原方案获批后明确指定 HandlerMethodArgumentResolver、直接属性路径、无需 Service 支持，只校验 HTTP 请求的 passkey 与 resourceId。这条明确指示替代原方法级 Advisor 设计。
 
 ## Requirements
-1. 新增方法级 `dev.macula.boot.starter.security.annotation.Passkey`，必填 `value` 表达式从方法入参取得一个 String 或整数资源编号，支持 `#p0`、`#a0`、命名参数和嵌套属性。
-2. 移除 CheckOwner 注解、Advisor 及其命名的异常类型；新实现和自动配置使用 Passkey 命名，不提供旧 API 兼容入口。历史 SDLC 证据保留原文，现行文档和测试迁移到新 API。
-3. 仅进行调用前校验；缺少真实认证身份、缺请求、缺凭证、非法表达式、返回值表达式、无入参来源、空编号、错误编号类型、关闭功能、缺少服务或凭证验证失败时拒绝，目标方法不得执行。ADMIN/ROOT 无隐式豁免。
-4. 与 PreAuthorize/PMS 独立叠加；同一方法上的 Passkey、PreAuthorize 和 PostAuthorize 均须生效。保留 JDK/CGLIB 代理、接口注解和泛型桥接方法支持。
-5. 返回值拥有者校验完全由标准 PostAuthorize 承担；不在 Passkey Advisor 中读取返回值或执行拥有者比较。文档给出独立 PostAuthorize 及与 Passkey 组合的示例。
-6. 保持现有 Passkey 服务和列表签发协议：绑定用户、资源编号和有效期，Header/Query 提取规则、HTTP 403/A0312 的资源凭证拒绝、默认关闭语义、可替换服务/Clock、HMAC 与 golden token 均保持。
-7. 主线与 5.x 具有一致外部 API 和安全语义，分别遵守现有依赖和 Java 版本；不调整 TSF/SnakeYAML 配置。
+1. 参数级 `dev.macula.boot.starter.security.annotation.Passkey`：默认空 value 使用参数本身；`orderId` 或 `order.id` 表示已绑定 JavaBean 的属性路径。不使用 SpEL、位置参数别名或方法参数名。
+2. 原 Spring 解析器先完成类型转换、RequestBody 反序列化及适用校验，再验证凭证；请求体只读取一次，绑定后的对象原样交给 Controller。未标注参数行为不变。
+3. resourceId 只接受非空 String 或整数；缺认证/凭证/服务、非法路径、属性缺失/null、错误编号类型、关闭功能或验证失败均拒绝且 Controller 不执行。ADMIN/ROOT 无隐式豁免。
+4. 使用可信认证身份验证凭证的用户、resourceId、签名及有效期；DTO 内 passkey 字段不是请求凭证来源。Controller 上的 PreAuthorize/PMS/PostAuthorize 仍独立生效。
+5. 删除 CheckOwner 注解/Advisor/命名异常，不保留兼容入口，不交付中间版本 PasskeyAdvisor。无需 Service 方法保护；返回值鉴权完全使用标准 PostAuthorize。
+6. 保留列表签发、Header/Query 规则、HMAC/token、配置、默认关闭与可替换服务/Clock、凭证拒绝 HTTP 403/A0312。
+7. 主线与 5.x API 和语义一致，5.x 保持 Java 8/Boot 2.7.18/Javax/Jackson 2，主线沿用当前基线；TSF 依赖不改。
 
 ## Non-goals
-不修改签发算法、TTL、密钥配置、列表容器范围、PMS/租户权限模型、网关认证链或数据库；不扩展标准 PostAuthorize 的异常映射，不修复无关全仓依赖问题，不合并或部署。
+不提供 Service 方法校验、任意 SpEL、Map/集合/数组批量资源校验、拥有者自动判断或凭证续期/撤销；不修改列表签发、Web 异常映射、网关/PMS/租户/数据库或 TSF 依赖；不合并或部署。
 
 ## Design
-将统一 CheckOwner Advisor 收敛为 Passkey Advisor：解析实际承载注解的方法与入参，验证表达式只引用入参资源，提取请求凭证并验证后调用目标方法。删除返回值模式、ResultRoot 和前后置分类状态；保留对非法/未知来源表达式的拒绝。资源凭证拒绝异常改为 Passkey 命名并继续实现公共 ResourceAccessDenied 标记。
+Security Starter 增加 HandlerMethodArgumentResolver 装饰器。RequestMappingHandlerAdapter 初始化完成后，轻量 BeanPostProcessor 捕获其原解析器列表，在最前面安装只处理 Passkey 参数的装饰器。内部 composite 仅包含原列表，先委托完成绑定再验证凭证，避免递归或重复读取 body；未标注参数继续走原列表。普通 WebMvcConfigurer 追加解析器不能接管已被内置解析器处理的 RequestBody/PathVariable，因此采用装饰方式。
 
-SecurityAutoConfiguration 注册可替换的 Passkey Advisor。保留现有方法安全顺序：主线位于 PreAuthorize 后；5.x 方法安全拦截器先于 Passkey，所有前置拒绝均阻止业务执行。其他 Starter 只在现行文档或组合测试引用旧类型时同步迁移，不改变 Commons/Web 的签发实现。
+空属性路径使用参数本身；非空使用受限 JavaBean 点分属性读取，禁止 class 反射导航、SpEL、方法调用和索引。缺属性或中间 null 拒绝。验证成功返回原绑定对象。
 
-标准返回后示例使用 `@PreAuthorize("isAuthenticated()")` 和 `@PostAuthorize("returnObject != null and returnObject.ownerUsername != null and returnObject.ownerUsername == authentication.name")`。返回值条件由业务指定；不在示例中引入管理员自动放行。
+现有 SecurityAutoConfiguration 通过 Servlet MVC 条件注册可替换的 BeanPostProcessor，服务/配置用延迟 provider，避免提前初始化 SecurityProperties/MVC。关闭时仍安装校验器并拒绝标注参数，默认服务/Clock 仍不创建。主线模板 Bean、现有方法安全配置及 imports 保留。
 
 ## Data and interfaces
-破坏性 Java API 迁移：`@CheckOwner("#p0")` 改为 `@Passkey("#p0")`；原 `@CheckOwner("returnObject.ownerUsername")` 改为标准 PostAuthorize 表达式，按需加 PreAuthorize。Advisor、Bean 与异常命名同步迁移并说明自定义覆盖点。配置键、Header、Query、JSON 和凭证格式不变，无数据库变更。
+`@PathVariable @Passkey Long orderId` 使用标量；`@RequestBody @Passkey("orderId") UpdateRequest request` 使用 DTO 属性。旧入参 CheckOwner 迁移至对应参数，旧返回值用法改为标准 PreAuthorize/PostAuthorize。不再提供旧 Advisor 覆盖点，自定义 PasskeyService 保留；配置/Header/Query/JSON/token/持久化不变。
 
 ## Flagged concerns
-- 删除 CheckOwner 是源代码不兼容变更：non-blocking，用户已明确选择直接移除，README 必须给出两种旧用法的迁移示例。
-- PostAuthorize 不能阻止方法副作用，也不会自动继承原 CheckOwner 的前置认证和 HTTP 403/A0312 映射：non-blocking，文档明确只用于结果鉴权、需要前置认证时组合 PreAuthorize，并沿用标准 Spring Security 异常处理。
-- 两条分支方法安全基础设施不同：non-blocking，分别验证 PMS 顺序、代理类型以及 Passkey 与 PostAuthorize 同时标注的真实调用行为。
-- 5.x 的 TSF 依赖配置可能继续限制全仓测试：non-blocking，遵守用户已明确要求保留配置，报告范围内结果与基线限制。
+- 删除方法级 API 与 Service 保护：non-blocking，用户明确要求 Controller 专用，文档说明迁移与范围。
+- 装饰器必须兼容内置/自定义解析器且幂等安装：non-blocking，通过 MVC 与配置测试证明绑定、Valid、未标注参数及重复初始化行为。
+- 参数绑定发生在方法鉴权之前，绑定/Valid 失败按 Spring 既有流程处理：non-blocking，Passkey 在绑定成功后检查，计数证明失败不执行 Controller。
+- PostAuthorize 不能阻止副作用，也不继承资源异常标记：non-blocking，沿用已接受的标准异常映射边界。
+- 5.x TSF 基线可能限制全仓测试：non-blocking，保留配置并如实报告。
 
 ## Verification strategy
-重命名并重构注解/Advisor/自动配置测试，覆盖前置成功与所有拒绝路径；通过方法计数证明拒绝时不执行；覆盖接口参数名、JDK/CGLIB、桥接方法、ADMIN/ROOT 和 PMS 组合。新增标准 PostAuthorize 的允许/拒绝及与 Passkey 组合回归，返回后拒绝时查询已执行。保留服务、请求提取、Web 自动签发和 golden token 测试。
-
-主线按现有工具链、5.x 按真实 JDK 8 执行定向测试和目标模块 clean verify，运行变更 Java Checkstyle 与 git diff --check；跨模块验证按仓库测试规则执行，现有 TSF 基线限制如实记录。无新增组织级品牌/合规技能；遵循 AGENTS.md、architecture.md、starter-development.md、testing.md 和 REVIEW.md。
+单测覆盖标量/JavaBean/嵌套路径、非法属性或类型、认证/开关/缺服务/错误凭证、委托一次且对象不替换；真实 MVC 覆盖 PathVariable/RequestParam/RequestBody、Valid、Header/Query、列表签发、Controller 计数及 PreAuthorize/PostAuthorize 组合；配置测试证明延迟装配与幂等安装。服务 golden token 两分支一致。两分支分别做编译/Checkstyle，正式验证阶段执行目标 clean verify 与适用全仓检查，不将旧 Advisor 的编译记录当作新方案测试证据。
