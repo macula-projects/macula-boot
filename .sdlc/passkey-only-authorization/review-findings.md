@@ -11,6 +11,13 @@
 - Suppressed: 0；仅 Plan pass，无代码评审或实施。
 - Human plan approval: accepted，用户于 2026-11-03 回复 YES。
 
+### Round 3 — 用户明确修改为 MVC 参数解析方案
+- Scope: 用户新增的 HandlerMethodArgumentResolver、直接属性路径、Controller 专用范围及相关文件/Proof 增量；旧方法级方案尚未提交源码。
+- Reviewer: `passkey_only_plan_review`，Plan pass only。
+- Result: No findings；已覆盖原参数解析器委托、单次 body 绑定、受限 JavaBean 属性、初始化后幂等包装、默认禁用拒绝、Controller 计数与 MVC 测试。
+- Suppressed: 0；实际累计 3 轮，达到评审预算，本轮无新增发现，无需继续。
+- Human revised-plan approval: accepted，用户回复“确认”。
+
 ### Round 2 — 2026-11-03
 - Scope: 仅审主线服务测试文件清单及 fixed golden token Proof 增量。
 - Result: No findings；Round 1 Minor 已覆盖。
