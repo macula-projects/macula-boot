@@ -45,6 +45,15 @@ public interface CacheConstants {
     /** 应用缓存里面的允许URL KEY */
     String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
 
+    /** System 发布的 API Key 身份缓存前缀。 */
+    String APIKEY_CACHE_PREFIX = "macula:cloud:system:application:apikey:";
+
+    /** API Key 缓存中记录应用编码的字段。 */
+    String APIKEY_APPLICATION_CODE_ATTRIBUTE = "applicationCode";
+
+    /** API Key 缓存与 JWT 中使用的应用 ID 字段。 */
+    String APIKEY_APPLICATION_ID_ATTRIBUTE = "applicationId";
+
     /** oauth 客户端信息 */
     String OAUTH2_CLIENT_CACHE_KEY = "cloud:iam:oauth2:client";
 
@@ -68,10 +77,13 @@ public interface CacheConstants {
 
     /** WEBSOCKET订阅关系KEY */
     String WEBSOCKET_USERS_KEY = "macula:ws:u:user:";
+
     /** WEBSOCKET订阅关系会话KEY */
     String WEBSOCKET_USER_SESSIONS_KEY = "macula:ws:u:sessions:";
+
     /** WEBSOCKET订阅关系会话与用户对应KEY */
     String WEBSOCKET_SESSION_USER_KEY = "macula:ws:s:user:";
+
     /** WEBSOCKET订阅关系会话订阅KEY */
     String WEBSOCKET_SESSION_SUBSCRIPTIONS_KEY = "macula:ws:s:subs:";
 }

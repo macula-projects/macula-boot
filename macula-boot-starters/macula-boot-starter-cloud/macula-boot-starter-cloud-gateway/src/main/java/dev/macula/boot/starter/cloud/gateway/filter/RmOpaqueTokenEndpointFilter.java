@@ -30,7 +30,6 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,6 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 
@@ -55,13 +55,17 @@ import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 @Slf4j
 @RequiredArgsConstructor
 public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
-    @Value("${spring.application.name:}")
-    private String applicationName;
-
     private final GatewayProperties properties;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, Object> sysRedisTemplate;
+    private final KongApiGlobalFilter kongApiGlobalFilter;
 
+    /**
+     * 匹配 token 清理端点，按配置执行 HMAC 完整准入后再操作缓存。
+     *
+     * @param exchange 当前请求
+     * @param chain 非清理请求的后续过滤链
+     * @return 清理处理结果或后续过滤链结果
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -76,20 +80,26 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             }
             if (properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 未进行kong验证：header： {}", request.getHeaders().headerSet());
+                    log.debug("删除opaqueToken 拒绝：未携带 HMAC 凭据");
                 }
                 return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN,
                     Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED));
             } else {
-                return handlerRmOpaqueToken(exchange, response, restfulPath);
+                return handlerRmOpaqueToken(exchange, response);
             }
 
         }
         return chain.filter(exchange);
     }
 
-    private Mono<Void> handlerRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response,
-        String restfulPath) {
+    /**
+     * 缓存清理请求体，供 HMAC 摘要校验和后续 token 参数解析共用。
+     *
+     * @param exchange 当前清理请求
+     * @param response 响应
+     * @return 完整准入及缓存清理结果
+     */
+    private Mono<Void> handlerRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
         return DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
                 byte[] bytes = new byte[dataBuffer.readableByteCount()];
                 dataBuffer.read(bytes);
@@ -97,20 +107,27 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
                 return bytes;
             }).defaultIfEmpty(new byte[0])
             .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
-            .flatMap(bytes -> rmOpaqueToken(exchange, response, restfulPath));
+            .flatMap(bytes -> validateAndRmOpaqueToken(exchange, response));
     }
 
-    private Mono<Void> rmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response, String restfulPath) {
+    /**
+     * 强制 HMAC 时先复用完整应用准入，再执行 token 缓存操作；不能仅调用纯验签工具。
+     *
+     * @param exchange 已缓存请求体的清理请求
+     * @param response 响应
+     * @return 验证失败响应，或缓存清理结果
+     */
+    private Mono<Void> validateAndRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
         if (properties.isForceHmacRmOpaqueTokenEndpoint()) {
-            Result<String> result = KongApiUtils.checkSign(exchange, sysRedisTemplate, restfulPath,
-                applicationName);
-            if (!result.isSuccess()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken kong验证失败： header : {}",
-                        exchange.getRequest().getHeaders().headerSet());
-                }
-                return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
-            }
+            return Mono.fromCallable(() -> kongApiGlobalFilter.validate(exchange))
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorReturn(Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN))
+                .flatMap(result -> {
+                    if (!result.isSuccess()) {
+                        return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN, result);
+                    }
+                    return rmOpaqueToken(exchange, response);
+                });
         }
         return rmOpaqueToken(exchange, response);
     }
@@ -118,9 +135,6 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
     private Mono<Void> rmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
         return Mono.just(RequestUtils.getBody(exchange)).flatMap(bytes -> {
             String requestBody = new String(bytes);
-            if (log.isDebugEnabled()) {
-                log.debug("删除opaqueToken requestBody: {}", requestBody);
-            }
             if (StringUtils.isBlank(requestBody)) {
                 return Mono.empty();
             }
@@ -128,7 +142,8 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
                 return Mono.just(new JSONObject(requestBody).toBean(RmOpaqueTokenQuery.class));
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 转换RmOpaqueTokenQuery失败: {}", e.getMessage(), e);
+                    // 解析异常可能包含原始 JSON 片段，只保留异常类型作为失败类别。
+                    log.debug("删除opaqueToken 请求体解析失败: {}", e.getClass().getSimpleName());
                 }
                 return Mono.empty();
             }

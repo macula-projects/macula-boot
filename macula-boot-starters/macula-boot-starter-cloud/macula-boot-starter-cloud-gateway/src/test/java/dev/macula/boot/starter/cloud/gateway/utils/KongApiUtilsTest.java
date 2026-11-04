@@ -30,6 +30,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -38,131 +39,76 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * 通过真实 HMAC 签名验证应用归属、认证租户和失败时的身份隔离。
+ * 纯 HMAC 签名校验及其无身份发布副作用的回归测试，提供其他测试共用的签名请求夹具。
  *
  * @author Rain
  * @since 6.1.0
  */
 public class KongApiUtilsTest {
+    /** 清除验证无 ThreadLocal 副作用时设置的测试上下文。 */
     @AfterEach
     void clearTenant() {
         TenantContextHolder.clearCurrentTenantId();
     }
 
+    /** 签名规则覆盖方法、Query 和请求体，验签不产生应用身份或改变租户上下文。 */
     @Test
-    void acceptsMatchingOwnerAndUsesSeparateAuthTenant() {
-        var exchange = request("GET", "/orders", "app", "");
+    void verifiesRequestWithoutPublishingIdentity() {
         TenantContextHolder.setCurrentTenantId(99L);
-        assertThat(KongApiUtils.checkSign(exchange, redis("12", "7"), "GET:/orders", "macula-samples-gateway").isSuccess()).isTrue();
-        KongApiUtils.HmacIdentity identity = exchange.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        assertThat(identity.applicationCode()).isEqualTo("app");
-        assertThat(identity.tenantId()).isEqualTo(7L);
-        assertThat(TenantContextHolder.getCurrentTenantId()).isEqualTo(99L);
-    }
-
-    @Test
-    void rejectsWrongOrMissingOwnerWithoutPublishingIdentity() {
-        for (String owner : new String[] {"7", null, "invalid"}) {
-            var exchange = request("GET", "/orders", "app", "");
-            exchange.getAttributes().put(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE,
-                new KongApiUtils.HmacIdentity("previous", 12L));
-            assertThat(KongApiUtils.checkSign(exchange, redis(owner, "7"), "GET:/orders", "macula-samples-gateway").isSuccess()).isFalse();
-            assertThat(exchange.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
+        for (String method : new String[] {"GET", "DELETE", "POST", "PUT", "PATCH"}) {
+            String body = "{\"message\":\"test\"}";
+            var exchange = request(method, "/orders?keep=value", "app", body);
+            exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY,
+                body.getBytes(StandardCharsets.UTF_8));
+            assertThat(KongApiUtils.checkSign(exchange, "test-secret").isSuccess()).isTrue();
+            assertThat(exchange.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE);
+            assertThat(TenantContextHolder.getCurrentTenantId()).isEqualTo(99L);
         }
     }
 
+    /** 错误密钥、空密钥及路径、Query、Body 被修改时均须拒绝。 */
     @Test
-    void supportsUnrestrictedGatewayAndOldCache() {
-        var exchange = request("GET", "/orders", "app", "");
-        assertThat(KongApiUtils.checkSign(exchange, redis("12", null), "GET:/orders").isSuccess()).isTrue();
-        KongApiUtils.HmacIdentity identity = exchange.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        assertThat(identity.tenantId()).isEqualTo(12L);
-        var withoutTenant = request("GET", "/orders", "app", "");
-        assertThat(KongApiUtils.checkSign(withoutTenant, redis(null, null), "GET:/orders").isSuccess()).isTrue();
-        KongApiUtils.HmacIdentity emptyIdentity = withoutTenant.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        assertThat(emptyIdentity.tenantId()).isNull();
+    void rejectsWrongSecretAndModifiedRequest() {
+        var request = request("GET", "/orders", "app", "");
+        assertThat(KongApiUtils.checkSign(request, "wrong").isSuccess()).isFalse();
+        assertThat(KongApiUtils.checkSign(request, "").isSuccess()).isFalse();
+        var modified = request.mutate().request(request.getRequest().mutate()
+            .uri(java.net.URI.create("/other?changed=yes")).build()).build();
+        assertThat(KongApiUtils.checkSign(modified, "test-secret").isSuccess()).isFalse();
+        var body = request("POST", "/orders", "app", "original");
+        body.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY,
+            "modified".getBytes(StandardCharsets.UTF_8));
+        assertThat(KongApiUtils.checkSign(body, "test-secret").isSuccess()).isFalse();
     }
 
+    /** 缺少签名、缺少日期、非法日期及过期请求不能通过验签。 */
     @Test
-    void invalidAuthTenantAndBadSignatureNeverPublishIdentity() {
-        for (String invalidTenant : new String[] {"invalid", " ", "9223372036854775808"}) {
-            var invalid = request("GET", "/orders", "app", "");
-            assertThat(KongApiUtils.checkSign(invalid, redis("12", invalidTenant), "GET:/orders", "macula-samples-gateway").isSuccess()).isFalse();
-            assertThat(invalid.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
+    void rejectsIncompleteAndExpiredSignatures() {
+        var missing = MockServerWebExchange.from(MockServerHttpRequest.get("/orders")
+            .header("Authorization", "hmac username=\"app\","));
+        assertThat(KongApiUtils.checkSign(missing, "test-secret").isSuccess()).isFalse();
+        for (String date : new String[] {"", "invalid", "Mon, 01 Jan 2024 00:00:00 GMT"}) {
+            var invalid = MockServerWebExchange.from(MockServerHttpRequest.get("/orders")
+                .header("Authorization", "hmac username=\"app\", signature=\"invalid\"").header("Date", date));
+            assertThat(KongApiUtils.checkSign(invalid, "test-secret").isSuccess()).isFalse();
         }
-        var badSignature = request("GET", "/orders", "app", "");
-        var wrongKey = redis("12", "7");
-        when(wrongKey.<String, String>opsForHash().entries(anyString())).thenReturn(Map.of("secretKey", "wrong"));
-        assertThat(KongApiUtils.checkSign(badSignature, wrongKey, "GET:/orders").isSuccess()).isFalse();
-        assertThat(badSignature.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
     }
 
+    /** 单独验签不构成完整认证，已有请求属性也不应被工具清理或覆盖。 */
     @Test
-    void deniedPathAndExpiredRequestDoNotPublishIdentity() {
-        var denied = request("GET", "/orders", "app", "");
-        var cache = redis("12", "7");
-        when(cache.<String, String>opsForHash().entries(anyString())).thenReturn(
-            Map.of("secretKey", "test-secret", "tenantId", "12", "permitUrls", "POST:/other"));
-        assertThat(KongApiUtils.checkSign(denied, cache, "GET:/orders", "macula-samples-gateway").isSuccess()).isFalse();
-        assertThat(denied.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        var expired = MockServerWebExchange.from(MockServerHttpRequest.get("/orders")
-            .header("Authorization", "hmac username=\"app\", signature=\"invalid\"")
-            .header("Date", "Mon, 01 Jan 2024 00:00:00 GMT"));
-        assertThat(KongApiUtils.checkSign(expired, redis("12", "7"), "GET:/orders", "macula-samples-gateway").isSuccess()).isFalse();
-    }
-
-    @Test
-    void interleavedRequestsAndLegacySignatureDoNotChangeThreadContext() {
-        var first = request("GET", "/orders", "first", "");
-        var second = request("GET", "/orders", "second", "");
-        KongApiUtils.checkSign(first, redis("12", "7"), "GET:/orders", "macula-samples-gateway");
-        KongApiUtils.checkSign(second, redis("12", "8"), "GET:/orders", "macula-samples-gateway");
-        KongApiUtils.HmacIdentity one = first.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        KongApiUtils.HmacIdentity two = second.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        assertThat(one.tenantId()).isEqualTo(7L);
-        assertThat(two.tenantId()).isEqualTo(8L);
-        assertThat(TenantContextHolder.getCurrentTenantId()).isNull();
-        assertThat(KongApiUtils.checkSign(first, redis("12", null), "GET:/orders").isSuccess()).isTrue();
-        KongApiUtils.HmacIdentity legacy = first.getAttribute(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
-        assertThat(legacy.tenantId()).isEqualTo(12L);
-        assertThat(TenantContextHolder.getCurrentTenantId()).isNull();
-        TenantContextHolder.setCurrentTenantId(99L);
-        assertThat(KongApiUtils.checkSign(first, redis("12", null), "GET:/orders").isSuccess()).isTrue();
-        assertThat(TenantContextHolder.getCurrentTenantId()).isEqualTo(99L);
-    }
-
-    @Test
-    void resolvesGatewayTenantUsingLongestCaseInsensitiveMatchingCode() {
-        var cache = redis("12", null);
-        when(cache.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_TENANTS))
-            .thenReturn(Map.of("macula", "1", "macula-samples", "12"));
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "macula-samples-gateway")).isEqualTo(12L);
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "macula-cloud-gateway")).isEqualTo(1L);
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "other-gateway")).isEqualTo(-1L);
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "")).isEqualTo(-1L);
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, null)).isEqualTo(-1L);
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "MACULA-SAMPLES-gateway")).isEqualTo(12L);
-        when(cache.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_TENANTS))
-            .thenReturn(Map.of("MACULA", "1", "MaCuLa-SaMpLeS", "12"));
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "macula-samples-GATEWAY")).isEqualTo(12L);
-    }
-
-    @Test
-    void missingAndInvalidTenantCacheResolveToUnknownWithoutBroaderFallback() {
-        var cache = redis("12", null);
-        when(cache.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_TENANTS))
-            .thenReturn(Map.of());
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "macula-samples-gateway")).isEqualTo(-1L);
-        when(cache.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_TENANTS))
-            .thenReturn(Map.of("macula", "1", "macula-samples", "invalid", "", "12"));
-        assertThat(KongApiUtils.resolveGatewayTenantId(cache, "macula-samples-gateway")).isEqualTo(-1L);
+    void pureSignatureDoesNotChangePublishedAttributes() {
         var exchange = request("GET", "/orders", "app", "");
-        assertThat(KongApiUtils.checkSign(exchange, redis("-1", "12"), "GET:/orders", "unknown-gateway").isSuccess()).isFalse();
+        assertThat(KongApiUtils.checkSign(exchange, "test-secret").isSuccess()).isTrue();
+        assertThatThrownBy(() -> KongApiUtils.verifiedPrincipal(exchange)).isInstanceOf(BadCredentialsException.class);
+        exchange.getAttributes().put("testAttribute", "unchanged");
+        assertThat(KongApiUtils.checkSign(exchange, "test-secret").isSuccess()).isTrue();
+        assertThat(exchange.<String>getAttribute("testAttribute")).isEqualTo("unchanged");
     }
 
     /** 创建使用测试密钥签名的请求。 */

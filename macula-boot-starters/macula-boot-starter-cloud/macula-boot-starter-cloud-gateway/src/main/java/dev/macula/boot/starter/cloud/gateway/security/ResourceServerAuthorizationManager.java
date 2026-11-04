@@ -21,8 +21,9 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +39,6 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import reactor.core.publisher.Mono;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +65,14 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     @Value("${spring.application.name}")
     private String appName;
 
+    /**
+     * 校验普通 OAuth 请求的 URL 权限，将 API Key 和 HMAC 请求分流到后续认证 GlobalFilter。
+     * 应用凭据在此放行仅表示允许继续验证，不代表已经认证成功。
+     *
+     * @param mono Spring Security 提供的认证身份
+     * @param authorizationContext 当前请求的授权上下文
+     * @return URL 授权或应用凭据分流结果
+     */
     @Override
     public Mono<AuthorizationResult> authorize(Mono<Authentication> mono,
                                                 AuthorizationContext authorizationContext) {
@@ -82,6 +90,11 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         // 如果token以"bearer "为前缀，到此方法里说明TOKEN有效即已认证
         String token = RequestUtils.getHeaderOrQueryToken(authorizationContext.getExchange());
 
+        // API Key 只在此分流，由后续 GlobalFilter 校验凭据和租户准入。
+        if (ApiKeyUtils.resolveApiKey(authorizationContext.getExchange()) != null) {
+            return Mono.just(new AuthorizationDecision(true));
+        }
+
         // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {
             // 这里要可配置哪些路径仅认证，无需鉴权(比如前端API)
@@ -95,22 +108,9 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         }
 
         // Hmac Token，属于系统访问的API
-        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX)) {
-            // 放行，由后面的HmacGlobalFilter校验签名
+        if (KongApiUtils.resolveHmacToken(authorizationContext.getExchange()) != null) {
+            // 放行，由后面的KongApiGlobalFilter校验签名
             return Mono.just(new AuthorizationDecision(true));
-        }
-
-        // API Key，属于系统间访问（ApiKeyAuthenticationFilter已设置SecurityContext并移除Authorization header）
-        if (StrUtil.isBlank(token)) {
-            return mono.filter(Authentication::isAuthenticated).flatMap(auth -> {
-                if (auth.getPrincipal() instanceof OAuth2AuthenticatedPrincipal) {
-                    OAuth2AuthenticatedPrincipal principal = (OAuth2AuthenticatedPrincipal) auth.getPrincipal();
-                    if ("apikey".equals(principal.getAttribute("authType"))) {
-                        return Mono.<AuthorizationResult>just(new AuthorizationDecision(true));
-                    }
-                }
-                return Mono.<AuthorizationResult>just(new AuthorizationDecision(false));
-            }).defaultIfEmpty(new AuthorizationDecision(false));
         }
 
         // 没有 Token不放行
