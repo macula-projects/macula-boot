@@ -126,22 +126,10 @@ public class ApiKeyGlobalFilter implements GlobalFilter, Ordered {
             return Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED);
         }
 
-        // 检查是否能访问当前网关对应租户
-        Result<Long> tenant = TenantUtils.checkTenant(sysRedisTemplate, applicationName, apps);
-
+        // 检查归属租户以及是否允许URL
+        Result<Long> tenant = TenantUtils.checkTenantAndUrls(exchange, sysRedisTemplate, applicationName, apps);
         if (!tenant.isSuccess()) {
             return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
-        }
-
-        // 检查是否能访问URL
-        String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
-
-        String path = exchange.getRequest().getMethod().name() + ":" + exchange.getRequest().getURI().getPath();
-        if (StrUtil.isNotBlank(permitUrls)) {
-            PathMatcher matcher = new AntPathMatcher();
-            if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> matcher.match(pattern, path))) {
-                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
-            }
         }
 
         return Result.success(createPrincipal(code, applicationId, tenant.getData()));

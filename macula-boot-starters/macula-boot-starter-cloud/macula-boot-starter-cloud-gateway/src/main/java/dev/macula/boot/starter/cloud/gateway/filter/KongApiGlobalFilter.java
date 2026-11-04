@@ -124,21 +124,10 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
             return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
         }
 
-        // 租户检查，是否能访问当前网关对应的租户
-        Result<Long> tenant = TenantUtils.checkTenant(sysRedisTemplate, applicationName, apps);
+        // 检查归属租户以及是否允许URL
+        Result<Long> tenant = TenantUtils.checkTenantAndUrls(exchange, sysRedisTemplate, applicationName, apps);
         if (!tenant.isSuccess()) {
             return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
-        }
-
-        // 检查是否能访问URL
-        String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
-
-        String path = exchange.getRequest().getMethod().name() + ":" + exchange.getRequest().getURI().getPath();
-        if (StrUtil.isNotBlank(permitUrls)) {
-            PathMatcher matcher = new AntPathMatcher();
-            if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> matcher.match(pattern, path))) {
-                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
-            }
         }
 
         // 检查token的签名
@@ -148,8 +137,7 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 只有所有准入与验签检查都通过后，才允许将应用信息标记为可信身份。
-        OAuth2AuthenticatedPrincipal principal = createPrincipal(exchange, username, tenant.getData());
-        return Result.success(principal);
+        return Result.success(createPrincipal(exchange, username, tenant.getData()));
     }
 
     /**

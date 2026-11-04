@@ -17,6 +17,7 @@
 
 package dev.macula.boot.starter.cloud.gateway.utils;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -27,6 +28,9 @@ import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * 解析网关归属租户，统一校验应用准入及认证业务租户。
@@ -94,4 +98,25 @@ public final class TenantUtils {
         return Result.success(authTenantId);
     }
 
+
+    public static Result<Long> checkTenantAndUrls(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
+            String applicationName, Map<String, String> apps) {
+            // 租户检查，是否能访问当前网关对应的租户
+        Result<Long> tenant = TenantUtils.checkTenant(sysRedisTemplate, applicationName, apps);
+        if (!tenant.isSuccess()) {
+            return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
+        }
+
+        // 检查是否能访问URL
+        String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
+
+        String path = exchange.getRequest().getMethod().name() + ":" + exchange.getRequest().getURI().getPath();
+        if (StrUtil.isNotBlank(permitUrls)) {
+            PathMatcher matcher = new AntPathMatcher();
+            if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> matcher.match(pattern, path))) {
+                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
+            }
+        }
+        return tenant;
+    }
 }
