@@ -43,13 +43,10 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
