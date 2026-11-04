@@ -24,28 +24,23 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.HMac;
 import cn.hutool.crypto.digest.HmacAlgorithm;
-import dev.macula.boot.constants.CacheConstants;
-import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Comparator;
-import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * {@code KongApiUtils} 基于Hmac的签名校验助手
+ * {@code KongApiUtils} HMAC 凭据识别、签名验证及可信身份读取工具。
  *
  * @author rain
  * @since 2023/2/20 12:38
@@ -53,114 +48,62 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class KongApiUtils {
 
     /**
-     * 按网关应用名忽略大小写匹配租户编码，多个匹配时使用最长前缀。
+     * 从 Authorization Header 识别待验签的 HMAC 凭据，普通请求返回 null。
+     * 这里只按协议前缀分流，不代表凭据完整或已经通过验签；HMAC 不接受 Query token。
      *
-     * @param sysRedisTemplate System 的租户编码缓存
-     * @param applicationName 网关的 spring.application.name
-     * @return 租户 ID；应用名缺失、缓存未命中或 ID 非法时返回 -1
+     * @param exchange 当前请求
+     * @return 原始 HMAC Authorization 值，或 null
      */
-    public static Long resolveGatewayTenantId(RedisTemplate<String, ?> sysRedisTemplate, String applicationName) {
-        if (StrUtil.isBlank(applicationName)) {
-            return GatewayConstants.UNKNOWN_TENANT_ID;
-        }
-        Map<String, String> tenants = sysRedisTemplate.<String, String>opsForHash()
-            .entries(CacheConstants.SECURITY_SYSTEM_TENANTS);
-        String tenantId = tenants.entrySet().stream()
-            .filter(entry -> StrUtil.isNotBlank(entry.getKey()) && StrUtil.startWithIgnoreCase(applicationName, entry.getKey()))
-            .max(Comparator.comparingInt(entry -> entry.getKey().length()))
-            .map(Map.Entry::getValue).orElse(null);
-        if (StrUtil.isEmpty(tenantId)) {
-            return GatewayConstants.UNKNOWN_TENANT_ID;
-        }
-        try {
-            return Long.valueOf(tenantId);
-        } catch (NumberFormatException exception) {
-            return GatewayConstants.UNKNOWN_TENANT_ID;
-        }
+    @Nullable
+    public static String resolveHmacToken(ServerWebExchange exchange) {
+        String token = exchange.getRequest().getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
+        return StrUtil.startWithIgnoreCase(token, GatewayConstants.HMAC_AUTH_PREFIX) ? token : null;
     }
 
+    /**
+     * 读取仅由 HMAC 认证过滤器在验签成功后构造的可信 principal。
+     * 不从原始请求或单独的验签成功结果临时构造身份。
+     *
+     * @param exchange 当前请求
+     * @return 已验证的 HMAC 应用身份
+     * @throws BadCredentialsException 缺少可信 principal 或属性类型非法
+     */
+    public static OAuth2AuthenticatedPrincipal verifiedPrincipal(ServerWebExchange exchange) {
+        Object value = exchange.getAttribute(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE);
+        if (value instanceof OAuth2AuthenticatedPrincipal principal) {
+            return principal;
+        }
+        throw new BadCredentialsException("Missing verified HMAC principal");
+    }
+
+    /**
+     * 判断 Header 是否包含可解析的 HMAC 应用名，供请求体缓存及清理入口识别协议。
+     * 此检查不验证签名，不能用作认证成功的依据。
+     *
+     * @param exchange 当前请求
+     * @return 是否包含 HMAC 应用名
+     */
     public static boolean isKongApiRequest(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
-        String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
+        String username = StrUtil.subBetween(token, GatewayConstants.HMAC_USERNAME_PREFIX, "\",");
         return StrUtil.isNotBlank(username);
     }
 
     /**
-     * 校验请求的签名是否正确，并验证URL是否匹配
+     * 使用调用方提供的密钥校验请求时间与 HMAC 签名，不读取应用缓存或检查租户、URL 许可。
+     * 本方法不发布身份；验签成功仅表示请求与密钥匹配，完整应用准入由认证过滤器负责。
      *
-     * @param exchange         请求Exchagne
-     * @param sysRedisTemplate 秘钥提取Redis
-     * @param path 请求路径
-     * @return 错误信息或者200，200表示成功
+     * @param exchange 携带 HMAC Authorization 和 Date 的请求；请求体须提前缓存
+     * @param secretKey 服务端取得的应用密钥
+     * @return 时间及签名的校验结果
      */
-    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
-        String path) {
-        return checkSignForTenant(exchange, sysRedisTemplate, path, null);
-    }
-
-    /**
-     * 根据网关应用名解析归属租户，并校验应用接入资格、签名及接口权限。
-     *
-     * @param exchange 当前请求
-     * @param sysRedisTemplate System 的租户及应用缓存
-     * @param path 带 HTTP 方法的权限路径
-     * @param applicationName 网关的 spring.application.name
-     * @return 验证结果；未匹配到网关租户时拒绝接入
-     */
-    public static Result<String> checkSign(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
-        String path, String applicationName) {
-        return checkSignForTenant(exchange, sysRedisTemplate, path,
-            resolveGatewayTenantId(sysRedisTemplate, applicationName));
-    }
-
-    /**
-     * 校验应用归属、签名及接口权限，成功后在请求属性中保存可信身份。
-     *
-     * @param exchange 当前请求
-     * @param sysRedisTemplate 应用凭据缓存
-     * @param path 带 HTTP 方法的权限路径
-     * @param gatewayTenantId 网关所属租户，null 表示保持旧接入行为
-     * @return 验证结果；失败时不保留可信身份
-     */
-    private static Result<String> checkSignForTenant(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
-        String path, Long gatewayTenantId) {
-        exchange.getAttributes().remove(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE);
+    public static Result<String> checkSign(ServerWebExchange exchange, String secretKey) {
         try {
             ServerHttpRequest request = exchange.getRequest();
-
-            String token = request.getHeaders().getFirst(SecurityConstants.AUTHORIZATION_KEY);
-
-            String username = StrUtil.subBetween(token, "hmac username=\"", "\",");
-            if (StrUtil.isBlank(username)) {
-                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "username缺少，验签失败");
-            }
-
-            Map<String, String> apps =
-                sysRedisTemplate.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + username);
-
-            // 验证ak/sk
-            String secretKey = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY);
+            String token = resolveHmacToken(exchange);
             if (StrUtil.isBlank(secretKey)) {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
-            }
-
-            String ownerTenant = apps.get(GlobalConstants.TENANT_ID_NAME);
-            Long ownerTenantId = StrUtil.isEmpty(ownerTenant) ? null : Long.valueOf(ownerTenant);
-            if (gatewayTenantId != null && (gatewayTenantId == GatewayConstants.UNKNOWN_TENANT_ID
-                || !gatewayTenantId.equals(ownerTenantId))) {
-                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "应用归属租户不允许接入本网关");
-            }
-            String authTenant = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_AUTH_TENANT_ID);
-            Long authTenantId = StrUtil.isEmpty(authTenant) ? ownerTenantId : Long.valueOf(authTenant);
-
-            // 检查URL是否允许，默认允许[多个URL表达式用逗号隔开，'GET:/i18n-base/v1/users/*, POST:/xxx/**']
-            String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
-            if (StrUtil.isNotBlank(permitUrls)) {
-                PathMatcher pathMatcher = new AntPathMatcher();
-                if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> pathMatcher.match(pattern, path))) {
-                    return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
-                }
             }
 
             String signature = StrUtil.subBetween(token, "signature=\"", "\"");
@@ -216,8 +159,6 @@ public class KongApiUtils {
             }
 
             if (StrUtil.isNotBlank(signature) && signature.equals(signatureNew)) {
-                exchange.getAttributes().put(GatewayConstants.HMAC_IDENTITY_ATTRIBUTE,
-                    new HmacIdentity(username, authTenantId));
                 return Result.success();
             } else {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "验签失败");
@@ -226,15 +167,4 @@ public class KongApiUtils {
             return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, e.getMessage());
         }
     }
-
-    /**
-     * 当前请求通过验签的应用及其有效业务租户。
-     *
-     * @param applicationCode 验签使用的应用编码
-     * @param tenantId 业务租户，可为 null 以兼容旧无租户配置
-     * @since 6.1.0
-     */
-    public record HmacIdentity(String applicationCode, Long tenantId) {
-    }
-
 }

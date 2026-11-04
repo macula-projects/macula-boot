@@ -87,7 +87,7 @@ macula:
 | `protect-urls.sign` / `protect-urls.crypto` | 空列表 | 需签名 / 加密的路径 |
 | `trace-id-response-header-enabled` | `true` | 有有效 Span 时输出 `x-traceId` |
 | `gray.enabled` | `false` | 启用网关灰度路由处理 |
-| `apikey.enabled` | `true` | 创建 API Key 认证过滤器 |
+| `apikey.enabled` | `true` | 允许 API Key 接入；关闭后仍保留 GlobalFilter，拒绝携带 API Key 的 Gateway 请求 |
 | `rm-opaque-token.enabled` | `true` | 创建 Token 缓存移除端点过滤器 |
 | `rm-opaque-token-endpoint` | `/gateway/rm/opaqueToken` | 缓存移除路径 |
 | `force-hmac-rm-opaque-token-endpoint` | `true` | 移除 Token 缓存时强制 HMAC 校验 |
@@ -122,10 +122,34 @@ macula:
 
 ### AK/SK认证
 
-将hmac的签名等信息转为JWT传递给微服务，微服务通过JWT获取用户信息和角色信息。
+HMAC 验签由 `KongApiGlobalFilter` 负责，通过后构造 `OAuth2AuthenticatedPrincipal` 保存到请求属性，交给 `AddJwtGlobalFilter` 统一转换为下游 JWT。
 
-1. 如果请求携带hmac信息，则校验签名，根据appId检查应用，如果应用有租户ID，则设置到租户上下文
-2. 通过AddJwtFilter生成JWT，具体同上
+1. 携带 HMAC 信息时校验签名、应用归属租户及 URL 许可；从可信验签结果取得业务租户，不写入 ThreadLocal 租户上下文。
+2. `KongApiGlobalFilter` 构造 principal，保留 `invoker` 覆盖主体及 `tokenId` 对应 JWT `jti` 的既有规则。
+3. `AddJwtGlobalFilter` 从已验证 principal 生成 JWT；OAuth、API Key 和 HMAC 共用请求头改写及 access_token Query 清理流程，各自缓存键规则保持。
+
+API Key 与 HMAC 过滤器均在 `boundedElastic` 上执行验证阶段的阻塞 Redis 查询；验证成功后发布 principal，再进入下游过滤链。HMAC 保留原验签错误码、消息及原因，验证阶段的异常兜底不吞掉下游业务异常。
+
+HMAC 分流使用 `KongApiUtils.resolveHmacToken(exchange)`，仅读取 Authorization Header；`KongApiUtils.verifiedPrincipal(exchange)` 只读取已验证 principal，缺失时拒绝，不代替验签。
+
+### API Key 认证
+
+API Key 与 HMAC 均在 Gateway `GlobalFilter` 阶段验证，通过后由 `AddJwtGlobalFilter` 转换为下游 JWT：
+
+```text
+Spring Security 输入检查与分流 → API Key 校验（order=190）/ HMAC 校验（order=200）
+→ 统一 principal 转 JWT（order=1000）→ 下游服务
+```
+
+调用方可使用 `Authorization: Bearer sk-xxx`，或 `access_token=sk-xxx` Query 参数（支持 GET、POST、PUT、PATCH、DELETE 等方法）。API Key 不会发送到 OAuth introspection；普通 OAuth Bearer 保持原认证及 URL 角色检查。API Key 只允许一个凭据来源；重复 Authorization、重复 access_token、Header 与 Query 同时携带凭据以及非法格式会被拒绝。Query 可能被接入侧访问日志记录，优先使用 Header。
+
+API Key 记录位于 System Redis 的 `macula:cloud:system:application:apikey:{key}` Hash，要求非空字符串 `applicationCode`、`applicationId` 和合法的 `tenantId`。网关通过共享的 `TenantUtils.resolveGatewayTenantId` 执行应用名/租户编码最长前缀匹配，解析 `spring.application.name` 对应的归属租户；只有该租户与 API Key 的 `tenantId` 一致才允许接入。应用名、映射或密钥归属缺失、归属不匹配以及 Redis 查询失败均拒绝请求；调用方租户 Header 不能改变归属。升级前须准备好 `macula:cloud:system:tenants` 和密钥归属缓存，历史跨租户或缺少租户的 API Key 将无法继续调用。
+
+API Key 与 HMAC 均按应用缓存的 `permitUrls` 校验接口许可（`METHOD:/path` 模式，多个模式以逗号分隔，缺省允许），并共用 `TenantUtils.checkTenant` 校验网关归属并解析认证业务租户。JWT 的 `tenantId` 优先使用 API Key 记录的 `authTenantId`，未配置时回退到归属 `tenantId`；认证租户不影响归属准入，非法租户值拒绝认证。验证成功的身份通过请求属性传递，不创建虚拟 OAuth token，也不依赖 SecurityContext。JWT 保留 `sub`、`applicationId`、`nickname`、`authType=apikey` 和 `tenantId`，共用 JWT 缓存键规则，仅增加 `apikey:` 类型段，默认键为 `macula:cloud:gateway:jwt:apikey:tn{tenantId}:{applicationCode}`，存在 `jti` 时优先使用它作为身份段。各认证来源的租户段统一为 `tn{tenantId}:`，旧 `a{tenantId}:` 缓存不再命中并等待自然过期。转发前覆盖 Authorization 为 JWT，并移除原始 access_token Query 参数。
+
+`macula.gateway.apikey.enabled=false` 会拒绝 API Key Gateway 请求，包括 `ignore-urls` 中的路由。过滤器仍装配，避免关闭功能后原始凭据直接转发。此机制仅作用于 Gateway 路由；本地 WebFlux 端点不会获得 API Key 认证身份，需使用该端点自己的认证机制。
+
+迁移注意：`ApiKeyAuthenticationFilter` 重命名为 `ApiKeyGlobalFilter`，Bean 定义移至 `ResourceServerConfiguration`，与 `KongApiGlobalFilter` 集中管理，Bean 名为 `apiKeyGlobalFilter`，接口由 `WebFilter` 改为 `GlobalFilter`，不再支持 `filter(exchange, WebFilterChain)`。可提供自定义 `ApiKeyGlobalFilter` Bean 覆盖默认实现；定制实现须验证凭据、遵守开关并按可信身份契约写入 `GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE`，否则 JWT 转换会拒绝请求。HMAC 定制过滤器同样须构造已验证 principal 并写入 `GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE`；无需新增自动配置 imports 或依赖。
 
 ### URL安全
 
@@ -399,7 +423,7 @@ public class RedisConfiguration {
 
 网关使用自己的 `spring.application.name`，从 System 缓存的“租户编码 → ID”映射中查找归属租户。匹配规则为 应用名以租户编码开头，不区分大小写；多个编码匹配时使用最长前缀。例如 `macula-samples-gateway` 匹配 `macula-samples`，对应租户 12。
 
-不再需要配置 `macula.gateway.tenant-id`。应用名缺失、映射缺失、无匹配前缀或命中的租户 ID 非法时，解析结果为 `-1`，拒绝 AK/SK 接入；应用归属租户必须与解析出的网关租户一致。该规则同时适用于启用 HMAC 的 opaque token 清理入口，API Key 不在本次控制范围。
+不再需要配置 `macula.gateway.tenant-id`。应用名缺失、映射缺失、无匹配前缀或命中的租户 ID 非法时，解析结果为 `-1`，拒绝 AK/SK 接入；应用归属租户必须与解析出的网关租户一致。该规则同时适用于启用 HMAC 的 opaque token 清理入口，以及 API Key 的网关归属租户检查。
 
 租户管理负责维护 `macula:cloud:system:tenants` Hash，字段为租户编码，值为租户 ID。System 启动时初始化，租户新增、修改和删除在事务提交成功后刷新，不依赖应用变更；映射未就绪或重建期间网关会拒绝未确认归属的请求。
 
@@ -407,4 +431,8 @@ public class RedisConfiguration {
 
 先升级网关并准备好租户映射缓存，再启用不同于归属租户的认证租户。旧网关忽略 `authTenantId`；回滚旧网关前须恢复两者一致。
 
-自定义验签集成应将网关的 `applicationName` 传给四参数 `KongApiUtils.checkSign`，由工具类内部解析网关归属并校验，再从可信请求属性读取认证结果。旧三参数方法仍保留无归属限制的调用方式，不提供新增的接入隔离保证；所有入口均不写入 `TenantContextHolder`。
+`TenantUtils` 统一负责网关归属租户解析，供 API Key 与 HMAC 使用。租户解析调用统一使用 `TenantUtils.resolveGatewayTenantId`。
+
+`KongApiUtils.checkSign(exchange, secretKey)` 仅使用服务端传入的密钥校验请求时间、签名及请求内容，不查询 Redis、不检查租户或 URL 许可，也不发布身份。原接收 Redis 和路径/应用名的三参数、四参数 `checkSign` 重载已移除；自定义集成须迁移，不能把纯验签成功当成完整应用认证。
+
+完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属准入及业务租户解析 → URL 许可 → 纯验签 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体；token 清理端点注入同一个验证器，在缓存读取/删除前执行相同准入。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。`RmOpaqueTokenEndpointFilter` 构造器的第三个参数相应改为 `KongApiGlobalFilter`，自定义装配须同步调整。

@@ -23,8 +23,10 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.filter.AddJwtGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.ApiKeyGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
@@ -124,11 +126,17 @@ public class ResourceServerConfiguration {
         //@formatter:on
     }
 
+    /**
+     * 将 API Key 留给 Gateway 认证过滤器，普通 Bearer 继续使用标准 OAuth token 提取规则。
+     *
+     * @return 同时执行 API Key 输入边界检查的认证转换器
+     */
     @Bean
     public ServerAuthenticationConverter serverBearerTokenAuthenticationConverter() {
         ServerBearerTokenAuthenticationConverter converter = new ServerBearerTokenAuthenticationConverter();
         converter.setAllowUriQueryParameter(true);
-        return converter;
+        return exchange -> Mono.defer(() -> ApiKeyUtils.resolveApiKey(exchange) != null
+            ? Mono.empty() : converter.convert(exchange));
     }
 
     @Bean
@@ -226,6 +234,24 @@ public class ResourceServerConfiguration {
         return new AddJwtGlobalFilter(jwtEncoder, jwtClaimsCustomizer, redisTemplate);
     }
 
+    /**
+     * 装配可覆盖的 API Key 过滤器；关闭功能时仍由过滤器明确拒绝 API Key 请求。
+     *
+     * @param sysRedisTemplate System 的密钥及租户缓存
+     * @return API Key 认证过滤器
+     */
+    @Bean
+    @ConditionalOnMissingBean(ApiKeyGlobalFilter.class)
+    public ApiKeyGlobalFilter apiKeyGlobalFilter(RedisTemplate<String, Object> sysRedisTemplate) {
+        return new ApiKeyGlobalFilter(sysRedisTemplate);
+    }
+
+    /**
+     * 装配负责 HMAC 验签、应用准入及 principal 构造的过滤器。
+     *
+     * @param sysRedisTemplate System 的应用及租户缓存
+     * @return HMAC 认证过滤器
+     */
     @Bean
     KongApiGlobalFilter kongApiGlobalFilter(RedisTemplate<String, Object> sysRedisTemplate) {
         return new KongApiGlobalFilter(sysRedisTemplate);

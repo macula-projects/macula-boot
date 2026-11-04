@@ -20,8 +20,8 @@ package dev.macula.boot.starter.cloud.gateway.config;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
-import dev.macula.boot.starter.cloud.gateway.filter.ApiKeyAuthenticationFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.GrayscalePublishGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
@@ -94,12 +94,20 @@ public class GatewayAutoConfiguration {
         return new NimbusJwkSetEndpointFilter(jwkSource);
     }
 
+    /**
+     * 装配 token 清理入口，复用 HMAC 过滤器的完整应用准入，避免只验签而漏掉授权。
+     *
+     * @param gatewayProperties 网关配置
+     * @param redisTemplate token 缓存
+     * @param kongApiGlobalFilter HMAC 应用验证器
+     * @return token 清理入口过滤器
+     */
     @Bean
     @ConditionalOnProperty(value = "macula.gateway.rm-opaque-token.enabled", havingValue = "true",
             matchIfMissing = true)
     public RmOpaqueTokenEndpointFilter rmOpaqueTokenEndpointFilter(GatewayProperties gatewayProperties,
-                                                                   RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Object> sysRedisTemplate) {
-        return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
+                                                                   RedisTemplate<String, Object> redisTemplate, KongApiGlobalFilter kongApiGlobalFilter) {
+        return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, kongApiGlobalFilter);
     }
 
     @Bean
@@ -107,11 +115,5 @@ public class GatewayAutoConfiguration {
                                                    GatewayProperties gatewayProperties) {
         return new TraceIdGlobalFilter(tracerProvider.getIfAvailable(),
             gatewayProperties.isTraceIdResponseHeaderEnabled());
-    }
-
-    @Bean
-    @ConditionalOnProperty(value = "macula.gateway.apikey.enabled", havingValue = "true", matchIfMissing = true)
-    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(RedisTemplate<String, Object> sysRedisTemplate) {
-        return new ApiKeyAuthenticationFilter(sysRedisTemplate);
     }
 }

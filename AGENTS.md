@@ -39,7 +39,10 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 - 保持 Java 17 兼容；包名沿用 `dev.macula...`。
 - Java 排版由开发者编辑器负责；IDEA 自动使用版本化的 `.idea/codeStyles` 项目方案，`.editorconfig` 提供跨编辑器的基础行为。不要使用 Maven 自动重排源码。
 - CI 对分支中变更的 Java 文件执行 Checkstyle；新增 Java 文件必须使用 `.config/license-header` 定义的 Apache License 2.0 版权头。
-- 类、接口、枚举、注解、Record 及测试类必须使用类级 Javadoc 说明职责；顶层类型必须包含非空的 `@author`、`@since`，内部类型无需重复 `@author`，但仍须包含 `@since`，格式参考 `AsyncAutoConfiguration`。公开 API 还应按需说明参数、返回值、异常和重要约束，禁止用注释逐行翻译代码。
+- 类、接口、枚举、注解、Record 及测试类必须使用类级 Javadoc 说明职责；顶层类型必须包含非空的 `@author`、`@since`，内部类型无需重复 `@author`，但仍须包含 `@since`，格式参考 `AsyncAutoConfiguration`。
+- 新增或修改的方法必须提供方法级 Javadoc，说明职责、重要约束，以及必要的参数、返回值和异常语义；私有方法、Bean 工厂方法和覆盖方法也应有适当说明，不能仅因方法非公开或带有 `@Override` 而省略。方法职责变化时同步更新注释。
+- 认证授权、可信身份来源、缓存隔离、响应式空值与错误处理、过滤器顺序等关键逻辑必须注释说明设计意图、信任边界或容易误用的原因。注释默认使用简洁中文，保留必要的技术标识；避免逐行翻译代码、重复方法名或堆砌无信息量的注释。
+- 避免在业务逻辑中散落硬编码的协议字段、认证类型、状态值、缓存前缀、过滤顺序和策略数值。优先复用现有常量；共享稳定标识定义为职责明确的常量，有固定取值集合及类型约束的领域概念优先使用枚举。仅在单个类内部使用的常量留在该类，避免重复定义、为普通语法数字强建常量，或在协议/缓存边界直接使用枚举名称代替约定值。正则等局部表达式优先保留完整、直观的写法，不为捕获组名、固定片段或单次使用的字面量机械提取常量。
 - Starter 自动配置应可覆盖、可禁用，并避免无条件创建 Bean。
 - 新增或移动自动配置时，同步检查 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。
 - 行为、配置键或公共 API 变化时，同步更新目标模块 README 和测试。
