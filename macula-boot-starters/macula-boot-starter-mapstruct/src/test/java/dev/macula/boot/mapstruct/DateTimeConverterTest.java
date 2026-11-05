@@ -50,6 +50,8 @@ class DateTimeConverterTest {
             assertEquals(LocalDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault()),
                 converter.toLocalDateTime(value));
             assertEquals(value, converter.toDate(converter.toLocalDateTime(value)));
+            assertEquals(LocalDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault()),
+                converter.instantToLocalDateTime(value.toInstant()));
             assertNull(converter.toDate(null));
             assertNull(converter.toLocalDateTime(null));
         }
@@ -67,6 +69,18 @@ class DateTimeConverterTest {
         DateTimeConverter blank = new DateTimeConverter(" ");
         assertEquals(LocalDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault()),
             blank.toLocalDateTime(value));
+    }
+
+    /** Instant双向转换使用配置时区，保留纳秒且不改变已有Date方法的空值调用。 */
+    @Test
+    void instantRoundTripPreservesNanosecondsAndNulls() {
+        DateTimeConverter converter = new DateTimeConverter("Asia/Shanghai");
+        Instant value = Instant.parse("2026-11-05T00:50:30.123456789Z");
+        assertEquals(LocalDateTime.parse("2026-11-05T08:50:30.123456789"), converter.instantToLocalDateTime(value));
+        assertEquals(value, converter.toInstant(converter.instantToLocalDateTime(value)));
+        assertNull(converter.instantToLocalDateTime(null));
+        assertNull(converter.toInstant(null));
+        assertNull(converter.toLocalDateTime(null));
     }
 
     /** 非法时区应明确失败，不静默回退系统时区。 */

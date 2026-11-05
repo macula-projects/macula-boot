@@ -105,9 +105,12 @@ class MapStructAutoConfigurationTest {
                 Converter converter = context.getBean(Converter.class);
                 DateTimeForm form = new DateTimeForm();
                 form.setCreateTime(Date.from(Instant.parse("2026-11-05T00:50:30Z")));
+                form.setOccurredAt(Instant.parse("2026-11-05T00:50:30.123456789Z"));
                 DateTimeEntity entity = converter.convert(form, DateTimeEntity.class);
                 assertThat(entity.getCreateTime()).isEqualTo(LocalDateTime.of(2026, 11, 5, 8, 50, 30));
                 assertThat(converter.convert(entity, DateTimeForm.class).getCreateTime()).isEqualTo(form.getCreateTime());
+                assertThat(entity.getOccurredAt()).isEqualTo(LocalDateTime.parse("2026-11-05T08:50:30.123456789"));
+                assertThat(converter.convert(entity, DateTimeForm.class).getOccurredAt()).isEqualTo(form.getOccurredAt());
             });
     }
 

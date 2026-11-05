@@ -17,13 +17,14 @@
 
 package dev.macula.boot.mapstruct;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
 
 /**
- * 在接口 Date 时间点与实体 LocalDateTime 之间双向转换。
+ * 在接口 Date / Instant 时间点与实体 LocalDateTime 之间双向转换。
  * 外部配置优先，未配置时使用创建 Bean 时的 JVM 默认时区；由 Mapper 的 uses 显式引用。
  *
  * @author Rain
@@ -63,5 +64,24 @@ public class DateTimeConverter {
      */
     public Date toDate(LocalDateTime value) {
         return value == null ? null : Date.from(value.atZone(storageZone).toInstant());
+    }
+    /**
+     * 按存储时区将接口Instant转换为实体日期时间，保留纳秒精度。
+     *
+     * @param value 接口时间点，可为 null
+     * @return 实体日期时间，输入为空时返回 null
+     */
+    public LocalDateTime instantToLocalDateTime(Instant value) {
+        return value == null ? null : LocalDateTime.ofInstant(value, storageZone);
+    }
+
+    /**
+     * 按同一存储时区将实体日期时间还原为Instant，不经过毫秒精度的Date。
+     *
+     * @param value 实体日期时间，可为 null
+     * @return 保留纳秒的时间点，输入为空时返回 null
+     */
+    public Instant toInstant(LocalDateTime value) {
+        return value == null ? null : value.atZone(storageZone).toInstant();
     }
 }

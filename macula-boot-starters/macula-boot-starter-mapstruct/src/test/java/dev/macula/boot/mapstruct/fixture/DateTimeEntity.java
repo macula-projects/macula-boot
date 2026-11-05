@@ -28,4 +28,5 @@ import lombok.Data;
 @Data
 public class DateTimeEntity {
     private LocalDateTime createTime;
+    private LocalDateTime occurredAt;
 }

@@ -2,7 +2,7 @@
 
 ## 概述
 
-提供 MapStruct / MapStruct Plus 对象映射依赖，以及 `Date` 与 `LocalDateTime` 的公共双向转换器。映射实现由注解处理器在编译期生成，日期时间转换通过 Starter 自动注册的 Spring 转换器执行。
+提供 MapStruct / MapStruct Plus 对象映射依赖，以及 `Date` / `Instant` 与 `LocalDateTime` 的公共双向转换器。映射实现由注解处理器在编译期生成，日期时间转换通过 Starter 自动注册的 Spring 转换器执行。
 
 ## 组件坐标
 
@@ -18,7 +18,7 @@
 
 - MapStruct：手写 `@Mapper` 接口，编译时生成实现。
 - MapStruct Plus：使用 `@AutoMapper` 自动生成双向 Mapper，通过 Spring 注入的 `io.github.linpeilie.Converter` 调用。
-- `DateTimeConverter`：将接口 `Date` 时间点与实体 `LocalDateTime` 按同一存储时区双向转换，支持空值。
+- `DateTimeConverter`：将接口 `Date` / `Instant` 时间点与实体 `LocalDateTime` 按同一存储时区双向转换，支持空值。
 - `MapStructAutoConfiguration`：默认注册可覆盖、可禁用的日期时间转换器，无需组件扫描或手工 `@Import`。
 - `GlobalMapperConfig`：同时提供普通 MapStruct 和 MapStruct Plus 的编译配置；Parent 默认让 Plus 使用它。
 
@@ -35,7 +35,7 @@
 
 ### 日期时间与时区约定
 
-实体日期时间保留 `LocalDateTime`，接口需要表达确定时间点时可使用 `Date`。转换器仅负责对象映射，不负责 JSON 格式或数据库连接时区。
+实体日期时间保留 `LocalDateTime`，接口需要表达确定时间点时可使用 `Date` 或 `Instant`，已有 `Date` 接口无需批量替换。转换器仅负责对象映射，不负责 JSON 格式或数据库连接时区。
 
 `macula.time.storage-zone` 为可选配置：
 
@@ -58,6 +58,10 @@ macula:
 
 `LocalDateTime` 本身不携带时区，所有实例应遵守相同的存储时间约定。该配置不改变 JVM、Jackson、JDBC 或数据库时区，也不改写历史数据。
 
+`Instant` 与 `LocalDateTime` 的双向映射遵循同一 `macula.time.storage-zone` 配置，并保留纳秒；`Date` 仅保留毫秒；实际落库精度由数据库列定义决定。接口字段由Date改为Instant时无需另外声明 `uses`，公共配置会按源/目标类型选择对应方法。转换方法使用不同名称，保留原有 `toLocalDateTime(null)` 调用的兼容性。
+
+JSON层建议保留标准ISO格式；`spring.jackson.date-format` 不统一控制Instant格式，不要用固定SSS的日期解析器处理可变精度ISO输入。Java对象转换器不负责JSON格式。
+
 ### 情况一：使用 MapStruct Plus
 
 继承更新后的 `macula-boot-parent` 并引入此 Starter 后，直接使用原有 `@AutoMapper`，无需业务模块再写全局配置、`uses` 或 `@Import`：
@@ -65,16 +69,19 @@ macula:
 ```java
 import io.github.linpeilie.annotations.AutoMapper;
 import java.util.Date;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @AutoMapper(target = User.class)
 public class UserForm {
     private Date createTime;
+    private Instant occurredAt;
     // getter/setter
 }
 
 public class User {
     private LocalDateTime createTime;
+    private LocalDateTime occurredAt;
     // getter/setter
 }
 ```
@@ -181,7 +188,7 @@ Parent 的编译参数优先于模块源码中的 Plus `@MapperConfig`，已有�
 mvn -pl macula-boot-starters/macula-boot-starter-mapstruct -am test
 ```
 
-测试覆盖自动配置发现、可选时区绑定、用户覆盖、禁用、classpath 条件、非法时区，并实际生成普通 MapStruct / MapStruct Plus Mapper；Plus 测试模型没有 `uses` 或模块配置，验证 Parent 的默认配置加载。覆盖双向往返和空值，不连接数据库或其他外部服务。
+测试覆盖自动配置发现、可选时区绑定、用户覆盖、禁用、classpath 条件、非法时区，并实际生成普通 MapStruct / MapStruct Plus Mapper；Plus 测试模型没有 `uses` 或模块配置，验证 Parent 的默认配置加载。覆盖Date/Instant双向往返、Instant纳秒精度和空值，不连接数据库或其他外部服务。
 
 ## 依赖引入
 

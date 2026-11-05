@@ -19,6 +19,7 @@ package dev.macula.boot.mapstruct.fixture;
 
 import io.github.linpeilie.annotations.AutoMapper;
 import java.util.Date;
+import java.time.Instant;
 import lombok.Data;
 
 /**
@@ -30,4 +31,5 @@ import lombok.Data;
 @AutoMapper(target = DateTimeEntity.class)
 public class DateTimeForm {
     private Date createTime;
+    private Instant occurredAt;
 }

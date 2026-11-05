@@ -69,19 +69,30 @@ class DateTimeMappingTest {
             context.refresh();
             DateTimeForm form = new DateTimeForm();
             form.setCreateTime(Date.from(Instant.parse("2026-11-05T00:50:30Z")));
+            form.setOccurredAt(Instant.parse("2026-11-05T00:50:30.123456789Z"));
             DateTimeMapper mapper = context.getBean(DateTimeMapper.class);
             assertEquals(expected, mapper.toEntity(form).getCreateTime());
             assertEquals(form.getCreateTime(), mapper.toForm(mapper.toEntity(form)).getCreateTime());
+            assertEquals(expected.withNano(123456789), mapper.toEntity(form).getOccurredAt());
+            assertEquals(form.getOccurredAt(), mapper.toForm(mapper.toEntity(form)).getOccurredAt());
             Converter converter = new Converter(new SpringConverterFactory(context));
             DateTimeEntity entity = converter.convert(form, DateTimeEntity.class);
             assertEquals(expected, entity.getCreateTime());
             assertEquals(form.getCreateTime(), converter.convert(entity, DateTimeForm.class).getCreateTime());
+            assertEquals(expected.withNano(123456789), entity.getOccurredAt());
+            assertEquals(form.getOccurredAt(), converter.convert(entity, DateTimeForm.class).getOccurredAt());
             form.setCreateTime(null);
+            form.setOccurredAt(null);
             assertNull(mapper.toEntity(form).getCreateTime());
             assertNull(converter.convert(form, DateTimeEntity.class).getCreateTime());
+            assertNull(mapper.toEntity(form).getOccurredAt());
+            assertNull(converter.convert(form, DateTimeEntity.class).getOccurredAt());
             entity.setCreateTime(null);
+            entity.setOccurredAt(null);
             assertNull(mapper.toForm(entity).getCreateTime());
             assertNull(converter.convert(entity, DateTimeForm.class).getCreateTime());
+            assertNull(mapper.toForm(entity).getOccurredAt());
+            assertNull(converter.convert(entity, DateTimeForm.class).getOccurredAt());
         }
     }
 }

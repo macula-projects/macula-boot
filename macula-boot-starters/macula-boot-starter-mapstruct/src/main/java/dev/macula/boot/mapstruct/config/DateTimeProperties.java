@@ -31,6 +31,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "macula.time")
 public class DateTimeProperties {
-    /** Date 与 LocalDateTime 双向转换使用的时区 ID。 */
+    /** Date / Instant 与 LocalDateTime 双向转换使用的时区 ID。 */
     private String storageZone;
 }
