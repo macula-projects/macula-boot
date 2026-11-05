@@ -1,11 +1,12 @@
+# Macula Boot Starter MapStruct
+
 ## 概述
 
-开发JAVA应用程序时会进行逻辑分层，各层之间为了解耦，通常会定义不同的对象进行数据传递（如XXXVO、XXXDTO、XXXPO、XXXBO）。当在不同层之间进行数据传递时，需要将这些对象进行相互转换。通常有两种处理方式：一是直接使用Setter和Getter方法转换，二是使用一些工具类进行转换（如BeanUtil.copyProperties）。第一种方式如果对象属性比较多时，要写很多的Getter/Setter代码，很繁琐；第二种方式虽然比第一种方式要简单很多，但是因为使用了反射，性能不佳。故在此推荐，统一使用MapStruct（MapStructPlus），代码简洁且不存在性能问题。
+提供 MapStruct / MapStruct Plus 对象映射依赖，以及 `Date` 与 `LocalDateTime` 的公共双向转换器。映射实现由注解处理器在编译期生成，日期时间转换通过 Starter 自动注册的 Spring 转换器执行。
 
 ## 组件坐标
 
 ```xml
-
 <dependency>
     <groupId>dev.macula.boot</groupId>
     <artifactId>macula-boot-starter-mapstruct</artifactId>
@@ -15,101 +16,178 @@
 
 ## 核心功能
 
-### 基于MapStruct
+- MapStruct：手写 `@Mapper` 接口，编译时生成实现。
+- MapStruct Plus：使用 `@AutoMapper` 自动生成双向 Mapper，通过 Spring 注入的 `io.github.linpeilie.Converter` 调用。
+- `DateTimeConverter`：将接口 `Date` 时间点与实体 `LocalDateTime` 按同一存储时区双向转换，支持空值。
+- `MapStructAutoConfiguration`：默认注册可覆盖、可禁用的日期时间转换器，无需组件扫描或手工 `@Import`。
+- `GlobalMapperConfig`：同时提供普通 MapStruct 和 MapStruct Plus 的编译配置；Parent 默认让 Plus 使用它。
 
-MapStruct是一个类型转换工具，通过定义类型转换接口（如下所示），然后在编译的时候自动生成实现类来工作。
+## 使用说明
 
-```java
-@Mapper(componentModel = MappingConstants.ComponentModel.DEFAULT)
-public interface SourceTargetMapper {
+两种接入方式的区别：
 
-    SourceTargetMapper MAPPER = Mappers.getMapper( SourceTargetMapper.class );
+| 使用方式 | 业务代码 | 如何接入公共转换器 |
+| --- | --- | --- |
+| MapStruct Plus | 模型使用 `@AutoMapper`，注入 `Converter` | 继承 Parent 并引入 Starter 后默认接入，无需显式引用 `GlobalMapperConfig` |
+| 普通 MapStruct | 手写 `@Mapper` 接口，注入该接口 | 每个 Mapper 显式设置 `config = GlobalMapperConfig.class` |
 
-    @Mapping( source = "username", target = "user" )
-    TargetDto toTarget( SourceDto s );
-}
+两者运行时都由 `MapStructAutoConfiguration` 默认注册 `DateTimeConverter`，不需要业务代码额外添加 `@Import` 或扫描 Starter 包。
+
+### 日期时间与时区约定
+
+实体日期时间保留 `LocalDateTime`，接口需要表达确定时间点时可使用 `Date`。转换器仅负责对象映射，不负责 JSON 格式或数据库连接时区。
+
+`macula.time.storage-zone` 为可选配置：
+
+| 配置情况 | 转换行为 |
+| --- | --- |
+| 配置合法时区 | 使用指定时区，忽略首尾空白 |
+| 未配置或留空 | 使用创建转换器时的 JVM 默认时区 |
+| 配置非法时区 | 初始化失败，避免静默转换为错误时间 |
+| 输入 null | 双向均返回 null |
+
+例如：
+
+```yaml
+macula:
+  time:
+    storage-zone: Asia/Shanghai
 ```
 
-继承 `macula-boot-parent` 时已配置 Lombok、`mapstruct-plus-processor`、`lombok-mapstruct-binding` 和 `-Amapstruct.defaultComponentModel=spring`，不必重复复制编译插件配置。默认生成 Spring Bean，优先注入 Mapper；上面的 `Mappers.getMapper` 示例适用于显式使用默认组件模型且无 Spring 依赖的 Mapper。
+此时 `Date` 表示的 `2026-11-05T00:50:30Z` 映射为实体中的 `2026-11-05T08:50:30`，反向转换还原同一时间点。未配置时使用 JVM 默认时区，不强制使用 UTC。
 
-仅导入 BOM 不会继承构建插件，需在应用父 POM 中配置对应 annotation processor。此模块无运行时 YAML 属性；转换实现于编译期生成，IDE 也需启用注解处理。
+`LocalDateTime` 本身不携带时区，所有实例应遵守相同的存储时间约定。该配置不改变 JVM、Jackson、JDBC 或数据库时区，也不改写历史数据。
 
-***MapStruct更多功能可以[参考官方文档](https://mapstruct.plus/mapstruct/1-5-3-Final.html)***
+### 情况一：使用 MapStruct Plus
 
-### 基于MapStruct Plus
-
-下面演示如何使用 MapStruct Plus 来映射两个对象。
-
-假设有两个类 `UserDto` 和 `User`，分别表示数据层对象和业务层对象：
+继承更新后的 `macula-boot-parent` 并引入此 Starter 后，直接使用原有 `@AutoMapper`，无需业务模块再写全局配置、`uses` 或 `@Import`：
 
 ```java
-public class UserDto {
-    private String username;
-    private int age;
-    private boolean young;
+import io.github.linpeilie.annotations.AutoMapper;
+import java.util.Date;
+import java.time.LocalDateTime;
 
-    // getter、setter、toString、equals、hashCode
+@AutoMapper(target = User.class)
+public class UserForm {
+    private Date createTime;
+    // getter/setter
 }
 
 public class User {
-    private String username;
-    private int age;
-    private boolean young;
-
-    // getter、setter、toString、equals、hashCode
+    private LocalDateTime createTime;
+    // getter/setter
 }
 ```
 
-测试：
+注入 Starter 提供的 `io.github.linpeilie.Converter` 后调用：
 
 ```java
+// 在 Spring 业务 Bean 中注入，不手工 new Converter。
+@Autowired
+private Converter converter;
 
-@SpringBootTest
-public class QuickStartTest {
-    private static final Converter converter = new Converter();
+// Form 的 Date → Entity 的 LocalDateTime。
+User user = converter.convert(form, User.class);
+// Entity 的 LocalDateTime → Form 的 Date。
+UserForm result = converter.convert(user, UserForm.class);
+```
 
-    @Test
-    public void test() {
-        User user = new User();
-        user.setUsername("jack");
-        user.setAge(23);
-        user.setYoung(false);
+编译期：Parent 传入 `-Amapstruct.plus.mapperConfigClass=dev.macula.boot.mapstruct.GlobalMapperConfig`。Plus 读取其中的 `io.github.linpeilie.annotations.MapperConfig`，将 `DateTimeConverter` 合并到它自己生成的配置类中。
 
-        UserDto userDto = converter.convert(user, UserDto.class);
-        System.out.println(userDto);    // UserDto{username='jack', age=23, young=false}
+生成的 Mapper 仍引用 **Plus 自己的 Config**，不是直接引用公共配置：
 
-        assert user.getUsername().equals(userDto.getUsername());
-        assert user.getAge() == userDto.getAge();
-        assert user.isYoung() == userDto.isYoung();
+```text
+GlobalMapperConfig（提供 uses = DateTimeConverter.class）
+    → Plus 生成的 AutoMapperConfig（合并公共 uses，类名可能带后缀）
+        → Plus 生成的 Mapper
+            → 调用自动配置注册的 DateTimeConverter
+```
 
-        User newUser = converter.convert(userDto, User.class);
+所以业务模型只需 `@AutoMapper(target = User.class)`，无需再填写 `uses`，也无需重复声明 Plus 全局配置。
 
-        System.out.println(newUser);    // User{username='jack', age=23, young=false}
+运行期：Boot 通过 `AutoConfiguration.imports` 发现 `MapStructAutoConfiguration`，按外部时区或 JVM 默认时区注册转换器。业务自定义同类型 Bean 时，默认 Bean 自动退让。
 
-        assert user.getUsername().equals(newUser.getUsername());
-        assert user.getAge() == newUser.getAge();
-        assert user.isYoung() == newUser.isYoung();
-    }
+依赖配置注入的映射使用 Spring 提供的 Converter，不使用 `new Converter()` 或 `Mappers.getMapper()` 绕开 Spring。
 
+### 情况二：只使用普通 MapStruct
+
+普通 MapStruct 不通过 Plus 的全局配置生成接口，需要在每个 Mapper 上显式引用 `GlobalMapperConfig`：
+
+```java
+import dev.macula.boot.mapstruct.GlobalMapperConfig;
+import org.mapstruct.Mapper;
+
+@Mapper(config = GlobalMapperConfig.class)
+public interface UserMapper {
+    // UserForm.createTime 为 Date，User.createTime 为 LocalDateTime。
+    User toEntity(UserForm form);
+    UserForm toForm(User entity);
 }
 ```
 
-***MapStruct Plus更多功能可以[参考官方文档](https://mapstruct.plus/)***
+在 Spring 业务 Bean 中注入生成的 Mapper 后调用：
+
+```java
+@Autowired
+private UserMapper userMapper;
+
+User user = userMapper.toEntity(form);
+UserForm result = userMapper.toForm(user);
+```
+
+这里 MapStruct 读取的是公共配置上的 `org.mapstruct.MapperConfig`，直接使用 Spring 组件模型和公共日期转换器。模型本身不需要 `@AutoMapper`。
+
+```text
+@Mapper(config = GlobalMapperConfig.class)
+    → MapStruct 生成的 Mapper 实现
+        → 调用自动配置注册的 DateTimeConverter
+```
+
+仅引入 Starter 或设置 `componentModel = "spring"`，不会自动给普通 Mapper 加上日期转换规则；省略 `config` 时，`Date` 与 `LocalDateTime` 仍按 MapStruct 内置的 UTC 规则转换。运行时自动配置只负责注册 Bean，不能替代编译期的 `config` 引用。
+
+### 自定义或禁用
+
+提供自己的 `DateTimeConverter` Bean 即可替换默认实现。仅禁用默认 Bean 可配置：
+
+```yaml
+macula:
+  mapstruct:
+    enabled: false
+```
+
+此开关不改写已生成的 Mapper；若这些 Mapper 使用日期转换器，禁用后需要自行提供 Bean，或在编译时改用不依赖它的配置。
+
+已有业务 Plus 全局配置时，在业务 POM 指定其类名，替换 Parent 默认值：
+
+```xml
+<properties>
+    <mapstruct-plus.mapper-config-class>com.example.ApplicationMappingConfig</mapstruct-plus.mapper-config-class>
+</properties>
+```
+
+业务配置使用 `io.github.linpeilie.annotations.MapperConfig`。需要保留默认时间转换时，将 `DateTimeConverter.class` 合并到 `uses`；每个业务编译模块只定义一份 Plus 配置。
+
+Parent 的编译参数优先于模块源码中的 Plus `@MapperConfig`，已有自定义配置必须同时覆盖上述 POM 属性，避免被默认配置替代。未依赖此 Starter、classpath 不存在默认配置类的模块，由 Plus 沿用原有配置。
+
+### 编译配置
+
+继承 `macula-boot-parent` 时已配置 Lombok、`mapstruct-plus-processor`、`lombok-mapstruct-binding` 和 `-Amapstruct.defaultComponentModel=spring`，无需重复配置；IDE 也需启用注解处理。
+
+仅导入 BOM 不会继承构建插件，需自行配置注解处理器及 `-Amapstruct.plus.mapperConfigClass=dev.macula.boot.mapstruct.GlobalMapperConfig`。自动配置只能注册运行时 Bean，无法修改已经编译完成的映射实现。
+
+## 验证
+
+```bash
+mvn -pl macula-boot-starters/macula-boot-starter-mapstruct -am test
+```
+
+测试覆盖自动配置发现、可选时区绑定、用户覆盖、禁用、classpath 条件、非法时区，并实际生成普通 MapStruct / MapStruct Plus Mapper；Plus 测试模型没有 `uses` 或模块配置，验证 Parent 的默认配置加载。覆盖双向往返和空值，不连接数据库或其他外部服务。
 
 ## 依赖引入
 
-```xml
-
-<dependencies>
-    <dependency>
-        <groupId>io.github.linpeilie</groupId>
-        <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
-    </dependency>
-</dependencies>
-```
+此 Starter 引入 `mapstruct-plus-spring-boot-starter`。MapStruct、MapStruct Plus 和注解处理器版本由 Macula Boot Parent 统一管理。
 
 ## 版权说明
 
-- MapStruct：https://github.com/mapstruct/mapstruct/blob/main/LICENSE.txt
-
-- MapStruct Plus：https://github.com/linpeilie/mapstruct-plus/blob/main/LICENSE
+- [MapStruct](https://github.com/mapstruct/mapstruct/blob/main/LICENSE.txt)
+- [MapStruct Plus](https://github.com/linpeilie/mapstruct-plus/blob/main/LICENSE)

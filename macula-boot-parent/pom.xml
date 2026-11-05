@@ -82,6 +82,8 @@
         <swagger3.version>2.2.55</swagger3.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mapstruct-plus.version>1.5.3</mapstruct-plus.version>
+        <!-- 默认加载 Starter 中的 Plus 共享配置；业务可覆盖为自己的配置类。 -->
+        <mapstruct-plus.mapper-config-class>dev.macula.boot.mapstruct.GlobalMapperConfig</mapstruct-plus.mapper-config-class>
         <lock4j.version>2.2.7</lock4j.version>
         <rocketmq-spring.version>2.3.6</rocketmq-spring.version>
         <springdoc.version>3.1.1</springdoc.version>
@@ -724,6 +726,9 @@
                         <compilerArgs>
                             <compilerArg>
                                 -Amapstruct.defaultComponentModel=spring
+                            </compilerArg>
+                            <compilerArg>
+                                -Amapstruct.plus.mapperConfigClass=${mapstruct-plus.mapper-config-class}
                             </compilerArg>
                         </compilerArgs>
                     </configuration>
