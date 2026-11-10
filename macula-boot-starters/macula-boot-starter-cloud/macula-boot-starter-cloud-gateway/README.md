@@ -436,3 +436,26 @@ public class RedisConfiguration {
 `KongApiUtils.checkSign(exchange, secretKey)` 仅使用服务端传入的密钥校验请求时间、签名及请求内容，不查询 Redis、不检查租户或 URL 许可，也不发布身份。原接收 Redis 和路径/应用名的三参数、四参数 `checkSign` 重载已移除；自定义集成须迁移，不能把纯验签成功当成完整应用认证。
 
 完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属准入及业务租户解析 → URL 许可 → 纯验签 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体；token 清理端点注入同一个验证器，在缓存读取/删除前执行相同准入。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。`RmOpaqueTokenEndpointFilter` 构造器的第三个参数相应改为 `KongApiGlobalFilter`，自定义装配须同步调整。
+
+### 应用与 API Key 的 URL/IP 准入
+
+HMAC、API Key 及强制 HMAC 的 token 清理端点，统一调用 `TenantUtils.checkTenantAndUrls` 校验归属租户、URL 和来源 IP。缓存字段 `permitUrls` 使用每行一条的 `HTTP方法:/路径`，支持 Ant 通配符，同时兼容旧英文逗号及混合分隔；路径沿用各调用入口的 `StripPrefix` 时点。
+
+```text
+GET:/service/api/**
+POST:/service/api/orders
+```
+
+新增缓存字段 `permitIps`，每行一个 IPv4、IPv6 或 CIDR：
+
+```text
+192.0.2.10
+192.0.2.0/24
+2001:db8::/32
+```
+
+缺失或空白表示不限；非空时任一规则匹配即通过 IP 检查，来源地址缺失、未命中或任一条规则非法均拒绝。URL 与 IP 两个条件都须满足，准入完成后才发布可信身份。每份配置最多 2000 字符。
+
+来源为请求的直连对端地址，不自行读取 `Forwarded` 或 `X-Forwarded-For`；经过代理时可能匹配代理 IP。部署须避免由不可信转发头重写对端地址，真实调用者 IP 需先建立可信代理边界。IPv4-mapped IPv6 按等价 IPv4 处理，mapped CIDR 前缀必须不少于 96。
+
+升级时先更新全部相关网关，再启用 System/Admin 多行 URL 和 IP 配置并重建凭据缓存。旧网关不能解释多行 URL，也不校验 IP，启用新配置后不能直接回退旧网关。普通 OAuth 请求的权限规则不受本次新增字段影响。

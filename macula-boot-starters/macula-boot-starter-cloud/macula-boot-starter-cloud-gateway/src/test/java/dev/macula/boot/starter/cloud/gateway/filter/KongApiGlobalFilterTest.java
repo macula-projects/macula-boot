@@ -231,4 +231,32 @@ class KongApiGlobalFilterTest {
         }
     }
 
+    /** 有效签名仍须通过集中 IP 准入，拒绝时清除旧身份且不能转发。 */
+    @Test
+    void enforcesPeerIpAfterValidHmacSignature() {
+        var applications = KongApiUtilsTest.redis("12", "7");
+        when(applications.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + "app"))
+            .thenReturn(java.util.Map.of("secretKey", "test-secret", "tenantId", "12",
+                CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "POST:/other\nGET:/orders",
+                CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24"));
+        var filter = new KongApiGlobalFilter(applications);
+        ReflectionTestUtils.setField(filter, "applicationName", "macula-samples-gateway");
+        for (String ip : new String[] {"192.0.2.7", "203.0.113.1"}) {
+            var signed = KongApiUtilsTest.request("GET", "/orders", "app", "");
+            var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(
+                org.springframework.mock.http.server.reactive.MockServerHttpRequest.get("/orders")
+                    .headers(signed.getRequest().getHeaders())
+                    .header("X-Forwarded-For", "192.0.2.7")
+                    .remoteAddress(new java.net.InetSocketAddress(ip, 1234)));
+            exchange.getAttributes().put(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE, "stale");
+            AtomicBoolean invoked = new AtomicBoolean();
+            filter.filter(exchange, forwarded -> Mono.fromRunnable(() -> invoked.set(true))).block();
+            assertThat(invoked.get()).isEqualTo(ip.equals("192.0.2.7"));
+            if (!invoked.get()) {
+                assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                assertThat(exchange.getAttributes()).doesNotContainKey(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE);
+            }
+        }
+    }
+
 }

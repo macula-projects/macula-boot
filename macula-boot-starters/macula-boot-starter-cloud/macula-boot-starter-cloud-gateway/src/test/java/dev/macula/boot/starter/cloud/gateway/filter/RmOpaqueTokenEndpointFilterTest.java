@@ -174,4 +174,23 @@ class RmOpaqueTokenEndpointFilterTest {
         return filter;
     }
 
+    /** 强制 HMAC 的清理入口不能绕过 IP，拒绝时不读写 token 缓存。 */
+    @Test
+    @SuppressWarnings("unchecked")
+    void deniedIpCannotReadOrRemoveTokenCache() {
+        var properties = new GatewayProperties();
+        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
+        var applications = KongApiUtilsTest.redis("12", "7");
+        when(applications.<String, String>opsForHash().entries(
+            dev.macula.boot.constants.CacheConstants.SECURITY_SYSTEM_APPS + "app"))
+            .thenReturn(java.util.Map.of("secretKey", "test-secret", "tenantId", "12",
+                dev.macula.boot.constants.CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24"));
+        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app",
+            "{\"token\":\"test-token\"}");
+        new RmOpaqueTokenEndpointFilter(properties, tokens, hmac(applications, "macula-samples-gateway"))
+            .filter(exchange, ignored -> Mono.empty()).block();
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        verifyNoInteractions(tokens);
+    }
+
 }

@@ -17,7 +17,7 @@
 
 package dev.macula.boot.starter.cloud.gateway.utils;
 
-import java.util.Arrays;
+import java.net.InetSocketAddress;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -26,6 +26,7 @@ import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
+import dev.macula.boot.security.AccessRuleUtils;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.AntPathMatcher;
@@ -99,23 +100,44 @@ public final class TenantUtils {
     }
 
 
+    /**
+     * 集中执行应用及 API Key 的租户、URL、来源 IP 准入，成功后调用方才能发布可信身份。
+     * 未配置的维度视为不限，已配置的 URL 与 IP 必须同时满足。
+     *
+     * @param exchange 当前请求，路径沿用调用入口所在的 StripPrefix 时点
+     * @param sysRedisTemplate System 租户映射缓存
+     * @param applicationName 网关应用名
+     * @param apps 凭据缓存，permitIps 缺失或空白表示不限
+     * @return 失败准入结果，或携带认证租户的成功结果
+     */
     public static Result<Long> checkTenantAndUrls(ServerWebExchange exchange, RedisTemplate<String, ?> sysRedisTemplate,
             String applicationName, Map<String, String> apps) {
-            // 租户检查，是否能访问当前网关对应的租户
+        // 公共入口集中判断，HMAC、API Key 及强制 HMAC 的清理端点不能绕过其中任一限制。
         Result<Long> tenant = TenantUtils.checkTenant(sysRedisTemplate, applicationName, apps);
         if (!tenant.isSuccess()) {
             return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
         }
 
-        // 检查是否能访问URL
-        String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
-
-        String path = exchange.getRequest().getMethod().name() + ":" + exchange.getRequest().getURI().getPath();
-        if (StrUtil.isNotBlank(permitUrls)) {
+        try {
+            String permitUrls = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS);
+            String path = exchange.getRequest().getMethod().name() + ":" + exchange.getRequest().getURI().getPath();
             PathMatcher matcher = new AntPathMatcher();
-            if (Arrays.stream(permitUrls.split(",")).noneMatch(pattern -> matcher.match(pattern, path))) {
+            boolean urlAllowed = AccessRuleUtils.matchesUrl(permitUrls, path, matcher::match);
+            if (!urlAllowed) {
                 return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
             }
+
+            String permitIps = apps.get(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS);
+            // 只使用直连对端；不能将调用方可伪造的 Forwarded/X-Forwarded-For 作为可信地址。
+            InetSocketAddress remote = exchange.getRequest().getRemoteAddress();
+            byte[] address = remote == null || remote.getAddress() == null ? null : remote.getAddress().getAddress();
+            boolean ipAllowed = AccessRuleUtils.matchesIp(permitIps, address);
+            if (!ipAllowed) {
+                return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许该来源 IP 访问");
+            }
+        } catch (IllegalArgumentException exception) {
+            // 损坏或超长的非空权限缓存不能回退为不限，也不回显缓存中的配置值。
+            return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "应用访问规则不合法");
         }
         return tenant;
     }

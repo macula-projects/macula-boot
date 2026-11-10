@@ -180,4 +180,25 @@ class ApiKeyGlobalFilterTest {
         assertThat(exchange.getAttributes()).doesNotContainKey(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE);
         assertThat(exchange.getResponse().getBodyAsString().block()).doesNotContain("sk-test", "secret");
     }
+    /** APIKEY 继承后的 IP 配置必须先于身份发布生效，转发头不能绕过。 */
+    @Test
+    void enforcesPeerIpBeforePublishingApiKeyIdentity() {
+        identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "POST:/other\nGET:/");
+        identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24");
+        AtomicInteger calls = new AtomicInteger();
+        var allowed = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+            .header("Authorization", "Bearer sk-test").remoteAddress(new java.net.InetSocketAddress("192.0.2.7", 1234)));
+        filter.filter(allowed, forwarded -> {
+            assertThat(ApiKeyUtils.verifiedPrincipal(forwarded)).isNotNull();
+            return Mono.fromRunnable(calls::incrementAndGet);
+        }).block();
+        assertThat(calls).hasValue(1);
+        var denied = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+            .header("Authorization", "Bearer sk-test").header("X-Forwarded-For", "192.0.2.7")
+            .remoteAddress(new java.net.InetSocketAddress("203.0.113.1", 1234)));
+        denied.getAttributes().put(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE, "stale");
+        assertRejected(denied);
+        assertRejected(request());
+    }
+
 }
