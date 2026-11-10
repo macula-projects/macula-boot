@@ -50,3 +50,11 @@ throw new BizException(ApiResultCode.BIZ_ERROR, "订单状态不允许此操作"
 `PasskeyIssuer` 是 Web 响应处理可调用的签发扩展，由安全模块实现，无需 Commons 或 Web 依赖具体认证框架。`PasskeyResources` 仅从 Collection、PageVO、成功 Result 的明确包装中提取列表资源，拒绝循环/过深结构，不遍历任意业务属性，单对象不自动签发。
 
 `ResourceAccessDenied` 是跨模块的资源拒绝标记，`ResourceAccessException` 提供无安全库依赖的拒绝异常；现有 Web 异常 Advice 将其转换为 HTTP 403 / A0312。签名密钥、当前身份与实际验签留在 Security Starter，不放入 DTO 或公共模块。
+
+## 应用访问规则
+
+`AccessRuleUtils.normalizeUrls` 将旧逗号及 LF/CRLF/CR 分隔的 URL 规范为每行一条；`normalizeIps` 校验每行一个 IPv4、IPv6 或 CIDR。每份配置最多 2000 字符，空白表示未配置，非法非空 IP 配置整体拒绝。IP 只解析数值字面量，不触发 DNS；不接受主机名、端口、通配符或地址 scope。IPv4-mapped IPv6 按 IPv4 匹配，mapped CIDR 前缀须为 96–128，转换为 IPv4 的 0–32。
+
+`CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS` 对应 Redis Hash 的 `permitIps`。此工具只负责规则解析与地址匹配；网关准入统一由 `TenantUtils.checkTenantAndUrls` 决定。
+
+URL 和 IP 分别使用 `AccessRuleUtils.matchesUrl(permitUrls, path, matcher)`、`AccessRuleUtils.matchesIp(permitIps, address)` 匹配，空白配置均返回 `true`。URL 匹配器由调用方提供，网关传入 `AntPathMatcher::match`，公共模块无需依赖 Spring 路径工具。

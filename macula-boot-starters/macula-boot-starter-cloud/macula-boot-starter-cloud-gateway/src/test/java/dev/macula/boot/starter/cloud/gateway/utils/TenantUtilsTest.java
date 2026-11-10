@@ -96,4 +96,30 @@ class TenantUtilsTest {
         return apps;
     }
 
+    /** URL/IP 在公共入口同时生效，兼容旧分隔，拒绝伪造头与损坏缓存。 */
+    @Test
+    void checksMultilineUrlsAndPeerIpTogether() {
+        var cache = KongApiUtilsTest.redis("12", null);
+        var apps = applicationTenants("12", null);
+        var request = org.springframework.mock.http.server.reactive.MockServerHttpRequest.get("/orders")
+            .remoteAddress(new java.net.InetSocketAddress("192.0.2.7", 1234))
+            .header("X-Forwarded-For", "203.0.113.1").header("Forwarded", "for=203.0.113.1");
+        var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(request);
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, " POST:/other,\r\n GET:/orders ");
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "2001:db8::/32\r\n192.0.2.0/24");
+        assertThat(TenantUtils.checkTenantAndUrls(exchange, cache, "macula-samples-gateway", apps).isSuccess()).isTrue();
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "203.0.113.1");
+        assertThat(TenantUtils.checkTenantAndUrls(exchange, cache, "macula-samples-gateway", apps).isSuccess()).isFalse();
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.7\ninvalid");
+        assertThat(TenantUtils.checkTenantAndUrls(exchange, cache, "macula-samples-gateway", apps).isSuccess()).isFalse();
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.7");
+        var missing = org.springframework.mock.web.server.MockServerWebExchange.from(
+            org.springframework.mock.http.server.reactive.MockServerHttpRequest.get("/orders"));
+        assertThat(TenantUtils.checkTenantAndUrls(missing, cache, "macula-samples-gateway", apps).isSuccess()).isFalse();
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "");
+        assertThat(TenantUtils.checkTenantAndUrls(missing, cache, "macula-samples-gateway", apps).isSuccess()).isTrue();
+        apps.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, ",,\n");
+        assertThat(TenantUtils.checkTenantAndUrls(exchange, cache, "macula-samples-gateway", apps).isSuccess()).isFalse();
+    }
+
 }

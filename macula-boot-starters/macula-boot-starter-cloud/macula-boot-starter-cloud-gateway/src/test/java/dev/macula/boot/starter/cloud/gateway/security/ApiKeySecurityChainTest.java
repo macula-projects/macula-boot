@@ -192,4 +192,16 @@ class ApiKeySecurityChainTest {
             return introspector;
         }
     }
+    /** 即使公开路径在 Security 链放行，Gateway 仍须拒绝 IP 不准入的 APIKEY。 */
+    @Test
+    void ipRestrictedKeyCannotBypassAdmissionOnIgnoredRoute() {
+        when(hashes.entries(CacheConstants.APIKEY_CACHE_PREFIX + "sk-test")).thenReturn(
+            Map.of("applicationCode", "app", "applicationId", "42", "tenantId", "12",
+                CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.7"));
+        client.get().uri("/public").header("Authorization", "Bearer sk-test")
+            .header("X-Forwarded-For", "192.0.2.7").exchange().expectStatus().isForbidden();
+        assertThat(downstream).hasValue(0);
+        verifyNoInteractions(introspector);
+    }
+
 }

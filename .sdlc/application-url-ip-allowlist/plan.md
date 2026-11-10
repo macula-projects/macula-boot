@@ -49,3 +49,41 @@ Status: accepted
 
 ## Approval
 Rain 回复“YES，直接集中到TenantUtils.checkTenantAndUrls方法里面验证。”，接受本计划及两仓仅本地提交 SDLC 工件的前置动作。所有 URL/IP 准入判断集中在该方法，HMAC/APIKEY 不新增独立判断分支。
+
+## Implementation record
+- 按用户要求进一步提取 AccessRuleUtils.matchesUrl，与 matchesIp 一致封装规则拆分、空配置放行及任一命中语义；Ant 匹配器由 TenantUtils 传入，不增加 Commons 依赖，集中准入入口及拒绝行为保持不变。
+- 按用户后续要求，checkTenantAndUrls 中 URL/IP 均以局部配置变量、请求目标、显式 Allowed 布尔结果及失败返回组织，保持空配置放行、非法配置拒绝和原匹配语义；仅调整集中入口写法。
+- 用户指定的集中入口已落实：TenantUtils.checkTenantAndUrls 直接执行 URL 与 IP 准入；HMAC、APIKEY 及强制 HMAC 清理端点保持既有调用链，不新增独立准入分支。AccessRuleUtils 仅提供规范化和纯字面量 IP/CIDR 解析、匹配。
+- Cloud 新增 allowIps / allow_ips；Redis 新增 permitIps；URL 与 IP 分别按 APIKEY 非空优先、应用兜底。省略 allowIps 保留，显式 null/空白清空，清空缓存显式写空字符串。
+- 管理端两个入口增加多行 IP，旧 URL 多行回显；应用提交使用 try/finally 恢复 loading，并只在 payload 中转换 manager，避免错误重试时破坏选择数据。此为原提交流程内的适配，无新增业务范围。
+- V24 未被占用，使用 V24__application_url_ip_allowlist.sql。未改动旧迁移。新增隔离迁移测试和既有真实缓存 IT 增量已实现；所有实际改动文件均在已接受清单内，无跨合同偏差。
+
+### Build validation evidence
+以下为实现阶段实际运行的验证，尚未替代人工实现完整性确认和 Stage 4 正式验收。
+- Boot: mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am test：Commons 32、Redis 5、Gateway 67，共 104，0 failure/error/skip。日志 /private/tmp/allowlist-boot-full-test.log。
+- Cloud: mvn -pl macula-cloud-api/macula-cloud-system-api,macula-cloud-system -am test -Plocal：API 19、System 199，共 218，0 failure/error，1 个已有迁移测试按条件跳过；本次隔离迁移测试随后实际通过。日志 /private/tmp/allowlist-cloud-full-test.log。
+- Admin: npm run test:unit -- --run：220 passed；npm run build 成功，保留既有大 chunk 提示。日志 /private/tmp/allowlist-admin-full-test.log、/private/tmp/allowlist-admin-build.log。
+- Cypress: npx start-server-and-test preview http://localhost:4173/ 'cypress run --e2e --spec cypress/e2e/application-api-key.cy.js'：3/3 passed，API 为可控 Mock；已检查桌面表单和移动端抽屉截图。日志 /private/tmp/allowlist-admin-cypress.log。
+- 真实隔离 IT: 在本任务创建的临时 MySQL 8.4 和 Redis 7.4.5 中，使用随机 loopback 端口、两个空测试库执行 mvn verify -Plocal -Dit.test=ApplicationUrlIpAllowlistMigrationIT,ApplicationApiKeyIntegrationIT（仅相关模块，Surefire 同时定向16项）：Failsafe 8/8 passed；验证 V23→V24 旧逗号数据不丢失、扩列、多行 IP 持久化、真实 Mapper/Redis 继承/覆盖/清空及撤销/锁行为。日志 /private/tmp/allowlist-isolated-it.log。所有本任务临时容器已移除，没有使用业务库。
+- 两仓仅本次变更/新增 Java 的 Checkstyle：0 violations；Admin 变更文件 ESLint：0 errors，961 warnings（主要为既有文件及沿用风格的 Prettier 提示，未自动格式化）；git diff --check 通过。
+- 按已批准计划仅本机安装了 Boot Commons 及必要父 POM，供 Cloud 使用本轮常量和解析工具，未修改依赖版本、未发布远端。
+
+### Remaining boundaries（实现阶段记录）
+- 实现阶段结束时未更新业务数据库和运行镜像；后续用户已明确授权本地镜像更新，实际执行结果见下文。本次仅本地提交过已批准 SDLC 工件，业务源码未提交或推送。
+- 网关安全链测试使用生产过滤链配合模拟基础设施；未启动部署中的网关执行真实 HTTP/代理拓扑验收。来源仍按直连对端 IP，可信代理边界未扩展。
+- 用户后续回复“OK”并授权本地镜像更新；该授权不代替 PR 人工审批或远端发布授权。
+
+## Local image refresh: 2026-11-11
+用户明确回复“OK，更新镜像”，并引用 IAM ProtocolVerificationCodeController.java。本次更新范围为 Gateway、System、Admin，以及该文件所属 IAM；未扩大到其他应用或中间件。
+
+- 本机 Maven 安装本轮 Boot Commons/Gateway 及必要父模块，将六个精确 Boot 构件写入 Docker Maven 构建缓存；原源码缓存构建因额外插件解析缓慢而停止，改用已验证的本机构件。无依赖版本变更，无远端发布。
+- 使用现有 Compose Dockerfile 构建四个镜像。从未启动临时容器提取应用 JAR，SHA-256 核对三个 Java 镜像的 Commons 以及 Gateway 镜像的网关 Starter 与本次构件完全一致；IAM 包含引用的控制器。
+- 按 Gateway → System → IAM/Admin 顺序，使用 up -d --no-deps --no-build --force-recreate --wait 定向重建。四个目标容器均运行最新镜像且 healthy；其余 13 个容器 ID 不变。
+- System 成功执行唯一待执行的 V24 追加迁移，实际两表 allow_ips 及 access_path 均为 nullable VARCHAR(2000)。启动日志确认凭据缓存刷新；现有应用缓存 2/2、APIKEY 缓存 2/2 均包含 permitIps 字段，未读取或输出密钥值。
+- HTTP 冒烟与更新前一致：Admin / 为 200，IAM discovery 为 200，Gateway /system/api/v1/menus/routes 与 System /api/v1/menus/routes 的无凭据请求均为预期 401。此为启动/未认证边界验证，不代表真实代理 IP 或每种调用凭据的端到端验收。
+- 无业务源码提交、Git 推送、镜像推送、凭据轮换或其他服务重启。
+- macula-cloud-gateway: sha256:5da8d23ac0bdc8551d2c5e72959b665e98caaae0dc3e47fbd71e0954766631ab
+- macula-cloud-system: sha256:dc5f3eafe093a12af431f35fa0b0dc2cb76ef78ebe12fcec3fa1c7fee17476bb
+- macula-cloud-iam: sha256:a91df4d2b07c26d54c28b5edb991b73d4a6a12108fce808e91f0b41e76754325
+- macula-cloud-admin: sha256:608159744db563c08b42798db8022838e4f31aa8dee0076be8129a8a52d870c4
+- 不含凭据的运行证据：/var/folders/bh/4nmzcd6n0dx7zgq1hq6g_d080000gp/T/allowlist-image-update-pzdcqig9/verification-summary.json

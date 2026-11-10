@@ -45,6 +45,9 @@ public interface CacheConstants {
     /** 应用缓存里面的允许URL KEY */
     String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
 
+    /** 应用及 API Key 缓存中的来源 IP/CIDR 白名单，空值表示不限。 */
+    String SECURITY_SYSTEM_APPS_PERMIT_IPS = "permitIps";
+
     /** System 发布的 API Key 身份缓存前缀。 */
     String APIKEY_CACHE_PREFIX = "macula:cloud:system:application:apikey:";
 
