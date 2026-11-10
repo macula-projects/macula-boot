@@ -6,6 +6,7 @@ Status: accepted
 - `.sdlc/application-url-ip-allowlist/spec.md`
 - `.sdlc/application-url-ip-allowlist/plan.md`
 - `.sdlc/application-url-ip-allowlist/review-findings.md`
+- `.sdlc/application-url-ip-allowlist/test-report.md`
 - `macula-boot-commons/src/main/java/dev/macula/boot/constants/CacheConstants.java`
 - `macula-boot-commons/src/main/java/dev/macula/boot/security/AccessRuleUtils.java`
 - `macula-boot-commons/src/test/java/dev/macula/boot/security/AccessRuleUtilsTest.java`
@@ -88,3 +89,6 @@ Rain 回复“YES，直接集中到TenantUtils.checkTenantAndUrls方法里面验
 - macula-cloud-iam: sha256:a91df4d2b07c26d54c28b5edb991b73d4a6a12108fce808e91f0b41e76754325
 - macula-cloud-admin: sha256:608159744db563c08b42798db8022838e4f31aa8dee0076be8129a8a52d870c4
 - 不含凭据的运行证据：/var/folders/bh/4nmzcd6n0dx7zgq1hq6g_d080000gp/T/allowlist-image-update-pzdcqig9/verification-summary.json
+
+## PR delivery authorization
+用户明确要求“推送PR合并”，授权本功能两仓的本地提交、分支推送、PR创建及正常合并；仍须通过测试、独立审查及仓库分支保护，不绕过检查，不使用admin bypass。正式测试报告为Stage 4必需工件，加入文件清单，不改变已接受业务范围。
