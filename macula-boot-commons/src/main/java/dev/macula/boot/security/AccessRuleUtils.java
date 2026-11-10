@@ -156,15 +156,24 @@ public final class AccessRuleUtils {
             }
             return bytes;
         }
-        if (!literal.matches("[0-9a-fA-F:.]+") || !IPAddress.isValidIPv6(literal)) {
+        if (!literal.matches("[0-9a-fA-F:.]+") || !literal.contains(":")) {
             throw new IllegalArgumentException("允许 IP 必须是 IPv4、IPv6 或 CIDR");
         }
+        // 保留空分组并显式检查压缩结构，避免依赖库将末尾单冒号误判为合法 IPv6。
         String[] halves = literal.split("::", -1);
-        List<Integer> left = ipv6Words(halves[0]);
-        List<Integer> right = halves.length == 2 ? ipv6Words(halves[1]) : List.of();
+        if (halves.length > 2) {
+            throw new IllegalArgumentException("IPv6 只能包含一处零组压缩");
+        }
+        boolean compressed = halves.length == 2;
+        List<Integer> left = ipv6Words(halves[0], !compressed);
+        List<Integer> right = compressed ? ipv6Words(halves[1], true) : List.of();
+        int wordCount = left.size() + right.size();
+        if ((!compressed && wordCount != 8) || (compressed && wordCount >= 8)) {
+            throw new IllegalArgumentException("IPv6 分组数量不合法");
+        }
         List<Integer> words = new ArrayList<>(left);
-        if (halves.length == 2) {
-            for (int i = left.size() + right.size(); i < 8; i++) {
+        if (compressed) {
+            for (int i = wordCount; i < 8; i++) {
                 words.add(0);
             }
         }
@@ -177,16 +186,24 @@ public final class AccessRuleUtils {
         return bytes;
     }
 
-    /** 将已通过 IPv6 语法校验的半段转换成 16 位字，严格解析末尾 IPv4。 */
-    private static List<Integer> ipv6Words(String half) {
+    /** 校验半段各分组并转换成 16 位字，IPv4 只允许出现在完整地址的末尾。 */
+    private static List<Integer> ipv6Words(String half, boolean allowIpv4Tail) {
         List<Integer> words = new ArrayList<>();
         if (!half.isEmpty()) {
-            for (String word : half.split(":")) {
+            String[] groups = half.split(":", -1);
+            for (int i = 0; i < groups.length; i++) {
+                String word = groups[i];
                 if (word.contains(".")) {
+                    if (!allowIpv4Tail || i != groups.length - 1) {
+                        throw new IllegalArgumentException("IPv4 只能位于 IPv6 地址末尾");
+                    }
                     byte[] ipv4 = parseAddress(word);
                     words.add((Byte.toUnsignedInt(ipv4[0]) << Byte.SIZE) | Byte.toUnsignedInt(ipv4[1]));
                     words.add((Byte.toUnsignedInt(ipv4[2]) << Byte.SIZE) | Byte.toUnsignedInt(ipv4[3]));
                 } else {
+                    if (!word.matches("[0-9a-fA-F]{1,4}")) {
+                        throw new IllegalArgumentException("IPv6 分组不合法");
+                    }
                     words.add(Integer.parseInt(word, 16));
                 }
             }

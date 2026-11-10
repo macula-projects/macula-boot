@@ -51,6 +51,7 @@ Status: accepted
 Rain 回复“YES，直接集中到TenantUtils.checkTenantAndUrls方法里面验证。”，接受本计划及两仓仅本地提交 SDLC 工件的前置动作。所有 URL/IP 准入判断集中在该方法，HMAC/APIKEY 不新增独立判断分支。
 
 ## Implementation record
+- Code 审查独立复核确认 BC IPv6 boolean 存在尾部冒号边界误判：本类改用无 DNS 的压缩位置、分组数量及 IPv4 尾段结构校验，IPv4 范围继续使用现有 BC 校验。补充合法单零组压缩及非法单冒号回归；保留已接受的地址/CIDR 语义，未新增依赖或扩大文件范围。
 - 按用户要求进一步提取 AccessRuleUtils.matchesUrl，与 matchesIp 一致封装规则拆分、空配置放行及任一命中语义；Ant 匹配器由 TenantUtils 传入，不增加 Commons 依赖，集中准入入口及拒绝行为保持不变。
 - 按用户后续要求，checkTenantAndUrls 中 URL/IP 均以局部配置变量、请求目标、显式 Allowed 布尔结果及失败返回组织，保持空配置放行、非法配置拒绝和原匹配语义；仅调整集中入口写法。
 - 用户指定的集中入口已落实：TenantUtils.checkTenantAndUrls 直接执行 URL 与 IP 准入；HMAC、APIKEY 及强制 HMAC 清理端点保持既有调用链，不新增独立准入分支。AccessRuleUtils 仅提供规范化和纯字面量 IP/CIDR 解析、匹配。

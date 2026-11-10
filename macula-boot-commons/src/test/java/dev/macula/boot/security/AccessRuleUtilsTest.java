@@ -85,6 +85,20 @@ class AccessRuleUtilsTest {
         assertThatIllegalArgumentException().isThrownBy(() -> AccessRuleUtils.normalizeIps("::ffff:192.0.2.1/95"));
     }
 
+    /** 零组可仅压缩一个分组，但单冒号、空压缩和非末尾 IPv4 都不构成合法地址。 */
+    @Test
+    void validatesIpv6CompressionAndDottedTailStructure() throws Exception {
+        for (String valid : new String[] {"1:2:3:4:5:6:7::", "::1:2:3:4:5:6:7", "1:2:3::4:5:6:7",
+            "1:2:3:4:5:6:192.0.2.7", "1:2:3:4:5::192.0.2.7", "::", "1:2:3:4:5:6:7:8"}) {
+            assertThat(matches(valid, valid)).as(valid).isTrue();
+        }
+        for (String invalid : new String[] {"1:2:3:4:5:6:7:", ":1:2:3:4:5:6:7", "1:2:3:4:5:6:7:8::",
+            "::1:2:3:4:5:6:7:8", "1:2:3:4:5:6:7", "1:2:3:4:5:6:192.0.2.7::", "192.0.2.7::",
+            "::192.0.2.7:1", "1:::2", "1:2:3:4:5:6:00000:8"}) {
+            assertThatIllegalArgumentException().as(invalid).isThrownBy(() -> AccessRuleUtils.normalizeIps(invalid));
+        }
+    }
+
     /** 非空错误配置整体失败，不能用已命中的前一条掩盖错误条目。 */
     @Test
     void rejectsMalformedRulesWithoutDnsOrPermissiveFallback() throws Exception {
