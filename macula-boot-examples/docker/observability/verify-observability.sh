@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-REQUEST_URL="${1:-http://127.0.0.1:5000/consumer/api/v1/consumer/echo/demo?str=hello}"
+REQUEST_URL="${1:-http://127.0.0.1:5099/consumer/api/v1/consumer/echo/demo?str=hello}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://127.0.0.1:39090}"
 LOKI_URL="${LOKI_URL:-http://127.0.0.1:33100}"
 TEMPO_URL="${TEMPO_URL:-http://127.0.0.1:33200}"
@@ -9,8 +9,31 @@ HEADER_FILE="${TMPDIR:-/tmp}/macula-observability-headers.$$"
 BODY_FILE="${TMPDIR:-/tmp}/macula-observability-body.$$"
 trap 'rm -f "$HEADER_FILE" "$BODY_FILE"' EXIT
 
-curl --fail --silent --show-error --dump-header "$HEADER_FILE" --output "$BODY_FILE" "$REQUEST_URL"
-TRACE_ID=$(awk 'BEGIN { IGNORECASE=1 } /^x-traceId:/ { gsub("\r", "", $2); print $2 }' "$HEADER_FILE" | tail -1)
+# 保护接口已强制加密签名，复用样板请求库发送回声请求，保留完整 provider 链路。
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+request_module="$script_dir/../../macula-example-alibaba-gateway/src/main/resources/static/crypto-demo/request.js"
+node - "$request_module" "$REQUEST_URL" "$HEADER_FILE" "$BODY_FILE" <<'JS'
+const fs = require('node:fs');
+const path = require('node:path');
+const [modulePath, target, headerFile, bodyFile] = process.argv.slice(2);
+const {createRequest} = require(modulePath);
+const axios = require(path.join(path.dirname(modulePath), 'vendor/axios.min.js'));
+const fetchAdapter = axios.getAdapter('fetch');
+const request = createRequest({
+    baseURL: new URL(target).origin,
+    adapter: async config => {
+        const response = await fetchAdapter(config);
+        if (!new URL(config.url).pathname.startsWith('/gateway/protect/')) {
+            fs.writeFileSync(headerFile, Object.entries(response.headers.toJSON())
+                .map(([name, value]) => `${name}: ${value}`).join('\n') + '\n');
+            fs.writeFileSync(bodyFile, response.data);
+        }
+        return response;
+    }
+});
+request.get(target).catch(error => { console.error(error.message); process.exitCode = 1; });
+JS
+TRACE_ID=$(awk 'tolower($1) == "x-traceid:" { gsub("\r", "", $2); print $2 }' "$HEADER_FILE" | tail -1)
 if [ -z "$TRACE_ID" ]; then
   echo "No x-traceId response header returned by $REQUEST_URL" >&2
   exit 1

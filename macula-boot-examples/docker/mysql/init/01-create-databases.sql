@@ -1,4 +1,4 @@
--- Local example bootstrap for MySQL 8.0.43.
+-- Local example bootstrap for MySQL 8.4.6.
 -- The MySQL image creates nacos_config and the nacos user from MYSQL_* variables.
 -- Polaris v1.18.1 uses the local-only root password from docker-compose.yml.
 

@@ -83,7 +83,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:5000/oauth2/jwks        # 网关地址
+          jwk-set-uri: http://127.0.0.1:5099/oauth2/jwks        # 网关地址
 
 seata:
   enabled: false
@@ -107,7 +107,7 @@ macula:
   security:
     ignore-urls:
       - /api/v1/provider1/echo
-      - /api/v1/provider1/user
+
   oss: #文件存储配置
     default-platform: tencent-cos-1 #默认使用的存储平台
     thumbnail-suffix: ".min.jpg" #缩略图后缀，例如【.min.jpg】【.png】
@@ -134,7 +134,6 @@ logging:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
   structured:
     format:
-      console: logstash
       file: logstash
 
 example:
@@ -195,7 +194,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://macula-example-alibaba-gateway:5000/oauth2/jwks
+          jwk-set-uri: http://macula-example-alibaba-gateway:5099/oauth2/jwks
 
 ---
 # 共享环境只保留配置中心连接信息，其余配置由 Nacos Data ID 提供

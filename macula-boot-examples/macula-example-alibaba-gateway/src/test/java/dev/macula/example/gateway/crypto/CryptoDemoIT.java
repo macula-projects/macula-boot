@@ -24,6 +24,9 @@ import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
 import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.SignCheckGlobalFilter;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import dev.macula.boot.starter.cloud.gateway.filter.ProtectUrlsEndpointFilter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,16 +61,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_PREDICATE_PATH_CONTAINER_ATTR;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
 /**
- * 使用实际浏览器适配代码、Gateway 过滤链和 HTTP 下游桩验证加解密协议。
+ * 使用实际浏览器适配代码、Gateway 过滤链和 HTTP 下游桩验证加密签名及普通请求。
  * 不加载业务应用自动配置，不连接 Nacos、Redis、OAuth 或真实 consumer/provider。
  *
  * @author Codex
@@ -79,6 +90,7 @@ class CryptoDemoIT {
     private static final CryptoLocaleServiceImpl CRYPTO = new CryptoLocaleServiceImpl();
     private static final AtomicReference<String> DOWNSTREAM_URI = new AtomicReference<>();
     private static final AtomicReference<String> DOWNSTREAM_BODY = new AtomicReference<>();
+    private static final AtomicReference<String> DOWNSTREAM_KEY = new AtomicReference<>();
     private static DisposableServer downstream;
     private static DisposableServer gateway;
     private static final java.net.http.HttpClient CLIENT = java.net.http.HttpClient.newHttpClient();
@@ -89,6 +101,7 @@ class CryptoDemoIT {
         CRYPTO.afterPropertiesSet();
         downstream = HttpServer.create().host("127.0.0.1").port(0).handle((request, response) -> {
             DOWNSTREAM_URI.set(request.uri());
+            DOWNSTREAM_KEY.set(request.requestHeaders().get("sm4-key"));
             return request.receive().aggregate().asString(StandardCharsets.UTF_8).defaultIfEmpty("")
                 .flatMap(body -> {
                     DOWNSTREAM_BODY.set(body);
@@ -96,7 +109,7 @@ class CryptoDemoIT {
                     if (request.method().name().equals("GET")) {
                         String query = URI.create(request.uri()).getRawQuery();
                         String value = URLDecoder.decode(query.substring("str=".length()), StandardCharsets.UTF_8);
-                        data = "Hello " + value + ",demo";
+                        data = request.uri().startsWith("/api/v1/consumer/plain?") ? "Plain " + value : "Hello " + value + ",demo";
                     } else {
                         data = JSONUtil.parseObj(body);
                     }
@@ -113,9 +126,11 @@ class CryptoDemoIT {
             .bind("macula.gateway", Bindable.of(GatewayProperties.class)).get();
         assertThat(properties.isForceCrypto()).isTrue();
         assertThat(properties.isCryptoSwitch()).isTrue();
-        assertThat(properties.getProtectUrls().getSign()).isEmpty();
-        assertThat(environment.getProperty("macula.gateway.security.ignore-urls"))
-            .contains("/crypto-demo/**").doesNotContain(API + "/user");
+        assertThat(properties.isSignSwitch()).isTrue();
+        assertThat(properties.isForceSign()).isTrue();
+        assertThat(properties.getProtectUrls().getSign()).containsExactly(API + "/echo/*", API + "/user");
+        assertThat(Binder.get(environment).bind("macula.gateway.security.ignore-urls", Bindable.listOf(String.class)).get())
+            .contains("/crypto-demo/**", API + "/plain").doesNotContain(API + "/user");
         GlobalFilter proxy = (exchange, chain) -> HttpClient.create()
             .request(io.netty.handler.codec.http.HttpMethod.valueOf(exchange.getRequest().getMethod().name()))
             .uri("http://127.0.0.1:" + downstream.port() + exchange.getRequest().getURI().getRawPath()
@@ -131,7 +146,8 @@ class CryptoDemoIT {
                 return exchange.getResponse().writeWith(Flux.just(exchange.getResponse().bufferFactory().wrap(bytes)));
             });
         FilteringWebHandler filters = new FilteringWebHandler(
-            List.of(new BodyGlobalFilter(), new CryptoGlobalFilter(CRYPTO, properties), proxy), false);
+            List.of(new BodyGlobalFilter(), new SignCheckGlobalFilter(CRYPTO, properties, nonceStore()),
+                new CryptoGlobalFilter(CRYPTO, properties), proxy), false);
         Route route = Route.async().id("consumer-test").uri("http://127.0.0.1:" + downstream.port())
             .predicate(exchange -> true)
             .filter(new OrderedGatewayFilter(new StripPrefixGatewayFilterFactory()
@@ -148,6 +164,22 @@ class CryptoDemoIT {
         }).filter(new ProtectUrlsEndpointFilter(CRYPTO, properties, null)).build();
         gateway = HttpServer.create().host("127.0.0.1").port(0)
             .handle(new ReactorHttpHandlerAdapter(handler)).bindNow(TIMEOUT);
+    }
+
+    /** 以测试替身模拟顺序 nonce 查重，不证明真实 Redis 连通性、TTL 或并发原子性。 */
+    @SuppressWarnings("unchecked")
+    private static RedisTemplate<String, Object> nonceStore() {
+        Set<String> seen = ConcurrentHashMap.newKeySet();
+        RedisTemplate<String, Object> redis = mock(RedisTemplate.class);
+        ValueOperations<String, Object> values = mock(ValueOperations.class);
+        when(redis.hasKey(anyString())).thenAnswer(call -> seen.contains(call.getArgument(0)));
+        when(redis.opsForValue()).thenReturn(values);
+        doAnswer(call -> {
+            seen.add(call.getArgument(0));
+            return null;
+        })
+            .when(values).set(anyString(), eq("x"), any(Duration.class));
+        return redis;
     }
 
     /** 释放两个临时 HTTP 监听器。 */
@@ -177,8 +209,7 @@ class CryptoDemoIT {
             "input", Map.of("name", "demo", "str", "你好 Macula 100%")));
         assertThat(DOWNSTREAM_URI.get()).startsWith("/api/v1/consumer/echo/demo?str=");
         assertThat(browser.getJSONObject("result").getStr("data")).isEqualTo("Hello 你好 Macula 100%,demo");
-        assertThat(browser.getJSONArray("trace").getJSONObject(0).getJSONObject("request").getStr("url"))
-            .startsWith(API + "/echo/demo?data=");
+        assertThat(browser.getJSONArray("trace").toString()).contains(API + "/echo/demo?data=");
     }
 
     /** 业务 POST 只传用户 JSON，自动解密的响应 data 已是对象。 */
@@ -199,6 +230,63 @@ class CryptoDemoIT {
     void rejectsMissingCryptoHeaders() throws Exception {
         DOWNSTREAM_URI.set(null);
         assertThat(get(API + "/echo/demo?str=hello").getBool("success")).isFalse();
+        assertThat(DOWNSTREAM_URI.get()).isNull();
+    }
+
+    /** 普通路径通过同一实例明文访问，下游收到原值且没有密钥头。 */
+    @Test
+    void preservesOrdinaryRequestWithoutProtection() throws Exception {
+        JSONObject browser = node(Map.of("op", "request", "kind", "plain", "baseUrl", uri("/").toString(),
+            "input", Map.of("str", "A&B+中文")));
+        assertThat(browser.getJSONObject("result").getStr("data")).isEqualTo("Plain A&B+中文");
+        assertThat(DOWNSTREAM_KEY.get()).isNull();
+        assertThat(browser.getJSONArray("trace")).isEmpty();
+    }
+
+    /** 缺少签名、篡改密文、过期时间与重复 nonce 均须在下游之前拒绝。 */
+    @Test
+    void rejectsInvalidAndReplayedSignatures() throws Exception {
+        JSONObject missing = wire();
+        missing.getJSONObject("headers").remove("signature");
+        assertRejected(missing, "缺少签名");
+        JSONObject tampered = wire();
+        tampered.set("url", tampered.getStr("url") + "&extra=tampered");
+        assertRejected(tampered, "签名验证不通过");
+        JSONObject expired = wire();
+        expired.getJSONObject("headers").set("timestamp", "1");
+        assertRejected(expired, "时间戳超时");
+        JSONObject body = node(Map.of("op", "wire", "kind", "post", "baseUrl", uri("/").toString(),
+            "input", Map.of("userName", "demo-user")));
+        body.set("body", body.getStr("body") + " ");
+        assertRejected(body, "签名验证不通过");
+        JSONObject replayed = wire();
+        assertThat(sendWire(replayed).getBool("success")).isTrue();
+        assertRejected(replayed, "禁止重复请求");
+    }
+
+    /** 捕获实际 Axios 拦截器生成的完整传输请求，不泄露明文密钥。 */
+    private JSONObject wire() throws Exception {
+        return node(Map.of("op", "wire", "baseUrl", uri("/").toString(), "input", Map.of("str", "hello")));
+    }
+
+    /** 发送已捕获请求，用于验证服务端负向分支与原样重放。 */
+    private JSONObject sendWire(JSONObject wire) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(wire.getStr("url"))).timeout(TIMEOUT);
+        if ("POST".equals(wire.getStr("method"))) {
+            builder.POST(HttpRequest.BodyPublishers.ofString(wire.getStr("body")));
+        } else {
+            builder.GET();
+        }
+        wire.getJSONObject("headers").forEach((name, value) -> builder.header(name, value.toString()));
+        return JSONUtil.parseObj(CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString()).body());
+    }
+
+    /** 错误必须明确且不触达下游。 */
+    private void assertRejected(JSONObject wire, String message) throws Exception {
+        DOWNSTREAM_URI.set(null);
+        JSONObject result = sendWire(wire);
+        assertThat(result.getBool("success")).isFalse();
+        assertThat(result.toString()).contains(message);
         assertThat(DOWNSTREAM_URI.get()).isNull();
     }
 
@@ -243,10 +331,23 @@ class CryptoDemoIT {
                     const request = createRequest({baseURL: x.baseUrl, getToken: () => x.token || '',
                         onTrace: event => trace.push(event)});
                     const url = '/consumer/api/v1/consumer';
-                    const result = x.kind === 'get'
+                    const result = x.kind === 'plain' ? await request.get(url + '/plain', {params: {str: x.input.str}}) : x.kind === 'get'
                         ? await request.get(url + '/echo/' + encodeURIComponent(x.input.name), {params: {str: x.input.str}})
                         : await request.post(url + '/user', x.input);
                     out = {result, trace};
+                }
+                if (x.op === 'wire') {
+                    const request = createRequest({baseURL: x.baseUrl, adapter: async config => {
+                        const u = new URL(config.url);
+                        if (u.pathname.startsWith('/gateway/')) {
+                            const response = await fetch(u);
+                            return {config, status: response.status, headers: {}, data: await response.text()};
+                        }
+                        out = {url: config.url, method: config.method.toUpperCase(), body: config.data, headers: config.headers.toJSON()};
+                        return {config, status: 200, headers: {}, data: JSON.stringify({success:true, code:'00000', data:null})};
+                    }});
+                    if (x.kind === 'post') await request.post('/consumer/api/v1/consumer/user', x.input);
+                    else await request.get('/consumer/api/v1/consumer/echo/demo', {params:x.input});
                 }
                 if (x.op === 'decrypt') out = {plain: c.decrypt(x.cipher, x.key)};
                 if (x.op === 'unwrap') out = {key: sm2.doDecrypt(x.wrapped.slice(2), x.privateKey, 1)};

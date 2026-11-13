@@ -14,7 +14,7 @@ Status: accepted
 7. README 提供页面地址、启动依赖、操作步骤和预期结果，更新原明文 echo 调用说明。
 
 ## Non-goals
-不新增业务端点、公钥接口、路由或 Profile；不修改 consumer/provider/Starter 协议；不扩展签名演示。
+按用户新确认扩展签名演示及 consumer 普通回声端点；不新增公钥接口、路由或 Profile，不修改 provider/Starter 协议。
 
 ## Design
 按用户确认使用 Axios 封装 request.js，请求和响应通过 Axios interceptors 统一加解密，业务使用 get/post 和普通 params/data。静态页面由 Gateway 提供，复用 /consumer/** 与 StripPrefix=1。仅为演示页面及其静态资源配置必要的匿名访问；现有 API 认证规则保持。浏览器加解密实现需与现有 Hutool SM2/SM4 模式和编码互通，实施计划明确库来源、版本和许可证。GET 正确编码路径段与 Query 密文，POST 使用 application/json。
@@ -31,3 +31,7 @@ Status: accepted
 
 ## Verification strategy
 验证浏览器与 Hutool 的 SM2/SM4 互通，检查页面桌面/移动布局、加载失败及错误显示。使用真实网关过滤链和明确标注的 HTTP 下游桩验证路径、参数解密、响应解密及缺头拒绝。具备完整环境时再操作页面调用真实 consumer/provider，分别报告静态检查、模拟验证和真实联调结果。
+
+## 已确认的签名与普通请求扩展
+
+用户确认 signing-plan.md。保护接口同时启用加密和 SHA-256 签名，业务调用仍使用 Axios get/post；页面显示签名、timestamp、nonce，不显示明文密钥。新增 GET /consumer/api/v1/consumer/plain?str=...，同一请求实例不加密、不签名，返回原始回声。普通路径仅在 local 示例中匿名放行，不扩大现有认证白名单；验签使用真实过滤器，Redis 测试替身与真实运行证据分别报告。

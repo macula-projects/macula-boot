@@ -59,6 +59,17 @@ public class ConsumerController {
 
     private final AsyncObservabilityProbe asyncObservabilityProbe;
 
+    /**
+     * 提供普通明文回声，用于与加密签名接口对照；不调用外部服务。
+     *
+     * @param str 原始查询参数
+     * @return 原样保留输入的回声文本，由统一响应处理包装为 Result
+     */
+    @GetMapping("/plain")
+    public String plain(@RequestParam("str") String str) {
+        return "Plain " + str;
+    }
+
     @GetMapping("/echo/{name}")
     public String echo(@RequestParam("str") String str, @PathVariable String name) {
         String hello = provider1Service.echo(str);

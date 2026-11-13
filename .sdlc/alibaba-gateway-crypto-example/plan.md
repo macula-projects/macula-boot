@@ -77,3 +77,17 @@ SDLC 文件：本目录 intent.md、spec.md、plan.md、review-findings.md。
 
 ## Test stage
 用户已明确 YES 确认 Axios 实现完成。本轮正式执行 sdlc-test，证据见 verification.md：全仓 334 项单元测试、12 项前端测试与 5 项目标 IT 通过。完整验证尚缺隔离环境下的全仓集成测试、移动/POST 浏览器检查及真实服务联调；未自行标记 green 或移交 Deploy。
+
+## 前端样板整理
+
+2026-11-13，用户确认示例已可运行，要求整理前端格式并说明复用边界。对已有 crypto-client.js、request.js、demo.js、index.html、demo.css 统一四空格格式，补充模块职责与接入 API 注释；模块 README 增加文件复用表、最小接入步骤及适用限制。不改业务接口、加密协议、认证边界或 vendor 原始发行文件。使用已有本地 Prettier 执行格式化，不引入 npm 工程或依赖；复跑现有 Node 测试并检查 vendor 无变更。
+
+回归验证发现原始 HEAD 的 Node 测试已有 11 通过、1 失败：页面未填 Token 时直接发出 POST，与原测试和页面说明不符。本轮补回 demo.js 的 POST Token 非空提示，仅作用于演示表单，不替代服务端认证，也不改变通用 request.js 的认证规则。
+
+整理后验证：五个自有前端文件 Prettier --check 通过；Node 原有 12 项测试全部通过（0 失败、0 跳过）；vendor 无 diff；git diff --check 通过。未重跑 Java 集成测试或浏览器视觉检查，本轮未修改密码算法或后端协议。
+
+## 已接受的签名扩展
+
+用户明确批准 [signing-plan.md](signing-plan.md)，并补充普通接口需求。该已接受计划的文件集合、顺序、风险和验证要求作为本计划的扩展，包含 consumer Controller、配置和 README。
+
+签名实现补充：现有 observability 回声脚本原先使用明文 curl，强制验签后无法到达 provider。为保留该链路，脚本复用实际 request.js 发出签名加密请求并捕获原始响应头，明确增加 Node.js 前置条件，不降低网关保护。网关健康检查改用普通 plain 接口；协议过滤器日志级别设 INFO，避免 DEBUG 输出明文密钥。

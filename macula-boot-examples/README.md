@@ -6,7 +6,7 @@
 
 | 类别 | 模块 | 默认端口 | 用途 |
 | --- | --- | ---: | --- |
-| Alibaba | `macula-example-alibaba-gateway` | HTTP 5000 / HTTPS 5443 | Nacos 服务发现、Spring Cloud Gateway、Sentinel 与网关安全 |
+| Alibaba | `macula-example-alibaba-gateway` | HTTP 5099 / HTTPS 5443 | Nacos 服务发现、Spring Cloud Gateway、Sentinel 与网关安全 |
 | Alibaba | `macula-example-alibaba-provider1` | 5020 | REST 接口、JWT 资源服务器、Nacos 配置刷新与服务注册 |
 | Alibaba | `macula-example-alibaba-consumer` | 5010 | OpenFeign 服务调用、Sentinel 降级和 WebSocket |
 | Alibaba | `macula-example-alibaba-provider2` | - | 预留的第二提供方模块，当前不启动 |

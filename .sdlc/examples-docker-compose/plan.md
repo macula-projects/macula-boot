@@ -3,6 +3,9 @@
 Status: accepted
 
 ## Files that change
+- Add `macula-boot-examples/docker/mysql/init-nacos-user.sh` and the Alibaba-only `mysql-init` service to seed the missing local Nacos user and role without replacing existing credentials.
+- Update the three Alibaba module READMEs alongside their approved application configuration changes.
+- Add `macula-boot-examples/docker/nacos/init.sh` for the originator-requested Nacos 3 upgrade, using v3 Console APIs and preserving existing example config.
 - Modify `.gitignore` to ignore only `macula-boot-examples/docker/.env` while keeping `.env.example` tracked.
 - Replace the placeholder `macula-boot-examples/docker/docker-compose.yml` with the Compose v2 topology for shared MySQL/Redis, Alibaba Nacos and applications, and Tencent Polaris and applications.
 - Add `macula-boot-examples/docker/.env.example` with local-only defaults, overridable host ports, namespaces, credentials, and pinned image versions.
@@ -60,6 +63,11 @@ Status: accepted
 - Project policy: run the applicable Maven tests and record test counts in Stage 4; run Bugs, Security, and Compliance review passes against changed files and immediate behavior. Do not claim Windows/amd64 execution, external GAPI/iPaaS/OSS/OAuth2/Sentinel Dashboard validation, task/binlog4j coverage, or production readiness.
 
 ## Deviations
+- 2026-11-13，用户要求解决网关 5000 端口占用，lsof 确认由本机 ControlCenter PID 1016 监听：local HTTP 默认改为 5099，docker Profile 显式保留 5000，均可通过 SERVER_HTTP_PORT 覆盖。同步网关 README 并刷新运行资源，不终止系统进程。
+- 2026-11-13，用户明确确认按 macula-cloud/deploy 的用户初始化方式完整对齐，取代此前空凭据方案：三个 Alibaba 应用、Compose 和 `.env.example` 恢复默认 nacos/nacos；独立 mysql-init 服务在 MySQL 健康后执行与参考目录相同的 INSERT IGNORE 用户/角色语句，Nacos 等待其成功。脚本只补缺失记录，不重设已有密码、不重建 schema；支持对已有数据卷单独执行。同步文档并重新生成三个应用资源，运行数据库变更未在本次文件修改中执行。
+- 2026-11-13，用户反馈 consumer 从本机启动后仍登录失败：Docker 环境变量不会应用到 IDE 进程。将三个 Alibaba 应用 local/docker 的 Nacos 凭据默认值改为空字符串，保留共享环境段原值；同步模块及 Docker README。无需修改 Java 启动入口，不修改现有运行进程和用户环境变量。
+- 2026-11-13，用户要求参考当前 `macula-cloud/deploy` 升级：默认镜像对齐 MySQL 8.4.6、Redis 7.4.5-alpine、Nacos 3.2.4；复制对应 Nacos schema，增加独立 Console 端口 38088、关闭 Admin/Console 鉴权并同步本地 token/identity 设置及日志卷。初始化提取为 `docker/nacos/init.sh`，改用 v3 Console API；保留 examples 的业务拓扑、客户端端口、空凭据、Redis 密码及 Polaris 配置。验证包含 Compose 渲染、shell 语法和初始化分支模拟；未授权升级运行实例或迁移旧数据卷，不将这些运行验证宣称通过。
+- 2026-11-13，根据用户要求修复本地 Nacos 登录错误：保持服务端关闭鉴权，将 Compose 与 `.env.example` 的客户端默认凭据改为空字符串，并补充已有 `.env` 与 Maven/IDE 的覆盖说明。仅调整本地示例连接配置，不创建用户或改变数据库；验证重点为 Compose 渲染后的三个 Alibaba 应用凭据为空。
 - Retained the complete upstream Polaris v1.18.1 server configuration instead of reducing it. Runtime startup depends on upstream listener, plugin, cache, and maintenance sections that cannot be safely removed without broader Polaris-specific validation. The Compose file still limits the local use case and publishes only the documented loopback ports, so verification scope is unchanged.
 - Added writable `/app/polaris/backup` and `/app/polaris/logs` directories to the shared application runtime image. The Tencent client creates these relative paths during startup; creating and owning them in the image is required to keep the planned non-root runtime user. Image-content and runtime-user checks cover the additional directories.
 - Added container-only Redis connection variables and pointed the Tencent client's Nacos-compatibility address at Polaris port 8848. Runtime startup exposed these implicit framework dependencies; the variables are confined to Compose and do not alter Maven/IDE defaults. Full-stack and dual-profile smoke checks cover the change.
@@ -69,3 +77,5 @@ Status: accepted
 - Stage 5 review found that direct `sed` substitution treated overridable MySQL passwords as replacement syntax. The Polaris startup command now escapes backslash, `&`, and the delimiter before rendering its runtime config, and the proof includes an isolated clean-volume smoke test using all three characters. The host-run documentation also now explains that `.env` port overrides must be mirrored into Maven/IDE environment variables and that Nacos-compatible gRPC ports remain HTTP `+1000`.
 - On 2026-09-21, the originator approved a post-merge application-port revision: Alibaba gateway HTTP/HTTPS `5000/5443`, provider `5020`, consumer `5010`; Tencent gateway `4000`, provider `4020`, consumer `4010`. Compose mappings, health checks, service-to-service URLs, environment defaults, module documentation, spec acceptance URLs, and Stage 4 evidence must move together and be reverified before the verification report is accepted.
 - On 2026-09-21, the originator confirmed replacing the originally planned Temurin Jammy runtime with the pinned `bellsoft/liberica-runtime-container:jre-17.0.20.1_1-glibc` runtime. The smaller Alpaquita glibc image preserves Java 17 and native-library compatibility while retaining `curl`, non-root execution, and `linux/amd64` plus `linux/arm64` support; all six images, both full application chains, Middleware-only behavior, persistence, and the full Maven verification were rerun after the change.
+
+2026-11-13，用户明确要求 Alibaba gateway 在 IDE 和 Docker 统一使用 HTTP 5099：主配置、Compose 映射/健康检查、环境模板、consumer/provider JWK、consumer WebSocket/Feign 地址、observability 脚本及 examples 文档同步；删除 local/docker 的重复端口覆盖。签名开启后网关健康检查使用普通 plain 接口，避免健康检查被强制加密签名拒绝。追加 GatewayService.java、consumer static/js/app.js、docker/observability/verify-observability.sh 到本次文件范围。

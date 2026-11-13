@@ -82,7 +82,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://127.0.0.1:5000/oauth2/jwks    # 网关地址
+          jwk-set-uri: http://127.0.0.1:5099/oauth2/jwks    # 网关地址
 
 feign:
   httpclient:
@@ -117,7 +117,7 @@ macula:
     null-to-empty: true         # 将null转为-1或者空串，默认为false
     long-to-string: true       # 将long转为字符串，默认为true
   security:
-    ignore-urls: /, /index.html, /hello2/**, /api/v1/consumer/echo/**, /api/v1/consumer/user
+    ignore-urls: /, /index.html, /hello2/**, /api/v1/consumer/echo/**, /api/v1/consumer/plain
 gapi:
   username: applicationA
   secret: xx
@@ -142,7 +142,6 @@ logging:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
   structured:
     format:
-      console: logstash
       file: logstash
 
 management:
@@ -193,7 +192,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://macula-example-alibaba-gateway:5000/oauth2/jwks
+          jwk-set-uri: http://macula-example-alibaba-gateway:5099/oauth2/jwks
 
 ---
 # 共享环境只保留配置中心连接信息，其余配置由 Nacos Data ID 提供

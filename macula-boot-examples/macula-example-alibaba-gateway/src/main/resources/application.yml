@@ -103,8 +103,8 @@ spring:
     oauth2:
       resourceserver:
         opaquetoken:
-          client-id: e4da4a32-592b-46f0-ae1d-784310e88423
-          client-secret: secret
+          client-id: b03620da-9362-4ebf-859a-35d481e756b9
+          client-secret: bSPJAkJcYNTHzZukczupUe6ghqnre6BIptjW5p-yrfc
           introspection-uri: ${OAUTH2_INTROSPECTION_URI:http://127.0.0.1:9010/oauth2/introspect}
   reactor:
     context-propagation: auto
@@ -113,17 +113,21 @@ macula:
     # 保护清单按网关入口原始路径匹配，包含 StripPrefix 移除前的 /consumer。
     crypto-switch: true
     force-crypto: true
+    sign-switch: true
+    force-sign: true
     protect-urls:
       crypto:
         - /consumer/api/v1/consumer/echo/*
         - /consumer/api/v1/consumer/user
-      sign: []
+      sign:
+        - /consumer/api/v1/consumer/echo/*
+        - /consumer/api/v1/consumer/user
     security:
       # 页面可匿名访问；/user 仍要求 OAuth Token，加密保护不替代身份认证。
       ignore-urls:
         - /consumer/hello2/**
         - /consumer/api/v1/consumer/echo/**
-        - /consumer/api/v1/consumer/user
+        - /consumer/api/v1/consumer/plain
         - /crypto-demo/**
       only-auth-urls: /api/**, /websocket/**
 
@@ -132,12 +136,15 @@ logging:
     root: info
     dev.macula.example.gateway: debug
     dev.macula.boot.starter.cloud.gateway: debug
+    # 协议过滤器 DEBUG 可能记录密钥或完整业务 Body，样板默认不输出这些材料。
+    dev.macula.boot.starter.cloud.gateway.filter.SignCheckGlobalFilter: info
+    dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter: info
+    dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter: info
     org.redisson: info
   file:
     name: ${user.home}/logs/${spring.application.name}/${spring.application.name}.log
   structured:
     format:
-      console: logstash
       file: logstash
 
 management:
