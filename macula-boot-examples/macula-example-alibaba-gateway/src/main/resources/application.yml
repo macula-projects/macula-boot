@@ -7,7 +7,7 @@ server:
     key-password: password
   port: ${SERVER_PORT:5443}
   http:
-    port: ${SERVER_HTTP_PORT:5000}
+    port: ${SERVER_HTTP_PORT:5099}
 
 spring:
   profiles:
@@ -110,8 +110,21 @@ spring:
     context-propagation: auto
 macula:
   gateway:
+    # 保护清单按网关入口原始路径匹配，包含 StripPrefix 移除前的 /consumer。
+    crypto-switch: true
+    force-crypto: true
+    protect-urls:
+      crypto:
+        - /consumer/api/v1/consumer/echo/*
+        - /consumer/api/v1/consumer/user
+      sign: []
     security:
-      ignore-urls: /consumer/hello2/**,/consumer/api/v1/consumer/echo/**
+      # 页面可匿名访问；/user 仍要求 OAuth Token，加密保护不替代身份认证。
+      ignore-urls:
+        - /consumer/hello2/**
+        - /consumer/api/v1/consumer/echo/**
+        - /consumer/api/v1/consumer/user
+        - /crypto-demo/**
       only-auth-urls: /api/**, /websocket/**
 
 logging:

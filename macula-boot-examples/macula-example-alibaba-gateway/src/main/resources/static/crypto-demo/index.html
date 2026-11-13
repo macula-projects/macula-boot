@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gateway 加解密实验室 · Macula</title>
+    <link rel="stylesheet" href="demo.css">
+    <script defer src="vendor/sm2.js"></script>
+    <script defer src="vendor/sm4.js"></script>
+    <script defer src="vendor/axios.min.js"></script>
+    <script defer src="crypto-client.js"></script>
+    <script defer src="request.js"></script>
+    <script defer src="demo.js"></script>
+</head>
+<body>
+<main>
+    <header><a class="brand" href="index.html">MACULA <span>DEV LAB</span></a><span class="badge">SM2 + SM4</span></header>
+    <section class="hero"><p class="eyebrow">GATEWAY / CRYPTO DEMO</p><h1>让加密过程，<br>看得见。</h1><p>业务照常发送请求，拦截器自动加解密。路径变量留在 URL，直接调用现有 Consumer 接口，观察完整往返。</p></section>
+    <section class="panel metadata" aria-labelledby="metadata-title">
+        <div class="section-head"><div><p class="eyebrow">01 / CONNECTION</p><h2 id="metadata-title">网关保护配置</h2></div><button id="reload" type="button" class="secondary">重新加载</button></div>
+        <p id="connection" role="status" aria-live="polite">正在连接当前网关…</p>
+        <details><summary>查看公钥与保护清单</summary><h3>SM2 公钥</h3><pre id="public-key">等待加载</pre><h3>保护 URL</h3><pre id="protect-urls">等待加载</pre></details>
+        <label for="token">OAuth Bearer Token <span>仅 /user 必填</span></label><input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="仅保存在当前页面内存，不会展示在结果中">
+    </section>
+    <section class="requests" aria-label="接口演示">
+        <form id="get-form" class="panel"><p class="eyebrow">02 / QUERY ENCRYPTION</p><h2><span class="method get">GET</span> 路径变量 + Query</h2><code>/consumer/api/v1/consumer/echo/{name}</code>
+            <label for="name">name <span>明文路径变量</span></label><input id="name" value="demo" required maxlength="120">
+            <label for="str">str <span>加密参数</span></label><input id="str" value="你好 Macula" required maxlength="2000">
+            <p class="hint">name 保留在路径中；str 包装到 data 密文。当前 Query 协议不支持值内的 &amp;、+ 和双引号。</p>
+            <button type="submit" data-send disabled>加密并发送 GET <span aria-hidden="true">↗</span></button>
+        </form>
+        <form id="post-form" class="panel"><p class="eyebrow">03 / BODY ENCRYPTION</p><h2><span class="method post">POST</span> JSON Body</h2><code>/consumer/api/v1/consumer/user</code>
+            <label for="user-json">UserResult <span>虚构演示数据</span></label><textarea id="user-json" maxlength="16000" rows="8" spellcheck="false">{
+  "userName": "demo-user",
+  "age": 25
+}</textarea>
+            <p class="hint">整个 JSON 加密到 data。此接口需要有效 OAuth Token；provider1 会更新 birthday 和 password。</p>
+            <button type="submit" data-send disabled>加密并发送 POST <span aria-hidden="true">↗</span></button>
+        </form>
+    </section>
+    <section class="panel results" aria-labelledby="result-title"><div class="section-head"><div><p class="eyebrow">04 / ROUND TRIP</p><h2 id="result-title">传输与解密结果</h2></div><button id="clear" class="secondary" type="button">清空结果</button></div>
+        <p id="status" role="status" aria-live="polite">加载配置后，选择一个接口开始。</p>
+        <div class="result-grid"><article><h3>01 请求明文</h3><pre id="plain">—</pre></article><article><h3>02 加密后的请求</h3><pre id="request">—</pre></article><article><h3>03 服务响应原文</h3><pre id="response">—</pre></article><article class="decoded"><h3>04 响应 data 解密</h3><pre id="decoded">—</pre></article></div>
+    </section>
+    <footer>仅供本地演示 · 需启动 Nacos、Redis、Gateway、Consumer、Provider1；/user 还需认证服务。<br>加密传输不替代 HTTPS 与身份认证。</footer>
+</main>
+</body>
+</html>

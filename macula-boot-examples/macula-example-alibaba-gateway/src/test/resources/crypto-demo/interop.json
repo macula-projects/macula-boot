@@ -1,0 +1,5 @@
+{
+  "plain": "你好 Macula / % 100",
+  "get": {"name": "demo", "str": "你好 Macula 100%"},
+  "user": {"userName": "demo-user", "age": 25}
+}
