@@ -57,6 +57,15 @@ public interface CacheConstants {
     /** API Key 缓存与 JWT 中使用的应用 ID 字段。 */
     String APIKEY_APPLICATION_ID_ATTRIBUTE = "applicationId";
 
+    /** IAM 资源服务器专用回调凭据，按 resource client_id 发布，不能用于普通业务 API。 */
+    String IAM_CALLBACK_CREDENTIAL_PREFIX = "macula:cloud:iam:resource:callback:";
+
+    /** 回调凭据缓存中的 SHA-256 摘要。 */
+    String IAM_CALLBACK_KEY_DIGEST = "apiKeyDigest";
+
+    /** 仅允许已登记的回调路径。 */
+    String IAM_CALLBACK_PATH = "path";
+
     /** oauth 客户端信息 */
     String OAUTH2_CLIENT_CACHE_KEY = "cloud:iam:oauth2:client";
 

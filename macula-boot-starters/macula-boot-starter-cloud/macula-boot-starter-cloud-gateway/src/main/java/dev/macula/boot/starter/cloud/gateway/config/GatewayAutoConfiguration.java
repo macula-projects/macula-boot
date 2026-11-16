@@ -21,7 +21,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
 import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
-import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.GrayscalePublishGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
@@ -33,6 +32,7 @@ import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguratio
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -95,19 +95,20 @@ public class GatewayAutoConfiguration {
     }
 
     /**
-     * 装配 token 清理入口，复用 HMAC 过滤器的完整应用准入，避免只验签而漏掉授权。
+     * 装配仅接受资源服务器专用 API Key 的清理入口，直接注入System凭据Redis。
      *
      * @param gatewayProperties 网关配置
      * @param redisTemplate token 缓存
-     * @param kongApiGlobalFilter HMAC 应用验证器
+     * @param sysRedisTemplate System发布的回调凭据缓存
      * @return token 清理入口过滤器
      */
     @Bean
     @ConditionalOnProperty(value = "macula.gateway.rm-opaque-token.enabled", havingValue = "true",
             matchIfMissing = true)
     public RmOpaqueTokenEndpointFilter rmOpaqueTokenEndpointFilter(GatewayProperties gatewayProperties,
-                                                                   RedisTemplate<String, Object> redisTemplate, KongApiGlobalFilter kongApiGlobalFilter) {
-        return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, kongApiGlobalFilter);
+                                                                   RedisTemplate<String, Object> redisTemplate,
+            @Qualifier("sysRedisTemplate") RedisTemplate<String, Object> sysRedisTemplate) {
+        return new RmOpaqueTokenEndpointFilter(gatewayProperties, redisTemplate, sysRedisTemplate);
     }
 
     @Bean
