@@ -77,4 +77,16 @@ class ApiKeyAutoConfigurationTest {
             assertThat(context.getBean(ApiKeyGlobalFilter.class)).isSameAs(custom);
         });
     }
+    /** 清理入口构造器直接绑定System凭据Redis，与token缓存连接分开。 */
+    @Test
+    void tokenRemovalInjectsSystemRedisDirectly() {
+        var tokenRedis = mock(RedisTemplate.class);
+        runner.withBean("redisTemplate", RedisTemplate.class, () -> tokenRedis).run(context -> {
+            assertThat(context).hasNotFailed();
+            var filter = context.getBean(dev.macula.boot.starter.cloud.gateway.filter.RmOpaqueTokenEndpointFilter.class);
+            assertThat(ReflectionTestUtils.getField(filter, "sysRedisTemplate")).isSameAs(context.getBean("sysRedisTemplate"));
+            assertThat(ReflectionTestUtils.getField(filter, "redisTemplate")).isSameAs(tokenRedis);
+        });
+    }
+
 }

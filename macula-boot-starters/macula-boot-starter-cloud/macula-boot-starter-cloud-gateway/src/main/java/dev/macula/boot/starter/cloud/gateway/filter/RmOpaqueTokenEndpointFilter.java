@@ -23,10 +23,14 @@ import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
-import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
-import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
-import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +51,7 @@ import reactor.core.scheduler.Schedulers;
 import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 
 /**
- * {@code RmOpaqueTokenEndpointFilter} 提供移除opaqueToken给IPAAS
+ * {@code RmOpaqueTokenEndpointFilter} 提供 opaque token 清理及 IAM 资源服务器专用 API Key 准入
  *
  * @author haohaoqiu
  * @since 2023/11/1 16:33
@@ -57,10 +61,13 @@ import static dev.macula.boot.result.ApiResultCode.VALIDATE_ERROR;
 public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
     private final GatewayProperties properties;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final KongApiGlobalFilter kongApiGlobalFilter;
+    private final RedisTemplate<String, Object> sysRedisTemplate;
+
+    @Value("${spring.security.oauth2.resourceserver.opaquetoken.client-id:}")
+    private String resourceClientId;
 
     /**
-     * 匹配 token 清理端点，按配置执行 HMAC 完整准入后再操作缓存。
+     * 匹配 token 清理端点，仅通过资源服务器专用 API Key 认证后操作缓存。
      *
      * @param exchange 当前请求
      * @param chain 非清理请求的后续过滤链
@@ -78,63 +85,79 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             if (log.isDebugEnabled()) {
                 log.debug("删除opaqueToken 日志：method： {}, path： {}， restfulPath: {}", method, path, restfulPath);
             }
-            if (properties.isForceHmacRmOpaqueTokenEndpoint() && !KongApiUtils.isKongApiRequest(exchange)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("删除opaqueToken 拒绝：未携带 HMAC 凭据");
-                }
-                return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN,
-                    Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED));
-            } else {
-                return handlerRmOpaqueToken(exchange, response);
-            }
+            return Mono.fromCallable(() -> validCallbackKey(exchange))
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorReturn(false)
+                .flatMap(valid -> valid ? handlerRmOpaqueToken(exchange, response)
+                    : ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN,
+                        Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED)));
 
         }
         return chain.filter(exchange);
     }
 
     /**
-     * 缓存清理请求体，供 HMAC 摘要校验和后续 token 参数解析共用。
+     * 只信任 System 发布到共享 Redis 的专用摘要，绑定本网关内省身份和登记路径。
+     * 普通业务 API Key、Query、重复 Header 及缓存故障均不能获得清理权限。
+     *
+     * @param exchange 当前清理请求
+     * @return 是否通过专用回调认证
+     */
+    private boolean validCallbackKey(ServerWebExchange exchange) {
+        List<String> headers = exchange.getRequest().getHeaders().get("Authorization");
+        if (headers == null || headers.size() != 1 || StringUtils.isBlank(resourceClientId)
+            || !exchange.getRequest().getQueryParams().isEmpty()
+            || !exchange.getRequest().getPath().value().equals(properties.getRmOpaqueTokenEndpoint())) {
+            return false;
+        }
+        String header = headers.get(0);
+        if (!header.matches("Bearer sk-[A-Za-z0-9_-]{43}")) {
+            return false;
+        }
+        Map<String, String> credential = sysRedisTemplate.<String, String>opsForHash()
+            .entries(CacheConstants.IAM_CALLBACK_CREDENTIAL_PREFIX + resourceClientId);
+        String expected = credential.get(CacheConstants.IAM_CALLBACK_KEY_DIGEST);
+        if (expected == null || !exchange.getRequest().getPath().value()
+            .equals(credential.get(CacheConstants.IAM_CALLBACK_PATH))) {
+            return false;
+        }
+        try {
+            String actual = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                .digest(header.substring("Bearer ".length()).getBytes(StandardCharsets.UTF_8)));
+            return MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),
+                actual.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 unavailable");
+        }
+    }
+
+    /**
+     * 读取已认证请求体，供 token 参数解析使用。
      *
      * @param exchange 当前清理请求
      * @param response 响应
      * @return 完整准入及缓存清理结果
      */
     private Mono<Void> handlerRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
-        return DataBufferUtils.join(exchange.getRequest().getBody()).map(dataBuffer -> {
+        return DataBufferUtils.join(exchange.getRequest().getBody(), 65536).map(dataBuffer -> {
                 byte[] bytes = new byte[dataBuffer.readableByteCount()];
                 dataBuffer.read(bytes);
                 DataBufferUtils.release(dataBuffer);
                 return bytes;
             }).defaultIfEmpty(new byte[0])
-            .doOnNext(bytes -> exchange.getAttributes().put(GatewayConstants.CACHED_REQUEST_BODY_OBJECT_KEY, bytes))
-            .flatMap(bytes -> validateAndRmOpaqueToken(exchange, response));
+            .flatMap(bytes -> rmOpaqueToken(bytes, response));
     }
 
     /**
-     * 强制 HMAC 时先复用完整应用准入，再执行 token 缓存操作；不能仅调用纯验签工具。
+     * 校验单 token 参数后在工作线程清理现有 token 与派生 JWT 缓存，非法输入不能产生清理副作用。
      *
-     * @param exchange 已缓存请求体的清理请求
-     * @param response 响应
-     * @return 验证失败响应，或缓存清理结果
+     * @param body 已认证请求的原始正文
+     * @param response 回执响应
+     * @return 缓存清理结果
      */
-    private Mono<Void> validateAndRmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
-        if (properties.isForceHmacRmOpaqueTokenEndpoint()) {
-            return Mono.fromCallable(() -> kongApiGlobalFilter.validate(exchange))
-                .subscribeOn(Schedulers.boundedElastic())
-                .onErrorReturn(Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN))
-                .flatMap(result -> {
-                    if (!result.isSuccess()) {
-                        return ResponseUtils.writeResult(response, HttpStatus.FORBIDDEN, result);
-                    }
-                    return rmOpaqueToken(exchange, response);
-                });
-        }
-        return rmOpaqueToken(exchange, response);
-    }
-
-    private Mono<Void> rmOpaqueToken(ServerWebExchange exchange, ServerHttpResponse response) {
-        return Mono.just(RequestUtils.getBody(exchange)).flatMap(bytes -> {
-            String requestBody = new String(bytes);
+    private Mono<Void> rmOpaqueToken(byte[] body, ServerHttpResponse response) {
+        return Mono.just(body).flatMap(bytes -> {
+            String requestBody = new String(bytes, StandardCharsets.UTF_8);
             if (StringUtils.isBlank(requestBody)) {
                 return Mono.empty();
             }
@@ -151,14 +174,17 @@ public class RmOpaqueTokenEndpointFilter implements WebFilter, Ordered {
             if (StringUtils.isBlank(rmOpaqueTokenForm.getToken())) {
                 return ResponseUtils.writeResult(response, HttpStatus.BAD_REQUEST, Result.failed(VALIDATE_ERROR));
             }
-            String opaqueTokenCacheKey = CacheConstants.GATEWAY_TOKEN_CACHE_KEY + rmOpaqueTokenForm.getToken();
-            OAuth2AuthenticatedPrincipal cachedPrincipal =
-                (OAuth2AuthenticatedPrincipal)redisTemplate.opsForValue().get(opaqueTokenCacheKey);
-            if (cachedPrincipal != null) {
-                redisTemplate.delete(AddJwtGlobalFilter.buildKey(cachedPrincipal));
-                redisTemplate.delete(opaqueTokenCacheKey);
-            }
-            return ResponseUtils.writeResult(response, HttpStatus.OK, Result.success());
+            return Mono.fromCallable(() -> {
+                String opaqueTokenCacheKey = CacheConstants.GATEWAY_TOKEN_CACHE_KEY + rmOpaqueTokenForm.getToken();
+                OAuth2AuthenticatedPrincipal cachedPrincipal =
+                    (OAuth2AuthenticatedPrincipal) redisTemplate.opsForValue().get(opaqueTokenCacheKey);
+                if (cachedPrincipal != null) {
+                    redisTemplate.delete(AddJwtGlobalFilter.buildKey(cachedPrincipal));
+                    redisTemplate.delete(opaqueTokenCacheKey);
+                }
+                return true;
+            }).subscribeOn(Schedulers.boundedElastic())
+                .flatMap(ignored -> ResponseUtils.writeResult(response, HttpStatus.OK, Result.success()));
         });
     }
 

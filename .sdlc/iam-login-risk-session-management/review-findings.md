@@ -19,3 +19,13 @@
 - 实际轮数：2；Passes run: Plan，仅审 /tmp/iam-login-plan-round2.diff 与必要上下文；修订后计划 SHA-256：09321a90ef9e2e2ce3437cc722c9648e7dc4809056fc9c490d5ef65e7873a076。
 - 复核结论：两项 Important 均已修复；新增 No findings；避免重复报告 2 项；未修改源码、未执行测试、未批准人工 gate。
 - 总计两轮，未超出三轮预算。人工工程批准尚未发生；不得将 review no findings 当作 plan accepted。
+
+
+## Stage: PR review — Round 1 (2026-11-17)
+
+- Reviewer: /root/review_boot_security，按 REVIEW.md 独立 Bugs / Security / Compliance passes，只读审查。
+- Scope：base HEAD `ed50b15fdd915e9e81c243a963a4b2cb7914de50` 上本功能全部工作树改动及未跟踪文件，包含缓存常量、自动装配、仅API Key回调与真实Redis IT；accepted plan与callback-revision为合同。
+- Bugs: No findings. Security: No findings. Compliance: No findings.
+- Findings posted 0；重复抑制 0；verifier rejected 0（无候选需验证）；Nits 0。
+- Recurring：扫描现有review-findings，未见此次回调实现需新增的重复缺陷类别。
+- 人工授权：用户明确“OK，推送代码合并”；此审查不自批 gate，不绕过分支保护。代码工作树指纹见 verification.md。

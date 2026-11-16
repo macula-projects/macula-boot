@@ -64,10 +64,6 @@ public class GatewayProperties {
     private ProtectUrl protectUrls = new ProtectUrl();
 
     /**
-     * 后端配置了移除OpaqueToken接口访问时强制hmac验证
-     */
-    private boolean forceHmacRmOpaqueTokenEndpoint = true;
-    /**
      * 移除opaqueToken的端点
      */
     private String rmOpaqueTokenEndpoint = GatewayConstants.DEFAULT_RM_OPAQUE_TOKEN_ENDPOINT;

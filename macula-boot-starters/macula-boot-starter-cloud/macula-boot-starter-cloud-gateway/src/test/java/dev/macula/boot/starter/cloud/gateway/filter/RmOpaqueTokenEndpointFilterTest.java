@@ -18,7 +18,6 @@
 package dev.macula.boot.starter.cloud.gateway.filter;
 
 import dev.macula.boot.starter.cloud.gateway.config.GatewayProperties;
-import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtilsTest;
 import org.junit.jupiter.api.Test;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -47,87 +46,67 @@ import static org.mockito.Mockito.when;
  * @since 6.1.0
  */
 class RmOpaqueTokenEndpointFilterTest {
+    /** 专用资源服务器Key通过后复用原缓存及派生JWT清理，重复删除仍然成功。 */
     @Test
     @SuppressWarnings("unchecked")
-    void rejectsMismatchedTenantWithoutTokenSideEffects() {
-        GatewayProperties properties = new GatewayProperties();
-        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app", "{\"token\":\"test-token\"}");
-        RmOpaqueTokenEndpointFilter filter = new RmOpaqueTokenEndpointFilter(properties, tokens,
-            hmac(KongApiUtilsTest.redis("7", "12"), "macula-samples-gateway"));
-        filter.filter(exchange, ignored -> Mono.empty()).block();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        verifyNoInteractions(tokens);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void unknownGatewayCannotCleanTokens() {
-        GatewayProperties properties = new GatewayProperties();
-        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app", "{\"token\":\"test-token\"}");
-        RmOpaqueTokenEndpointFilter filter = new RmOpaqueTokenEndpointFilter(properties, tokens,
-            hmac(KongApiUtilsTest.redis("12", "7"), "unknown-gateway"));
-        filter.filter(exchange, ignored -> Mono.empty()).block();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        verifyNoInteractions(tokens);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void matchingTenantCanReachTokenLookup() {
-        GatewayProperties properties = new GatewayProperties();
+    void callbackKeyCleansExistingCachesIdempotently() throws Exception {
+        var properties = new GatewayProperties();
         RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
         ValueOperations<String, Object> values = mock(ValueOperations.class);
         when(tokens.opsForValue()).thenReturn(values);
-        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app", "{\"token\":\"test-token\"}");
-        RmOpaqueTokenEndpointFilter filter = new RmOpaqueTokenEndpointFilter(properties, tokens,
-            hmac(KongApiUtilsTest.redis("12", "7"), "macula-samples-gateway"));
-        filter.filter(exchange, ignored -> Mono.empty()).block();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(values).get(anyString());
+        var principal = new org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal(
+            "fixture", java.util.Map.of("sub", "fixture", "iat", java.time.Instant.EPOCH), java.util.List.of());
+        when(values.get(dev.macula.boot.constants.CacheConstants.GATEWAY_TOKEN_CACHE_KEY + "test-token"))
+            .thenReturn(principal, null);
+        var credentials = callbackCredentials(properties.getRmOpaqueTokenEndpoint());
+        var filter = new RmOpaqueTokenEndpointFilter(properties, tokens, credentials);
+        ReflectionTestUtils.setField(filter, "resourceClientId", "resource");
+        for (int attempt = 0; attempt < 2; attempt++) {
+            var exchange = MockServerWebExchange.from(MockServerHttpRequest.post(properties.getRmOpaqueTokenEndpoint())
+                .header("Authorization", "Bearer sk-" + "a".repeat(43)).body("{\"token\":\"test-token\"}"));
+            filter.filter(exchange, ignored -> Mono.error(new AssertionError("Callback must finish here"))).block();
+            assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+        verify(tokens).delete(AddJwtGlobalFilter.buildKey(principal));
+        verify(tokens).delete(dev.macula.boot.constants.CacheConstants.GATEWAY_TOKEN_CACHE_KEY + "test-token");
     }
 
+    /** 错误/跨资源服务器/Query/重复凭据、Redis故障、HMAC和无凭据请求都不能清理。 */
     @Test
     @SuppressWarnings("unchecked")
-    void explicitlyDisabledHmacRetainsLegacyBehavior() {
-        GatewayProperties properties = new GatewayProperties();
-        properties.setForceHmacRmOpaqueTokenEndpoint(false);
-        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-        ValueOperations<String, Object> values = mock(ValueOperations.class);
-        when(tokens.opsForValue()).thenReturn(values);
-        var applications = KongApiUtilsTest.redis("7", null);
-        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app", "{\"token\":\"test-token\"}");
-        new RmOpaqueTokenEndpointFilter(properties, tokens, hmac(applications, "macula-samples-gateway"))
-            .filter(exchange, ignored -> Mono.empty()).block();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.OK);
-        verifyNoInteractions(applications);
-    }
-    /** token 清理仍须校验应用 URL 许可和签名，不能因改用纯验签工具而绕过策略。 */
-    @Test
-    @SuppressWarnings("unchecked")
-    void deniedUrlAndInvalidSignatureCannotCleanTokens() {
-        for (boolean deniedUrl : new boolean[] {true, false}) {
+    void callbackFailuresNeverReadOrDeleteTokenCache() throws Exception {
+        for (int scenario = 0; scenario < 9; scenario++) {
             var properties = new GatewayProperties();
             RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-            var applications = KongApiUtilsTest.redis("12", "7");
-            when(applications.<String, String>opsForHash().entries(
-                dev.macula.boot.constants.CacheConstants.SECURITY_SYSTEM_APPS + "app"))
-                .thenReturn(java.util.Map.of("secretKey", deniedUrl ? "test-secret" : "wrong",
-                    "tenantId", "12", "permitUrls", deniedUrl ? "GET:/other" : "POST:/**"));
-            var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app",
-                "{\"token\":\"test-token\"}");
-            new RmOpaqueTokenEndpointFilter(properties, tokens, hmac(applications, "macula-samples-gateway"))
-                .filter(exchange, ignored -> Mono.empty()).block();
+            var credentials = callbackCredentials(properties.getRmOpaqueTokenEndpoint());
+            var filter = new RmOpaqueTokenEndpointFilter(properties, tokens, credentials);
+            ReflectionTestUtils.setField(filter, "resourceClientId", scenario == 1 ? "other-resource" : "resource");
+            var request = MockServerHttpRequest.post(properties.getRmOpaqueTokenEndpoint()
+                + (scenario == 2 ? "?access_token=sk-" + "a".repeat(43) : ""));
+            if (scenario != 2 && scenario != 7 && scenario != 6) {
+                request.header("Authorization", "Bearer sk-" + (scenario == 0 ? "b" : "a").repeat(43));
+            }
+            if (scenario == 6) { request.header("Authorization", "hmac username=\"app\", signature=\"fixture\""); }
+            if (scenario == 8) { ReflectionTestUtils.setField(filter, "resourceClientId", ""); }
+            if (scenario == 3) { request.header("Authorization", "Bearer sk-" + "a".repeat(43)); }
+            if (scenario == 4) {
+                when(credentials.<String, String>opsForHash().entries(anyString()))
+                    .thenThrow(new IllegalStateException("synthetic Redis failure"));
+            }
+            if (scenario == 5) {
+                when(credentials.<String, String>opsForHash().entries(anyString())).thenReturn(java.util.Map.of());
+            }
+            var exchange = MockServerWebExchange.from(request.body("{\"token\":\"test-token\"}"));
+            filter.filter(exchange, ignored -> Mono.empty()).block();
             assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
             verifyNoInteractions(tokens);
         }
     }
 
-    /** DEBUG 日志不得包含成功请求 token、失败 Header/Cookie 或 JSON 解析异常中的正文片段。 */
+    /** 认证通过仍须校验正文；解析异常和运行日志均不能泄漏token与API Key。 */
     @Test
     @SuppressWarnings("unchecked")
-    void debugLogsNeverContainRawCredentialsOrPayload() {
+    void validatesPayloadWithoutLoggingCredentials() throws Exception {
         Logger logger = (Logger)LoggerFactory.getLogger(RmOpaqueTokenEndpointFilter.class);
         Level previous = logger.getLevel();
         ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -137,27 +116,18 @@ class RmOpaqueTokenEndpointFilterTest {
         try {
             var properties = new GatewayProperties();
             RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-            ValueOperations<String, Object> values = mock(ValueOperations.class);
-            when(tokens.opsForValue()).thenReturn(values);
             var filter = new RmOpaqueTokenEndpointFilter(properties, tokens,
-                hmac(KongApiUtilsTest.redis("12", "7"), "macula-samples-gateway"));
-            var valid = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app",
-                "{\"token\":\"sensitive-opaque-token\"}");
-            filter.filter(valid, ignored -> Mono.empty()).block();
-            assertThat(valid.getResponse().getStatusCode()).isEqualTo(HttpStatus.OK);
-            var invalid = MockServerWebExchange.from(MockServerHttpRequest.post(properties.getRmOpaqueTokenEndpoint())
-                .header("Authorization", "Bearer sk-sensitive-key").header("Cookie", "SESSION=sensitive-cookie"));
-            filter.filter(invalid, ignored -> Mono.empty()).block();
-            assertThat(invalid.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-            properties.setForceHmacRmOpaqueTokenEndpoint(false);
-            var malformed = MockServerWebExchange.from(MockServerHttpRequest.post(properties.getRmOpaqueTokenEndpoint())
-                .body("{\"token\":\"sensitive-json-fragment\""));
-            filter.filter(malformed, ignored -> Mono.empty()).block();
-            assertThat(malformed.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(appender.list).isNotEmpty();
-            assertThat(appender.list).allSatisfy(event -> {
-                assertThat(event.getFormattedMessage()).doesNotContain("sensitive-opaque-token", "sk-sensitive-key",
-                    "sensitive-cookie", "sensitive-json-fragment");
+                callbackCredentials(properties.getRmOpaqueTokenEndpoint()));
+            ReflectionTestUtils.setField(filter, "resourceClientId", "resource");
+            for (String body : new String[] {"", "{}", "{\"token\":\"sensitive-json-fragment\""}) {
+                var exchange = MockServerWebExchange.from(MockServerHttpRequest.post(properties.getRmOpaqueTokenEndpoint())
+                    .header("Authorization", "Bearer sk-" + "a".repeat(43)).body(body));
+                filter.filter(exchange, ignored -> Mono.empty()).block();
+                assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            }
+            verifyNoInteractions(tokens);
+            assertThat(appender.list).isNotEmpty().allSatisfy(event -> {
+                assertThat(event.getFormattedMessage()).doesNotContain("sensitive-json-fragment", "sk-" + "a".repeat(43));
                 assertThat(event.getThrowableProxy()).isNull();
             });
         } finally {
@@ -167,30 +137,33 @@ class RmOpaqueTokenEndpointFilterTest {
         }
     }
 
-    /** 创建与生产相同准入配置的 HMAC 验证器，避免清理测试绕过过滤器策略。 */
-    private KongApiGlobalFilter hmac(RedisTemplate<String, Object> applications, String applicationName) {
-        var filter = new KongApiGlobalFilter(applications);
-        ReflectionTestUtils.setField(filter, "applicationName", applicationName);
-        return filter;
-    }
-
-    /** 强制 HMAC 的清理入口不能绕过 IP，拒绝时不读写 token 缓存。 */
+    /** 非清理端点正常进入后续链路，不读取凭据或token缓存。 */
     @Test
     @SuppressWarnings("unchecked")
-    void deniedIpCannotReadOrRemoveTokenCache() {
-        var properties = new GatewayProperties();
-        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class);
-        var applications = KongApiUtilsTest.redis("12", "7");
-        when(applications.<String, String>opsForHash().entries(
-            dev.macula.boot.constants.CacheConstants.SECURITY_SYSTEM_APPS + "app"))
-            .thenReturn(java.util.Map.of("secretKey", "test-secret", "tenantId", "12",
-                dev.macula.boot.constants.CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24"));
-        var exchange = KongApiUtilsTest.request("POST", properties.getRmOpaqueTokenEndpoint(), "app",
-            "{\"token\":\"test-token\"}");
-        new RmOpaqueTokenEndpointFilter(properties, tokens, hmac(applications, "macula-samples-gateway"))
-            .filter(exchange, ignored -> Mono.empty()).block();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        verifyNoInteractions(tokens);
+    void passesOtherEndpointsWithoutRedisAccess() {
+        RedisTemplate<String, Object> tokens = mock(RedisTemplate.class), credentials = mock(RedisTemplate.class);
+        var filter = new RmOpaqueTokenEndpointFilter(new GatewayProperties(), tokens, credentials);
+        var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/business"));
+        var called = new java.util.concurrent.atomic.AtomicBoolean();
+        filter.filter(exchange, ignored -> Mono.fromRunnable(() -> called.set(true))).block();
+        assertThat(called).isTrue();
+        verifyNoInteractions(tokens, credentials);
+    }
+
+    /** 构造只绑定单个资源服务器和准确路径的专用摘要。 */
+    @SuppressWarnings("unchecked")
+    private RedisTemplate<String, Object> callbackCredentials(String path) throws Exception {
+        RedisTemplate<String, Object> redis = mock(RedisTemplate.class);
+        org.springframework.data.redis.core.HashOperations<String, String, String> hashes = mock(
+            org.springframework.data.redis.core.HashOperations.class);
+        when(redis.<String, String>opsForHash()).thenReturn(hashes);
+        String digest = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+            .digest(("sk-" + "a".repeat(43)).getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        when(hashes.entries(anyString())).thenReturn(java.util.Map.of());
+        when(hashes.entries(dev.macula.boot.constants.CacheConstants.IAM_CALLBACK_CREDENTIAL_PREFIX + "resource"))
+            .thenReturn(java.util.Map.of(dev.macula.boot.constants.CacheConstants.IAM_CALLBACK_KEY_DIGEST, digest,
+                dev.macula.boot.constants.CacheConstants.IAM_CALLBACK_PATH, path));
+        return redis;
     }
 
 }

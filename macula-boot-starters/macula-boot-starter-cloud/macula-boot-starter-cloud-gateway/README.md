@@ -90,7 +90,6 @@ macula:
 | `apikey.enabled` | `true` | 允许 API Key 接入；关闭后仍保留 GlobalFilter，拒绝携带 API Key 的 Gateway 请求 |
 | `rm-opaque-token.enabled` | `true` | 创建 Token 缓存移除端点过滤器 |
 | `rm-opaque-token-endpoint` | `/gateway/rm/opaqueToken` | 缓存移除路径 |
-| `force-hmac-rm-opaque-token-endpoint` | `true` | 移除 Token 缓存时强制 HMAC 校验 |
 | `security.ignore-urls` | 空列表并合并内置白名单 | 放行认证的路径 |
 | `security.only-auth-urls` | 空列表 | 只认证、不检查 URL 角色权限的路径 |
 | `security.default-url-require-check` | `false` | 未配置 URL 权限时是否要求鉴权，生产需明确评估 |
@@ -119,6 +118,23 @@ macula:
 1. 前端访问gateway接口，在HTTP请求头添加`Authorization: Bearer xxxxx`
 2. gateway收到token后，调用iam服务器的introspect url返回用户信息和角色信息（同时会以token有效期来缓存用户信息）
 3. 通过AddJwtFilter将用户信息和角色信息转为JWT Token放入请求头给后续的微服务的安全模块校验认证（JWT也会缓存）
+
+### IAM 资源服务器 API Key 回调
+
+复用 `POST /gateway/rm/opaqueToken`（由 `macula.gateway.rm-opaque-token-endpoint` 配置），请求为 `Authorization: Bearer <专用 API Key>`、JSON `{"token":"<access token>"}`。IAM 在资源服务器接入设置中维护实际 HTTPS 回调地址，首次保存生成独立 Key，与内省 OAuth client_secret 分开。成功响应沿用 `Result.success()`。
+
+`RmOpaqueTokenEndpointFilter` 从 `sysRedisTemplate` 读取 System 发布的凭据摘要和路径，按 `spring.security.oauth2.resourceserver.opaquetoken.client-id` 绑定本网关身份。只接受单一 Header 凭据，拒绝 Query、重复 Header、错误 Key、错误资源服务器、错误路径及缺失/不可读取的缓存；失败不能降级绕过认证。清理端点仅认证 API Key；无凭据及 HMAC 请求均拒绝，没有认证关闭开关。构造器直接注入 `sysRedisTemplate`，自定义装配也须直接传入System凭据缓存连接。
+
+System 缓存键为 `CacheConstants.IAM_CALLBACK_CREDENTIAL_PREFIX + resource_client_id`，Hash 含 `apiKeyDigest`（SHA-256十六进制）和 `path`，仅启用的真实资源服务器配置发布，禁用即删除；60秒TTL，30秒从数据库重建。此凭据不赋予普通业务 API 权限。网关的System Redis必须可读该缓存，token缓存仍使用原网关Redis；集群实例必须共享token缓存，否则需分别配置回调。
+
+通过认证后只执行原有 opaque token 与关联派生 JWT 缓存清理。IAM 对账户所有待撤销access token逐个回调所有资源服务器，部分失败保留重试；这是尽力同步，允许与并发内省存在短暂不一致，不承诺版本水位或固定60秒收敛，也不取消已开始的请求。内省缓存和派生JWT沿用原实现。
+
+```bash
+mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am test
+# 必须使用专用临时Redis，不能指向业务Redis。
+IAM_CALLBACK_REDIS_IT_PORT=<isolated-port> mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am verify \
+  -Dit.test=RmOpaqueTokenCallbackIT -Dfailsafe.failIfNoSpecifiedTests=false
+```
 
 ### AK/SK认证
 
@@ -435,11 +451,11 @@ public class RedisConfiguration {
 
 `KongApiUtils.checkSign(exchange, secretKey)` 仅使用服务端传入的密钥校验请求时间、签名及请求内容，不查询 Redis、不检查租户或 URL 许可，也不发布身份。原接收 Redis 和路径/应用名的三参数、四参数 `checkSign` 重载已移除；自定义集成须迁移，不能把纯验签成功当成完整应用认证。
 
-完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属准入及业务租户解析 → URL 许可 → 纯验签 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体；token 清理端点注入同一个验证器，在缓存读取/删除前执行相同准入。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。`RmOpaqueTokenEndpointFilter` 构造器的第三个参数相应改为 `KongApiGlobalFilter`，自定义装配须同步调整。
+完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属准入及业务租户解析 → URL 许可 → 纯验签 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。token 清理端点独立使用资源服务器 API Key，构造器第三个参数为 `sysRedisTemplate`，不再依赖此 HMAC 验证器。
 
 ### 应用与 API Key 的 URL/IP 准入
 
-HMAC、API Key 及强制 HMAC 的 token 清理端点，统一调用 `TenantUtils.checkTenantAndUrls` 校验归属租户、URL 和来源 IP。缓存字段 `permitUrls` 使用每行一条的 `HTTP方法:/路径`，支持 Ant 通配符，同时兼容旧英文逗号及混合分隔；路径沿用各调用入口的 `StripPrefix` 时点。
+业务 HMAC 与业务 API Key 统一调用 `TenantUtils.checkTenantAndUrls` 校验归属租户、URL 和来源 IP。缓存字段 `permitUrls` 使用每行一条的 `HTTP方法:/路径`，支持 Ant 通配符，同时兼容旧英文逗号及混合分隔；路径沿用各调用入口的 `StripPrefix` 时点。
 
 ```text
 GET:/service/api/**

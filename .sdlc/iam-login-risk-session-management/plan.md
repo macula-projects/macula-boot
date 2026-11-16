@@ -1,5 +1,7 @@
 # Plan: IAM 登录风险、在线会话与安全策略执行 (from spec.md 2026-11-15)
 
+> 2026-11-15 回调协议修订已由用户 YES 批准，以 [callback-revision.md](callback-revision.md) 为准；原文的 JWS/网关版本缓存部分不再实施。
+
 ## Files that change
 本计划 Status: accepted，用户明确回复 YES 批准工程实施。Cloud 根为 ../macula-cloud，Boot 根为当前 macula-boot。下列花括号逐项展开为明确文件，不代表整个目录可任意修改；新增类如需拆分或增加文件，先记录计划偏差再评估是否需要重新审批。无计划删除文件。
 
@@ -52,6 +54,220 @@ Boot Gateway（模块 macula-boot-starters/macula-boot-starter-cloud/macula-boot
 - Admin tests/unit/{iam-security.test.js,iam-resource-revocation.test.js,security-policy.test.js}、cypress/e2e/{iam-security.cy.js,iam-mfa.cy.js}（新增/修改）。
 - Cloud {macula-cloud-iam,macula-cloud-system,macula-cloud-api/macula-cloud-system-api,macula-cloud-gateway,macula-cloud-admin}/README.md；IAM docs/{configuration.md,third-party-integration.md}（修改）；不创建内容重复的根说明。
 
+修订前实施快照（历史；当前API Key修订及下列最新清单取代原回调部分）：
+
+Cloud：
+
+```text
+.sdlc/iam-login-risk-session-management/plan.md
+.sdlc/iam-login-risk-session-management/verification.md
+macula-cloud-admin/README.md
+macula-cloud-admin/cypress/e2e/admin-authorization-code.cy.js
+macula-cloud-admin/cypress/e2e/iam-mfa.cy.js
+macula-cloud-admin/cypress/e2e/iam-security.cy.js
+macula-cloud-admin/cypress/e2e/security-policy.cy.js
+macula-cloud-admin/src/api/model/system/iamResourceRevocation.js
+macula-cloud-admin/src/api/model/system/iamSecurity.js
+macula-cloud-admin/src/api/model/system/securityPolicy.js
+macula-cloud-admin/src/locales/lang/en.js
+macula-cloud-admin/src/locales/lang/zh-cn.js
+macula-cloud-admin/src/utils/adminAuthorizationCode.js
+macula-cloud-admin/src/views/common/login/callback.vue
+macula-cloud-admin/src/views/system/iamSecurity/LoginLogs.vue
+macula-cloud-admin/src/views/system/iamSecurity/OnlineSessions.vue
+macula-cloud-admin/src/views/system/iamSecurity/RevocationOperations.vue
+macula-cloud-admin/src/views/system/iamSecurity/UserSecurityDialog.vue
+macula-cloud-admin/src/views/system/iamSecurity/index.vue
+macula-cloud-admin/src/views/system/oauth2Client/components/ResourceServerSettings.vue
+macula-cloud-admin/src/views/system/securityPolicy/index.vue
+macula-cloud-admin/tests/unit/admin-authorization-code.test.js
+macula-cloud-admin/tests/unit/iam-resource-revocation.test.js
+macula-cloud-admin/tests/unit/iam-security.test.js
+macula-cloud-api/macula-cloud-system-api/README.md
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamResourceRevocationConfigDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamRevocationDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamSecurityCommandDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamSecurityStateDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamSessionDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/dto/IamSessionSearchDTO.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamLockType.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamRiskLevel.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamRiskReason.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamSecurityAction.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamSecurityVersion.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/IamUserIdentity.java
+macula-cloud-api/macula-cloud-system-api/src/main/java/dev/macula/cloud/system/security/PasswordPolicyRules.java
+macula-cloud-gateway/README.md
+macula-cloud-gateway/src/main/resources/application.yml
+macula-cloud-iam/README.md
+macula-cloud-iam/docs/configuration.md
+macula-cloud-iam/docs/third-party-integration.md
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/email/EmailCodeService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/AdditionalAuthenticationRequiredException.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/MfaAuthorizationParameters.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/MfaChallengeService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/MfaCompletionService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/MfaSessionAuthenticationStrategy.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/mfa/impl/DefaultMfaChallengeService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/LoginDeviceInfo.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/LoginRiskAuthenticationFilter.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/LoginRiskDecision.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/LoginRiskEvaluator.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/LoginRiskProperties.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/TrustedLoginRequestResolver.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/geo/IpGeolocationClient.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/geo/IpGeolocationProperties.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/geo/IpGeolocationResult.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/geo/impl/CachingIpGeolocationClient.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/geo/impl/IpDataCloudGeolocationClient.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/risk/impl/RuleBasedLoginRiskEvaluator.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/session/IamHtmlSecurityHeadersFilter.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/session/IamRememberMeServices.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/session/IamUserSessionFilter.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/sms/SmsCodeService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/verification/VerificationCodePurpose.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/verification/VerificationCodeService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/verification/VerificationCodeStore.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/authentication/verification/redis/RedisVerificationCodeStore.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/config/DefaultSecurityConfiguration.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/config/IamLoginSecurityConfiguration.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/config/IamSecurityMaintenanceConfiguration.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/config/oauth2/OAuth2ProtocolExtensionConfiguration.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/config/oauth2/ProtocolOAuth2Configuration.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/controller/IamPasswordChangeController.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/controller/LoginController.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/controller/MfaChallengeController.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/handler/BrowserAuthenticationFailureHandler.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/message/audit/LoginMessageAudit.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/message/dispatch/LoginMailDispatcher.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/message/dispatch/LoginSmsDispatcher.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/message/template/LoginMessageConfigurationService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/ProtocolCheckingTokenGenerator.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/ResourceTokenIntrospectionAuthenticationProvider.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/configuration/impl/TokenEndpointExtension.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/endpoint/OAuth2TokenEndpointFailureHandler.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/endpoint/OAuth2TokenEndpointSuccessHandler.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/grant/externalcode/OAuth2ExternalCodeAuthenticationConverter.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/grant/externalcode/OAuth2ExternalCodeAuthenticationProvider.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/persistence/MaculaOAuth2AuthorizationService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/protocol/oauth2/token/claims/impl/DefaultAccessTokenClaimsService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/revocation/impl/HttpIamRevocationDispatcher.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/revocation/impl/JwsIamRevocationSigner.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/IamPasswordPolicyGate.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/IamSecurityCoordinator.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/IamSecurityPolicyReader.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/IamSecurityStateRepository.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/IamSessionRegistry.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/impl/DatabaseIamSecurityStateRepository.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/impl/DatabaseIamSessionRegistry.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/impl/DefaultIamPasswordPolicyGate.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/impl/DefaultIamSecurityCoordinator.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/security/impl/DictionaryIamSecurityPolicyReader.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/service/account/impl/DefaultClientAccountDetailsService.java
+macula-cloud-iam/src/main/java/dev/macula/cloud/iam/service/userdetails/SysUserDetails.java
+macula-cloud-iam/src/main/resources/application.yml
+macula-cloud-iam/src/main/resources/static/iam/mfa.js
+macula-cloud-iam/src/main/resources/templates/login.html
+macula-cloud-iam/src/main/resources/templates/mfa.html
+macula-cloud-iam/src/main/resources/templates/password-change-required.html
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/mfa/MfaChallengeServiceTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/risk/LoginDeviceInfoTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/risk/LoginRiskEvaluatorTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/risk/TrustedLoginRequestResolverTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/risk/geo/IpDataCloudGeolocationClientTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/session/IamRememberMeServicesTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/authentication/verification/redis/RedisVerificationCodeStoreTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/config/IamProtocolTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/config/MfaProtocolIT.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/protocol/oauth2/client/impl/OAuth2ClientRegistrationServiceImplTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/protocol/oauth2/endpoint/OAuth2TokenEndpointSuccessHandlerTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/protocol/oauth2/token/claims/impl/DefaultAccessTokenClaimsServiceTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/revocation/IamRevocationDispatcherTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/security/IamSecurityConcurrencyIT.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/security/IamSecurityCoordinatorTest.java
+macula-cloud-iam/src/test/java/dev/macula/cloud/iam/service/application/IamApplicationTestFixtures.java
+macula-cloud-system/README.md
+macula-cloud-system/src/main/java/dev/macula/cloud/system/controller/IamResourceRevocationConfigController.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/controller/IamSecurityManagementController.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/controller/SecurityPolicyController.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/enums/MessageTemplateType.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/form/IamMfaPolicyForm.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/form/IamResourceRevocationConfigForm.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/form/IamSecurityActionForm.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/form/LoginRiskPolicyConfigForm.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamLoginLogMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamResourceRevocationConfigMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamRevocationMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamRevocationTargetMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamSessionMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysIamUserSecurityMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysUserMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/mapper/SysUserPasswordHistoryMapper.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamLoginLog.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamResourceRevocationConfig.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamRevocation.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamRevocationTarget.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamSession.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysIamUserSecurity.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/pojo/entity/SysUserPasswordHistory.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/query/IamLoginLogQuery.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/query/IamSessionQuery.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/IamLoginAuditService.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/IamResourceRevocationConfigService.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/IamSecurityManagementService.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/IamSecurityTime.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/PasswordPolicyValidator.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/SecurityPolicyService.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/IamLoginAuditServiceImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/IamResourceRevocationConfigServiceImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/IamSecurityManagementServiceImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/PasswordPolicyValidatorImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/SecurityPolicyServiceImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/service/impl/SysUserServiceImpl.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/IamLoginLogVO.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/IamResourceRevocationConfigVO.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/IamRevocationVO.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/IamSessionVO.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/IamUserSecurityVO.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/LoginRiskPolicyConfigResult.java
+macula-cloud-system/src/main/java/dev/macula/cloud/system/vo/SecurityPolicyResult.java
+macula-cloud-system/src/main/resources/db/migration/V30__iam_login_security.sql
+macula-cloud-system/src/test/java/dev/macula/cloud/system/controller/IamResourceRevocationConfigControllerTest.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/controller/IamSecurityManagementControllerTest.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/integration/IamAuditRetentionIT.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/integration/IamLoginSecurityMigrationIT.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/service/impl/IamSecurityManagementServiceTest.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/service/impl/MessageSettingsServiceImplTest.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/service/impl/PasswordPolicyValidatorTest.java
+macula-cloud-system/src/test/java/dev/macula/cloud/system/service/impl/SysUserServiceImplTest.java
+```
+
+Boot：
+
+```text
+.sdlc/iam-login-risk-session-management/plan.md
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/README.md
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/config/IamRevocationAutoConfiguration.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/config/IamRevocationProperties.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/filter/AddJwtGlobalFilter.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/filter/RmOpaqueTokenEndpointFilter.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/ResourceServerConfiguration.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamAwareOpaqueTokenIntrospector.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationEndpointFilter.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationEvent.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationReceipt.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationStore.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationVerifier.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/security/revocation/RedisIamRevocationStore.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/config/IamRevocationAutoConfigurationTest.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/filter/AddJwtGlobalFilterTest.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/filter/RmOpaqueTokenEndpointFilterTest.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamAwareOpaqueTokenIntrospectorTest.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationMultiInstanceIT.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/security/revocation/IamRevocationVerifierTest.java
+```
+
 ## Order of work
 1. 确认所有路径、相邻实现/测试、模块 POM/README、CLAUDE.md（如存在）和规则；新迁移重查 V30 冲突；已核实语言文件为 zh-cn.js/en.js、Gateway 配置为 src/main/resources/application.yml。新增 Query 仅供 System Controller 使用，留在 System query 命名空间，不扩大 System API。仅当计划获人工批准后，将跨仓库已批准工件同步至 Boot。不开 fast path，不修改无关分支或部署。
 2. 先定义身份复合键、版本、锁型、风险原因、管理及内部 Feign 契约；在 System 增量建表，唯一约束区分合法空 tenant 的目录，防止 MySQL NULL 唯一键绕过。加入策略配置、消息场景及菜单/按钮权限；保留现有应用及凭据。验证隔离库 V29→新版本以及重复执行/约束。
@@ -68,6 +284,25 @@ Boot Gateway（模块 macula-boot-starters/macula-boot-starter-cloud/macula-boot
 13. 执行 Proof 的相关验证，修复失败并记录实际命令、数量、跳过和限制到 verification.md；完成后进入 sdlc-test 正式验证，不把计划中的测试当已通过。源码完成再请求实现完成确认，不自行进入部署/PR。
 
 ## Risks
+实施偏差记录（不改变已接受的业务范围）：
+- 单一实现中的挑战存储、原事务续接集中于 `DefaultMfaChallengeService` 与 `MfaAuthorizationParameters`；安全审计写入由独立安全 Repository 承担，未机械创建预期清单中的空壳接口/重复 Entity。外部端点、一次性绑定、原子消费与验证边界按 spec 保留。
+- 新增 IAM `authentication/mfa/MfaAuthorizationParameters.java`，从实际恢复授权 URL 的 raw query 建立规范参数快照，处理 SavedRequest 的框架 continue 控制参数和 null/空串差异；保留所有参数键、重复值及顺序，不放宽 state/PKCE/client 绑定。
+- V30 新会话表加入 `login_family_id` 与索引，在用户主库行锁下统一计数浏览器和原生登录家族；同族 token 与刷新不重复占配额。
+- 管理动作枚举用显式 API/event code，保持已批准的现有 wire 值不变，避免协议依赖 Java 枚举重命名。
+- 密码提前提醒通过受信用户 token 响应扩展 `password_expires_at` / `password_expiry_warning_days` 实现：新增 IAM `protocol/oauth2/endpoint/OAuth2TokenEndpointSuccessHandler.java` 包装原成功处理；Admin 修改 `src/utils/adminAuthorizationCode.js`、`src/views/common/login/callback.vue`、`tests/unit/admin-authorization-code.test.js` 与 `cypress/e2e/admin-authorization-code.cy.js`。仅在完成原 ID Token 与权限初始化后展示有界提醒，不改变登录证明或持久化提醒元数据。
+- 新安全表明确采用 UTC wall-clock 存储，System 增加专用 `service/IamSecurityTime.java` 包装现有 `DateTimeConverter("UTC")`，IAM JDBC 使用 LocalDateTime 绑定/读取再按 UTC 转换；避免默认 JVM/Asia/Shanghai 驱动使锁与清理边界偏移。不修改旧表全局时区，也不提供第二个通用 DateTimeConverter Bean。增加 Asia/Shanghai 真实数据库往返与截止边界验证。
+- 新增 IAM `src/main/java/dev/macula/cloud/iam/authentication/risk/LoginDeviceInfo.java` 及同包测试 `LoginDeviceInfoTest.java`：纯 UA 展示解析，分别记录设备、系统、浏览器；保留原始 UA，解析结果不作为可信身份。
+- 新增 IAM `src/main/resources/static/iam/mfa.js` 支撑受限 MFA 页面发送/验证交互；沿用当前页面的 CSRF 与挑战绑定，不创建独立登录凭据。
+- IAM Session 实现命名为 `security/impl/DatabaseIamSessionRegistry.java`，与实际主库行锁/查询职责一致，不保留误导性的 Redis 类名。
+- System `mapper/SysUserMapper.java` 新增密码更新行锁以串行历史校验和写入；属于已批准密码策略事务实现。
+- System 管理动作使用同库事务写安全版本与 outbox，IAM 直接读取主库；不新增反向 Feign 命令端点，避免引入额外可信调用身份。原计划中的 IamSecurityFeignClient/内部命令 Controller 不再机械创建。
+- IAM 安全表采用独立 JDBC Repository/TransactionTemplate 投影，SQL 留在数据访问层，不引用 System 实现；不生成重复 MyBatis Entity/Mapper/XML。保持同一 V30 契约、事务/版本语义；具体新增文件以实际变更清单记录。
+- 新增 API `security/PasswordPolicyRules.java`，提供纯规则与不可变配置以便 System 写密码和 IAM 受限改密共用；不引入数据库或服务实现依赖。
+- outbox 增加 `command_digest`、`actor`、`audit_reason`，用于校验相同 operationId 的完整命令幂等及保留操作者/原因；回调 `reason` 仍为稳定动作码，避免把管理员自由文本作为协议标识。
+- Admin 新增撤销操作分页 GET `/api/v1/iam-revocations` 以支撑已接受的同步列表页面；补充 `cypress/e2e/security-policy.cy.js` 验证风险阈值保存与边界。
+- 资源服务器回调是全局出站目标配置，沿用平台 ROOT 管理边界；租户管理员仍可管理其授权范围内的用户及查看同步状态。
+- Boot 正缓存为 0 时，派生内部 JWT 为当次下游转发提供最短 1 秒有效期；正常缓存模式继承状态绝对截止，不因每次生成派生 JWT 扩大缓存收敛窗口。
+
 - 用户接受资源服务器部分不一致：callback 未到时默认最多 60 秒、配置上限 300 秒；缓存不能 stale-if-error/滑动续期。第三方未实现协议不承诺时间上界，未接入/失败状态持续可见；仅平台 stub 测试不能代替外部联调。
 - 数据库主库安全状态为权威；Redis 恢复、事务回滚、并发刷新/签发/撤销必须可重复证明。版本不得 ABA/重置；不得把锁状态误当用户 status。已开始的业务请求不强制终止。
 - 用户已选择同通道新验证码可做再次验证，不宣称独立因子。密钥缺失、邮箱/手机均未绑定、消息供应商失败会拒绝该次认证；首次新设备或地理未知可能要求 MFA。
@@ -89,3 +324,28 @@ Boot Gateway（模块 macula-boot-starters/macula-boot-starter-cloud/macula-boot
 - 外部契约：IpDataCloudGeolocationClientTest 使用纯解析/模拟传输；IpDataCloudGeolocationClientIT 使用 HTTP stub 验证 URI 编码、IPv4/IPv6、数字/字符串 code=200、data.location 映射、业务失败/超时/未知字段、无效/缺失地理和凭据脱敏。禁止把这些结果写成真实供应商联调通过。
 - 命令：Boot `mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am test`，相关 IT 用 verify；Cloud `mvn -pl macula-cloud-api,macula-cloud-system,macula-cloud-iam,macula-cloud-gateway -am test -Plocal`，相关 IT 用 verify，再执行跨服务全仓 test/verify。Admin 相关 Vitest、npm run build、相关 Cypress；所有新增修改 Java 检查版权头/Javadoc/Checkstyle，最后 git diff --check。
 - 所有外部测试先检查运行条件；运行日志/报告与正式 sdlc-test 的 coverage、第三方实测、性能证据分开。记录默认/关闭缓存及地理超时的 p95/p99，不捏造 SLO 或以本地指标替代生产承诺。
+
+## API Key 修订实施细化
+
+用户 YES 已接受 callback-revision.md。新增 filter/RmOpaqueTokenCallbackIT.java（Boot Gateway src/test/java 同包）用两套真实Redis连接验证System凭据格式与现有网关token清理；属于修订 Proof 的跨缓存连接证据。API Key 通过现有内省 client-id 绑定，读取 sysRedisTemplate 而不是网关本地 token Redis。原构造器保持兼容。
+
+IAM沿用已存在的 `security.issued` 发布前检查钩子写独立 callback token ledger，无需再修改 MaculaOAuth2AuthorizationService；身份行锁串行化 ledger 与撤销快照。System 密码修改路径也调用 mapper snapshot，避免遗漏重置密码。任务到期擦除明文并标记 EXPIRED，不标记远端已确认的 SYNCED。System凭据由提交后/启动/周期重建恢复，Redis摘要60秒TTL，30秒续发；未成功同步显式报错。
+
+## API Key修订后实际文件清单（Boot）
+
+```text
+.sdlc/iam-login-risk-session-management/callback-revision.md
+.sdlc/iam-login-risk-session-management/plan.md
+.sdlc/iam-login-risk-session-management/spec.md
+macula-boot-commons/src/main/java/dev/macula/boot/constants/CacheConstants.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/README.md
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/main/java/dev/macula/boot/starter/cloud/gateway/filter/RmOpaqueTokenEndpointFilter.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/filter/RmOpaqueTokenCallbackIT.java
+macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway/src/test/java/dev/macula/boot/starter/cloud/gateway/filter/RmOpaqueTokenEndpointFilterTest.java
+```
+
+## 用户追加约束：仅API Key且直接注入System Redis
+
+用户明确要求无需兼容HMAC，仅认证API Key；直接注入System Redis，不增加可选setter/包装。此指示直接修订已接受计划：删除RmOpaqueTokenEndpointFilter的HMAC分支和forceHmacRmOpaqueTokenEndpoint属性；GatewayAutoConfiguration工厂直接传入sysRedisTemplate，删除setCallbackCredentials及认证中间标记；对应单测/Redis IT改为仅API Key，并覆盖HMAC/无凭据均拒绝。新增修改文件为GatewayProperties.java、GatewayAutoConfiguration.java、ApiKeyAutoConfigurationTest.java（验证直接绑定System Redis），均在原计划模块内。原业务HMAC过滤器职责不变。更新README与实际验证记录，不重复请求已给出的方向确认。
+
+本地镜像更新实测的IAM跨表排序规则兼容修复及验证详见Cloud同slug的plan.md和verification.md；Boot源码不涉及该修复。用户授权更新四个本地应用镜像，均已健康，未更改其他25个原容器。

@@ -1,4 +1,6 @@
 # Spec: IAM 登录风险、在线会话与安全策略执行 (from intent.md 2026-11-15)
+
+> 2026-11-15 回调协议修订已由用户 YES 批准，以 [callback-revision.md](callback-revision.md) 为准；原文的 JWS/网关版本缓存部分不再实施。
 Status: accepted
 
 ## Source intent
