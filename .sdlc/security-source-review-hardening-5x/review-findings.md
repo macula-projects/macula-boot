@@ -10,3 +10,9 @@
 - fresh verifier 只核实上述两项：参数框架问题已随撤回消除，文档矛盾已修正；2 项已处置、0 false-positive rejection、0 新发现。
 - 原 SELF 拼接与 OR 分组仍属待重评估的 Important 安全问题，PR 不得据此转 ready。当前草稿不批准合并，不接受永久风险。
 - 保留的当前范围已做定向回归与规范检查，历史全仓或 SQL 专用结果不能当作恢复后全仓验证。
+
+## Stage: PR review — Round 3, accepted minimal username fix
+- 最终预算轮，只审原 Handler 的 SELF 白名单/非法值无匹配/单引号/条件分组，以及新回归与当前文档；无参数框架、额外 JDBC 或部门变更。
+- 独立 Bugs / Security / Compliance：0 新发现，重复抑制 0。安全结论依赖 Rain 明确确认的 [A-Za-z0-9_]+ 约定；未来扩展字符集需要重新评估。
+- fresh verifier 接收两分支空 surviving findings：0 待核验、verifier-rejected 0；没有批准合并或接受风险。
+- 主线最新全仓 426 项、0 failures/errors、3 原有 skip；5.x Handler/ROOT 6 项通过，旧全仓限制仍在，因此 5.x 保持草稿。变更 Java Checkstyle 零违规，git diff --check 通过。
