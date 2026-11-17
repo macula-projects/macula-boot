@@ -37,7 +37,7 @@ import javax.annotation.Resource;
  * @since 2022-01-23
  */
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.security.oauth2.resourceserver.jwt.secret=isolated-integration-test-secret-32-bytes")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserSeqMapperTest {

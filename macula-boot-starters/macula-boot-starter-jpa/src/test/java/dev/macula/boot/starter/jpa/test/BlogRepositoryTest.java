@@ -35,8 +35,9 @@ import java.util.List;
  * BlogRepository 的单元测试类.
  *
  * @author blinkfox on 2019-08-16.
+ * @since 5.0.21
  */
-@SpringBootTest
+@SpringBootTest(properties = "spring.security.oauth2.resourceserver.jwt.secret=isolated-integration-test-secret-32-bytes")
 public class BlogRepositoryTest {
 
     @Resource

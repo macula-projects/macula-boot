@@ -43,7 +43,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.SupplierJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -154,6 +159,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
     JwtDecoder jwtDecoderByJwkKeySetUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
@@ -168,6 +174,7 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(KeyValueCondition.class)
     JwtDecoder jwtDecoderByPublicKeyValue() throws Exception {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
@@ -183,18 +190,24 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(IssuerUriCondition.class)
     SupplierJwtDecoder jwtDecoderByIssuerUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
         return new SupplierJwtDecoder(() -> JwtDecoders.fromIssuerLocation(jwt.getIssuerUri()));
     }
 
+    /** Secret 模式必须显式配置足够长度的密钥；异常不包含密钥内容。 */
     @Bean
     @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(SecretCondition.class)
     JwtDecoder jwtDecoderBySecret() throws UnsupportedEncodingException {
         // 根据给定的字节数组使用AES加密算法构造一个密钥
-        byte[] secrets = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
+        String secret = securityProperties.getJwtSecret();
+        if (secret == null || secret.trim().isEmpty() || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT 对称验签需要显式配置至少 32 字节的 Secret 或其他验证来源");
+        }
+        byte[] secrets = secret.getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(secrets, 0, secrets.length, "HMACSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }

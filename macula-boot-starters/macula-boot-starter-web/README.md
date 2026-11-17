@@ -623,3 +623,8 @@ public @interface Sensitive {
 ## 版权说明
 
 - Spring：https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt
+
+
+## 请求租户上下文
+
+TenantFilter 在 finally 清理当前线程租户，包括解析或下游异常；请求租户能否用于切换由 MyBatis 自动配置中的 ROOT 判断决定。过滤器不新增角色策略。

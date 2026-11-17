@@ -23,7 +23,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import dev.macula.boot.starter.mp.test.entity.User;
 import dev.macula.boot.starter.mp.test.mapper.UserMapper;
 import dev.macula.boot.starter.mp.test.vo.UserVO;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -38,7 +42,7 @@ import java.util.List;
  * @since 2022-01-18
  */
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.security.oauth2.resourceserver.jwt.secret=isolated-integration-test-secret-32-bytes")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserMapperTest {
 

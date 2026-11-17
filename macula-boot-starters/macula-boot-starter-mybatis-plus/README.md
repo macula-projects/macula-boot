@@ -318,3 +318,7 @@ public class BasePageQuery {
 
 - mybatis-plus：https://github.com/baomidou/mybatis-plus/blob/3.0/LICENSE
 - mysql-connector-java：https://github.com/mysql/mysql-connector-j/blob/release/8.0/LICENSE
+
+## 请求租户切换
+
+只有已认证 ROOT 可以使用请求中的租户，其他身份继续使用认证租户和默认租户。数据权限 Handler 与原生拦截器已恢复原实现，SQL 安全修复方案另行评估。

@@ -339,3 +339,8 @@ public class TestController {
 ## 版本说明
 
 - oauth2-oidc-sdk：https://github.com/hidglobal/oauth-2.0-sdk-with-openid-connect-extensions/blob/master/LICENSE.txt
+
+
+## JWT 验证配置迁移
+
+资源服务器不再提供固定默认 HMAC Secret。Secret 模式必须显式设置 `spring.security.oauth2.resourceserver.jwt.secret`，UTF-8 编码至少 32 字节；已有 JWK、issuer、公钥及自定义 JwtDecoder 路径保持。缺少有效来源时启动失败，测试也应显式提供测试专用配置。ROOT 判断要求当前 Authentication 已认证且非匿名。

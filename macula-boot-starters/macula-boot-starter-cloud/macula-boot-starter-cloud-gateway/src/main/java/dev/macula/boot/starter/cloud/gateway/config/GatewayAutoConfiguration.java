@@ -17,10 +17,19 @@
 
 package dev.macula.boot.starter.cloud.gateway.config;
 
+import dev.macula.boot.starter.cloud.gateway.filter.GrayscalePublishGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.RmOpaqueTokenEndpointFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.NimbusJwkSetEndpointFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.ProtectUrlsEndpointFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.TraceIdGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.BodyGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.CryptoGlobalFilter;
+import dev.macula.boot.starter.cloud.gateway.filter.SignCheckGlobalFilter;
+
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.macula.boot.starter.cloud.gateway.crypto.CryptoService;
-import dev.macula.boot.starter.cloud.gateway.filter.*;
+
 import dev.macula.boot.starter.cloud.gateway.security.ResourceServerConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -53,7 +62,13 @@ public class GatewayAutoConfiguration {
         return new GrayscalePublishGlobalFilter(gatewayProperties);
     }
 
+    /** 使用可配置大小上限创建请求体过滤器，原过滤器流程保持。 */
     @Bean
+    public BodyGlobalFilter bodyGlobalFilter(GatewayProperties properties) {
+        return new BodyGlobalFilter(properties.getMaxCachedBodySize());
+    }
+
+    /** 保留原手工装配入口，采用默认上限。 */
     public BodyGlobalFilter bodyGlobalFilter() {
         return new BodyGlobalFilter();
     }

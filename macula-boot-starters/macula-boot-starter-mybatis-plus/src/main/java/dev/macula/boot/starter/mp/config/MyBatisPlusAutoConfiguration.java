@@ -17,18 +17,21 @@
 
 package dev.macula.boot.starter.mp.config;
 
-import cn.hutool.core.util.ClassUtil;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
-import com.baomidou.mybatisplus.extension.plugins.inner.*;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.crypto.config.CryptoProperties;
 import dev.macula.boot.starter.crypto.core.CryptoManager;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
 import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import dev.macula.boot.starter.mp.interceptor.MybatisDecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.MybatisEncryptInterceptor;
 import dev.macula.boot.starter.security.utils.SecurityUtils;
@@ -58,6 +61,7 @@ import java.util.Objects;
 @EnableConfigurationProperties(MyBatisPlusProperties.class)
 public class MyBatisPlusAutoConfiguration {
 
+    /** 按原插件顺序装配原数据权限插件，仅 ROOT 可采用请求租户。 */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(MyBatisPlusProperties properties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -65,12 +69,12 @@ public class MyBatisPlusAutoConfiguration {
         // 租户插件
         if (properties.isTenantEnable()) {
             interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+                /** 已认证 ROOT 才可切换，否则沿用认证租户与默认值。 */
                 @Override
                 public Expression getTenantId() {
 
-                    // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
-                    // TODO 需要检查当前用户是否可以访问该租户
-                    if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
+                    // 只有已认证 ROOT 可以采用请求租户，普通身份仍使用认证租户。
+                    if (SecurityUtils.isRoot() && Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
                         return new LongValue(TenantContextHolder.getCurrentTenantId());
                     }
 
