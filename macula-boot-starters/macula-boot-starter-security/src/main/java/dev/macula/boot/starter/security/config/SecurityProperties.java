@@ -55,7 +55,7 @@ public class SecurityProperties implements InitializingBean {
 
     private static final List<String> DEFAULT_IGNORE_URLS = SecurityConstants.DEFAULT_IGNORE_URLS;
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.secret:macula_secret$terces_alucam$123456}")
+    @Value("${spring.security.oauth2.resourceserver.jwt.secret:}")
     private String jwtSecret;
 
     private List<String> ignoreUrls = new ArrayList<>();

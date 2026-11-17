@@ -111,12 +111,15 @@ public class SecurityUtils {
     }
 
     /**
-     * 判断用户是否为超级管理员
+     * 判断当前已认证且非匿名的身份是否具有 ROOT 角色
      *
      * @return true/false
      */
     public static boolean isRoot() {
-        return getRoles().contains(SecurityConstants.ROOT_ROLE_CODE);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated()
+            && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)
+            && getRoles().contains(SecurityConstants.ROOT_ROLE_CODE);
     }
 
     public static Map<String, Object> getTokenAttributes() {

@@ -211,6 +211,10 @@ public enum DataScopeEnum implements IBaseEnum<Integer> {
 
 从原理来说，实际上是通过实现DataPermissionHandler，对具体的SQL语句根据用户的数据权限重新按照部门ID或者用户ID生成新的SQL语句过滤数据。
 
+### 数据权限用户名约定
+
+SELF 用户名只接受大小写英文字母、数字、下划线（`[A-Za-z0-9_]+`）。空值或非法字符产生 `1 = 0` 权限条件，不删除字符后继续查询；合法值使用单引号 SQL 字面量。原 WHERE 与权限条件分别加括号，避免 OR 分支绕过。保留原 Handler、原生数据权限插件、部门查询和 find_in_set，不引入参数框架或数据库通用化。ALL/DEFAULT 策略保持不变。
+
 #### 分页插件
 
 引入PaginationInnerInterceptor分页拦截器，返回IPage<T>接口，具体可参考[官方文档](https://baomidou.com/pages/97710a)
@@ -318,3 +322,7 @@ public class BasePageQuery {
 
 - mybatis-plus：https://github.com/baomidou/mybatis-plus/blob/3.0/LICENSE
 - mysql-connector-java：https://github.com/mysql/mysql-connector-j/blob/release/8.0/LICENSE
+
+## 请求租户切换
+
+只有已认证 ROOT 可以使用请求中的租户，其他身份继续使用认证租户和默认租户。数据权限继续采用原 Handler 与原生拦截器；SELF 校验和条件分组见下文。

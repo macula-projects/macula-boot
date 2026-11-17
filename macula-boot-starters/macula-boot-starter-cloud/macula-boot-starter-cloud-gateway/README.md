@@ -332,3 +332,13 @@ public class RedisConfiguration {
 - oauth2-oidc-sdk：https://github.com/hidglobal/oauth-2.0-sdk-with-openid-connect-extensions/blob/master/LICENSE.txt
 - caffeine：https://github.com/ben-manes/caffeine/blob/master/LICENSE
 - spring-cloud-gateway：https://github.com/spring-cloud/spring-cloud-gateway/blob/main/LICENSE.txt
+
+## JWT 签名与请求缓存配置
+
+网关在 `macula.gateway.jwt` 下支持 `key-store`（默认 `classpath:jwk/jose.jks`，file/classpath）、`key-store-type`（默认 JKS）、`key-store-password`、`key-alias`（默认 jose）、可选 `key-password`。默认加载保留原资源和密码约定；5.x 签名资源仍由应用提供，不在 Starter 新增私钥。生产应配置独立 RSA 私钥，使用公开内置材料存在身份伪造风险。显式资源、密码或别名错误时启动失败，不回退。
+
+JWKSource 与 JwtEncoder 分别按类型退让，自定义编码器仍可依赖默认 source。密码不进入配置对象 toString 或加载异常。可通过对应 Spring 环境变量覆盖配置，真实凭据不写入仓库。
+
+`macula.gateway.max-cached-body-size` 默认 10MB（10 MiB），必须为正且不超过 int 字节容量；保留原缓存分支、已有 Object 缓存短路、链构造与订阅时机，聚合超限返回标准 413。Opaque 身份缓存读取时检查 exp，TTL 使用剩余有效期，无 exp 时最多 5 分钟；阻塞 Redis 调度到 boundedElastic。密钥和请求/响应明文不再写日志。
+
+派生 JWT 键只在原前缀后增加 `id:` / `u:`，保留 5.x 的租户 `a` 段，区分 JWT_ID 与主体名。旧未分类键不回读，按原 TTL 自然过期；撤销继续调用同一 buildKey。应用隔离沿用各网关独立缓存的部署方式；本次不迁移 6.x API Key 或 IAM 协议。

@@ -43,7 +43,11 @@ import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrinci
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -51,7 +55,11 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -217,6 +225,11 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
         return 1000;
     }
 
+    /**
+     * 保留 jti 优先与租户分段，以类型前缀区分相同文本的 ID 和主体名。
+     * @param principal 当前认证身份
+     * @return 使用 id: 或 u: 分类的派生 JWT 缓存键
+     */
     public static String buildKey(OAuth2AuthenticatedPrincipal principal) {
         // 生成缓存JWT的KEY
         // 当有租户ID时，加上a{tenantId}作为KEY，以防止应用的租户会修改
@@ -227,9 +240,9 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
 
         // 当有JWT_ID的时候，以JWT_ID作为KEY缓存
         if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            return CacheConstants.GATEWAY_JWT_CACHE_KEY + app + principal.getAttribute(JWTClaimNames.JWT_ID);
+            return CacheConstants.GATEWAY_JWT_CACHE_KEY + "id:" + app + principal.getAttribute(JWTClaimNames.JWT_ID);
         }
 
-        return CacheConstants.GATEWAY_JWT_CACHE_KEY + app + principal.getName();
+        return CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:" + app + principal.getName();
     }
 }
