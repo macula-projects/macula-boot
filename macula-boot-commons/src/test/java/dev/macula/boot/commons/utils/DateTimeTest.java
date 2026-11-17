@@ -64,11 +64,13 @@ public class DateTimeTest {
         //formatter.setIso(DateTimeFormat.ISO.DATE_TIME);
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         System.out.println("ISO.DATE_TIME:" + formatter.print(new Date(), Locale.getDefault()));
+        formatter.setPattern("yyyy-MM-dd");
         System.out.println("ISO.DATE_TIME:" + formatter.parse("2019-02-26", Locale.getDefault()));
 
         DateTimeFormatter formatter1 = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
         System.out.println("DATETIME:" + formatter1.format(OffsetDateTime.now()));
-        TemporalAccessor xx = formatter1.parse("19-2-27 上午11:26");
+        DateTimeFormatter formatter3 = DateTimeFormatter.ofPattern("yy-M-d ah:mm", Locale.CHINA);
+        TemporalAccessor xx = formatter3.parse("19-2-27 上午11:26");
         System.out.println("DATETIME:" + xx);
 
         System.out.println(LocalDateTime.now().atZone(ZoneId.of("+07:00")).toOffsetDateTime());

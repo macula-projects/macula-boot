@@ -61,7 +61,7 @@
         <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.9</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
-        <spring-cloud-tencent.version>2.1.1.0-2021.0.9</spring-cloud-tencent.version>
+        <spring-cloud-tencent.version>2.1.2.1-2021.0.9</spring-cloud-tencent.version>
         <spring-cloud-tsf.version>1.46.19-SpringCloud2021-RELEASE</spring-cloud-tsf.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <mysql.binlog.version>0.29.1</mysql.binlog.version>
@@ -70,6 +70,7 @@
         <mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
         <fenix.version>2.7.0</fenix.version>
         <redisson.version>3.25.2</redisson.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
         <hutool.version>5.8.25</hutool.version>
         <easyexcel.version>3.3.4</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>

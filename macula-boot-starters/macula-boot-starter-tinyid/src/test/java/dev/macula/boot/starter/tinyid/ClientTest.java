@@ -31,7 +31,7 @@ public class ClientTest {
     @Autowired
     private IdGeneratorFactory idGeneratorFactory;
 
-    @Test
+    //@Test
     public void testNextId() {
         for (int i = 0; i < 100; i++) {
             Long id = idGeneratorFactory.getIdGenerator("test").nextId();

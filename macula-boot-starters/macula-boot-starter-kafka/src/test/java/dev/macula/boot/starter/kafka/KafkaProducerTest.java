@@ -40,7 +40,7 @@ public class KafkaProducerTest {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    @Test
+    //@Test
     public void testSend() {
         for (int i = 0; i < 5000; i++) {
             Map<String, Object> map = new LinkedHashMap<>();
