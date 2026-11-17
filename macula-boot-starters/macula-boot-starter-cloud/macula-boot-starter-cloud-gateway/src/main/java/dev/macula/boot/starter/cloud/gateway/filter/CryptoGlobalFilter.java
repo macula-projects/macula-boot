@@ -77,6 +77,12 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
     private final GatewayProperties properties;
     private final PercentCodec urlEncoder = RFC3986.QUERY;
 
+    /**
+     * 按保护配置解密请求并包装加密响应，诊断日志不记录密钥或业务明文。
+     * @param exchange 当前请求
+     * @param chain 下游链
+     * @return 下游结果或加密错误响应
+     */
     @SneakyThrows
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -105,7 +111,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         try {
             // 解密密钥
             sm4Key = cryptoService.decryptSm4Key(sm4Key);
-            log.debug("ProcessCryptoReqResFilter， sm4Key:{}", sm4Key);
             // 解密请求的内容
             exchange = processRequest(exchange, sm4Key);
         } catch (Exception e) {
@@ -132,6 +137,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         return exchange.mutate().request(newRequest).response(serverHttpResponseDecorator).build();
     }
 
+    /** 解密查询参数并重建 URI，不输出参数明文。 */
     private ServerHttpRequest processGetRequest(ServerWebExchange exchange, String sm4Key) {
         ServerHttpRequest serverHttpRequest = exchange.getRequest();
         String path = serverHttpRequest.getURI().getPath();
@@ -144,7 +150,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         }
 
         String encryptParam = data.get(0);
-        log.debug("======editGetParam start path:{}, encrtyParam: {}", path, encryptParam);
 
         // 解密URL参数
         String decrypt = cryptoService.decrypt(encryptParam, sm4Key);
@@ -158,7 +163,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                 String[] split = uriStr.split("\\?");
                 String encodePath = urlEncoder.encode(replace, CharsetUtil.CHARSET_UTF_8);
                 String newPath = split[0] + "?" + encodePath;
-                log.debug("======editGetParam new path:{}", newPath);
                 URI newUri = uri.resolve(newPath);
                 return serverHttpRequest.mutate().uri(newUri).build();
             }
@@ -166,6 +170,7 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         return serverHttpRequest;
     }
 
+    /** 解密 JSON 请求体，不将明文写入日志。 */
     private ServerHttpRequest processPostRequest(ServerWebExchange exchange, String sm4Key) {
         ServerHttpRequest request = exchange.getRequest();
         // 尝试从 exchange 的自定义属性中取出缓存到的 body
@@ -184,7 +189,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                         // 解密请求内容
                         String deJson = cryptoService.decrypt(enStr, sm4Key);
                         if (StrUtil.isNotBlank(deJson)) {
-                            log.debug("最终的JSON数据为:{}", deJson);
                             decrypBytes = deJson.getBytes(StandardCharsets.UTF_8);
                         }
                     }
@@ -196,12 +200,12 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
         return request;
     }
 
+    /** 加密响应数据，不将原始响应内容写入日志。 */
     private ServerHttpResponseDecorator processResponse(ServerWebExchange exchange, String sm4Key) {
-        ServerHttpRequest request = exchange.getRequest();
-        String path = request.getURI().getPath();
         ServerHttpResponse originalResponse = exchange.getResponse();
         DataBufferFactory bufferFactory = originalResponse.bufferFactory();
         return new ServerHttpResponseDecorator(originalResponse) {
+            /** 聚合并加密既有响应协议的数据字段，不输出解密或加密前的内容。 */
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
                 if (body instanceof Flux) {
@@ -219,7 +223,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                         String result = new String(contentByte, StandardCharsets.UTF_8);
                         JSONObject node = JSONUtil.parseObj(result);
                         Object data = node.get(GatewayConstants.CRYPTO_DATA_KEY);
-                        log.debug("======processResponse body:{}, path:{}", data, path);
                         if (data != null) {
                             String text = data.toString();
                             String content = null;
@@ -230,7 +233,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
                             }
 
                             node.set(GatewayConstants.CRYPTO_DATA_KEY, content);
-                            log.debug("修改响应体,修改前:{},修改后:{}, path:{}", text, node.toStringPretty(), path);
                             // 设置body长度
                             byte[] resultBytes = node.toJSONString(2).getBytes(StandardCharsets.UTF_8);
                             originalResponse.getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
@@ -238,7 +240,6 @@ public class CryptoGlobalFilter implements GlobalFilter, Ordered {
 
                             return bufferFactory.wrap(resultBytes);
                         } else {
-                            log.info("data 为空，不修改响应体,响应参数:{}, path:{}", data, path);
                             return bufferFactory.wrap(result.getBytes(StandardCharsets.UTF_8));
                         }
                     }));

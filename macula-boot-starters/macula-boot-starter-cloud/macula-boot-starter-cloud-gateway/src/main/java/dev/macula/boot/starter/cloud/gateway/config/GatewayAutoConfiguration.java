@@ -63,7 +63,19 @@ public class GatewayAutoConfiguration {
         return new GrayscalePublishGlobalFilter(gatewayProperties);
     }
 
+    /**
+     * 装配带请求体大小限制的缓存过滤器。
+     * @param properties 网关配置
+     * @return 请求体缓存过滤器
+     */
     @Bean
+    public BodyGlobalFilter bodyGlobalFilter(GatewayProperties properties) {
+        return new BodyGlobalFilter(properties.getMaxCachedBodySize());
+    }
+
+    /** 保留已有手工调用入口，使用兼容默认上限。
+     * @return 默认请求体缓存过滤器
+     */
     public BodyGlobalFilter bodyGlobalFilter() {
         return new BodyGlobalFilter();
     }

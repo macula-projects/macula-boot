@@ -18,7 +18,6 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import cn.hutool.core.convert.Convert;
-import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
@@ -47,11 +46,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.SpringReactiveOpaqueTokenIntrospector;
@@ -67,14 +61,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.constraints.NotNull;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 资源服务器配置
@@ -139,54 +129,17 @@ public class ResourceServerConfiguration {
             ? Mono.empty() : converter.convert(exchange));
     }
 
+    /**
+     * 装配按剩余有效期缓存的内省器，命中缓存仍执行过期检查。
+     * @return 带共享 Token 缓存的内省器
+     */
     @Bean
     public ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector() {
-        return new ReactiveOpaqueTokenIntrospector() {
-            final OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
-            final ReactiveOpaqueTokenIntrospector delegate = SpringReactiveOpaqueTokenIntrospector
-                        .withIntrospectionUri(opaqueToken.getIntrospectionUri())
-                        .clientId(opaqueToken.getClientId())
-                        .clientSecret(opaqueToken.getClientSecret())
-                        .build();
-
-            @Override
-            public Mono<OAuth2AuthenticatedPrincipal> introspect(String token) {
-                OAuth2AuthenticatedPrincipal cachedPrincipal = (OAuth2AuthenticatedPrincipal) redisTemplate.opsForValue()
-                        .get(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token);
-
-                if (cachedPrincipal != null) {
-                    return Mono.just(cachedPrincipal);
-                }
-
-                return this.delegate.introspect(token).map(principal -> {
-                    // introspect 获取principal后缓存内容
-                    Instant iat = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.IAT);
-                    Instant exp = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.EXP);
-                    long between = iat != null && exp != null ? ChronoUnit.MINUTES.between(iat, exp) : 5L;
-
-                    principal = new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), principal.getAttributes(),
-                            extractAuthorities(principal));
-
-                    redisTemplate.opsForValue()
-                            .set(CacheConstants.GATEWAY_TOKEN_CACHE_KEY + token, principal, between, TimeUnit.MINUTES);
-
-                    return principal;
-                });
-            }
-
-            // 自定义获取用户的 authorities
-            private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
-                List<GrantedAuthority> result = new ArrayList<>(principal.getAuthorities());
-
-                List<String> authorities = principal.getAttribute(SecurityConstants.AUTHORITIES_KEY);
-                if (authorities != null) {
-                    result.addAll(authorities.stream()
-                            .map(role -> new SimpleGrantedAuthority(SecurityConstants.AUTHORITIES_PREFIX + role))
-                            .toList());
-                }
-                return result;
-            }
-        };
+        OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
+        ReactiveOpaqueTokenIntrospector delegate = SpringReactiveOpaqueTokenIntrospector
+            .withIntrospectionUri(opaqueToken.getIntrospectionUri()).clientId(opaqueToken.getClientId())
+            .clientSecret(opaqueToken.getClientSecret()).build();
+        return new CachingReactiveOpaqueTokenIntrospector(delegate, redisTemplate, java.time.Clock.systemUTC());
     }
 
     @Bean

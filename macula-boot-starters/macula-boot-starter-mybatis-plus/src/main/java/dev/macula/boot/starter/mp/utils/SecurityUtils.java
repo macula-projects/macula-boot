@@ -24,6 +24,7 @@ import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.enums.DataScopeEnum;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.util.ClassUtils;
@@ -41,6 +42,9 @@ import java.util.stream.Collectors;
  */
 public class SecurityUtils {
 
+    /** 获取已认证身份名称，未认证时返回 null。
+     * @return 当前身份名称
+     */
     public static String getCurrentUser() {
         if (ClassUtils.isPresent("org.springframework.security.core.context.SecurityContextHolder",
             SecurityUtils.class.getClassLoader())) {
@@ -118,11 +122,18 @@ public class SecurityUtils {
     }
 
     /**
-     * 判断用户是否为超级管理员
+     * 判断已认证且非匿名的身份是否具有 ROOT 角色，不能仅信任权限名称
      *
      * @return true/false
      */
     public static boolean isRoot() {
-        return getRoles().contains(SecurityConstants.ROOT_ROLE_CODE);
+        if (!ClassUtils.isPresent("org.springframework.security.core.context.SecurityContextHolder",
+            SecurityUtils.class.getClassLoader())) {
+            return false;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated()
+            && !(authentication instanceof AnonymousAuthenticationToken)
+            && getRoles().contains(SecurityConstants.ROOT_ROLE_CODE);
     }
 }

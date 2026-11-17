@@ -608,7 +608,9 @@ Boot 3 的 `Jackson2ObjectMapperBuilderCustomizer` 与 `com.fasterxml.jackson.da
 
 ### 租户ID
 
-在HTTP请求头或者请求参数中添加`tenantId`参数可以设置当前请求的租户ID上下文，用户后续的数据库操作按照租户ID隔离数据。一般用在前端界面切换不同租户来管理。
+在 HTTP Header 或 Query 中添加 `tenantId` 可提供当前请求的租户提示，Header 优先。该值本身不代表授权；MyBatis-Plus Starter 在数据访问点仅允许已认证且非匿名的 `ROOT` 采用它切换租户。普通身份忽略此提示，继续使用认证租户及既有默认回退规则。
+
+TenantFilter 在请求退出时清理本次租户上下文，包含参数转换失败和下游异常。业务逻辑应在请求处理过程中读取上下文，不应依赖请求结束后的 ThreadLocal 值。
 
 ## 依赖引入
 
