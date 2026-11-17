@@ -32,7 +32,8 @@ import dev.macula.boot.starter.crypto.core.CryptoManager;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
 import dev.macula.boot.starter.mp.interceptor.MybatisDecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.MybatisEncryptInterceptor;
-import dev.macula.boot.starter.mp.interceptor.ParameterizedDataPermissionInterceptor;
+import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import dev.macula.boot.starter.mp.utils.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -60,7 +61,7 @@ import java.util.Objects;
 public class MyBatisPlusAutoConfiguration {
 
     /**
-     * 按配置组合租户、参数化数据权限、分页及写入保护插件。
+     * 按配置组合租户、数据权限、分页及写入保护插件。
      * @param properties 扩展配置
      * @return 插件链
      */
@@ -101,7 +102,7 @@ public class MyBatisPlusAutoConfiguration {
 
         // 数据权限
         if (properties.isDataPermissionEnable()) {
-            interceptor.addInnerInterceptor(new ParameterizedDataPermissionInterceptor());
+            interceptor.addInnerInterceptor(new DataPermissionInterceptor(new MyDataPermissionHandler()));
         }
 
         // 分页插件

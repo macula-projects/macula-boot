@@ -23,7 +23,7 @@ import dev.macula.boot.context.TenantContextHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import dev.macula.boot.starter.mp.interceptor.ParameterizedDataPermissionInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
@@ -79,20 +79,19 @@ class MyBatisPlusAutoConfigurationTest {
         assertThat(new MyBatisPlusAutoConfiguration().mybatisPlusInterceptor(properties).getInterceptors())
             .noneMatch(TenantLineInnerInterceptor.class::isInstance);
     }
-    /** 单一工厂装配参数化插件，无额外数据源 Bean；关闭权限时跳过插件。 */
+    /** 单一工厂装配原生插件，无额外数据源 Bean；关闭权限时跳过插件。 */
     @Test
     void installsOrDisablesPermissionInterceptor() {
         var runner = new ApplicationContextRunner().withUserConfiguration(MyBatisPlusAutoConfiguration.class);
         runner.run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context.getBean(com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.class).getInterceptors())
-                .anyMatch(ParameterizedDataPermissionInterceptor.class::isInstance);
-            assertThat(context).doesNotHaveBean("departmentDataScopeProvider");
+                .anyMatch(DataPermissionInterceptor.class::isInstance);
         });
         runner.withPropertyValues("macula.mybatis-plus.data-permission-enable=false").run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context.getBean(com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.class).getInterceptors())
-                .noneMatch(ParameterizedDataPermissionInterceptor.class::isInstance);
+                .noneMatch(DataPermissionInterceptor.class::isInstance);
         });
     }
 }

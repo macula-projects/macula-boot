@@ -1,5 +1,12 @@
 # 兼容性与安全复查
 
+## 当前有效状态：SQL 重写已按用户要求撤回
+- MyDataPermissionHandler 与任务起始基线完全一致；原生 DataPermissionInterceptor 接入恢复，新增参数上下文、参数化插件及 SQL 专用测试删除。ROOT 租户授权、JWT、Token 缓存、请求体 10 MiB、日志清理等其他修复保留。
+- 下文所有 SQL 参数化、H2/MySQL、JOIN/CTE 记录均为已撤销实现的历史证据，不代表当前 SQL 漏洞已修复。PR 保持草稿，SQL 部分等待重新评估，不能按旧 Verification is green 进入合并。
+- 原实现本轮重新复现：`SELF=create_by = "alice" OR 1 = 1`；`OR=active = 1 OR id = 2 AND dept_id = 12`；`DEPT_SUB` 仍使用 find_in_set。日志 `/tmp/macula-compat-review/OriginalPermissionReevaluation.log`。前两项是需要单独修复的注入与逻辑分组问题；第三项是原 MySQL 方言约束，不再混入安全修复改造。
+- Handler SPI 只返回 Expression，没有 BoundSql/ParameterMapping；先评估保留原结构的最小安全改法，不能再默认扩展为 SQL 参数基础设施。此轮只恢复和评估，不新增替代 SQL 实现。
+
+
 ## PR 前完整验证（当前实现）
 - 用户已确认实现并要求全面 review、通过后提交主线和 5.x PR。主线使用独立的临时 Redis 7.4.5 与 MySQL 8.4.6，均只绑定回环端口，没有连接业务容器。
 - 实际命令：`MACULA_SECURITY_TEST_MYSQL_URL=<isolated-mysql-jdbc-url> MACULA_SECURITY_TEST_MYSQL_USER=root MACULA_SECURITY_TEST_MYSQL_PASSWORD='' IAM_CALLBACK_REDIS_IT_PORT=6379 mvn -fae verify`；退出 0，日志 `/tmp/macula-security-main-final-verify.log`。
@@ -120,3 +127,7 @@ BASELINE=true CURRENT=OK SQL=SELECT id FROM t START WITH parent_id = ? CONNECT B
 - Rain 明确应用之间使用各网关独立缓存，选择在 prefix 后增加 id: 或 u:。当前实现仅修改 buildKey 的两个返回分支及注释，保留 API Key 和租户段，不恢复 v2、内部应用属性或摘要方案；保留用户已有 tenant 变量更名。
 - 相同值的 JWT_ID 与 name 回归先在旧实现失败，添加类型段后通过；12 项 AddJwtGlobalFilterTest、RmOpaqueTokenEndpointFilterTest 全部通过（0 failures/errors/skips）。命令：`mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am test -Dtest=AddJwtGlobalFilterTest,RmOpaqueTokenEndpointFilterTest -Dsurefire.failIfNoSpecifiedTests=false`，日志 `/tmp/macula-jwt-key-prefix-test.log`。
 - 两个变更 Java 文件 Checkstyle 零违规，git diff --check 通过；日志 `/tmp/macula-jwt-key-prefix-style.log`。原跨类型碰撞已修复；应用间隔离依据用户给定部署边界，本次没有额外证明外部 Redis 隔离配置。未运行全仓或真实 Redis IT，未清理实际缓存。
+
+## 恢复后实际验证
+- 主线 clean test：MyBatisPlusAutoConfigurationTest 3、SecurityUtilsTest 1，全通过；日志 /tmp/macula-original-handler-restore-main.log。
+- 两分支 Handler 均与各自任务起始基线逐字节一致；新增 SQL 类与引用已移除。当前变更文件 Checkstyle 零违规，git diff --check 通过。没有运行新的 SQL 修复验证，因为当前没有 SQL 修复实现。

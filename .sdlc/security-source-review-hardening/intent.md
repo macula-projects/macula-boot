@@ -1,4 +1,7 @@
 # Intent: 源码安全审查问题修复
+
+当前范围更正：Rain 要求恢复原 MyDataPermissionHandler 并重新评估；SQL 注入/OR 修复目标尚未完成，参数框架已撤销。保留其他已接受修复，PR 维持草稿，不代表接受原 SQL 风险。
+
 Author: Rain. Status: accepted.
 
 ## Problem
