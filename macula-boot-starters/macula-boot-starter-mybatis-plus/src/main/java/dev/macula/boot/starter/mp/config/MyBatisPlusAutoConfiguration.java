@@ -23,7 +23,6 @@ import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
@@ -31,9 +30,10 @@ import dev.macula.boot.context.TenantContextHolder;
 import dev.macula.boot.starter.crypto.config.CryptoProperties;
 import dev.macula.boot.starter.crypto.core.CryptoManager;
 import dev.macula.boot.starter.mp.handler.AuditMetaObjectHandler;
-import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
 import dev.macula.boot.starter.mp.interceptor.MybatisDecryptInterceptor;
 import dev.macula.boot.starter.mp.interceptor.MybatisEncryptInterceptor;
+import dev.macula.boot.starter.mp.handler.MyDataPermissionHandler;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import dev.macula.boot.starter.mp.utils.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -60,6 +60,11 @@ import java.util.Objects;
 @EnableConfigurationProperties(MyBatisPlusProperties.class)
 public class MyBatisPlusAutoConfiguration {
 
+    /**
+     * 按配置组合租户、数据权限、分页及写入保护插件。
+     * @param properties 扩展配置
+     * @return 插件链
+     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(MyBatisPlusProperties properties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -67,12 +72,12 @@ public class MyBatisPlusAutoConfiguration {
         // 租户插件
         if (properties.isTenantEnable()) {
             interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+                /** 仅 ROOT 可采用请求租户，普通身份优先采用认证租户。 */
                 @Override
                 public Expression getTenantId() {
 
-                    // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
-                    // TODO 需要检查当前用户是否可以访问该租户
-                    if (Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
+                    // 请求租户属于不可信输入，只有经认证的 ROOT 允许切换；其他身份继续使用 Token 租户。
+                    if (SecurityUtils.isRoot() && Objects.nonNull(TenantContextHolder.getCurrentTenantId())) {
                         return new LongValue(TenantContextHolder.getCurrentTenantId());
                     }
 
@@ -86,6 +91,7 @@ public class MyBatisPlusAutoConfiguration {
                 }
 
                 // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
+                /** 按既有后缀规则确定需要隔离的表。 */
                 @Override
                 public boolean ignoreTable(String tableName) {
                     // 分租户的表名称应该统一以 xx标识

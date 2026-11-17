@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * JWT 租户来自可信 HMAC 身份，缓存沿用原 buildKey 规则。
+ * JWT 租户来自可信 HMAC 身份，缓存按 JWT_ID 与 name 区分键类型。
  *
  * @author Rain
  * @since 6.1.0
@@ -110,7 +110,7 @@ class AddJwtGlobalFilterTest {
             return Mono.fromRunnable(calls::incrementAndGet);
         }).block();
         assertThat(calls).hasValue(1);
-        org.mockito.Mockito.verify(values).get(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:tn12:app");
+        org.mockito.Mockito.verify(values).get(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:u:tn12:app");
     }
 
     @Test
@@ -198,10 +198,10 @@ class AddJwtGlobalFilterTest {
             }
         }
         assertThat(keys).containsExactlyInAnyOrder(
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "tn7:first",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "tn8:first",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "tn7:second",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "tn8:second");
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn7:first",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn8:first",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn7:second",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn8:second");
     }
 
     @Test
@@ -216,23 +216,36 @@ class AddJwtGlobalFilterTest {
         verifyNoInteractions(encoder, redis);
     }
 
-    /** 共用租户与 jti 规则，仅为 API Key 增加类型段，并保持 OAuth/HMAC 原键。 */
+    /** 保留租户与 API Key 段，以 id: 和 u: 区分会话 ID 与主体名。 */
     @Test
     void preservesNonHmacCacheKeyContract() {
         var principal = new DefaultOAuth2AuthenticatedPrincipal("user",
             Map.of("tenantId", 12L, "jti", "token-id"), AuthorityUtils.NO_AUTHORITIES);
         assertThat(AddJwtGlobalFilter.buildKey(principal))
-            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "tn12:token-id");
+            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "id:tn12:token-id");
         var apiKey = new DefaultOAuth2AuthenticatedPrincipal("app",
             Map.of("authType", "apikey"), AuthorityUtils.NO_AUTHORITIES);
-        assertThat(AddJwtGlobalFilter.buildKey(apiKey)).isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:app");
+        assertThat(AddJwtGlobalFilter.buildKey(apiKey)).isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:u:app");
         var tenantApiKey = new DefaultOAuth2AuthenticatedPrincipal("app",
             Map.of("authType", "apikey", "tenantId", 12L), AuthorityUtils.NO_AUTHORITIES);
         assertThat(AddJwtGlobalFilter.buildKey(tenantApiKey))
-            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:tn12:app");
+            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:u:tn12:app");
         var apiKeyWithJti = new DefaultOAuth2AuthenticatedPrincipal("app",
             Map.of("authType", "apikey", "tenantId", 12L, "jti", "token-id"), AuthorityUtils.NO_AUTHORITIES);
         assertThat(AddJwtGlobalFilter.buildKey(apiKeyWithJti))
-            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:tn12:token-id");
+            .isEqualTo(CacheConstants.GATEWAY_JWT_CACHE_KEY + "apikey:id:tn12:token-id");
     }
+    /** 同租户内相同值的 JWT_ID 与主体名必须落在不同键类型中。 */
+    @Test
+    void separatesTokenIdFromPrincipalName() {
+        for (Map<String, Object> attributes : List.<Map<String, Object>>of(
+            Map.of("tenantId", 12L), Map.of("tenantId", 12L, "authType", "apikey"))) {
+            var byName = new DefaultOAuth2AuthenticatedPrincipal("appB", attributes, AuthorityUtils.NO_AUTHORITIES);
+            Map<String, Object> withId = new java.util.HashMap<>(attributes);
+            withId.put("jti", "appB");
+            var byId = new DefaultOAuth2AuthenticatedPrincipal("appA", withId, AuthorityUtils.NO_AUTHORITIES);
+            assertThat(AddJwtGlobalFilter.buildKey(byId)).isNotEqualTo(AddJwtGlobalFilter.buildKey(byName));
+        }
+    }
+
 }

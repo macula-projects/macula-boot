@@ -35,6 +35,7 @@ class GatewayPropertiesTest {
         .withUserConfiguration(PropertiesConfiguration.class)
         .withPropertyValues("macula.gateway.crypto-switch=false", "macula.gateway.sign-switch=true", "macula.gateway.force-crypto=true", "macula.gateway.trace-id-response-header-enabled=false", "macula.gateway.protect-urls.crypto[0]=/api/crypto/**", "macula.gateway.protect-urls.crypto[1]=/api/encrypt/**", "macula.gateway.protect-urls.sign[0]=/api/sign/**", "macula.gateway.gray.enabled=true");
 
+    /** 默认值与已有部署及请求体限制约定一致。 */
     @Test
     void hasDocumentedDefaults() {
         GatewayProperties properties = new GatewayProperties();
@@ -50,6 +51,7 @@ class GatewayPropertiesTest {
         assertThat(properties.getRmOpaqueTokenEndpoint()).isEqualTo("/gateway/rm/opaqueToken");
     }
 
+    /** 嵌套属性与路径清单保持可绑定。 */
     @Test
     void bindsNestedAndListProperties() {
         contextRunner.run(context -> {
@@ -63,6 +65,23 @@ class GatewayPropertiesTest {
             assertThat(properties.getProtectUrls().getSign()).containsExactly("/api/sign/**");
             assertThat(properties.getGray().isEnabled()).isTrue();
         });
+    }
+
+    /** 密码属性不进入自动生成的配置字符串，大小边界在绑定时失败。 */
+    @Test
+    void protectsSecretsAndValidatesBodyLimit() {
+        contextRunner.withPropertyValues("macula.gateway.jwt.key-store-password=private-store-secret",
+            "macula.gateway.jwt.key-password=private-key-secret", "macula.gateway.max-cached-body-size=2MB").run(context -> {
+                var properties = context.getBean(GatewayProperties.class);
+                assertThat(properties.getMaxCachedBodySize().toBytes()).isEqualTo(2 * 1024 * 1024);
+                assertThat(properties.toString()).doesNotContain("private-store-secret", "private-key-secret");
+                assertThat(properties.getJwt().toString()).doesNotContain("private-store-secret", "private-key-secret");
+            });
+        for (String size : new String[] {"0B", "-1B", "3GB"}) {
+            contextRunner.withPropertyValues("macula.gateway.max-cached-body-size=" + size)
+                .run(context -> assertThat(context).hasFailed());
+        }
+        assertThat(new GatewayProperties().getMaxCachedBodySize().toBytes()).isEqualTo(10 * 1024 * 1024);
     }
 
     /**

@@ -23,3 +23,9 @@ curl "http://127.0.0.1:4000/consumer/api/v1/consumer/echo"
 ```
 
 `/consumer/**` 会去除一层前缀后转发到 `lb://macula-example-tencent-consumer`。OAuth2 client secret 是本地演示值，不得直接用于部署环境。
+
+## 请求体与访问限制
+
+请求体缓存默认上限 10 MiB，签名/加密请求超限返回 HTTP 413；使用 `MACULA_GATEWAY_MAX_CACHED_BODY_SIZE` 可调整。此上限约束现有缓存分支，不能替代入口并发及上传策略。
+
+资源服务器应继续使用已配置的 JWK 等验证来源；仅依赖旧默认 HMAC Secret 的下游应用需显式配置至少 32 字节的 Secret。请求租户切换仅允许 ROOT，普通身份继续采用认证租户。

@@ -134,8 +134,8 @@ mybatis-plus:
 interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler(){
 @Override public Expression getTenantId(){
 
-    // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
-    if(Objects.nonNull(TenantContextHolder.getCurrentTenantId())){
+    // 只有已认证且非匿名的 ROOT 允许采用请求上下文中的租户 ID
+    if(SecurityUtils.isRoot() && Objects.nonNull(TenantContextHolder.getCurrentTenantId())){
     return new LongValue(TenantContextHolder.getCurrentTenantId());
     }
 
@@ -156,7 +156,7 @@ interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHan
     }));
 ```
 
-- 首先是从TenantContextHolder获取租户ID，适合具有多个租户的用户在前端切换租户ID使用；
+- 已认证的 ROOT 优先从 TenantContextHolder 读取请求租户；非 ROOT 忽略请求租户，不返回 403，继续使用认证租户；
 - 其次是从登录上下文获取租户ID，一般用于ak/sk访问应用的时候，通过应用配置获取租户ID；
 - 最后是从应用配置的租户ID获取
 
@@ -222,6 +222,10 @@ public enum DataScopeEnum implements IBaseEnum<Integer> {
 ```
 
 从原理来说，实际上是通过实现DataPermissionHandler，对具体的SQL语句根据用户的数据权限重新按照部门ID或者用户ID生成新的SQL语句过滤数据。
+
+### 数据权限用户名约定
+
+SELF 用户名只接受大小写英文字母、数字、下划线（`[A-Za-z0-9_]+`）。空值或非法字符产生 `1 = 0` 权限条件，不删除字符后继续查询；合法值使用单引号 SQL 字面量。原 WHERE 与权限条件分别加括号，避免 OR 分支绕过。保留原 Handler、原生数据权限插件、部门查询和 find_in_set，不引入参数框架或数据库通用化。ALL/DEFAULT 策略保持不变。
 
 #### 分页插件
 

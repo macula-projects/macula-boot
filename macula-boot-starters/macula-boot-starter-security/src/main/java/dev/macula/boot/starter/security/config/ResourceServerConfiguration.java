@@ -178,7 +178,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
         };
     }
 
+    /** 从 JWK 地址装配可替换的验签器，显式来源不要求 HMAC Secret。 */
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
     JwtDecoder jwtDecoderByJwkKeySetUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
@@ -192,7 +194,9 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
         return nimbusJwtDecoder;
     }
 
+    /** 从公钥资源装配可替换的验签器。 */
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @ConditionalOnPublicKeyJwtDecoder
     JwtDecoder jwtDecoderByPublicKeyValue() throws Exception {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
@@ -207,19 +211,28 @@ public class ResourceServerConfiguration implements ApplicationContextAware {
         return Base64.getMimeDecoder().decode(keyValue);
     }
 
+    /** 按 issuer 延迟发现验签配置，避免启动阶段强制联网。 */
     @Bean
+    @ConditionalOnMissingBean(JwtDecoder.class)
     @ConditionalOnIssuerLocationJwtDecoder
     SupplierJwtDecoder jwtDecoderByIssuerUri() {
         OAuth2ResourceServerProperties.Jwt jwt = properties.getJwt();
         return new SupplierJwtDecoder(() -> JwtDecoders.fromIssuerLocation(jwt.getIssuerUri()));
     }
 
+    /**
+     * 仅在对称验签模式检查显式密钥，避免无配置时启用公开默认值。
+     * @return HMAC SHA-256 验签器
+     */
     @Bean
     @ConditionalOnMissingBean(JwtDecoder.class)
     @Conditional(SecretCondition.class)
     JwtDecoder jwtDecoderBySecret() {
-        // 根据给定的字节数组使用 AES加密算法构造一个密钥
-        byte[] secrets = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
+        String configured = securityProperties.getJwtSecret();
+        if (configured == null || configured.isBlank() || configured.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT 对称验签需要显式配置至少 32 字节的 Secret 或其他验证来源");
+        }
+        byte[] secrets = configured.getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(secrets, 0, secrets.length, "HMACSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
