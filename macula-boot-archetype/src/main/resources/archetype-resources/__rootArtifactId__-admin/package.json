@@ -27,7 +27,7 @@
     "sortablejs": "1.15.0",
     "tinymce": "8.9.2",
     "vue": "^3.2.47",
-    "vue-i18n": "9.14.5",
+    "vue-i18n": "11.4.14",
     "vue-router": "^4.1.6",
     "vuedraggable": "4.0.3",
     "xgplayer": "2.31.7",
