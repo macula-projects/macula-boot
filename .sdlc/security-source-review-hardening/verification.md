@@ -1,5 +1,17 @@
 # 兼容性与安全复查
 
+## 当前有效状态：原 Handler 内最小修复
+- Rain 明确 username 只含大小写英文字母、数字、下划线，SELF 完整校验 `[A-Za-z0-9_]+`；空或非法值产生 1=0，不删除字符后转换身份。合法值使用单引号字面量；原 WHERE 和权限条件分别加括号。
+- 只有原 Handler 的上述小范围修改，原生 DataPermissionInterceptor、部门/find_in_set、ALL/DEFAULT 保持。参数上下文、参数化插件和词法框架仍未采用；不要求使用方迁移插件。
+- 新增五项回归先在恢复后的原实现失败（4 failures），补丁后通过：合法字符及大小写、SQL 关键字作为合法用户名、引号/空白/反斜线/Unicode/空值拒绝、OR 分组、ALL/DEFAULT 和部门语义保持。
+- 目标模块及依赖 `mvn -pl macula-boot-starters/macula-boot-starter-mybatis-plus -am test`：43 项，0 failures/errors/skips，日志 `/tmp/macula-minimal-username-main-test.log`。
+- 在独立临时 Redis 上执行 `IAM_CALLBACK_REDIS_IT_PORT=6379 mvn -fae verify`：426 项，0 failures/errors，3 项原有 Kafka/RocketMQ/TinyID 条件 skip；退出 0，日志 `/tmp/macula-minimal-username-main-verify.log`。
+- 实际输出：`[INFO] BUILD SUCCESS`，`[INFO] Total time: 01:36 min`。变更 Java Checkstyle 零违规，git diff --check 通过；受保护配置未改，无适用 eval。Verification is green（当前最小方案，依赖已确认用户名约定）。
+
+## 历史记录说明
+以下恢复、参数化、跨方言及词法试验记录对应旧快照，不覆盖当前最小方案，也不构成仍需迁移插件或恢复参数框架的要求。
+
+
 ## 当前有效状态：SQL 重写已按用户要求撤回
 - MyDataPermissionHandler 与任务起始基线完全一致；原生 DataPermissionInterceptor 接入恢复，新增参数上下文、参数化插件及 SQL 专用测试删除。ROOT 租户授权、JWT、Token 缓存、请求体 10 MiB、日志清理等其他修复保留。
 - 下文所有 SQL 参数化、H2/MySQL、JOIN/CTE 记录均为已撤销实现的历史证据，不代表当前 SQL 漏洞已修复。PR 保持草稿，SQL 部分等待重新评估，不能按旧 Verification is green 进入合并。

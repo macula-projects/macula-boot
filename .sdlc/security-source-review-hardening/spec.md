@@ -2,7 +2,7 @@
 Status: accepted.
 
 ## 当前有效范围
-Rain 最新要求恢复原 MyDataPermissionHandler 后重新评估。当前 Handler 与任务起始基线完全一致，原生 DataPermissionInterceptor 接入恢复；参数上下文、参数化插件、词法改写及 SQL 专用测试全部撤销。历史 SQL 方案不再是本 spec 的要求，历史证据保留在 verification.md/review-findings.md 和 Git 历史中。
+Rain 要求保留原 Handler，并明确 username 仅为大小写字母、数字、下划线。当前仅在原 SELF 分支完整校验该白名单、非法值返回 1=0、合法值用单引号，以及为原 WHERE 和权限条件分别加括号。原生插件、部门/find_in_set、ALL/DEFAULT 语义保留。参数上下文、参数化插件、词法重写方案继续撤销，不恢复。
 
 ## Requirements
 1. 只有已认证且非匿名的 ROOT 可以采用请求租户；其他身份沿用认证租户及默认回退。TenantFilter 在 finally 清理上下文。
@@ -14,17 +14,20 @@ Rain 最新要求恢复原 MyDataPermissionHandler 后重新评估。当前 Hand
 7. JWT 派生缓存只追加 id:/u: 分类，保留原 API Key（如适用）和租户段；不回读旧未分类键，撤销使用同一 buildKey。应用间隔离按用户明确的各网关独立缓存部署。
 8. JWT 默认兼容和环境变量说明集中在 Gateway Starter README，不重复散布。
 
-## Deferred SQL review
-原 SELF 用户名拼接可改变 SQL 条件，原 WHERE 含 OR 时缺少分组，尚未修复。find_in_set 是原有 MySQL 方言约束。下一步只基于原 Handler 评估注入与分组的最小修改，先确认范围，再写新的 SQL 实现；不把跨库通用化或参数基础设施默认混入。本次不声明 SQL 安全通过。
+## 用户确认的最小 SQL 修复
+Rain 明确用户名只包含大小写字母、数字、下划线。SELF 完整匹配 `[A-Za-z0-9_]+`，空值或非法字符返回恒假权限条件，不删除字符后映射成另一用户；合法值使用标准单引号字面量。仅补充原 WHERE 与权限条件的括号，保留原 Handler、原生插件、部门及 find_in_set 查询、ALL/DEFAULT 策略。不恢复参数框架或跨数据库改造。
+
+## 数据库与身份边界
+find_in_set 保持原 MySQL 方言，不宣称全数据库兼容；列名、别名仍属于代码注解的可信配置。白名单安全结论依赖用户名字符约定，未来若允许其他字符，需要重新评估，不可仅放宽正则后继续拼接。
 
 ## Non-goals
-不改变 DEFAULT/缺失 dataScope、@Inner、invoker；不轮换真实密钥、不操作业务数据库/Redis、不合并或部署。数据权限 SQL 重写已明确撤回。
+不改变 DEFAULT/缺失 dataScope、@Inner、invoker；不轮换真实密钥、不操作业务数据库/Redis、不合并或部署。保留原 Handler 结构，只采用已确认的白名单与分组修复。
 
 ## Compatibility
 保持 Java 17、现有自动配置入口和默认签名材料；手工无参入口继续可用。
 
 ## Verification strategy
-验证 ROOT/租户清理、JWT 默认/配置/Bean 回退、Secret 模式、缓存过期/TTL、请求体原流程/413、敏感日志及 id:/u: 撤销一致性。恢复 Handler 后执行 clean 构建及相关回归，核对 Handler 与基线一致、无已删框架引用。旧 SQL 参数化测试结果不适用于当前实现。受保护配置未改，无适用 eval。
+验证 ROOT/租户清理、JWT 默认/配置/Bean 回退、Secret 模式、缓存过期/TTL、请求体原流程/413、敏感日志及 id:/u: 撤销一致性。恢复 Handler 后执行 clean 构建及相关回归，核对 Handler 仅有最小修复、无已删框架引用。旧 SQL 参数化测试结果不适用于当前实现。受保护配置未改，无适用 eval。
 
 ## PR gate
-主线 PR #53 保持草稿；原 SQL 风险待重新评估，之前全仓绿只对应此前快照，不自批准当前合并。
+主线最小修复已重新验证并独立审查，通过后进入 PR 人工评审；不自批准合并。5.x 的旧全仓阻塞单独记录。

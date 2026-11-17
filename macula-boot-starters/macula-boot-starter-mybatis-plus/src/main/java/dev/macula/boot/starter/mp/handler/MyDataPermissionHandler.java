@@ -29,6 +29,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 
 import java.lang.reflect.Method;
@@ -42,6 +43,15 @@ import java.lang.reflect.Method;
 @Slf4j
 public class MyDataPermissionHandler implements DataPermissionHandler {
 
+    /**
+     * 沿用原范围策略构造条件；SELF 只接受约定的 ASCII 用户名，非法值不匹配任何记录。
+     * @param deptAlias 部门表别名，来自代码注解
+     * @param deptIdColumnName 部门列名，来自代码注解
+     * @param userAlias 用户表别名，来自代码注解
+     * @param userIdColumnName 用户列名，来自代码注解
+     * @param where 可为空的原条件
+     * @return 原条件与权限条件分别分组；ALL/DEFAULT 保持原条件
+     */
     @SneakyThrows
     public static Expression dataScopeFilter(String deptAlias, String deptIdColumnName, String userAlias,
         String userIdColumnName, Expression where) {
@@ -70,7 +80,12 @@ public class MyDataPermissionHandler implements DataPermissionHandler {
                 break;
             case SELF:
                 username = SecurityUtils.getCurrentUser();
-                appendSqlStr = userColumnName + StringPool.EQUALS + "\"" + username + "\"";
+                // 不清洗后继续查询，避免非法身份被转换成另一个合法用户名。
+                if (username == null || !username.matches("[A-Za-z0-9_]+")) {
+                    appendSqlStr = "1 = 0";
+                    break;
+                }
+                appendSqlStr = userColumnName + StringPool.EQUALS + "'" + username + "'";
                 break;
             // 默认部门及子部门数据权限
             case DEPT_AND_SUB:
@@ -93,7 +108,8 @@ public class MyDataPermissionHandler implements DataPermissionHandler {
             return appendExpression;
         }
 
-        return new AndExpression(where, appendExpression);
+        // AND 优先于 OR，必须保护原条件中的所有分支。
+        return new AndExpression(new ParenthesedExpressionList<>(where), new ParenthesedExpressionList<>(appendExpression));
     }
 
     @Override
