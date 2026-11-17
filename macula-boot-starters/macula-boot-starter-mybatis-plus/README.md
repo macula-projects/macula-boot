@@ -134,8 +134,8 @@ mybatis-plus:
 interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler(){
 @Override public Expression getTenantId(){
 
-    // 如果上下文租户ID不为空，则用上下文的，否则用配置的租户ID（适合租户负责人切换租户）
-    if(Objects.nonNull(TenantContextHolder.getCurrentTenantId())){
+    // 只有已认证且非匿名的 ROOT 允许采用请求上下文中的租户 ID
+    if(SecurityUtils.isRoot() && Objects.nonNull(TenantContextHolder.getCurrentTenantId())){
     return new LongValue(TenantContextHolder.getCurrentTenantId());
     }
 
@@ -156,7 +156,7 @@ interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHan
     }));
 ```
 
-- 首先是从TenantContextHolder获取租户ID，适合具有多个租户的用户在前端切换租户ID使用；
+- 已认证的 ROOT 优先从 TenantContextHolder 读取请求租户；非 ROOT 忽略请求租户，不返回 403，继续使用认证租户；
 - 其次是从登录上下文获取租户ID，一般用于ak/sk访问应用的时候，通过应用配置获取租户ID；
 - 最后是从应用配置的租户ID获取
 
@@ -222,6 +222,40 @@ public enum DataScopeEnum implements IBaseEnum<Integer> {
 ```
 
 从原理来说，实际上是通过实现DataPermissionHandler，对具体的SQL语句根据用户的数据权限重新按照部门ID或者用户ID生成新的SQL语句过滤数据。
+
+SELF 使用 `create_by = ?`，用户名通过 JDBC 类型处理器绑定，不进入 SQL 文本；部门范围同样使用绑定的 Long 参数。字段名和别名只接受简单标识符。空用户名、空部门范围返回恒假条件；原 WHERE 与权限条件分别分组，保证 OR 分支受权限约束。缺失或 DEFAULT dataScope 的既有策略保持不变，非法范围报错。
+
+默认使用 `ParameterizedDataPermissionInterceptor` 同步维护 SQL、`ParameterMapping` 和 `additionalParameters`，按最终 SQL 中的占位符顺序组合原参数与新增权限参数；UNION、子查询、foreach、分页及写操作不会简单地将新增参数追加到末尾。查询结束或异常时恢复嵌套参数上下文。
+
+部门及子部门继续在原业务 SQL 中通过 `sys_dept(id, tree_path)` 子查询过滤，使用绑定参数的等值、前缀/中间/后缀 LIKE 匹配完整逗号分隔项，部门 12 不会匹配 112。该分支固定绑定 5 个条件参数，保留同一条 SQL 的执行和数据一致性边界。
+
+```sql
+dept_id IN (
+    SELECT id FROM sys_dept
+    WHERE id = ? OR tree_path = ?
+       OR tree_path LIKE ? OR tree_path LIKE ? OR tree_path LIKE ?
+)
+```
+
+部门值为 12 时，5 个绑定值依次为 `12L`、`"12"`、`"12,%"`、`"%,12,%"`、`"%,12"`。
+
+升级自定义接入时：自行组合原生 `DataPermissionInterceptor(new MyDataPermissionHandler())` 的代码须迁移为 `new ParameterizedDataPermissionInterceptor()`；直接调用旧静态 `dataScopeFilter` 不能自行执行尚未绑定的值表达式。缺少参数上下文时明确报错，不回退为字符串拼接或无限制查询。自动配置的普通使用方无需改代码。
+
+参数遍历覆盖 `TOP (?)`（包括 `PERCENT`、`WITH TIES`）及 Oracle `START WITH` / `CONNECT BY`（包括 `NOCYCLE` 和两种子句顺序），内部原参数仍与权限参数按最终 SQL 输出顺序绑定。参数映射不完整时拒绝执行，不回退为无限制查询。TOP 已在 H2 MSSQLServer 模式执行验证；Oracle 层级语法目前只验证解析改写与参数序列。
+
+当前集成验证覆盖内存 H2 的五种模式，不能据此宣称所有厂商数据库或所有 SQL 语法均通过验证。
+
+```bash
+# 无外部服务：真实 MyBatis + H2 默认及多种兼容模式
+mvn -pl macula-boot-starters/macula-boot-starter-mybatis-plus -am verify -Dit.test=DataPermissionDatabaseIT -Dfailsafe.failIfNoSpecifiedTests=false
+```
+
+真实 MySQL 回归测试 `MyDataPermissionMysqlIT` 仅在显式设置 `MACULA_SECURITY_TEST_MYSQL_URL`（`jdbc:mysql:` URL）、`MACULA_SECURITY_TEST_MYSQL_USER`、`MACULA_SECURITY_TEST_MYSQL_PASSWORD` 时使用独立测试库执行，不读取业务数据源；测试使用连接级随机临时表，连接关闭后自动销毁。未提供 URL 时该测试明确跳过。
+
+```bash
+mvn -pl macula-boot-starters/macula-boot-starter-mybatis-plus -am verify -Dit.test=MyDataPermissionMysqlIT -Dfailsafe.failIfNoSpecifiedTests=false
+```
+
 
 #### 分页插件
 

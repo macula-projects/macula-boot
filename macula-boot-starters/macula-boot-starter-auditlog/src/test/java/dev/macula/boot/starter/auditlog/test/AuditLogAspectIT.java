@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * @author Rain
  * @since 2024/04/07
  */
-@SpringBootTest
+@SpringBootTest(properties = "spring.security.oauth2.resourceserver.jwt.secret=isolated-integration-test-secret-32-bytes")
 @AutoConfigureMockMvc
 public class AuditLogAspectIT {
 

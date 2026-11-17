@@ -1,3 +1,4 @@
+# 请求体缓存默认 10 MiB，可用 MACULA_GATEWAY_MAX_CACHED_BODY_SIZE 调整。
 server:
   ssl:
     key-store: classpath:jwk/springboot.p12

@@ -111,7 +111,26 @@ macula:
 
 ### Token认证
 
-`spring.security.oauth2.resourceserver.jwt.issuer-uri` 用于下游 JWT 的签发者标识，默认 `http://127.0.0.1:9010`。默认签名密钥从 `jwk/jose.jks` 加载，目前没有对应的 YAML 密钥配置项；生产应用应提供自己的 `JWKSource<SecurityContext>` Bean 替换内置实现。
+`spring.security.oauth2.resourceserver.jwt.issuer-uri` 用于下游 JWT 的签发者标识，默认 `http://127.0.0.1:9010`。签名密钥支持以下网关配置。未配置时保留原 `classpath:jwk/jose.jks`、`jose` 别名及原密码，旧部署签发密钥和下游验证关系不变；默认组件加载内置材料时输出 WARN。内置私钥公开，生产应配置独立签名材料，这次兼容调整不消除默认密钥风险。
+
+| 属性 | 默认值 / 行为 |
+| --- | --- |
+| `macula.gateway.jwt.key-store` | `classpath:jwk/jose.jks`；支持 `classpath:` 或 `file:` |
+| `macula.gateway.jwt.key-store-type` | `JKS`，可配置 `PKCS12` |
+| `macula.gateway.jwt.key-store-password` | 保留原默认值，生产通过环境变量注入 |
+| `macula.gateway.jwt.key-alias` | `jose` |
+| `macula.gateway.jwt.key-password` | 未提供时使用 KeyStore 密码 |
+| `macula.gateway.max-cached-body-size` | `10MB`，即 10,485,760 字节；必须大于零且不超过 2,147,483,647 字节 |
+
+可使用 Spring 标准环境变量 `MACULA_GATEWAY_JWT_KEY_STORE`、`MACULA_GATEWAY_JWT_KEY_STORE_TYPE`、`MACULA_GATEWAY_JWT_KEY_STORE_PASSWORD`、`MACULA_GATEWAY_JWT_KEY_ALIAS`、`MACULA_GATEWAY_JWT_KEY_PASSWORD` 覆盖，也可在配置中心设置同名属性。显式资源、密码或别名错误会启动失败，不静默回退。
+
+自定义 `JWKSource<SecurityContext>` 或 `JwtEncoder` Bean 分别按类型优先。仅替换编码器时，仍创建默认 JWKSource，兼容 `JwtEncoder customEncoder(JWKSource<SecurityContext> source)` 的原有装配方式；因此默认 source 的显式 KeyStore 配置也必须有效。使用独立密钥体系的编码器应同时提供对应的 JWKSource。密码不进入配置对象 toString 或异常消息。
+
+签名/加密的 POST、PUT、PATCH 请求在本过滤器首次聚合时按实际字节数限制，包括未知 Content-Length 的分块流；聚合超限通过标准 HTTP 413 异常终止后续订阅。已有非 null 缓存对象按原逻辑直接传递，不转换类型、不重复读取或重新限额；保留原 defaultIfEmpty/doOnNext/then 链及链构造时机。普通未进入缓存分支的请求保持原行为。可用 `MACULA_GATEWAY_MAX_CACHED_BODY_SIZE` 调整，不能用 0 或负数关闭限制。过滤器不记录密钥和请求/响应明文。
+
+Opaque Token 缓存命中仍校验 `exp`，过期缓存删除并重新内省；写入 TTL 使用从当前时间到 `exp` 的剩余时间，而非 `exp - iat`。非法 `exp` 拒绝认证；无 `exp` 时最多缓存 5 分钟。缓存键和撤销接口保持不变。
+
+派生 JWT 的缓存键在原前缀后增加类型段：有 `JWT_ID` 使用 `id:`，否则使用 `u:`；保留 API Key 前缀和租户段，避免 ID 与主体名相同导致碰撞。升级不回读旧派生键，旧值自然过期，撤销入口继续调用 `AddJwtGlobalFilter.buildKey`。应用间隔离沿用各网关独立缓存的部署方式。
 
 将oauth2的token转换为JWT传递给微服务，微服务通过JWT获取用户信息和角色信息。
 
@@ -127,7 +146,7 @@ macula:
 
 System 缓存键为 `CacheConstants.IAM_CALLBACK_CREDENTIAL_PREFIX + resource_client_id`，Hash 含 `apiKeyDigest`（SHA-256十六进制）和 `path`，仅启用的真实资源服务器配置发布，禁用即删除；60秒TTL，30秒从数据库重建。此凭据不赋予普通业务 API 权限。网关的System Redis必须可读该缓存，token缓存仍使用原网关Redis；集群实例必须共享token缓存，否则需分别配置回调。
 
-通过认证后只执行原有 opaque token 与关联派生 JWT 缓存清理。IAM 对账户所有待撤销access token逐个回调所有资源服务器，部分失败保留重试；这是尽力同步，允许与并发内省存在短暂不一致，不承诺版本水位或固定60秒收敛，也不取消已开始的请求。内省缓存和派生JWT沿用原实现。
+通过认证后只执行 opaque token 与关联派生 JWT 缓存清理。IAM 对账户所有待撤销access token逐个回调所有资源服务器，部分失败保留重试；这是尽力同步，允许与并发内省存在短暂不一致，不承诺版本水位或固定60秒收敛，也不取消已开始的请求。内省缓存和派生 JWT 沿用原实现。
 
 ```bash
 mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am test

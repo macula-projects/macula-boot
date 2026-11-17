@@ -40,9 +40,11 @@ macula:
 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | 未设置 | 通过签发者地址发现验证配置 |
 | `spring.security.oauth2.resourceserver.jwt.public-key-location` | 未设置 | 本地 RSA 公钥资源路径 |
 | `spring.security.oauth2.resourceserver.jwt.jws-algorithms` | Boot 默认 `RS256` | JWK / 公钥方式允许的签名算法 |
-| `spring.security.oauth2.resourceserver.jwt.secret` | 内置兼容值 | 对称密钥配置；生产环境应显式注入，不使用公开默认值 |
+| `spring.security.oauth2.resourceserver.jwt.secret` | 未设置 | 显式 HMAC SHA-256 密钥，UTF-8 至少 32 字节 |
 
-当未配置 JWK、issuer 或公钥路径且无自定义 JwtDecoder 时，使用 `secret` 构造对称验签器；不要在不同验签模式间混配属性。
+当未配置 JWK、issuer 或公钥路径且无自定义 JwtDecoder 时，使用显式 `secret` 构造对称验签器；缺失、空白或 UTF-8 编码不足 32 字节时启动失败。其他验证来源及自定义 JwtDecoder 不要求该 Secret。不要在不同验签模式间混配属性。
+
+升级时，曾依赖旧默认 HMAC Secret 的资源服务器必须配置独立密钥或改用既有 JWK/issuer/公钥来源。此变化与网关 RSA 默认签名材料的兼容策略独立：网关仍保留原 `jose.jks` 默认行为，本模块不再自动启用公开 HMAC Secret。
 
 ## 核心功能
 

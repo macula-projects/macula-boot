@@ -37,7 +37,7 @@ import org.springframework.data.domain.Sort;
  * @author blinkfox on 2019-08-16.
  * @since 2026/8/12
  */
-@SpringBootTest
+@SpringBootTest(properties = "spring.security.oauth2.resourceserver.jwt.secret=isolated-integration-test-secret-32-bytes")
 public class BlogRepositoryIT {
 
     @Resource

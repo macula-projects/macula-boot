@@ -208,10 +208,10 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
     }
 
     /**
-     * 按认证来源、租户和身份生成 JWT 缓存键，避免 API Key 与同名 HMAC 应用串用 claims。
+     * 按认证来源、键类型和租户生成缓存键，区分相同值的 JWT_ID 与主体名。
      *
      * @param principal 已验证身份
-     * @return API Key 专用键，或沿用 OAuth/HMAC 的 jti 优先缓存键
+     * @return 保留 jti 优先规则，以 id: / u: 区分值的来源
      */
     public static String buildKey(OAuth2AuthenticatedPrincipal principal) {
 
@@ -223,17 +223,16 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 将业务租户作为缓存键的一段，避免应用更换租户后复用旧 JWT
-        String tenate = "";
+        String tenant = "";
         if (principal.getAttributes().containsKey(GlobalConstants.TENANT_ID_NAME)) {
-            tenate = TENANT_CACHE_SEGMENT_PREFIX + principal.getAttributes().get(GlobalConstants.TENANT_ID_NAME) + ":";
+            tenant = TENANT_CACHE_SEGMENT_PREFIX + principal.getAttributes().get(GlobalConstants.TENANT_ID_NAME) + ":";
         }
 
-        // 生成缓存JWT的KEY
-        // 当有JWT_ID的时候，以JWT_ID作为KEY缓存
+        // 类型段放在租户和值之前，避免 tokenId 与另一主体名称相同时复用 JWT。
         if (principal.getAttributes().containsKey(JWTClaimNames.JWT_ID)) {
-            return prefix + tenate + principal.getAttribute(JWTClaimNames.JWT_ID);
+            return prefix + "id:" + tenant + principal.getAttribute(JWTClaimNames.JWT_ID);
         }
-        return prefix + tenate + principal.getName();
+        return prefix + "u:" + tenant + principal.getName();
     }
 
     /**
