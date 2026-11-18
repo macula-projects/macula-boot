@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@tinymce/tinymce-vue": "6.3.0",
-    "axios": "1.20.0",
+    "axios": "1.21.0",
     "codemirror": "5.65.5",
     "core-js": "3.24.1",
     "cropperjs": "1.5.12",
@@ -25,9 +25,9 @@
     "pinia": "^2.0.33",
     "pinyin-match": "^1.2.2",
     "sortablejs": "1.15.0",
-    "tinymce": "8.9.2",
+    "tinymce": "8.10.2",
     "vue": "^3.2.47",
-    "vue-i18n": "9.14.5",
+    "vue-i18n": "11.4.14",
     "vue-router": "^4.1.6",
     "vuedraggable": "4.0.3",
     "xgplayer": "2.31.7",
@@ -35,11 +35,11 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
-    "@vitejs/plugin-vue": "^4.0.0",
-    "@vitejs/plugin-vue-jsx": "^3.0.0",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "@vitejs/plugin-vue-jsx": "^5.1.6",
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/test-utils": "^2.0.2",
-    "cypress": "^10.4.0",
+    "cypress": "^16.3.0",
     "eslint": "^8.21.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-vue": "^9.3.0",
@@ -50,8 +50,8 @@
     "start-server-and-test": "^1.14.0",
     "unplugin-auto-import": "^0.11.2",
     "unplugin-vue-components": "^0.22.4",
-    "vite": "^4.1.0",
-    "vite-plugin-inspect": "^0.7.15",
-    "vitest": "^0.29.2"
+    "vite": "^8.3.8",
+    "vite-plugin-inspect": "^12.1.0",
+    "vitest": "^5.1.0"
   }
 }
