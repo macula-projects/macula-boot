@@ -1,5 +1,24 @@
 # 中文名 V2 脱敏验证
 
+## 两字末字规则：双分支交付验证（2026-11-18）
+
+- 用户已明确要求提交、推送、合并到 5.x 和 main；本次仅交付姓名 V2 两字规则修订及其测试和文档，不重做历史功能。
+- 5.x / Java 8：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test` 退出 0，Web 131、Commons 5，共 136 项，0 failures/errors/skipped。姓名测试 43 项；日志 `/tmp/chinese-name-v2-last-character-final-tests.log`。
+- main / Java 17：相同 Maven 命令退出 0，Web 143、Commons 34，共 177 项，0 failures/errors/skipped。姓名测试 45 项（包含主线原有通用回归）；日志 `/tmp/name-tail-main-test.log`。
+- main：针对本次两个 Java 文件执行 `mvn -N checkstyle:check -Dcheckstyle.includes=macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java,macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/utils/SensitiveUtilTest.java`，退出 0，0 violations；日志 `/tmp/name-tail-main-style.log`。
+- 两个分支 `git diff --check` 均通过；本次未在本地重跑全仓测试。main PR 按现有 CI 执行 Maven Verify，不改动 CI、外部服务或发布配置。
+
+
+## 2026-11-18 当前修订：两字姓名保留末字
+
+用户明确确认本次规则：单字原样、两字保留末字、三字及以上保留首尾。此节结果对应当前源码，下方记录保留为历史证据。
+
+- 使用 Tencent Kona JDK 8u472 执行 `mvn -pl macula-boot-starters/macula-boot-starter-web -am test`，退出码 0，`BUILD SUCCESS`。
+- `SensitiveUtilTest`：43 项；Web：131 项；Commons：5 项。总计 136 项，0 failures/errors/skipped。
+- 覆盖两字姓名保留末字、五种间隔点、首尾点、生僻汉字、斜杠分段与空段；单字、三字及以上和 V1 兼容用例通过。
+- 最终日志：`/tmp/chinese-name-v2-last-character-final-tests.log`。首次运行发生在测试断言更新完成前，10 个旧两字规则断言失败，日志 `/tmp/chinese-name-v2-last-character-tests.log`；同步断言后重跑通过。
+- `git diff --check` 通过。本次未执行全仓测试，不替代下方全仓外部环境限制记录；未提交、推送或推进 PR 人工门禁。
+
 ## 当前修订：连续隐藏单星与斜杠分段
 
 用户已明确确认修订后的实现完整，进入 Test。以下命令使用 Tencent Kona JDK 8u472（JAVA_HOME 同下文环境）。
