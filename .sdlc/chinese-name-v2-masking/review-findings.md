@@ -20,3 +20,10 @@
 - 第 3 轮只复核恢复测试的变化，无新发现；全部发现已修复。最终源代码快照：5.x 08dde421，main 74d07f02。
 - Suppressed=0，verifier-rejected=0；最终未解决 Important/Minor/Nit/Pre-existing 均为 0。Recurring：本轮为同一交付的双分支移植，没有跨独立变更重复的缺陷类别。
 - 审查及 verifier 均未代替人工批准；远端推送和合并依据用户本次明确授权，不绕过分支保护。
+
+## 两字末字规则：独立交付审查（2026-11-18）
+- 新修订第 1 轮，最多三轮。独立只读 reviewer 对实际 diff 执行 Bugs、Security、Compliance；审查快照为 5.x `de40118a..8999a108`、main `250bb889..a42b2ecf`。
+- 5.x 无 REVIEW.md，按技能要求执行三个 pass；main 按现有 REVIEW.md 执行，最多五个 Nit。
+- 结论：无须修正的发现。单字、两字末字、三字及以上首尾、五种间隔点、斜杠空段及 Unicode 行为与已确认规则一致；main 原通用测试和 Javadoc 保留；README、spec 与测试一致。Compliance 无额外适用要求，不新增监管假设。
+- Posted=0、Suppressed=0、Verifier-rejected=0；无 findings 可交由 fresh-context verifier 逐项验证，无新增重复缺陷类别需要编码。
+- 本次独立审查没有批准人工门禁。提交、推送与合并依据用户本轮明确指令“提交推送合并到5.x和main”，不绕过仓库保护或检查。
