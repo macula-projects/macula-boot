@@ -49,6 +49,10 @@ spring:
       host: 127.0.0.1
       port: ${REDIS_PORT:36379}
       password: ${REDIS_PASSWORD:redis}
+      system:
+        host: 127.0.0.1
+        port: ${REDIS_PORT:36379}
+        password: ${REDIS_PASSWORD:redis}
   cloud:
     sentinel:
       #启动后马上初始化，而不是等有流量有再初始化。否则会提示：Runtime port not initialized, won't send heartbeat
@@ -81,10 +85,14 @@ spring:
           globalcors:
             cors-configurations:
               '[/**]':
-                allowed-origin-patterns: "*"
+                allowed-origins:
+                  - http://127.0.0.1:5099
+                  - http://localhost:5099
+                  - https://localhost:5443
+                  - https://127.0.0.1:5443
                 allowed-methods: "*"
                 allowed-headers: "*"
-                allow-credentials: true
+                allow-credentials: false
                 max-age: 1800
             add-to-simple-url-handler-mapping: true
           routes:

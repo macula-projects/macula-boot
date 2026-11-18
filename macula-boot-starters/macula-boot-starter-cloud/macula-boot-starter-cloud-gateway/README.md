@@ -71,7 +71,7 @@ macula:
 | `server.port` / `server.http.port` | Alibaba 为 HTTPS `5443` / HTTP `5000`，分别由 `SERVER_PORT` / `SERVER_HTTP_PORT` 覆盖；HTTP 扩展端口需示例中的配套 Java 配置 |
 | `server.ssl.*` | Alibaba 示例使用 classpath 证书；生产替换证书及口令 |
 | `spring.cloud.gateway.server.webflux.routes` | HTTP / WebSocket 路由；Tencent 示例转发到 `macula-example-tencent-consumer`，端口为 HTTP `4000` |
-| `spring.cloud.gateway.server.webflux.globalcors` | Alibaba 示例提供全局 CORS；生产应收窄来源，不照搬通配规则 |
+| `spring.cloud.gateway.server.webflux.globalcors` | Alibaba 示例仅允许列出的本地来源；生产须替换为实际可信前端来源 |
 | `spring.data.redis.*` | samples 使用标准单 Redis 配置；独立 System Redis 见下文扩展 |
 | `spring.security.oauth2.resourceserver.opaquetoken.*` | Token introspection 地址及调用凭证 |
 | `spring.reactor.context-propagation` | `auto`，跨 Reactor 线程传播上下文 |
@@ -494,3 +494,13 @@ POST:/service/api/orders
 来源为请求的直连对端地址，不自行读取 `Forwarded` 或 `X-Forwarded-For`；经过代理时可能匹配代理 IP。部署须避免由不可信转发头重写对端地址，真实调用者 IP 需先建立可信代理边界。IPv4-mapped IPv6 按等价 IPv4 处理，mapped CIDR 前缀必须不少于 96。
 
 升级时先更新全部相关网关，再启用 System/Admin 多行 URL 和 IP 配置并重建凭据缓存。旧网关不能解释多行 URL，也不校验 IP，启用新配置后不能直接回退旧网关。普通 OAuth 请求的权限规则不受本次新增字段影响。
+
+### CORS 与 CSRF 边界
+
+Spring Security 在认证前复用 `spring.cloud.gateway.server.webflux.globalcors` 规则，使允许来源的浏览器也能读取 401 等认证失败响应；Gateway 路由层使用同一配置。`add-to-simple-url-handler-mapping: true` 可覆盖未匹配路由谓词的预检。未配置有效 CORS 规则时，不会增加默认开放来源，同源及非浏览器认证行为保持原样。
+
+`/gateway/protect/key` 与 `/gateway/protect/urls` 早于安全链处理，端点自身执行跨域校验；拒绝和预检均提前结束，不生成配置正文。
+
+生产环境使用明确的 `allowed-origins`，包含协议及必要端口。Alibaba 示例只列出 HTTP `localhost`/`127.0.0.1:5099` 与 HTTPS `localhost`/`127.0.0.1:5443`；额外的独立前端端口须显式加入。示例保留允许方法和请求头的通配规则以兼容演示，生产应按接口需要收窄，并保留实际 Authorization、Content-Type 及签名请求头。
+
+纯 Bearer Header 认证不要求 `allow-credentials: true`，示例将其关闭。网关沿用显式 Token 认证及 CSRF 禁用；若代理的登录、刷新或业务接口依赖 Cookie/Session，须单独设计 CSRF 防护，不能仅依赖 CORS。Query Token 兼容行为保持不变，应避免在日志中记录凭据。

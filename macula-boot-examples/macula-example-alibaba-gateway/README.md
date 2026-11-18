@@ -34,6 +34,16 @@ local 配置中的 `echo/*` 和 `user` 已启用强制加密，原缺少加密�
 网关安全配置中包含演示用 client secret，部署前必须通过配置中心替换。
 
 
+## Redis 配置
+
+示例显式装配 `sysRedisTemplate`，用于读取 System 发布的应用、权限及 Token 清理回调凭据。网关自身缓存绑定 `spring.data.redis`，System 缓存绑定 `spring.data.redis.system`，两套属性和客户端独立注入。local 默认使用同一 Redis；实际环境须将 System 配置指向发布这些缓存的实例及数据库。仅增加 YAML 不会自动创建指定名称的模板。
+
+## 跨域配置
+
+local 配置的 `spring.cloud.gateway.server.webflux.globalcors` 仅允许 HTTP `http://127.0.0.1:5099`、`http://localhost:5099` 与 HTTPS `https://localhost:5443`、`https://127.0.0.1:5443`。页面由网关同源提供，无需额外开放来源；使用独立前端或修改监听端口时，显式加入对应 Origin。生产部署应替换为真实可信前端来源。
+
+示例使用显式 Bearer Header，`allow-credentials` 为 `false`。允许方法和请求头暂保留通配规则以兼容演示；生产应按需收窄，并包含实际使用的 Authorization、Content-Type 和签名请求头。Security 在认证前处理跨域，允许来源可读取认证失败响应；保护配置端点对跨域拒绝和预检提前结束。若新增 Cookie/Session 认证，应另行评估 CSRF 防护。
+
 ## 浏览器加解密示例
 
 启动依赖后打开 **http://127.0.0.1:5099/crypto-demo/index.html**，也可通过 HTTPS `https://localhost:5443/crypto-demo/index.html` 访问（本地示例证书需要浏览器信任）。页面、Axios 和加密库全部由 Gateway 同源提供，不需要 npm 安装、前端构建或运行时 CDN。

@@ -17,6 +17,11 @@
 
 package dev.macula.boot.starter.cloud.gateway.security;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
@@ -24,15 +29,16 @@ import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.filter.AddJwtGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.ApiKeyGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
-import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.cloud.gateway.config.GlobalCorsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
@@ -45,6 +51,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
@@ -59,12 +66,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
-
-import jakarta.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 资源服务器配置
@@ -85,16 +86,23 @@ public class ResourceServerConfiguration {
     private List<String> onlyAuthUrls = Collections.emptyList();
 
     @Setter
-    private boolean defaultUrlRequireCheck = false;
+    private boolean defaultUrlRequireCheck = true;
 
     @NotNull
     private final OAuth2ResourceServerProperties properties;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 配置资源服务器安全链，在认证前使用全局 CORS 规则处理跨域请求。
+     *
+     * @param http 响应式安全配置
+     * @param authorizationManager URL 授权管理器
+     * @return 网关安全过滤器链
+     */
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
-                                                         ReactiveAuthorizationManager<AuthorizationContext> authorizationManager) {
+            ReactiveAuthorizationManager<AuthorizationContext> authorizationManager) {
         //@formatter:off
         // 添加默认忽略的路径
         ignoreUrls.addAll(SecurityConstants.DEFAULT_IGNORE_URLS);
@@ -110,7 +118,9 @@ public class ResourceServerConfiguration {
             .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
             .anyExchange().access(authorizationManager)
         )
-        .cors(ServerHttpSecurity.CorsSpec::disable)
+        // 在认证前复用全局 CORS 配置，使允许来源也能读取认证失败响应。
+        .cors(Customizer.withDefaults())
+        // 凭据由客户端显式传递，不从 Cookie 提取；引入 Cookie/Session 认证时须重新评估。
         .csrf(ServerHttpSecurity.CsrfSpec::disable);
         return http.build();
         //@formatter:on
@@ -126,19 +136,27 @@ public class ResourceServerConfiguration {
         ServerBearerTokenAuthenticationConverter converter = new ServerBearerTokenAuthenticationConverter();
         converter.setAllowUriQueryParameter(true);
         return exchange -> Mono.defer(() -> ApiKeyUtils.resolveApiKey(exchange) != null
-            ? Mono.empty() : converter.convert(exchange));
+                ? Mono.empty() : converter.convert(exchange));
     }
 
     /**
      * 装配按剩余有效期缓存的内省器，命中缓存仍执行过期检查。
+     *
      * @return 带共享 Token 缓存的内省器
      */
     @Bean
     public ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector() {
         OAuth2ResourceServerProperties.Opaquetoken opaqueToken = properties.getOpaquetoken();
+
+        assert opaqueToken.getClientId() != null;
+        assert opaqueToken.getClientSecret() != null;
+
         ReactiveOpaqueTokenIntrospector delegate = SpringReactiveOpaqueTokenIntrospector
-            .withIntrospectionUri(opaqueToken.getIntrospectionUri()).clientId(opaqueToken.getClientId())
-            .clientSecret(opaqueToken.getClientSecret()).build();
+                .withIntrospectionUri(opaqueToken.getIntrospectionUri())
+                .clientId(opaqueToken.getClientId())
+                .clientSecret(opaqueToken.getClientSecret())
+                .build();
+
         return new CachingReactiveOpaqueTokenIntrospector(delegate, redisTemplate, java.time.Clock.systemUTC());
     }
 
@@ -167,6 +185,12 @@ public class ResourceServerConfiguration {
                         Result.failed(ApiResultCode.TOKEN_INVALID_OR_EXPIRED)));
     }
 
+    /**
+     * 将 Gateway 全局规则提供给 Security 和提前执行的保护配置端点。
+     *
+     * @param corsProperties Gateway 全局跨域规则
+     * @return 配置源；映射为空时返回 null，不增加默认开放规则
+     */
     @Bean
     @Conditional(CorsCondition.class)
     public CorsConfigurationSource corsConfigurationSource(GlobalCorsProperties corsProperties) {
@@ -183,7 +207,7 @@ public class ResourceServerConfiguration {
 
     @Bean
     AddJwtGlobalFilter addJwtGlobalFilter(JwtEncoder jwtEncoder, JwtClaimsCustomizer jwtClaimsCustomizer,
-                                          RedisTemplate<String, Object> redisTemplate) {
+            RedisTemplate<String, Object> redisTemplate) {
         return new AddJwtGlobalFilter(jwtEncoder, jwtClaimsCustomizer, redisTemplate);
     }
 
