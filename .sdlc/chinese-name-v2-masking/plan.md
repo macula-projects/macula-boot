@@ -2,11 +2,11 @@
 Status: accepted
 
 ## Files that change
-- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java`：仅调整 V2 方法、中文说明及私有间隔点判断方法。
-- `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/utils/SensitiveUtilTest.java`：新增定向单元测试。
-- `.sdlc/chinese-name-v2-masking/plan.md`：记录计划和实际实施偏差。
-- `.sdlc/chinese-name-v2-masking/review-findings.md`：记录 Plan 审查结果。
-- `.sdlc/chinese-name-v2-masking/verification.md`：后续 Test 阶段记录实际验证结果。
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java` # 仅调整 V2 方法、中文说明及私有间隔点判断方法。
+- `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/utils/SensitiveUtilTest.java` # 新增定向单元测试。
+- `.sdlc/chinese-name-v2-masking/plan.md` # 记录计划和实际实施偏差。
+- `.sdlc/chinese-name-v2-masking/review-findings.md` # 记录 Plan 审查结果。
+- `.sdlc/chinese-name-v2-masking/verification.md` # 后续 Test 阶段记录实际验证结果。
 
 ## Order of work
 1. 保留已有未提交修改；使用 Java 8 兼容的 Unicode 码点 API 统计非间隔点字符数。
@@ -25,3 +25,6 @@ Status: accepted
 - 断言 V1 原有行为，检查差异仅涉及声明范围。
 - Build：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test-compile -DskipTests`；`git diff --check`。
 - 后续 Test：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test -Dtest=SensitiveUtilTest -Dsurefire.failIfNoSpecifiedTests=false`，记录真实输出。
+
+## Implementation record
+- 文件清单中的说明改为门禁支持的 `#` 行内注释；仅修正解析格式，文件范围及实施方案不变。
