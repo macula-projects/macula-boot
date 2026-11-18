@@ -106,9 +106,9 @@ public class SensitiveUtil {
     }
 
     /**
-     * 中文名：两个字保留首字，三个字及以上保留首尾字，每段连续隐藏内容压成一个星号。
+     * 中文名：两个字保留末字，三个字及以上保留首尾字，每段连续隐藏内容压成一个星号。
      * 间隔点保留且不计入字数，斜杠分隔的姓名独立脱敏，单字姓名保持原样。
-     * 如：欧阳娜娜 → 欧*娜，阿不都·热合曼 → 阿*·*曼，欧阳娜娜/李四 → 欧*娜/李*。
+     * 如：欧阳娜娜 → 欧*娜，阿不都·热合曼 → 阿*·*曼，欧阳娜娜/李四 → 欧*娜/*四。
      *
      * @param username 中文名
      * @return 脱敏中文名
@@ -144,7 +144,7 @@ public class SensitiveUtil {
                 masked.appendCodePoint(codePoint);
                 hiding = false;
             } else {
-                if (nameIndex == 0 || (nameLength >= 3 && nameIndex == nameLength - 1)) {
+                if (nameIndex == nameLength - 1 || (nameLength >= 3 && nameIndex == 0)) {
                     masked.appendCodePoint(codePoint);
                     hiding = false;
                 } else if (!hiding) {

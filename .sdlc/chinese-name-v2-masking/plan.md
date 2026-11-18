@@ -2,6 +2,7 @@
 Status: accepted
 
 ## Files that change
+- `macula-boot-starters/macula-boot-starter-web/README.md` # 补充已确认的姓名 V2 公共行为及示例。
 - `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java` # 仅调整 V2 方法、中文说明及私有间隔点判断方法。
 - `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/utils/SensitiveUtilTest.java` # 新增定向单元测试。
 - `.sdlc/chinese-name-v2-masking/plan.md` # 记录计划和实际实施偏差。
@@ -10,7 +11,7 @@ Status: accepted
 
 ## Order of work
 1. 保留已有未提交修改；按 `/` 分段并保留空段，使用 Java 8 兼容的 Unicode 码点 API 为每段独立统计非间隔点字符数。
-2. 每段再次遍历字符：间隔点保留；首字保留；有效字数至少为三时末字保留；连续隐藏区只输出一个 `ASTERISK_CHAR`，间隔点重置隐藏状态；按原顺序保留所有 `/`。补充单星与分段规则中文说明。
+2. 每段再次遍历字符：间隔点保留；末字保留；有效字数至少为三时首字保留；连续隐藏区只输出一个 `ASTERISK_CHAR`，间隔点重置隐藏状态；按原顺序保留所有 `/`。补充单星与分段规则中文说明。
 3. 更新既有纯 JUnit 5 测试的逐字星号预期，新增斜杠分段、单字段、首尾及连续斜杠、空段、多段带间隔点姓名用例。不启动 Spring、不引入依赖，确认其他脱敏方法未改变。
 4. Build 阶段进行目标模块及其依赖的测试源码编译和 `git diff --check`，记录偏差；人工确认实现后进入 Test 阶段执行定向测试。
 
@@ -45,3 +46,11 @@ Status: accepted
 
 ## Delivery
 用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。
+
+## 2026-11-18 两字姓名修订
+- 用户已明确批准上述具体规则：单字原样、两字保留末字、三字及以上保留首尾。按已确认方案调整 V2 保留条件、Javadoc、两字及分段测试断言，同步 intent/spec 和 verification；不改 V1。
+- 额外覆盖两字姓名的五种间隔点，以及首字或末字为 Unicode 扩展汉字的边界。
+- 使用 Java 8 运行 Web 及依赖模块测试，实际结果记录于 verification.md。
+
+## 本次双分支交付
+用户明确要求提交、推送并合并到 5.x 和 main。按各分支现有测试和文档结构移植相同规则，保留 main 已有通用脱敏回归与 Javadoc；补充模块 README，满足 main 公共行为变化的文档要求。验证与独立审查完成后通过两个独立 PR 交付，不将两条产品线互相整分支合并。
