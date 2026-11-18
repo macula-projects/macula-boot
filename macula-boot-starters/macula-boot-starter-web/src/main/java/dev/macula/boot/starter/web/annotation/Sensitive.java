@@ -80,6 +80,10 @@ public @interface Sensitive {
          */
         CHINESE_NAME,
         /**
+         * 中文名，保留首尾字、间隔点及斜杠分段。
+         */
+        CHINESE_NAME_V2,
+        /**
          * 身份证号
          */
         ID_CARD,
@@ -87,6 +91,10 @@ public @interface Sensitive {
          * 座机号
          */
         FIXED_PHONE,
+        /**
+         * 自动识别手机或座机。
+         */
+        PHONE,
         /**
          * 地址
          */

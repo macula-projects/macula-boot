@@ -57,6 +57,7 @@
     </licenses>
 
     <properties>
+        <libphonenumber.version>9.0.40</libphonenumber.version>
         <revision>6.1.0-SNAPSHOT</revision>
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -104,6 +105,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>libphonenumber</artifactId>
+                <version>${libphonenumber.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-devtools</artifactId>
