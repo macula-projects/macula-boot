@@ -9,22 +9,31 @@ Status: accepted
 - `.sdlc/chinese-name-v2-masking/verification.md` # 后续 Test 阶段记录实际验证结果。
 
 ## Order of work
-1. 保留已有未提交修改；使用 Java 8 兼容的 Unicode 码点 API 统计非间隔点字符数。
-2. 再次遍历字符：间隔点保留原位；首字保留；有效字数至少为三时末字保留；其余替换为 `ASTERISK_CHAR`。补充方法中文说明。
-3. 新增纯 JUnit 5 单元测试，不启动 Spring、不引入依赖。确认其他脱敏方法未改变。
+1. 保留已有未提交修改；按 `/` 分段并保留空段，使用 Java 8 兼容的 Unicode 码点 API 为每段独立统计非间隔点字符数。
+2. 每段再次遍历字符：间隔点保留；首字保留；有效字数至少为三时末字保留；连续隐藏区只输出一个 `ASTERISK_CHAR`，间隔点重置隐藏状态；按原顺序保留所有 `/`。补充单星与分段规则中文说明。
+3. 更新既有纯 JUnit 5 测试的逐字星号预期，新增斜杠分段、单字段、首尾及连续斜杠、空段、多段带间隔点姓名用例。不启动 Spring、不引入依赖，确认其他脱敏方法未改变。
 4. Build 阶段进行目标模块及其依赖的测试源码编译和 `git diff --check`，记录偏差；人工确认实现后进入 Test 阶段执行定向测试。
 
 ## Risks
 - 用 UTF-16 长度计数会拆开生僻汉字，统一使用 Unicode 码点。
-- 间隔点不能作为姓名字数或首尾位置；多段姓名只保留整体首尾。
+- 间隔点不参与姓名字数，每个斜杠分段独立保留首尾；间隔点保留并分隔连续隐藏区。
 - 除 `·`、`•`、`・`、`.`、`．` 外的字符均参与姓名计数，不增加格式校验。
 - 相关源码已有未提交修改，只在其基础上调整 V2，不覆盖其他工作。
 
 ## Proof
-- `SensitiveUtilTest` 覆盖 null、空串、单字、两字、三字、四字、五种点、多个间隔点、首尾间隔点、仅含点及 Unicode 扩展汉字；断言星号数量和点的位置。
+- `SensitiveUtilTest` 覆盖 null、空串、单字、两字、三字、四字、五种点、多个间隔点、首尾间隔点、仅含点及 Unicode 扩展汉字；断言新版连续隐藏压缩、间隔点位置及斜杠分段结果（包括空段、连续和首尾斜杠）。
 - 断言 V1 原有行为，检查差异仅涉及声明范围。
 - Build：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test-compile -DskipTests`；`git diff --check`。
 - 后续 Test：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test -Dtest=SensitiveUtilTest -Dsurefire.failIfNoSpecifiedTests=false`，记录真实输出。
 
 ## Implementation record
 - 文件清单中的说明改为门禁支持的 `#` 行内注释；仅修正解析格式，文件范围及实施方案不变。
+- 已调整 `handlerUsernameV2`：按 Unicode 码点统计和遍历，保留整体首尾及五种间隔点，沿用单字和空值边界规则。
+- 已新增 `SensitiveUtilTest`：共 25 个参数化或普通测试用例（尚未执行），覆盖计划中的姓名边界并检查 V1 行为。
+- 使用 Tencent Kona JDK 8u472 执行目标模块及依赖的 `mvn -pl macula-boot-starters/macula-boot-starter-web -am test-compile -DskipTests`，退出码 0，BUILD SUCCESS；日志 `/tmp/chinese-name-v2-build.log`。`git diff --check` 通过。
+- 仅修改计划内的 V2 实现和新增测试；现有注解与序列化修改保留。除文件清单格式修正外无实施偏差。
+- 等待人工确认实现完整，再进入 Test 阶段执行正式定向测试；当前编译结果不作为测试通过证据。
+- 用户随后明确确认实现完整；已进入 Test 阶段。25 个脱敏用例及 Web/Commons 全部 38 个测试通过；全仓测试被 RocketMQ 外部连接失败阻塞，详细命令、输出和限制见 verification.md。
+
+## Pending revision
+- 用户补充要求：连续隐藏合并单星，间隔点两侧各单星；斜杠分段独立脱敏并保留斜杠。已更新设计和步骤，文件清单不变，用户已明确确认。旧版实现和测试结果作为历史保留，不视为新版通过证据。
