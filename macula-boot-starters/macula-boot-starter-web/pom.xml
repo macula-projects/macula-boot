@@ -33,6 +33,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+        </dependency>
+        <dependency>
             <groupId>dev.macula.boot</groupId>
             <artifactId>macula-boot-commons</artifactId>
         </dependency>
