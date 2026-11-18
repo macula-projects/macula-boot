@@ -1,5 +1,14 @@
 # 中文名 V2 脱敏验证
 
+## 两字末字规则：双分支交付验证（2026-11-18）
+
+- 用户已明确要求提交、推送、合并到 5.x 和 main；本次仅交付姓名 V2 两字规则修订及其测试和文档，不重做历史功能。
+- 5.x / Java 8：`mvn -pl macula-boot-starters/macula-boot-starter-web -am test` 退出 0，Web 131、Commons 5，共 136 项，0 failures/errors/skipped。姓名测试 43 项；日志 `/tmp/chinese-name-v2-last-character-final-tests.log`。
+- main / Java 17：相同 Maven 命令退出 0，Web 143、Commons 34，共 177 项，0 failures/errors/skipped。姓名测试 45 项（包含主线原有通用回归）；日志 `/tmp/name-tail-main-test.log`。
+- main：针对本次两个 Java 文件执行 `mvn -N checkstyle:check -Dcheckstyle.includes=macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java,macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/utils/SensitiveUtilTest.java`，退出 0，0 violations；日志 `/tmp/name-tail-main-style.log`。
+- 两个分支 `git diff --check` 均通过；本次未在本地重跑全仓测试。main PR 按现有 CI 执行 Maven Verify，不改动 CI、外部服务或发布配置。
+
+
 ## Main delivery verification
 - 基线 origin/main b735b292，源码快照 74d07f02；Java 17、Boot 4、Jackson 3 兼容移植，父 POM 集中管理国际号码依赖。
 - `JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.17.jdk/Contents/Home mvn clean verify` 退出码 0，`BUILD SUCCESS`，日志 `/tmp/macula-main-port-verify.log`。
