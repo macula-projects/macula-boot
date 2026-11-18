@@ -35,3 +35,15 @@ Status: accepted
 - Test：目标模块及依赖 `mvn -pl macula-boot-starters/macula-boot-starter-crypto -am test`，随后 `mvn test`；捕获输出、退出码及外部依赖阻塞，禁止在全仓未通过时声明整体绿色。
 - 打包：`mvn -pl macula-boot-starters/macula-boot-starter-crypto -am package -DskipTests`。检查普通和 cli 两个 JAR，确认 Main-Class、Hutool 依赖、工具内部类完整，排除 Spring 自动配置及业务配置。
 - 使用实际 JDK 8 `java -jar` 进程验证参数加解密、已知向量、UTF-8 中文、无 Console 的 stdin 交互和错误退出码；另外使用真实终端检查 Console 输入。交付 cli JAR 的本地路径及 README。
+
+## Implementation record
+- 用户明确批准计划后完成 ConfigCryptoUtil、ConfigCryptoCli、两份单元测试、Shade 打包配置及 README。未修改 CryptoPostProcessor，保留其他未提交工作。
+- 使用 Tencent Kona JDK 8u472 执行目标模块及依赖的 `test-compile -DskipTests`，退出码 0，BUILD SUCCESS；日志 `/tmp/config-crypto-cli-build.log`。
+- 为提前交付可审阅的真实打包产物，在 Build 阶段提前执行计划中的 `package -DskipTests`；未执行测试或运行时验证。缺失插件依赖经沙箱授权写入本机 Maven 缓存。初次打包暴露父 POM 的 Shade transformers 合并冲突，使用 combine.self="override" 修正；同时排除 Hutool 自带 Spring 自动配置资源。最终打包退出码 0，BUILD SUCCESS；日志 `/tmp/config-crypto-cli-package.log`。
+- 产物 `macula-boot-starters/macula-boot-starter-crypto/target/macula-boot-starter-crypto-5.0.22-SNAPSHOT-cli.jar`，2533409 字节；普通 Starter JAR 保留。静态检查确认 Main-Class、CLI 内部类及 Hutool AES 存在，未混入 Spring 自动配置或业务 YAML。
+- `git diff --check` 通过。构建和静态产物检查不作为单测或独立进程运行通过证据。
+- 等待人工确认实现完整后，进入 Test 阶段执行全部计划验证。
+- 用户随后确认实现完整；已执行 Test：Crypto 模块 18 个测试、独立 JDK 8 JAR 的 15 项检查及真实 Console 加解密均通过。全仓测试被 RocketMQ 外部连接失败阻塞，不声明全仓绿色；证据见 verification.md。
+
+## Delivery
+用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。

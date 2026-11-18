@@ -39,3 +39,16 @@ Status: accepted
 
 ## References
 - 固定版本的官方 Java POM：https://github.com/google/libphonenumber/blob/v9.0.40/java/pom.xml 。该版本明确 source/target 8，仍以本项目 JDK 8 编译及测试为最终证据。
+
+## Implementation record
+- 用户明确批准计划后，已完成三个电话入口、包内 PhoneMaskingSupport、参数化与 Jackson 序列化测试、Web POM 依赖及 README。handlerPhone 只识别并委派；姓名算法、注解、序列化映射及其他已有工作保持原样。
+- 辅助类按原数字位置替换，支持国家码、可确认的地理区号与拨号前导零、明确分机；国内显式短主号通过独立虚构号码核验区号。未知类型保留原数字计数，不依赖解析器删除的运营商前缀，防止短号被错误截短。
+- 首次下载固定版本依赖被沙箱的 Maven 缓存写限制阻止，经授权下载后使用 Tencent Kona JDK 8u472 执行 `mvn -pl macula-boot-starters/macula-boot-starter-web -am test-compile -DskipTests`，退出码 0，BUILD SUCCESS；日志 `/tmp/adaptive-phone-build.log`。
+- 单模块 dependency:tree 因本地尚无当前版本 Commons 安装产物尝试访问缓存失败；改为同一 Reactor 内 `mvn -pl macula-boot-starters/macula-boot-starter-web -am test-compile dependency:tree -DskipTests -Dincludes=com.googlecode.libphonenumber:libphonenumber`，退出码 0，BUILD SUCCESS；依赖树确认 `libphonenumber:9.0.40:compile`，日志 `/tmp/adaptive-phone-dependencies.log`。未通过 install 改变本地项目依赖快照。
+- 固定版本 PhoneNumberUtil class major version 为 52，真实 JDK 8 编译成功；`git diff --check` 通过。
+- 除为解析本地 Reactor 依赖而调整检查命令外，无范围或行为偏差。测试源码已编译，未运行单测或正式运行时验证；等待人工确认实现完整后进入 Test 阶段。
+- 用户随后明确确认实现完整；已进入 Test。首轮发现国际码与区号之间带连字符时分机识别失败，已在原范围修复并补回归断言。重新执行后电话 79 项、姓名 37 项全部通过，Web/Commons 合计 129 项通过且 0 跳过。
+- 全仓 `mvn test` 仍因 RocketMQ 外部连接失败退出 1，未跳过或修改无关测试；真实命令、输出及限制见 verification.md，不声明全仓绿色。
+
+## Delivery
+用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。
