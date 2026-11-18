@@ -1,5 +1,16 @@
 # 手机与座机自适应脱敏验证记录
 
+## Main delivery verification
+- 基线 origin/main b735b292，源码快照 74d07f02；Java 17、Boot 4、Jackson 3 兼容移植，父 POM 集中管理国际号码依赖。
+- `JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.17.jdk/Contents/Home mvn clean verify` 退出码 0，`BUILD SUCCESS`，日志 `/tmp/macula-main-port-verify.log`。
+- Surefire：Tests run 502 / failures 0 / errors 0 / skipped 0；Failsafe：Tests run 58 / failures 0 / errors 0 / skipped 4（按项目既有配置跳过）。
+- 首次沙箱执行被 MapStruct Plus 的 ~/.msp 增量标记写权限阻止；获准后完成真实全仓 clean verify，不修改测试或构建配置来跳过失败。
+- 变更的 10 个 Java 文件精确 Checkstyle：退出码 0，`You have 0 Checkstyle violations.`；日志 `/tmp/macula-main-checkstyle.log`。
+- 实际 cli JAR 包含入口、内部类和 Hutool，无 Spring 自动配置；独立 Java 17 进程的固定向量加解密、stdin 交互、EOF 及无效输入 5 项检查通过。原普通 Starter JAR 保留。
+- git diff --check 通过；本次不修改 protected 配置/技能/hook，eval 不适用。
+- Verification is green（仅指 main 本次完整验证）；以下为 5.x 历史记录，不作为 main 测试证据。
+
+
 日期：2026-11-18。用户已明确确认实现完整后进入 Test 阶段。
 
 ## 环境

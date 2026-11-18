@@ -53,3 +53,6 @@ Status: accepted
 
 ## Main forward port
 用户明确要求同步推送合并 main；保持本次验收的行为，按 main 的 AGENTS.md 适配 Java 17/Boot 4/Jackson 3、父 POM 集中版本和 Javadoc。上述为必要的主线兼容调整，不把 5.x 构建证据当作 main 验证结果。
+
+## Delivery
+用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。
