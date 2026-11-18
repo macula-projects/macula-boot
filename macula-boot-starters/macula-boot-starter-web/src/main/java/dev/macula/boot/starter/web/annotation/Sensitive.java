@@ -78,6 +78,11 @@ public @interface Sensitive {
          * 中文名
          */
         CHINESE_NAME,
+
+        /**
+         * 中文名，保留少数名族点
+         */
+        CHINESE_NAME_V2,
         /**
          * 身份证号
          */
@@ -86,6 +91,10 @@ public @interface Sensitive {
          * 座机号
          */
         FIXED_PHONE,
+        /**
+         * 固话或者手机号
+         */
+        PHONE,
         /**
          * 地址
          */

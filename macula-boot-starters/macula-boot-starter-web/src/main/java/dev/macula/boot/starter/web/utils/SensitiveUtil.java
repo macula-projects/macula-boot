@@ -28,7 +28,7 @@ public class SensitiveUtil {
     public static char ASTERISK_CHAR = '*';
 
     /**
-     * [手机号码] 前3位后4位明码，中间4位掩码用****显示，如138****0000
+     * [手机号码] 保留国际码，主号8位及以上保留前三后四；4～7位隐藏中间两位，1～3位全部隐藏。
      *
      * @param mobile 手机号码
      * @return 脱敏手机号
@@ -37,20 +37,20 @@ public class SensitiveUtil {
         if (StrUtil.isEmpty(mobile)) {
             return null;
         }
-        return hide(mobile, 3, mobile.length() - 4);
+        return PhoneMaskingSupport.mask(mobile, true);
     }
 
     /**
-     * [手机号码] 只显示后四位, 如:*8856
+     * [手机号码和座机自适应] 识别类型并委派；类型不明确时采用座机规则。
      *
-     * @param phone 手机号码
-     * @return 脱敏手机号
+     * @param phone 手机或座机号码
+     * @return 脱敏电话号码
      */
     public static String handlerPhone(String phone) {
         if (StrUtil.isEmpty(phone)) {
             return null;
         }
-        return overlay(phone, ASTERISK, 1, 0, phone.length() - 4);
+        return PhoneMaskingSupport.isMobile(phone) ? handlerMobile(phone) : handlerFixedPhone(phone);
     }
 
     /**
@@ -106,7 +106,65 @@ public class SensitiveUtil {
     }
 
     /**
-     * [固定电话] 后四位，其他隐藏（例子：****1234）
+     * 中文名：两个字保留首字，三个字及以上保留首尾字，每段连续隐藏内容压成一个星号。
+     * 间隔点保留且不计入字数，斜杠分隔的姓名独立脱敏，单字姓名保持原样。
+     * 如：欧阳娜娜 → 欧*娜，阿不都·热合曼 → 阿*·*曼，欧阳娜娜/李四 → 欧*娜/李*。
+     *
+     * @param username 中文名
+     * @return 脱敏中文名
+     */
+    public static String handlerUsernameV2(String username) {
+        if (StrUtil.isEmpty(username)) {
+            return null;
+        }
+        String[] names = username.split("/", -1);
+        StringBuilder masked = new StringBuilder(username.length());
+        for (int i = 0; i < names.length; i++) {
+            if (i > 0) {
+                masked.append('/');
+            }
+            masked.append(maskUsernamePart(names[i]));
+        }
+        return masked.toString();
+    }
+
+    private static String maskUsernamePart(String username) {
+        int[] codePoints = username.codePoints().toArray();
+        int nameLength = 0;
+        for (int codePoint : codePoints) {
+            if (!isNameSeparator(codePoint)) {
+                nameLength++;
+            }
+        }
+        StringBuilder masked = new StringBuilder(username.length());
+        int nameIndex = 0;
+        boolean hiding = false;
+        for (int codePoint : codePoints) {
+            if (isNameSeparator(codePoint)) {
+                masked.appendCodePoint(codePoint);
+                hiding = false;
+            } else {
+                if (nameIndex == 0 || (nameLength >= 3 && nameIndex == nameLength - 1)) {
+                    masked.appendCodePoint(codePoint);
+                    hiding = false;
+                } else if (!hiding) {
+                    masked.append(ASTERISK_CHAR);
+                    hiding = true;
+                }
+                nameIndex++;
+            }
+        }
+        return masked.toString();
+    }
+
+    private static boolean isNameSeparator(int codePoint) {
+        return codePoint == '·' || codePoint == '•' || codePoint == '・'
+            || codePoint == '.' || codePoint == '．';
+    }
+
+    /**
+     * [固定电话] 保留国际码、可识别区号及分机；主号8位及以上保留后四位。
+     * 主号4～7位隐藏中间两位，1～3位全部隐藏，原有号码格式保留。
      *
      * @param num 固定电话
      * @return 脱敏固定电话
@@ -115,7 +173,7 @@ public class SensitiveUtil {
         if (StrUtil.isEmpty(num)) {
             return null;
         }
-        return overlay(num, ASTERISK, 4, 0, num.length() - 4);
+        return PhoneMaskingSupport.mask(num, false);
     }
 
     /**

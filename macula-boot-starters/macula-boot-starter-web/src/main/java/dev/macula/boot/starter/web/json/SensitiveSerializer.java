@@ -73,8 +73,14 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
                 case CHINESE_NAME:
                     gen.writeString(SensitiveUtil.handlerUsername(value));
                     break;
+                case CHINESE_NAME_V2:
+                    gen.writeString(SensitiveUtil.handlerUsernameV2(value));
+                    break;
                 case FIXED_PHONE:
                     gen.writeString(SensitiveUtil.handlerFixedPhone(value));
+                    break;
+                case PHONE:
+                    gen.writeString(SensitiveUtil.handlerPhone(value));
                     break;
                 case ADDRESS:
                     gen.writeString(SensitiveUtil.handlerAddress(value));
