@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import dev.macula.boot.starter.web.annotation.Sensitive;
+import dev.macula.boot.starter.web.handler.SensitiveHandler;
 import dev.macula.boot.starter.web.utils.SensitiveUtil;
 
 import java.io.IOException;
@@ -38,20 +39,31 @@ import java.util.Objects;
  */
 public class SensitiveSerializer extends JsonSerializer<String> implements ContextualSerializer {
 
+    private Sensitive sensitive;
     private Sensitive.Type type;
     private int startInclude;
     private int endExclude;
     private int overlayRepeat;
+    private SensitiveHandler customHandler;
 
     public SensitiveSerializer() {
-
     }
 
-    public SensitiveSerializer(final Sensitive sensitive) {
+    public SensitiveSerializer(final Sensitive sensitive) throws ReflectiveOperationException {
+        this.sensitive = sensitive;
         this.type = sensitive.value();
         this.startInclude = sensitive.startInclude();
         this.endExclude = sensitive.endExclude();
         this.overlayRepeat = sensitive.overlayRepeat();
+
+        if (type == Sensitive.Type.CUSTOM_HANDLER) {
+            if (sensitive.handler() == SensitiveHandler.class) {
+                throw new IllegalArgumentException("CUSTOM_HANDLER 必须指定 handler 实现类");
+            }
+            this.customHandler = sensitive.handler().getDeclaredConstructor().newInstance();
+        } else {
+            this.customHandler = null;
+        }
     }
 
     @Override
@@ -98,6 +110,9 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
                     gen.writeString(
                         SensitiveUtil.overlay(value, SensitiveUtil.ASTERISK, overlayRepeat, startInclude, endExclude));
                     break;
+                case CUSTOM_HANDLER:
+                    gen.writeString(customHandler.handle(value, sensitive));
+                    break;
                 default:
                     gen.writeString(value);
             }
@@ -117,7 +132,13 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
                 sensitive = property.getContextAnnotation(Sensitive.class);
             }
             if (Objects.nonNull(sensitive)) {
-                return new SensitiveSerializer(sensitive);
+                try {
+                    return new SensitiveSerializer(sensitive);
+                } catch (ReflectiveOperationException | IllegalArgumentException e) {
+                    throw JsonMappingException.from(prov,
+                        "字段 " + property.getName() + " 的 SensitiveHandler 初始化失败: " +
+                            sensitive.handler().getName(), e);
+                }
             }
         }
         return prov.findValueSerializer(property.getType(), property);

@@ -19,6 +19,7 @@ package dev.macula.boot.starter.web.annotation;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dev.macula.boot.starter.web.handler.SensitiveHandler;
 import dev.macula.boot.starter.web.json.SensitiveSerializer;
 
 import java.lang.annotation.ElementType;
@@ -65,6 +66,12 @@ public @interface Sensitive {
      * @return *重复的次数
      */
     int overlayRepeat() default 4;
+
+    /**
+     * CUSTOM_HANDLER是生效
+     */
+    Class<? extends SensitiveHandler> handler() default SensitiveHandler.class;
+
 
     /**
      * Enumeration used with {@link Sensitive}
@@ -119,5 +126,10 @@ public @interface Sensitive {
          * 自定义,只替换成指定个*
          */
         CUSTOM_OVERLAY,
+
+        /**
+         * 自定义Handler，完全自己处理
+         */
+        CUSTOM_HANDLER
     }
 }

@@ -11,6 +11,30 @@ Status: accepted
 - `.sdlc/adaptive-phone-masking/review-findings.md` # Plan 审查记录。
 - `.sdlc/adaptive-phone-masking/verification.md` # Test 阶段实际验证证据。
 
+### 自定义 Handler 扩展（2026-11-19，待确认并提交计划后实施）
+
+用户在现有未提交代码基础上要求完整实现自定义 `SensitiveHandler`。本次扩展以下文件；其余电话及姓名算法保持原范围：
+
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/annotation/Sensitive.java`
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/handler/SensitiveHandler.java`
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/json/SensitiveSerializer.java`
+- `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/json/SensitiveSerializerTest.java`
+
+其中 Web README 已在原文件清单中，本次补充自定义 Handler 使用示例及构造器、线程安全约束。
+
+实施顺序：
+1. 保留用户已添加的 `CUSTOM_HANDLER` 类型及 `SensitiveHandler.handle(String, Sensitive)` 接口；注解采用 `Class<? extends SensitiveHandler> handler() default SensitiveHandler.class`，修复多余分号并说明默认值只是未配置标记。
+2. 序列化器保存字段注解及不可变的字段配置；仅在 `CUSTOM_HANDLER` 时通过公开无参构造器实例化 Handler。缺少实现类、无公开无参构造器或构造失败直接报错，保留异常原因；在 `createContextual` 中转换为带字段名的 `JsonMappingException`，不吞异常。
+3. 自定义分支调用 `customHandler.handle(value, sensitive)`，写出结果后 `break`，避免继续写出原始值。保留现有 null/空字符串处理及内置脱敏分支；Handler 返回 null 时写出 JSON null，执行异常由 Jackson 传播，不回退原文。
+4. 添加真实 ObjectMapper 测试，覆盖自定义输出、同一 Handler 接收不同字段注解且缓存后不串配置、Handler 返回 null、空值兼容、缺失实现、构造器不可访问或抛错、执行失败及内置脱敏回归；README 给出可复用示例。
+5. 使用 JDK 8 编译，并运行目标模块新测试、AdaptivePhoneMaskingTest 和 SensitiveUtilTest；执行 `git diff --check`，记录真实结果。此扩展不修改号码算法，不触发全仓外部服务测试。
+
+风险与边界：反射创建的 Handler 不接入 Spring 依赖注入；实现类及无参构造器须公开，实例可能被 Jackson 缓存并跨线程复用，须无状态或线程安全。内置类型忽略 handler 属性，避免对旧注解用法增加构造要求。
+
+门禁记录：2026-11-19 首次源码补全被 PreToolUse 的 AI SDLC artifact gate 拦截，原因是扩展文件未列入已提交的活动计划；该次补丁未执行。以上扩展待人工确认并提交计划后再实施，不以原计划 accepted 状态代替扩展审批。
+
+测试补充记录：用户随后自行完成业务实现，并仅要求补充测试。新增上述 `SensitiveSerializerTest.java`，未修改业务源码，也未提交计划或代码。测试文件写入获门禁允许。使用 JDK 8 执行 `mvn -o -pl macula-boot-starters/macula-boot-starter-web -am test -Dtest=SensitiveSerializerTest,AdaptivePhoneMaskingTest,SensitiveUtilTest -Dsurefire.failIfNoSpecifiedTests=false`，退出码 1；共 134 项，128 项通过、3 项断言失败、3 项执行错误、0 跳过。新增 11 项中 5 项通过；3 项配置错误测试因构造异常被吞而断言失败，3 项自定义输出测试因缺少 break 导致 Jackson 重复写值报错。原电话 80 项及姓名 43 项全部通过。日志 `/tmp/sensitive-handler-tests.log`；`git diff --check` 通过。保留失败测试供用户修复业务实现后回归，不将当前结果声明为测试通过。
+
 ## Order of work
 1. 在 Web POM 固定 `com.googlecode.libphonenumber:libphonenumber:9.0.40`。官方该版本 POM 指定 source/target 8；实施使用真实 JDK 8 编译验证，不使用 SNAPSHOT 或手写全球国家码表。
 2. 新增包内 PhoneMaskingSupport，解析明确分机标记及国内 `区号-7或8位主号-分机`；检查输入字符和分组完整性，禁止将任意不规则文本直接交给宽松解析器后原文返回。保存主号数字在原输入中的位置，分机及其原始分隔符独立保存。
