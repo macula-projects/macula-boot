@@ -54,6 +54,16 @@ Status: accepted
 
 风险：动态刷新仍依赖 Spring Cloud 同步事件和业务 Bean 的 RefreshScope/重新绑定机制；不保证刷新窗口内并发读取的原子性。该扩展经用户批准超出原电话功能及 crypto CLI 的非目标，仅涉及上述精确列出的文件。
 
+实施与验证记录：
+- 已仅提交获准的计划扩展，提交 `05afde8a`，用于解除源码写入门禁；本次业务源码、测试、文档修改均未提交或推送。保留用户在示例模块中的修改。
+- 实现读取时解密、组合源递归、启动后期及标准 Cloud 刷新事件重新包装，保留 MapPropertySource 类型、原 Map、属性枚举与 OriginLookup；系统环境变量保留原类型与宽松绑定，不参与解密。Crypto 模块仅测试范围引入 Cloud Context。
+- 首轮模块测试发现 SpringBootTestRandomPortEnvironmentPostProcessor 将已有源强转为 MapPropertySource，普通 Enumerable 包装破坏类型；已改为为 Map 提供专用包装类并补类型、systemProperties 与系统环境变量绑定回归。该修复未扩大文件范围。
+- 使用 Tencent Kona JDK 8u472 执行 `mvn -o -pl macula-boot-starters/macula-boot-starter-crypto -am test`，最终退出码 0，31 项全部通过，0 失败、0 错误、0 跳过。其中新测试 13 项，覆盖真实 Spring Boot 启动、BootstrapPropertySource、模拟 Nacos 组合源、实际 Spring Cloud EnvironmentChangeEvent/ConfigurationPropertiesRebinder、更新/明文转换/属性删除/源删除、优先级、OriginLookup、错误密文/密钥及本地兼容；日志 `/tmp/nacos-crypto-tests.log`。
+- JDK 8 执行同模块 Reactor `package -DskipTests`，退出码 0，普通 Starter JAR 包含 LifecycleListener 及 spring.factories 注册；CLI JAR 不含 Spring 类及生命周期监听器，日志 `/tmp/nacos-crypto-package.log`。最终新增测试仅影响测试源码，未在打包后修改生产源码。
+- `git diff --check` 通过。未连接真实 Nacos，未执行全仓外部服务测试；刷新验证使用真实 Cloud 事件/重绑定和离线模拟配置源，不宣称真实服务端到端验证通过。README 已注明支持边界及单例 @Value 的刷新限制。
+- 用户随后报告 provider1 日志初始化时无法解析 spring.application.name。新增启用真实 Spring Cloud bootstrap 的启动测试：名称仅在临时 bootstrap.properties 中，日志文件名在临时 application.properties 中引用该名称，修复前复现相同异常（日志 `/tmp/nacos-crypto-bootstrap-before.log`）。根因是 BootstrapApplicationListener 仅接受 OriginTrackedMapPropertySource，而此前 Map 包装改变了具体类型。由于该类为 final，改为使用惰性 Map 视图创建同类型配置源，保留来源和 bootstrap 合并行为；视图不缓存明文，枚举名称不触发解密，原 Map 保留密文。不修改 provider1 配置。
+- 上述修复后重新执行 JDK 8 Crypto Reactor 全部测试，退出码 0，32 项全部通过、0 失败/错误/跳过，其中新处理器测试 14 项；日志 `/tmp/nacos-crypto-bootstrap-fixed.log`。复现测试同时验证 bootstrap 中的加密属性可解密、日志路径正确解析。此前仅模拟晚加载源的启动用例不足以覆盖真实 bootstrap 合并，现已补齐该覆盖。
+
 ### 原电话脱敏实施顺序
 1. 在 Web POM 固定 `com.googlecode.libphonenumber:libphonenumber:9.0.40`。官方该版本 POM 指定 source/target 8；实施使用真实 JDK 8 编译验证，不使用 SNAPSHOT 或手写全球国家码表。
 2. 新增包内 PhoneMaskingSupport，解析明确分机标记及国内 `区号-7或8位主号-分机`；检查输入字符和分组完整性，禁止将任意不规则文本直接交给宽松解析器后原文返回。保存主号数字在原输入中的位置，分机及其原始分隔符独立保存。

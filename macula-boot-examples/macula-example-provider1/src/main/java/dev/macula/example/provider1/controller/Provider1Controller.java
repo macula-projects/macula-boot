@@ -49,8 +49,16 @@ public class Provider1Controller {
     @Operation(summary = "echo方法", description = "用于演示")
     @Parameter(name = "字符串", description = "用于回声")
     public String echo(@RequestParam("str") String str) {
-        log.info("echo: " + str + ", test=" + config.getTest());
-        return "Hello " + str + ", test=" + config.getTest() + ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
+        log.info("echo: " + str + ", test=" + config.getTest() +
+            ", encryptApp=" + config.getEncryptApp()  +
+            ", encryptBoot=" + config.getEncryptBoot() +
+            ", encryptNacos=" + config.getEncryptNacos()
+        );
+        return "Hello " + str + ", test=" + config.getTest() +
+            ", encryptApp=" + config.getEncryptApp() +
+            ", encryptBoot=" + config.getEncryptBoot() +
+            ", encryptNacos=" + config.getEncryptNacos() +
+            ", by " + SecurityUtils.getCurrentUser() + ", at " + DateUtil.now();
     }
 
     @PostMapping("/user")

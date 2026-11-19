@@ -34,4 +34,7 @@ import org.springframework.context.annotation.Configuration;
 @RefreshScope
 public class ExampleConfig {
     private String test;
+    private String encryptApp;
+    private String encryptNacos;
+    private String encryptBoot;
 }

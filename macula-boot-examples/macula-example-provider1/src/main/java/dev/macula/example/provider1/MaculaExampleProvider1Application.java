@@ -17,6 +17,7 @@
 
 package dev.macula.example.provider1;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -31,7 +32,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication
 @EnableDiscoveryClient
 public class MaculaExampleProvider1Application {
-
     public static void main(String[] args) {
         SpringApplication.run(MaculaExampleProvider1Application.class, args);
     }

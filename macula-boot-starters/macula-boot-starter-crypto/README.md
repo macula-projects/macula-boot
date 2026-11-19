@@ -30,11 +30,11 @@ macula:
 
 ### 配置文件加密
 
-配置文件加密只支持AES（AES/ECB/PKCS5Padding）方式加密，密钥只能通过命令行的方式设置
+配置文件加密支持 AES（AES/ECB/PKCS5Padding）。密钥通过启动参数 `macula.crypto.key`、JVM 系统属性或环境变量 `MACULA_CRYPTO_KEY` 提供，长度为 16、24 或 32 个 UTF-8 字节。示例密钥仅用于演示：
 
 ```
 在启动的时候加入密钥
---macula.crypto.key=password
+--macula.crypto.key=abcdef1234567890
 ```
 
 ***注意：配置文件的密文属性需要以 "mpw:" 开头***，例如：
@@ -43,6 +43,22 @@ macula:
 test:
   encrypt: mpw:Or0wNwIcctnekUyDfeN8cw==
 ```
+
+以上示例读取 `test.encrypt` 得到 `hello1`。
+
+#### Nacos 配置与刷新
+
+本地配置和 Nacos 配置均使用相同的 `mpw:` 协议。应用需要引入 Nacos Config 依赖并完成原有的配置加载设置；Crypto Starter 不提供 Nacos 客户端或连接配置，也不增加 Spring Cloud 运行时依赖。
+
+- 启动早期通过 `EnvironmentPostProcessor` 包装已加载的配置源，bootstrap 后通过 `ApplicationPreparedEvent` 补充包装后加载的 Nacos 配置，再进行普通 Bean 创建、`@Value` 注入与 `@ConfigurationProperties` 绑定。
+- 按原名称、顺序包装普通 Map 和可枚举配置源，递归处理组合配置源；保留 `OriginTrackedMapPropertySource` 的具体类型，确保 Spring Cloud bootstrap 合并本地配置时仍可识别，避免丢失 `spring.application.name` 等属性。原数据继续保存密文，读取时解密，不建立最高优先级明文副本。高优先级明文配置仍能覆盖低优先级加密配置。
+- Spring Cloud 发布以当前 `ConfigurableApplicationContext` 为 source 的标准 `EnvironmentChangeEvent` 时，监听器优先重新包装被替换的配置源。后续读取和配置重新绑定使用新值；配置改为明文、属性删除或整个配置源删除后，按原有优先级读取或回退，不保留旧明文。
+- `@Value` 的普通单例不会因配置改变而自动重新注入；动态更新仍需要原有的 `@RefreshScope` 或 Spring Cloud 配置重新绑定机制。监听器依赖标准同步事件处理，不保证源替换与事件发布之间并发读取的原子性，不提供运行期间的密钥轮换机制。
+- 密钥建议在进程启动时提供。系统环境变量保持其原类型和宽松绑定行为，用于提供密钥或普通覆盖值，不参与 `mpw:` 解密。缺少密钥时沿用既有行为，保留原配置值；提供密钥后，读取格式错误或无法解密的密文会抛出包含源名、属性名的异常，不输出密钥、密文或明文。
+
+排查 Nacos 配置仍返回密文时，确认 Starter 在 classpath、启动密钥正确、配置值以 `mpw:` 开头；自定义刷新流程需在源替换后、重新绑定前发布标准事件。仅通过 `@NacosValue` 或其他客户端私有缓存读取、未进入 Spring Environment 的配置不在本处理器的处理范围。
+
+验证采用离线组合配置源模拟 Nacos 加载、真实 Spring Boot 启动及 Spring Cloud 刷新事件/配置重新绑定，不等同于连接真实 Nacos 服务的端到端验证。
 
 ### 独立配置加解密工具
 
