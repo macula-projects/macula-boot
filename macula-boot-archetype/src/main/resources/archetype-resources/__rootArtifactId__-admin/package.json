@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@tinymce/tinymce-vue": "6.3.0",
-    "axios": "1.21.0",
+    "axios": "1.21.1",
     "codemirror": "5.65.5",
     "core-js": "3.24.1",
     "cropperjs": "1.5.12",
