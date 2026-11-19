@@ -19,14 +19,14 @@ jobs:
       # 2. 安装Java 环境 这里会用到的参数就是 Git Action secrets中配置的，
       #    取值要在key前面加  secrets.
       - name: Set up Maven Central Repo
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '8'
           server-id: ossrh
-          server-username-env-var: MAVEN_USERNAME
-          server-password-env-var: MAVEN_CENTRAL_TOKEN
-          gpg-passphrase-env-var: MAVEN_GPG_PASSPHRASE
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_SECRET }}
       # 3. 发布到Maven中央仓库
       - name: Publish to Maven Central Repo
