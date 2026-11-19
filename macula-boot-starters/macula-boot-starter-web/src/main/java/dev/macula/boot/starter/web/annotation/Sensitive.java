@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2023 Macula
- *   macula.dev, China
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 package dev.macula.boot.starter.web.annotation;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
+import dev.macula.boot.starter.web.handler.SensitiveHandler;
 import dev.macula.boot.starter.web.json.SensitiveSerializer;
 import tools.jackson.databind.annotation.JsonSerialize;
 
@@ -65,6 +66,13 @@ public @interface Sensitive {
      * @return *重复的次数
      */
     int overlayRepeat() default 4;
+
+    /**
+     * CUSTOM_HANDLER 时使用的实现类，必须具有可访问的无参构造器。
+     *
+     * @return 处理类；默认值表示尚未配置，自定义模式下将报错
+     */
+    Class<? extends SensitiveHandler> handler() default SensitiveHandler.class;
 
     /**
      * Enumeration used with {@link Sensitive}
@@ -119,5 +127,10 @@ public @interface Sensitive {
          * 自定义,只替换成指定个*
          */
         CUSTOM_OVERLAY,
+
+        /**
+         * 完全由指定 SensitiveHandler 处理。
+         */
+        CUSTOM_HANDLER,
     }
 }
