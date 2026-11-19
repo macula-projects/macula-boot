@@ -2,6 +2,11 @@
 Status: accepted
 
 ## Files that change
+- `macula-boot-starters/macula-boot-starter-crypto/src/main/java/dev/macula/boot/starter/crypto/config/CryptoPostProcessor.java` # 用户确认的 Nacos 解密修复，原位包装与生命周期监听。
+- `macula-boot-starters/macula-boot-starter-crypto/src/main/resources/META-INF/spring.factories` # 注册启动及刷新事件监听器。
+- `macula-boot-starters/macula-boot-starter-crypto/src/test/java/dev/macula/boot/starter/crypto/config/CryptoPostProcessorTest.java` # 本地、嵌套、加载时机、刷新、优先级及异常测试。
+- `macula-boot-starters/macula-boot-starter-crypto/pom.xml` # 仅测试范围引入 Spring Cloud Context，以真实刷新事件验证兼容性。
+- `macula-boot-starters/macula-boot-starter-crypto/README.md` # 补充 Nacos 支持范围及验证限制。
 - `macula-boot-starters/macula-boot-starter-web/pom.xml` # 添加固定版本的离线国际号码解析依赖。
 - `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java` # 更新三个电话入口，保留其他脱敏规则。
 - `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/PhoneMaskingSupport.java` # 新增包内解析与数字位置掩码辅助实现。
@@ -36,6 +41,20 @@ Status: accepted
 测试补充记录：用户随后自行完成业务实现，并仅要求补充测试。新增上述 `SensitiveSerializerTest.java`，未修改业务源码，也未提交计划或代码。测试文件写入获门禁允许。使用 JDK 8 执行 `mvn -o -pl macula-boot-starters/macula-boot-starter-web -am test -Dtest=SensitiveSerializerTest,AdaptivePhoneMaskingTest,SensitiveUtilTest -Dsurefire.failIfNoSpecifiedTests=false`，退出码 1；共 134 项，128 项通过、3 项断言失败、3 项执行错误、0 跳过。新增 11 项中 5 项通过；3 项配置错误测试因构造异常被吞而断言失败，3 项自定义输出测试因缺少 break 导致 Jackson 重复写值报错。原电话 80 项及姓名 43 项全部通过。日志 `/tmp/sensitive-handler-tests.log`；`git diff --check` 通过。保留失败测试供用户修复业务实现后回归，不将当前结果声明为测试通过。
 
 ## Order of work
+
+### Nacos 配置解密修复扩展（2026-11-19）
+
+用户要求“直接帮我改一下看看”，并在获知源码门禁要求更新及提交活动计划后明确回复“确认”。本扩展由用户批准，仅提交本计划以满足 artifact gate；不提交业务源码、不推送、不修改用户示例应用配置或真实密钥。
+
+1. 保留用户将 OriginTrackedMapPropertySource 放宽到 MapPropertySource 的意图，进一步改为按原名称、位置包装 EnumerablePropertySource，递归处理 CompositePropertySource；读取时解密 mpw:，保留原始密文、属性枚举及来源信息，不生成 custom-encrypt 最高优先级快照。
+2. EnvironmentPostProcessor 处理早期配置；spring.factories 注册 ApplicationPreparedEvent 监听器处理 bootstrap 后加载的配置；以最高监听优先级处理 Spring Cloud EnvironmentChangeEvent，刷新替换配置源后重新包装。Crypto Starter 不增加 Spring Cloud 运行时硬依赖，以事件完整类名识别可选刷新事件，测试使用真实 Cloud 事件。
+3. 密钥沿用 macula.crypto.key，按 Environment 优先级读取，解密协议复用 ConfigCryptoUtil；包装保持幂等，不缓存明文，解密错误只报告源名和属性名，不输出密钥、密文、明文。
+4. 测试覆盖本地 OriginTracked/普通 Map、嵌套组合源、配置优先级、初始化器晚加载的模拟 Nacos 配置及 Bean 绑定、真实刷新事件替换/删除/明文转换、重复安装、OriginLookup、空值和错误密文；只使用虚构测试密钥和离线源，不声称已连接真实 Nacos。
+5. 使用 JDK 8 执行 Crypto 及依赖模块测试和 git diff --check；记录实际结果及真实 Nacos 集成尚待验证的边界。新增实现集中在现有处理器及其嵌套类型，测试范围依赖不进入 CLI JAR。
+
+风险：动态刷新仍依赖 Spring Cloud 同步事件和业务 Bean 的 RefreshScope/重新绑定机制；不保证刷新窗口内并发读取的原子性。该扩展经用户批准超出原电话功能及 crypto CLI 的非目标，仅涉及上述精确列出的文件。
+
+### 原电话脱敏实施顺序
 1. 在 Web POM 固定 `com.googlecode.libphonenumber:libphonenumber:9.0.40`。官方该版本 POM 指定 source/target 8；实施使用真实 JDK 8 编译验证，不使用 SNAPSHOT 或手写全球国家码表。
 2. 新增包内 PhoneMaskingSupport，解析明确分机标记及国内 `区号-7或8位主号-分机`；检查输入字符和分组完整性，禁止将任意不规则文本直接交给宽松解析器后原文返回。保存主号数字在原输入中的位置，分机及其原始分隔符独立保存。
 3. 利用 libphonenumber 的国家码集合识别 +/00 国际前缀，输出保留原前缀与格式；无国际码默认 CN。只在解析视图移除格式字符，原字符串作为掩码模板。对国际码、国内拨号前导零、国家有效号码及地理区号建立可靠的位置对应，不用简单 substring 搜索猜测重复数字的边界；无法对应时回退 `*`。
