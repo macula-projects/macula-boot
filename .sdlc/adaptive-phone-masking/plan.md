@@ -2,6 +2,16 @@
 Status: accepted
 
 ## Files that change
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/annotation/Sensitive.java` # 已验收自定义 Handler 的主线适配。
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/handler/SensitiveHandler.java` # 自定义处理接口及线程安全契约。
+- `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/json/SensitiveSerializer.java` # Jackson 3 上下文序列化及初始化异常。
+- `macula-boot-starters/macula-boot-starter-web/src/test/java/dev/macula/boot/starter/web/json/SensitiveSerializerTest.java` # 自定义处理与既有类型回归。
+- `macula-boot-starters/macula-boot-starter-crypto/src/main/java/dev/macula/boot/starter/crypto/config/CryptoPostProcessor.java` # Boot 4 配置源包装、启动及刷新监听。
+- `macula-boot-starters/macula-boot-starter-crypto/src/main/resources/META-INF/spring.factories` # 保留 Boot 4 后处理器注册键并增加监听器。
+- `macula-boot-starters/macula-boot-starter-crypto/src/test/java/dev/macula/boot/starter/crypto/config/CryptoPostProcessorTest.java` # 离线源、优先级、异常、幂等及 Origin 单测。
+- `macula-boot-starters/macula-boot-starter-crypto/src/test/java/dev/macula/boot/starter/crypto/config/CryptoPostProcessorIT.java` # 完整启动、bootstrap、日志占位符与真实 Cloud 事件重绑定。
+- `macula-boot-starters/macula-boot-starter-crypto/pom.xml` # 仅测试范围增加 BOM 管理的 Cloud Context。
+- `macula-boot-starters/macula-boot-starter-crypto/README.md` # 同步 Nacos 使用边界。
 - `macula-boot-parent/pom.xml` # main 按 AGENTS.md 集中管理 libphonenumber 版本。
 - `macula-boot-starters/macula-boot-starter-web/pom.xml` # 添加固定版本的离线国际号码解析依赖。
 - `macula-boot-starters/macula-boot-starter-web/src/main/java/dev/macula/boot/starter/web/utils/SensitiveUtil.java` # 更新三个电话入口，保留其他脱敏规则。
@@ -53,6 +63,14 @@ Status: accepted
 
 ## Main forward port
 用户明确要求同步推送合并 main；保持本次验收的行为，按 main 的 AGENTS.md 适配 Java 17/Boot 4/Jackson 3、父 POM 集中版本和 Javadoc。上述为必要的主线兼容调整，不把 5.x 构建证据当作 main 验证结果。
+
+### 2026-11-19 自定义 SensitiveHandler 与 Nacos 配置解密 PR
+
+用户明确要求“帮我把Sensitive可以自定义handler和配置文件加密支持nacos这两个修复PR到main”。本次从最新 origin/main 创建独立分支，移植已经在 5.x 实现并验收的功能（036f9fa6、dc84c23d 中的 Web/Crypto 修改），不合并 5.x 全分支，不带入示例凭据/环境配置、版本发布提交或现有 main 工作区中的 Gateway 修改。
+
+实施顺序：先移植 Sensitive API/实现并适配 Jackson 3 DatabindException；再移植 Crypto 包装及事件监听并保持 Boot 4 EnvironmentPostProcessor 注册键；将完整 Spring 启动用例按主线规则拆为 IT，保留离线单测；补齐中文 Javadoc、标准版权头和 README。依赖使用现有父 POM/BOM 管理，不改变 main 6.1.0-SNAPSHOT / Boot 4 / Java 17 版本体系。
+
+验证：先执行 Web/Crypto/Commons 目标模块 verify，再执行全仓 clean verify；按 CI 规则对修改的 Java 文件执行 Checkstyle，检查普通和 CLI JAR。审查遵循 REVIEW.md，运行独立 Bugs/Security/Compliance 及独立发现验证，记录实际结果。只创建 PR，等待人工审核，不合并或部署。真实 Nacos 服务端到端测试仍未纳入授权环境，不以模拟源和真实事件测试替代该证据。
 
 ## Delivery
 用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。
