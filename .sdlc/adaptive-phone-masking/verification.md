@@ -56,3 +56,14 @@ Tencent Kona JDK 8u472，Maven 3.9.6，libphonenumber 9.0.40。Maven 命令设�
 
 ## 结论
 电话脱敏及姓名回归、Web/Commons 全部测试通过。全仓验证仍受 RocketMQ 外部连接失败阻塞，不声明整体绿色，不进入 PR 审查或部署交接。
+
+
+## 2026-11-19 自定义 Handler 与 Nacos 解密主线 PR 验证
+
+- 范围：从 5.x 已验收实现前移植到 main，源码快照 `3cd560feb1f34cb00b3d5b01cfdba994e9668646`，基线 `cc05c252`。使用 Tencent Kona JDK 17.0.17 / Maven 3.9.6 / main Boot 4.0.8、Cloud 2025.1.3、Jackson 3。
+- 目标命令：`mvn -o -pl macula-boot-starters/macula-boot-starter-web,macula-boot-starters/macula-boot-starter-crypto -am verify`，退出码 0，216 项单元测试 + 5 项集成测试，0 failures/errors/skipped；日志 `/tmp/handler-nacos-main-target-verify.log`。其中 SensitiveSerializerTest 11 项；CryptoPostProcessorTest 11 项、CryptoPostProcessorIT 3 项，包含真实 bootstrap/日志占位符及 Cloud 事件/实际重绑定。
+- 全仓首次运行被注解处理器写入 `~/.msp/incrementMark` 的沙箱限制阻止；正常权限重跑 `mvn -o clean verify`，退出码 0、BUILD SUCCESS，Surefire 549 项（0 失败/错误/跳过），Failsafe 61 项（0 失败/错误、4 项既有跳过）；日志 `/tmp/handler-nacos-main-full-verify.log`。
+- 既有跳过：KafkaProducerIT.testSend、OrderServiceIT.testSendTxMsg、TinyIdClientIT.testNextId、RmOpaqueTokenCallbackIT.platformCredentialAuthorizesExistingCacheRemovalAcrossConnections。本次未新增或修改跳过条件。
+- 按 CI 范围对变更的 7 个 Java 文件运行 `mvn -o -N checkstyle:check -Dcheckstyle.includes=<变更文件清单>`，退出码 0，0 violations；日志 `/tmp/handler-nacos-main-checkstyle.log`。拆分测试时遗留的无用导入已删除。
+- 普通 Crypto Starter JAR 含 LifecycleListener 及注册；CLI JAR 含 0 个 Spring 类且不含监听器。`git diff --check` 通过。
+- 未更改 main 框架/发布版本、父 POM 或用户的本地 Gateway 修改；未引入示例凭据和环境配置。真实 Nacos 服务端到端测试未运行；离线源和真实 Cloud 事件测试不替代该证据。此结果只证明本次 main 快照，不代替 5.x 验证。

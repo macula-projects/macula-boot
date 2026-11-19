@@ -74,3 +74,8 @@ Status: accepted
 
 ## Delivery
 用户明确授权双分支推送合并；已完成独立代码审查及修复、分支适配和重新验证，详见 review-findings.md 与 verification.md。现有姓名/电话注解类型和序列化调用为本次功能必要组成，一并交付。
+
+
+### 2026-11-19 主线 PR 实施记录
+
+已在 `codex/sensitive-handler-nacos-main` 隔离分支完成两项修复，代码提交 `3cd560fe`。保留 main 的 Java 17 / Boot 4 / Jackson 3 及父 POM 版本管理，仅给 Crypto 增加测试范围 Cloud Context；将完整上下文测试拆为 IT，补齐接口/方法/内部类型中文 Javadoc 及标准版权头。未带入 5.x 版本发布和示例环境配置。目标 216 单测 + 5 IT 全通过；全仓 549 单测 + 61 IT（4 既有跳过）通过；独立审查无发现，详情见 verification.md、review-findings.md。仅清理拆分测试的无用导入，没有行为或范围偏差。用户授权创建 PR，不合并或部署。

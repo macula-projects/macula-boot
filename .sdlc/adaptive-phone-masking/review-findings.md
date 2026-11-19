@@ -17,3 +17,15 @@
 - 第 3 轮只复核恢复测试的变化，无新发现；全部发现已修复。最终源代码快照：5.x 08dde421，main 74d07f02。
 - Suppressed=0，verifier-rejected=0；最终未解决 Important/Minor/Nit/Pre-existing 均为 0。Recurring：本轮为同一交付的双分支移植，没有跨独立变更重复的缺陷类别。
 - 审查及 verifier 均未代替人工批准；远端推送和合并依据用户本次明确授权，不绕过分支保护。
+
+
+## Deploy — 独立交付 Round 1：Handler / Nacos main PR（2026-11-19）
+
+- Reviewed SHA：`3cd560feb1f34cb00b3d5b01cfdba994e9668646`，base `cc05c252`；范围为 main 前移植的两项修复及必要接口、单元测试、IT 和文档，包含审查开始时尚未跟踪的新文件。本轮为新交付的第 1 轮，最多 3 轮。
+- Policy：已读取本分支 REVIEW.md，未配置额外 depth，按 Standard 执行独立 Bugs、Security、Compliance；Nit 上限 5。
+- Reviewer：只读 sdlc-reviewer 子代理。Bugs 核对 bootstrap 类型、日志初始化、配置优先级、读取时解密、刷新重绑定、Jackson 3 自定义策略；Security 核对反射来源、失败回退、异常/明文泄漏和依赖边界；Compliance 未发现违反适用项目规则，无额外监管要求适用。
+- Findings：No findings。Important=0、Minor=0、Nit=0、Pre-existing=0。既有 AES/ECB 协议不属于新增变更。
+- 独立 fresh-context verify mode：输入存活发现为 0，未增加或修改发现；posted=0、suppressed=0、verifier-rejected=0。
+- Recurring：扫描既有 `.sdlc/*/review-findings.md`，本交付没有新增发现，无跨变更重复类别需要额外编码。配置源类型问题已经以真实 bootstrap 日志占位符 IT 和具体类型断言固定回归。
+- 验证：目标 verify 与全仓 clean verify 绿色，7 个变更 Java 文件 Checkstyle 0 violations，详见 verification.md。
+- 审查结果不是人工批准。仅创建 PR，等待人工审核；未合并、未部署。
