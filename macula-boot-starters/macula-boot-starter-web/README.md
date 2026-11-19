@@ -679,3 +679,24 @@ TenantFilter 在请求退出时清理本次租户上下文，包含参数转换�
 - `/` 分隔的各段姓名独立脱敏，保留斜杠和空段，例如 `张三/欧阳娜娜 → *三/欧*娜`。
 
 按 Unicode 码点处理生僻汉字；null 和空字符串返回 null。原 `handlerUsername` / `CHINESE_NAME` 规则保持原样。
+
+## 自定义字段脱敏 Handler
+
+当内置规则不能满足需求时，实现 `SensitiveHandler`，并在字段上指定 `CUSTOM_HANDLER`：
+
+```java
+public class AccountMaskingHandler implements SensitiveHandler {
+    @Override
+    public String handle(String value, Sensitive sensitive) {
+        return SensitiveUtil.hide(value, sensitive.startInclude(), sensitive.endExclude());
+    }
+}
+
+@Sensitive(value = Sensitive.Type.CUSTOM_HANDLER, handler = AccountMaskingHandler.class,
+    startInclude = 2, endExclude = 6)
+private String account;
+```
+
+例如 `account=abcdefgh` 序列化为 `ab****gh`。实现类及无参构造器应公开且可访问；处理器由序列化器创建，不从 Spring 容器获取。实例可能被 Jackson 缓存并跨线程复用，应保持无状态或保证线程安全。null 和空字符串沿用原行为，不调用 Handler；Handler 返回 null 时输出 JSON null。
+
+`handler` 仅在 `CUSTOM_HANDLER` 时使用。未指定实现类、无参构造器缺失或不可访问、构造失败时，Jackson 3 的 `DatabindException` 会包含字段名、Handler 类名并保留原始原因；处理器执行失败继续传播异常，不回退输出原文。内置脱敏类型及原有参数保持兼容。

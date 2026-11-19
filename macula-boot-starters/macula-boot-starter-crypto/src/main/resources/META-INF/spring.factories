@@ -1,2 +1,5 @@
 org.springframework.boot.EnvironmentPostProcessor=\
   dev.macula.boot.starter.crypto.config.CryptoPostProcessor
+
+org.springframework.context.ApplicationListener=\
+  dev.macula.boot.starter.crypto.config.CryptoPostProcessor$LifecycleListener

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2023 Macula
- *   macula.dev, China
+ * macula.dev, China
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package dev.macula.boot.starter.web.json;
 
 import cn.hutool.core.util.ObjectUtil;
 import dev.macula.boot.starter.web.annotation.Sensitive;
+import dev.macula.boot.starter.web.handler.SensitiveHandler;
 import dev.macula.boot.starter.web.utils.SensitiveUtil;
 
 import java.util.Objects;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
 
@@ -36,22 +38,40 @@ import tools.jackson.databind.ValueSerializer;
  */
 public class SensitiveSerializer extends ValueSerializer<String> {
 
+    private Sensitive sensitive;
+    private SensitiveHandler customHandler;
     private Sensitive.Type type;
     private int startInclude;
     private int endExclude;
     private int overlayRepeat;
 
+    /**
+     * 创建初始或字段专用序列化器；自定义策略通过无参构造器创建。
+     */
     public SensitiveSerializer() {
 
     }
 
-    public SensitiveSerializer(final Sensitive sensitive) {
+    /**
+     * 创建初始或字段专用序列化器；自定义策略通过无参构造器创建。
+     */
+    public SensitiveSerializer(final Sensitive sensitive) throws ReflectiveOperationException {
+        this.sensitive = sensitive;
         this.type = sensitive.value();
         this.startInclude = sensitive.startInclude();
         this.endExclude = sensitive.endExclude();
         this.overlayRepeat = sensitive.overlayRepeat();
+        if (type == Sensitive.Type.CUSTOM_HANDLER) {
+            if (sensitive.handler() == SensitiveHandler.class) {
+                throw new IllegalArgumentException("CUSTOM_HANDLER 必须指定 handler 实现类");
+            }
+            this.customHandler = sensitive.handler().getDeclaredConstructor().newInstance();
+        }
     }
 
+    /**
+     * 按字段配置输出单个脱敏结果，空值保持原有快捷处理行为。
+     */
     @Override
     public void serialize(String value, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         if (ObjectUtil.isEmpty(value)) {
@@ -96,6 +116,9 @@ public class SensitiveSerializer extends ValueSerializer<String> {
                     gen.writeString(
                         SensitiveUtil.overlay(value, SensitiveUtil.ASTERISK, overlayRepeat, startInclude, endExclude));
                     break;
+                case CUSTOM_HANDLER:
+                    gen.writeString(customHandler.handle(value, sensitive));
+                    break;
                 default:
                     gen.writeString(value);
             }
@@ -103,6 +126,9 @@ public class SensitiveSerializer extends ValueSerializer<String> {
 
     }
 
+    /**
+     * 按字段注解创建独立实例，将策略初始化失败包装为 Jackson 映射异常并保留原因。
+     */
     @Override
     public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
         if (Objects.isNull(property)) {
@@ -114,7 +140,13 @@ public class SensitiveSerializer extends ValueSerializer<String> {
                 sensitive = property.getContextAnnotation(Sensitive.class);
             }
             if (Objects.nonNull(sensitive)) {
-                return new SensitiveSerializer(sensitive);
+                try {
+                    return new SensitiveSerializer(sensitive);
+                } catch (ReflectiveOperationException | IllegalArgumentException ex) {
+                    throw DatabindException.from(prov,
+                        "字段 " + property.getName() + " 的 SensitiveHandler 初始化失败: "
+                            + sensitive.handler().getName(), ex);
+                }
             }
         }
         return prov.findPrimaryPropertySerializer(property.getType(), property);
