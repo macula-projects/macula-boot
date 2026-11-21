@@ -224,3 +224,7 @@ String plaintext = ConfigCryptoUtil.decrypt(encrypted, "abcdef1234567890");
 
 工具沿用配置协议 AES/ECB/PKCS5Padding 和 Base64；该协议无认证，无法保证识别所有错误密钥或密文篡改。工具不会改变 `CryptoPostProcessor` 的配置来源或动态刷新支持范围。
 
+
+### 管理秘密认证信封
+
+`AuthenticatedSecretCipher`提供独立AES-256-GCM用途绑定信封，不创建Bean、不改变已有字段加密配置。构造时传入部署密钥环（每个密钥32字节）及当前keyId；`encrypt(context, plaintext)`每次生成新nonce，`decrypt(context, envelope)`要求相同的服务器用途。context应含kind/provider/configId/version，不能直接相信HTTP输入。密钥不与密文同库保存；旧keyId需在解密旧记录期间显式保留。禁止记录明文、密钥或信封。未配置密钥时应拒绝相应托管秘密写入，不能回退BASE64。
