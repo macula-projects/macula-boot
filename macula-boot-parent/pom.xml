@@ -74,6 +74,7 @@
         <fenix.version>4.0.0</fenix.version>
         <redisson.version>4.7.0</redisson.version>
         <hutool.version>5.8.47</hutool.version>
+        <zxing.version>3.5.3</zxing.version>
         <easyexcel.version>4.0.3</easyexcel.version>
         <transmittable-thread.version>2.14.5</transmittable-thread.version>
         <fastjson2.version>2.0.65</fastjson2.version>
@@ -443,6 +444,17 @@
             </dependency>
 
             <!-- HuTool -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
