@@ -145,7 +145,12 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 校验
-        sm4Key = cryptoService.decryptSm4Key(sm4Key);
+        try {
+            sm4Key = cryptoService.decryptSm4Key(sm4Key);
+        } catch (Exception e) {
+            // 返回异常信息
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_CRYPTO_ERROR, e.getMessage()));
+        }
         String plain = path + params + sm4Key + timestamp + nonce;
         String algorithm = request.getHeaders().getFirst(GatewayConstants.ALGORITHM_NAME);
         if (StrUtil.isEmpty(algorithm)) {
