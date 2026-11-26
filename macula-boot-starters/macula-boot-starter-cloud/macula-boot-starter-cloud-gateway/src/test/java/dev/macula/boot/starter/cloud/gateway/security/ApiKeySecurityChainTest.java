@@ -50,8 +50,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * 真实 Security WebFilter 链和 Gateway 排序链配合模拟基础设施的回归测试。
@@ -68,6 +73,7 @@ class ApiKeySecurityChainTest {
     private RedisTemplate<String, Object> redis;
     private HashOperations<String, Object, Object> hashes;
 
+    /** 装配真实安全链和过滤器，分别准备开放路径和已配置角色的路径。 */
     @BeforeEach
     void setUp() {
         downstream = new AtomicInteger();
@@ -81,7 +87,7 @@ class ApiKeySecurityChainTest {
             Map.of("applicationCode", "app", "applicationId", "42", "tenantId", "12"));
         when(hashes.entries(CacheConstants.SECURITY_SYSTEM_TENANTS)).thenReturn(Map.of("sample", "12"));
         when(hashes.entries(CacheConstants.SECURITY_SYSTEM_APPS + "app")).thenReturn(
-            Map.of("secretKey", "test-secret", "tenantId", "12", "permitUrls", "GET:/orders"));
+            Map.of("secretKey", "test-secret", "tenantId", "12", "permitUrls", "GET:/open-orders,GET:/orders"));
         when(hashes.entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY))
             .thenReturn(Map.of("sample-gateway:GET:/orders", List.of("ADMIN")));
         introspector = mock(ReactiveOpaqueTokenIntrospector.class);
@@ -90,7 +96,7 @@ class ApiKeySecurityChainTest {
                 AuthorityUtils.createAuthorityList("ROLE_USER"))));
         var config = new TestResourceServerConfiguration(redis, introspector);
         config.setIgnoreUrls(new java.util.ArrayList<>(List.of("/public")));
-        var manager = new ResourceServerAuthorizationManager(redis, List.of(), true);
+        var manager = new ResourceServerAuthorizationManager(redis);
         ReflectionTestUtils.setField(manager, "appName", "sample-gateway");
         var security = config.securityWebFilterChain(ServerHttpSecurity.http(), manager);
         apiKey = new ApiKeyGlobalFilter(redis);
@@ -119,12 +125,13 @@ class ApiKeySecurityChainTest {
         }).webFilter(new WebFilterChainProxy(security)).build();
     }
 
+    /** API Key 的两种传递方式都在开放路径进入现有凭据校验链。 */
     @Test
     void apiKeyHeaderAndQueryAcrossMethodsNeverCallIntrospection() {
-        client.get().uri("/orders").header("Authorization", "Bearer sk-test").exchange().expectStatus().isOk();
+        client.get().uri("/open-orders").header("Authorization", "Bearer sk-test").exchange().expectStatus().isOk();
         for (HttpMethod method : new HttpMethod[] {HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT,
             HttpMethod.PATCH, HttpMethod.DELETE}) {
-            client.method(method).uri("/orders?access_token=sk-test&keep=value")
+            client.method(method).uri("/open-orders?access_token=sk-test&keep=value")
                 .exchange().expectStatus().isOk();
         }
         assertThat(downstream).hasValue(6);
@@ -164,12 +171,25 @@ class ApiKeySecurityChainTest {
         verifyNoInteractions(introspector);
     }
 
+    /** 开放路径仍需验证 HMAC 后才发布下游身份。 */
     @Test
     void validHmacStillVerifiesAndConvertsWithoutIntrospection() {
-        var request = KongApiUtilsTest.request("GET", "/orders", "app", "").getRequest();
-        client.get().uri("/orders").headers(headers -> headers.addAll(request.getHeaders()))
+        var request = KongApiUtilsTest.request("GET", "/open-orders", "app", "").getRequest();
+        client.get().uri("/open-orders").headers(headers -> headers.addAll(request.getHeaders()))
             .exchange().expectStatus().isOk();
         assertThat(downstream).hasValue(1);
+        verifyNoInteractions(introspector);
+    }
+
+    /** 应用凭据不能进入有 URL 角色规则的路径。 */
+    @Test
+    void deniesApplicationCredentialsBeforeProtectedRoute() {
+        client.get().uri("/orders").header("Authorization", "Bearer sk-test")
+            .exchange().expectStatus().is4xxClientError();
+        var request = KongApiUtilsTest.request("GET", "/orders", "app", "").getRequest();
+        client.get().uri("/orders").headers(headers -> headers.addAll(request.getHeaders()))
+            .exchange().expectStatus().is4xxClientError();
+        assertThat(downstream).hasValue(0);
         verifyNoInteractions(introspector);
     }
 

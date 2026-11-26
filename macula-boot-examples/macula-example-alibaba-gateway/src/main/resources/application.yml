@@ -138,7 +138,6 @@ macula:
         - /consumer/api/v1/consumer/echo/**
         - /consumer/api/v1/consumer/plain
         - /crypto-demo/**
-      only-auth-urls: /api/**, /websocket/**
 
 logging:
   level:

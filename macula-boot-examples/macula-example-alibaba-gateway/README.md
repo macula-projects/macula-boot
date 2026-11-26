@@ -172,7 +172,9 @@ console.log(userResult.data.userName); // 已还原的对象
 | --- | --- | --- | --- | --- |
 | 普通 GET | `/consumer/api/v1/consumer/plain?str=...` | 无 | 无 | local 示例匿名 |
 | 保护 GET | `/consumer/api/v1/consumer/echo/{name}` | SM4 Query 与响应 | SHA-256 | local 示例匿名 |
-| 保护 POST | `/consumer/api/v1/consumer/user` | SM4 JSON 与响应 | SHA-256 | 有效 Bearer Token |
+| 保护 POST | `/consumer/api/v1/consumer/user` | SM4 JSON 与响应 | SHA-256 | 具有相应 URL 角色的 Bearer Token |
+
+演示保护 POST 前，为调用者配置 `macula-example-alibaba-gateway:POST:/consumer/api/v1/consumer/user` 对应的角色，并发布 URL 权限映射。Bearer WebSocket 握手相应使用 `macula-example-alibaba-gateway:GET:/websocket/**`。
 
 普通接口可以单独用 curl 验证（直连 consumer 为 `http://localhost:5010/api/v1/consumer/plain`）：
 

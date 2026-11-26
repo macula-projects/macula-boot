@@ -18,7 +18,6 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -81,12 +80,6 @@ public class ResourceServerConfiguration {
 
     @Setter
     private List<String> ignoreUrls = new ArrayList<>();
-
-    @Setter
-    private List<String> onlyAuthUrls = Collections.emptyList();
-
-    @Setter
-    private boolean defaultUrlRequireCheck = true;
 
     @NotNull
     private final OAuth2ResourceServerProperties properties;
@@ -160,9 +153,15 @@ public class ResourceServerConfiguration {
         return new CachingReactiveOpaqueTokenIntrospector(delegate, redisTemplate, java.time.Clock.systemUTC());
     }
 
+    /**
+     * 为进入网关安全链的请求创建 URL 授权管理器。
+     *
+     * @param sysRedisTemplate 发布 URL 角色映射的 System Redis 连接
+     * @return 共用同一套 URL 规则的管理器
+     */
     @Bean
     public ResourceServerAuthorizationManager authorizationManager(RedisTemplate<String, Object> sysRedisTemplate) {
-        return new ResourceServerAuthorizationManager(sysRedisTemplate, onlyAuthUrls, defaultUrlRequireCheck);
+        return new ResourceServerAuthorizationManager(sysRedisTemplate);
     }
 
     /**

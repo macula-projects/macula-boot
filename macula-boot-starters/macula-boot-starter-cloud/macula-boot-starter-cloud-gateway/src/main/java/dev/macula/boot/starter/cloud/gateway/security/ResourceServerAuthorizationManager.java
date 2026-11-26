@@ -21,12 +21,13 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.constants.SecurityConstants;
-import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
+import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -39,6 +40,7 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,13 +57,9 @@ import java.util.Map;
 public class ResourceServerAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
 
     private final RedisTemplate<String, Object> sysRedisTemplate;
+    private final PathMatcher pathMatcher = new AntPathMatcher();
 
-    // 给前端个人的API（只认证Token，不鉴权)
-    private final List<String> onlyAuthUrls;
-
-    // 默认 URL是否需要检查权限
-    private final boolean defaultUrlRequireCheck;
-
+    // URL 规则以接收请求的网关应用名作为命名空间。
     @Value("${spring.application.name}")
     private String appName;
 
@@ -81,7 +79,6 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return Mono.just(new AuthorizationDecision(true));
         }
-        PathMatcher pathMatcher = new AntPathMatcher();
         String method = request.getMethod().name();
         String path = request.getURI().getPath();
 
@@ -92,17 +89,11 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // API Key 只在此分流，由后续 GlobalFilter 校验凭据和租户准入。
         if (ApiKeyUtils.resolveApiKey(authorizationContext.getExchange()) != null) {
-            return Mono.just(new AuthorizationDecision(true));
+            return checkOpenApi(restfulPath);
         }
 
         // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
         if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, SecurityConstants.TOKEN_PREFIX)) {
-            // 这里要可配置哪些路径仅认证，无需鉴权(比如前端API)
-            if (onlyAuthUrls.stream().anyMatch(s -> pathMatcher.match(s, path))) {
-                // 不是需要鉴权的URL，直接放行
-                return Mono.just(new AuthorizationDecision(true));
-            }
-
             // 鉴权
             return checkPerm(mono, restfulPath);
         }
@@ -110,7 +101,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
         // Hmac Token，属于系统访问的API
         if (KongApiUtils.resolveHmacToken(authorizationContext.getExchange()) != null) {
             // 放行，由后面的KongApiGlobalFilter校验签名
-            return Mono.just(new AuthorizationDecision(true));
+            return checkOpenApi(restfulPath);
         }
 
         // 没有 Token不放行
@@ -118,39 +109,61 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
     }
 
     /**
-     * 鉴权
-     * <p>
-     * 缓存取 [URL权限-角色集合] 规则数据 urlPermRolesRules = [{'key':'GET:/i18n-base/v1/users/*','value':['ADMIN','TEST']},...]
+     * 仅在权限映射可用且入口没有角色规则时允许应用凭据继续核验。
+     *
+     * @param restfulPath 带应用名和方法的规则匹配路径
+     * @return 是否允许进入应用凭据验证链
+     */
+    private Mono<AuthorizationResult> checkOpenApi(String restfulPath) {
+        return loadUrlRules().map(rules -> {
+            // 权限刷新期间也可能读到空映射，不能据此判断路由开放。
+            boolean allowed = !rules.isEmpty() && rules.keySet().stream()
+                .noneMatch(pattern -> pathMatcher.match(pattern, restfulPath));
+            return (AuthorizationResult)new AuthorizationDecision(allowed);
+        }).onErrorResume(DataAccessException.class, failure -> {
+            log.debug("无法读取 Gateway URL 权限映射，应用凭据请求已拒绝");
+            return Mono.just(new AuthorizationDecision(false));
+        });
+    }
+
+    /**
+     * RedisTemplate 调用延迟至订阅，在有界线程池执行，避免阻塞 WebFlux 线程。
+     *
+     * @return 当前 URL 权限映射，未初始化时返回空映射
+     */
+    private Mono<Map<String, Object>> loadUrlRules() {
+        return Mono.fromCallable(() -> sysRedisTemplate.<String, Object>opsForHash()
+            .entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY)).subscribeOn(Schedulers.boundedElastic())
+            .defaultIfEmpty(Map.of());
+    }
+
+    /**
+     * 从现有规则映射中汇总匹配 URL 的角色。
+     *
+     * @param mono Spring Security 核验后的身份
+     * @param restfulPath 带应用名和方法的规则匹配路径
+     * @return Bearer URL 授权决定
      */
     private Mono<AuthorizationResult> checkPerm(Mono<Authentication> mono, String restfulPath) {
-
-        Map<String, Object> urlPermRolesRules =
-            sysRedisTemplate.<String, Object>opsForHash().entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY);
-
-        // 根据请求路径获取有访问权限的角色列表
-        // 拥有访问权限的角色
-        List<String> authorizedRoles = new ArrayList<>();
-
-        // 是否需要鉴权，默认未设置拦截规则不需鉴权
-        boolean requireCheck = defaultUrlRequireCheck;
-
-        PathMatcher pathMatcher = new AntPathMatcher();
-        for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
-            String perm = permRoles.getKey();
-            if (pathMatcher.match(perm, restfulPath)) {
-                List<String> roles = Convert.toList(String.class, permRoles.getValue());
-                authorizedRoles.addAll(Convert.toList(String.class, roles));
-                if (!requireCheck) {
-                    requireCheck = true;
+        return loadUrlRules().flatMap(rules -> {
+            List<String> authorizedRoles = new ArrayList<>();
+            for (Map.Entry<String, Object> rule : rules.entrySet()) {
+                if (pathMatcher.match(rule.getKey(), restfulPath)) {
+                    authorizedRoles.addAll(Convert.toList(String.class, rule.getValue()));
                 }
             }
-        }
+            return checkRoles(mono, authorizedRoles);
+        });
+    }
 
-        // 没有设置拦截规则放行
-        if (!requireCheck) {
-            return Mono.just(new AuthorizationDecision(true));
-        }
-
+    /**
+     * 只使用已认证主体的角色，保留 ROOT 和反向角色的现有规则。
+     *
+     * @param mono Spring Security 核验后的身份
+     * @param authorizedRoles 当前 URL 的角色集合
+     * @return 角色判定结果
+     */
+    private Mono<AuthorizationResult> checkRoles(Mono<Authentication> mono, List<String> authorizedRoles) {
         // 判断正向角色是否包含，反向角色是否包含，取其and结果
         // 注意：Authentication中的authorities的ROLE的CODE以ROLE_开头，如果是反向角色会是ROLE_!xxx这种形式
         return mono.filter(Authentication::isAuthenticated).flatMapIterable(Authentication::getAuthorities)
