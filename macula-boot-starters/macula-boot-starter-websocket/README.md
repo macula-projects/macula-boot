@@ -59,11 +59,9 @@ spring:
                 - Path=/websocket/**
               filters:
                 - StripPrefix=1
-macula:
-  gateway:
-    security:
-      only-auth-urls: [/websocket/**]
 ```
+
+使用 Bearer Token 建立 WebSocket 连接时，在 Gateway 的 URL 权限中为握手请求配置角色。例如，名为 `sample-gateway` 的网关使用 `sample-gateway:GET:/websocket/**`。规则匹配网关收到的路径，包含剥离前缀之前的路径。
 
 
 

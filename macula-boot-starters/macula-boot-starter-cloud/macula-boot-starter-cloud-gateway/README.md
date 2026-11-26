@@ -63,7 +63,7 @@ macula:
   gateway:
     security:
       ignore-urls: /consumer/hello2/**,/consumer/api/v1/consumer/echo/**
-      only-auth-urls: /api/**, /websocket/**
+
 ```
 
 | samples 配置 | 说明 |
@@ -91,10 +91,14 @@ macula:
 | `rm-opaque-token.enabled` | `true` | 创建 Token 缓存移除端点过滤器 |
 | `rm-opaque-token-endpoint` | `/gateway/rm/opaqueToken` | 缓存移除路径 |
 | `security.ignore-urls` | 空列表并合并内置白名单 | 放行认证的路径 |
-| `security.only-auth-urls` | 空列表 | 只认证、不检查 URL 角色权限的路径 |
-| `security.default-url-require-check` | `false` | 未配置 URL 权限时是否要求鉴权，生产需明确评估 |
 
 灰度过滤器的创建另受 `macula.cloud.gray.enabled` 控制（默认 `true`），与 `macula.gateway.gray.enabled` 的运行开关不同。应用还需提供 `spring.application.name`，OAuth2 凭证和签名材料须由部署环境注入。
+
+### URL 角色规则迁移
+
+移除原来的 `macula.gateway.security.only-auth-urls` 和 `macula.gateway.security.default-url-require-check` 配置。曾经只校验 Bearer Token 的业务和 WebSocket 路径需要在发布到 Redis 的 URL 权限映射中配置角色。规则使用 `应用名:HTTP方法:网关接收路径`，例如 `sample-gateway:GET:/api/orders/**`。角色路径应排除在 `security.ignore-urls` 白名单之外。
+
+API Key、HMAC 仅在读取到有效的非空 URL 规则映射且请求路径未命中规则时，进入各自的凭据验证。初始化权限缓存和刷新期间，空映射会拒绝这两类凭据。原有 ROOT 及反向角色按既有规则执行。
 
 ## 核心功能
 

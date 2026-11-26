@@ -60,10 +60,6 @@ spring:
   reactor:
     context-propagation: auto
 
-macula:
-  gateway:
-    security:
-      only-auth-urls: /api/**
 
 logging:
   level:

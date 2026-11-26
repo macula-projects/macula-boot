@@ -77,6 +77,13 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
     private final GatewayProperties properties;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 校验网关收到的原路径及请求签名，密钥解密失败返回固定错误。
+     *
+     * @param exchange 当前请求及响应
+     * @param chain 验签通过后的网关过滤链
+     * @return 请求处理完成信号
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -145,14 +152,18 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 校验
-        sm4Key = cryptoService.decryptSm4Key(sm4Key);
+        try {
+            sm4Key = cryptoService.decryptSm4Key(sm4Key);
+        } catch (RuntimeException failure) {
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_CRYPTO_ERROR));
+        }
+
         String plain = path + params + sm4Key + timestamp + nonce;
         String algorithm = request.getHeaders().getFirst(GatewayConstants.ALGORITHM_NAME);
         if (StrUtil.isEmpty(algorithm)) {
             algorithm = GatewayConstants.DEFAULT_ALGORITHM;
         }
         String newSignature = HexUtil.encodeHexStr(DigestUtil.digester(algorithm).digest(plain), false);
-        log.debug("plain: " + plain);
         log.debug("newSignature: " + newSignature);
         if (!newSignature.equalsIgnoreCase(signature)) {
             return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "签名验证不通过"));

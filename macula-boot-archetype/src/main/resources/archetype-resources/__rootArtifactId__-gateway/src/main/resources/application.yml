@@ -38,10 +38,6 @@ spring:
                 - Path=/openapi/**
               filters:
                 - StripPrefix=1
-macula:
-  gateway:
-    security:
-      only-auth-urls: /api/**
 
 ---
 # local Profile 包含 IDE 本地开发所需的全部默认配置

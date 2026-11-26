@@ -18,12 +18,16 @@
 package dev.macula.boot.starter.cloud.gateway.security;
 
 import dev.macula.boot.constants.CacheConstants;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
@@ -32,41 +36,91 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
- * API Key 仅分流，普通 Bearer 仍受 URL 角色限制。
+ * 校验应用凭据和 Bearer 的 URL 授权边界，以及不可用权限快照的处理。
  *
  * @author Rain
  * @since 6.1.0
  */
 @SuppressWarnings("unchecked")
 class ResourceServerAuthorizationManagerTest {
-    @Test
-    void apiKeyIsDeferredButAnonymousIsDenied() {
-        var manager = new ResourceServerAuthorizationManager(mock(RedisTemplate.class), List.of(), true);
-        assertThat(manager.authorize(Mono.empty(), context("Bearer sk-test")).block().isGranted()).isTrue();
-        assertThat(manager.authorize(Mono.empty(), new AuthorizationContext(MockServerWebExchange.from(
-            MockServerHttpRequest.get("/orders")))).block().isGranted()).isFalse();
-    }
+    private HashOperations<String, String, Object> hashes;
+    private ResourceServerAuthorizationManager manager;
 
-    @Test
-    void ordinaryBearerStillRequiresAuthorizedRole() {
+    /** 初始化缓存替身，使用正向角色规则和一个空角色条目。 */
+    @BeforeEach
+    void setUp() {
         RedisTemplate<String, Object> redis = mock(RedisTemplate.class);
-        HashOperations<String, String, Object> hashes = mock(HashOperations.class);
+        hashes = mock(HashOperations.class);
         when(redis.<String, Object>opsForHash()).thenReturn(hashes);
         when(hashes.entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY))
-            .thenReturn(Map.of("sample:GET:/orders", List.of("ADMIN")));
-        var manager = new ResourceServerAuthorizationManager(redis, List.of(), true);
+            .thenReturn(Map.of("sample:GET:/orders/*", List.of("ADMIN"), "sample:GET:/restricted", List.of()));
+        manager = new ResourceServerAuthorizationManager(redis);
         ReflectionTestUtils.setField(manager, "appName", "sample");
-        assertThat(manager.authorize(Mono.just(new TestingAuthenticationToken("user", "test", "ROLE_USER")),
-            context("Bearer oauth")).block().isGranted()).isFalse();
-        assertThat(manager.authorize(Mono.just(new TestingAuthenticationToken("admin", "test", "ROLE_ADMIN")),
-            context("Bearer oauth")).block().isGranted()).isTrue();
     }
 
-    private AuthorizationContext context(String token) {
-        return new AuthorizationContext(MockServerWebExchange.from(MockServerHttpRequest.get("/orders")
+    /** 已配置 URL 拒绝应用凭据，未配置 URL 只允许进入后续凭据验证链。 */
+    @Test
+    void applicationCredentialsRequireUnmatchedUrl() {
+        for (String token : List.of("Bearer sk-test", GatewayConstants.HMAC_AUTH_PREFIX + " fixture")) {
+            var decision = manager.authorize(Mono.empty(), context("/open-orders", token));
+            verifyNoInteractions(hashes);
+            assertThat(decision.block().isGranted()).isTrue();
+            assertThat(manager.authorize(Mono.empty(), context("/orders/42", token)).block().isGranted()).isFalse();
+            assertThat(manager.authorize(Mono.empty(), context("/restricted", token)).block().isGranted()).isFalse();
+            clearInvocations(hashes);
+        }
+    }
+
+    /** 空缓存与 Redis 读取故障都拒绝应用凭据。 */
+    @Test
+    void unavailableRulesDenyApplicationCredentials() {
+        when(hashes.entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY))
+            .thenReturn(Map.of(), null)
+            .thenThrow(new DataAccessResourceFailureException("fixture"));
+        assertThat(manager.authorize(Mono.empty(), context("/open-orders", "Bearer sk-test")).block().isGranted()).isFalse();
+        assertThat(manager.authorize(Mono.empty(), context("/open-orders", GatewayConstants.HMAC_AUTH_PREFIX + " fixture")).block().isGranted()).isFalse();
+        assertThat(manager.authorize(Mono.empty(), context("/open-orders", "Bearer sk-test")).block().isGranted()).isFalse();
+    }
+
+    /** 已认证的 Bearer 按现有正、反向角色和 ROOT 规则处理。 */
+    @Test
+    void ordinaryBearerRequiresAuthorizedRole() {
+        assertThat(manager.authorize(identity("ROLE_USER"), context("/orders/42", "Bearer oauth")).block().isGranted())
+            .isFalse();
+        assertThat(manager.authorize(identity("ROLE_ADMIN"), context("/orders/42", "Bearer oauth")).block().isGranted())
+            .isTrue();
+        assertThat(manager.authorize(identity("ROLE_ADMIN", "ROLE_!ADMIN"), context("/orders/42", "Bearer oauth"))
+            .block().isGranted()).isFalse();
+        assertThat(manager.authorize(identity("ROLE_ADMIN"), context("/open-orders", "Bearer oauth")).block().isGranted())
+            .isFalse();
+        assertThat(manager.authorize(identity("ROLE_ROOT"), context("/open-orders", "Bearer oauth")).block().isGranted())
+            .isTrue();
+    }
+
+    /** 未提供凭据时拒绝，预检仍沿用既有放行且无缓存读取。 */
+    @Test
+    void anonymousIsDeniedAndPreflightSkipsRoleLookup() {
+        assertThat(manager.authorize(Mono.empty(), new AuthorizationContext(MockServerWebExchange.from(
+            MockServerHttpRequest.get("/orders")))).block().isGranted()).isFalse();
+        assertThat(manager.authorize(Mono.empty(), new AuthorizationContext(MockServerWebExchange.from(
+            MockServerHttpRequest.options("/orders")))).block().isGranted()).isTrue();
+        verifyNoInteractions(hashes);
+    }
+
+    /** 构造带固定角色的已认证主体。 */
+    private Mono<Authentication> identity(String... roles) {
+        return Mono.just(new TestingAuthenticationToken("fixture", "test", roles));
+    }
+
+    /** 构造包含指定凭据和路径的授权上下文。 */
+    private AuthorizationContext context(String path, String token) {
+        return new AuthorizationContext(MockServerWebExchange.from(MockServerHttpRequest.get(path)
             .header("Authorization", token)));
     }
 }

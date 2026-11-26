@@ -13,4 +13,3 @@ spring:
 macula:
   security:
     ignore-urls: static/**, public/**, swagger-ui.html, swagger-ui.html/**, webjars/**, swagger-resources/**, swagger-resources/**, favicon.ico
-    only-auth-urls: mall/**
