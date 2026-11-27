@@ -29,3 +29,9 @@
 - Findings posted 0；重复抑制 0；verifier rejected 0（无候选需验证）；Nits 0。
 - Recurring：扫描现有review-findings，未见此次回调实现需新增的重复缺陷类别。
 - 人工授权：用户明确“OK，推送代码合并”；此审查不自批 gate，不绕过分支保护。代码工作树指纹见 verification.md。
+
+## 连续相同字符文案增量 · Deploy 第 1 轮
+
+- 范围：基于 `f3852f5a` 的本次密码规则文案变更，按 Bugs、Security、Compliance 独立审查。
+- Minor：`.sdlc/iam-login-risk-session-management/spec.md` 对阈值 3 的表述未限定新启用的规则，已有策略可能保存不同阈值。独立复核确认，已补充说明。
+- Important 0；Minor 1（已修正）；重复抑制 0；复核驳回 0。Security 与 Compliance 无发现。
