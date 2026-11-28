@@ -90,8 +90,6 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
                         return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
                     }
                     exchange.getAttributes().put(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE, result.getData());
-                    // 已完成应用验证，网关的内部转发可以进入本地处理器。
-                    exchange.getAttributes().remove(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
                     return chain.filter(restoreRequestBody(exchange));
                 });
         });

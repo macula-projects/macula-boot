@@ -34,7 +34,6 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
@@ -68,7 +67,6 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.WebFilter;
 import reactor.core.publisher.Mono;
 
@@ -168,17 +166,6 @@ public class ResourceServerConfiguration {
     @Bean
     public ResourceServerAuthorizationManager authorizationManager(RedisTemplate<String, Object> sysRedisTemplate) {
         return new ResourceServerAuthorizationManager(sysRedisTemplate);
-    }
-
-    /**
-     * 在处理器选择阶段确保等待应用认证的请求只能进入 Gateway 路由。
-     *
-     * @param mappings Spring WebFlux 的处理器映射
-     * @return 应用凭据的路由选择约束
-     */
-    @Bean
-    ApplicationCredentialRouteMapping applicationCredentialRouteMapping(ObjectProvider<HandlerMapping> mappings) {
-        return new ApplicationCredentialRouteMapping(mappings);
     }
 
     /**

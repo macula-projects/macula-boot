@@ -479,7 +479,7 @@ public class RedisConfiguration {
 
 ### 应用与 API Key 的 URL/IP 准入
 
-System Redis 按归属租户与应用 ID 发布 `macula:cloud:system:app_perms:{tenantId}:{applicationId}`。授权值为 `METHOD:/入口路径模式` 列表，支持 Ant 路径模式。API Key 与 HMAC 在认证后、发布 principal 前匹配改写前的网关入口路径。无匹配、缓存缺失或不可用时拒绝。Spring Security 只把待认证的应用凭据交给实际匹配的 Gateway 路由，其他受保护的 WebFlux 处理器拒绝这类凭据。普通 Bearer 继续使用角色 URL 规则。
+System Redis 按归属租户与应用 ID 发布 `macula:cloud:system:app_perms:{tenantId}:{applicationId}`。授权值为 `METHOD:/入口路径模式` 列表，支持 Ant 路径模式。API Key 与 HMAC 在认证后、发布 principal 前匹配改写前的网关入口路径。无匹配、缓存缺失或不可用时拒绝。应用接口认证在 Gateway 路由的全局过滤器执行。网关本地入口应显式公开，或通过专用 WebFilter 执行独立认证。普通 Bearer 继续使用角色 URL 规则。
 
 新增缓存字段 `permitIps`，每行一个 IPv4、IPv6 或 CIDR：
 

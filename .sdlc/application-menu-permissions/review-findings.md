@@ -15,3 +15,7 @@
 - Important · Bugs。内部转发保留原入口路径用于授权。应用凭据通过验证后再清理待路由标记，定制过滤器按既有约定发布可信主体也能继续转发。
 - Important · Bugs/Security。应用授权与目录写入在首次读库前取得快照锁，普通用户写入租户与 SQL 租户保持一致。重建在事务外等待短时锁竞争。
 - 三轮分别执行 Bugs、Security、Compliance。重复的事务锁顺序和租户问题合并为 2 处。上述事项均有对应回归测试。
+
+## 移除额外处理器映射的复核
+
+独立 Bugs、Security、Compliance 检查未发现 Important 或 Minor。已将初次交付的映射规则标为历史方案。用户确认的新 Gateway 契约取代了 1 项历史发现。

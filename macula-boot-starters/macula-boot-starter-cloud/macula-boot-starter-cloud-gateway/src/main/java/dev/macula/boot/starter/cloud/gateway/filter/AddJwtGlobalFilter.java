@@ -110,13 +110,8 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
                             .uri(UriComponentsBuilder.fromUri(request.getURI())
                                     .replaceQueryParam(SecurityConstants.QUERY_AUTHORIZATION_KEY).build(true).toUri())
                             .header(SecurityConstants.AUTHORIZATION_KEY,
-                                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal,
-                                            hmac))
+                                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal, hmac))
                             .build();
-                    // 定制过滤器只需发布已验证的 principal，内部转发状态在 JWT 生成后统一整理。
-                    if (hmac || principal == exchange.getAttribute(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE)) {
-                        exchange.getAttributes().remove(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
-                    }
                     return exchange.mutate().request(request).build();
                 })
                 // 在 exchange 阶段处理空身份，避免对 Mono<Void> 兜底而重复执行下游。
