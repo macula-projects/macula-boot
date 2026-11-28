@@ -14,6 +14,10 @@ Result<Void> status = Result.judge(true);
 
 业务可实现 `ResultCode` 定义自己的错误码。Web Starter 负责 Controller 响应包装，Commons 本身不注册 Web 处理器。
 
+## IAM Redis 命名
+
+IAM 与 System 使用 `CacheConstants.IAM_REDIS_PREFIX` 构造 IAM Redis 键，统一前缀为 `macula:cloud:iam:`。专用后缀、Cluster 哈希标签和有效期由各键的读写方定义。
+
 ## 全局常量
 
 | 类型 | 用途 |

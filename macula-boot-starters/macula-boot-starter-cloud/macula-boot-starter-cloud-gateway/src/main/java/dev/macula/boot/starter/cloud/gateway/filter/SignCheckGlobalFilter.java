@@ -118,23 +118,18 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // 1. 校验时间戳：服务器时间和请求时间相差超过300秒，校验不通过
-        long timeCheck = Math.abs(System.currentTimeMillis() - Long.parseLong(timestamp)) / (1000);
-        if (timeCheck >= GatewayConstants.DEFAULT_TIMESTAMP_BTW) {
-            log.info("timestamp: " + (System.currentTimeMillis()) / (1000));
+        long now = System.currentTimeMillis();
+        long signatureTime;
+        try {
+            signatureTime = Long.parseLong(timestamp);
+        } catch (NumberFormatException failure) {
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "时间戳无效"));
+        }
+        long signingWindow = Duration.ofSeconds(GatewayConstants.DEFAULT_TIMESTAMP_BTW).toMillis();
+        if (signatureTime <= now - signingWindow || signatureTime >= now + signingWindow) {
             return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "时间戳超时"));
         }
 
-        // 2. 校验nonce参数：该参数不能在Redis中出现
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(CacheConstants.GATEWAY_NONCE_KEY + nonce))) {
-            log.info("nonce:" + nonce);
-            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "禁止重复请求"));
-        } else {
-            redisTemplate.opsForValue().set(CacheConstants.GATEWAY_NONCE_KEY + nonce, "x",
-                Duration.ofSeconds(GatewayConstants.DEFAULT_TIMESTAMP_BTW));
-        }
-
-        // 3. 校验签名
         // GET签名体= path+param1=value1&param2=value2...+key+timestamp+nonce
         // POST签名体 = path+param1=value1&param2=value2...+SHA-256=+base64(sha256(body))+key+timestamp+nonce
         MultiValueMap<String, String> requestQueryParams = request.getQueryParams();
@@ -167,12 +162,18 @@ public class SignCheckGlobalFilter implements GlobalFilter, Ordered {
         log.debug("newSignature: " + newSignature);
         if (!newSignature.equalsIgnoreCase(signature)) {
             return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "签名验证不通过"));
-        } else {
-            // post请求的body需要解析之后再次封装，否则请求会报错
-            if (bodyBytes != null) {
-                ServerHttpRequest newRequest = RequestUtils.rewriteRequestBody(exchange, bodyBytes);
-                exchange = exchange.mutate().request(newRequest).build();
-            }
+        }
+
+        // 仅合法签名能登记 nonce，Redis 原子登记保证并发请求最多通过一次。
+        // 如果客户端时钟领先，登记覆盖其签名仍然有效的整个窗口。
+        Duration nonceTtl = Duration.ofMillis(signingWindow + Math.max(0L, signatureTime - now));
+        if (!Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(
+                CacheConstants.GATEWAY_NONCE_KEY + nonce, "x", nonceTtl))) {
+            return ResponseUtils.writeResult(response, Result.failed(ApiResultCode.API_SIGN_ERROR, "禁止重复请求"));
+        }
+        if (bodyBytes != null) {
+            ServerHttpRequest newRequest = RequestUtils.rewriteRequestBody(exchange, bodyBytes);
+            exchange = exchange.mutate().request(newRequest).build();
         }
         return chain.filter(exchange);
     }

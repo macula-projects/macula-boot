@@ -21,7 +21,6 @@ import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -64,28 +62,15 @@ class ResourceServerAuthorizationManagerTest {
         ReflectionTestUtils.setField(manager, "appName", "sample");
     }
 
-    /** 已配置 URL 拒绝应用凭据，未配置 URL 只允许进入后续凭据验证链。 */
+    /** 应用凭据直接进入后续验证，角色缓存与这条链路无关。 */
     @Test
-    void applicationCredentialsRequireUnmatchedUrl() {
+    void applicationCredentialsBypassRoleLookup() {
         for (String token : List.of("Bearer sk-test", GatewayConstants.HMAC_AUTH_PREFIX + " fixture")) {
-            var decision = manager.authorize(Mono.empty(), context("/open-orders", token));
-            verifyNoInteractions(hashes);
-            assertThat(decision.block().isGranted()).isTrue();
-            assertThat(manager.authorize(Mono.empty(), context("/orders/42", token)).block().isGranted()).isFalse();
-            assertThat(manager.authorize(Mono.empty(), context("/restricted", token)).block().isGranted()).isFalse();
-            clearInvocations(hashes);
+            for (String path : List.of("/open-orders", "/orders/42", "/restricted")) {
+                assertThat(manager.authorize(Mono.empty(), context(path, token)).block().isGranted()).isTrue();
+            }
         }
-    }
-
-    /** 空缓存与 Redis 读取故障都拒绝应用凭据。 */
-    @Test
-    void unavailableRulesDenyApplicationCredentials() {
-        when(hashes.entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY))
-            .thenReturn(Map.of(), null)
-            .thenThrow(new DataAccessResourceFailureException("fixture"));
-        assertThat(manager.authorize(Mono.empty(), context("/open-orders", "Bearer sk-test")).block().isGranted()).isFalse();
-        assertThat(manager.authorize(Mono.empty(), context("/open-orders", GatewayConstants.HMAC_AUTH_PREFIX + " fixture")).block().isGranted()).isFalse();
-        assertThat(manager.authorize(Mono.empty(), context("/open-orders", "Bearer sk-test")).block().isGranted()).isFalse();
+        verifyNoInteractions(hashes);
     }
 
     /** 已认证的 Bearer 按现有正、反向角色和 ROOT 规则处理。 */

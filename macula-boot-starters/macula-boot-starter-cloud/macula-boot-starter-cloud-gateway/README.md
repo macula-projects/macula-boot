@@ -98,7 +98,7 @@ macula:
 
 移除原来的 `macula.gateway.security.only-auth-urls` 和 `macula.gateway.security.default-url-require-check` 配置。曾经只校验 Bearer Token 的业务和 WebSocket 路径需要在发布到 Redis 的 URL 权限映射中配置角色。规则使用 `应用名:HTTP方法:网关接收路径`，例如 `sample-gateway:GET:/api/orders/**`。角色路径应排除在 `security.ignore-urls` 白名单之外。
 
-API Key、HMAC 仅在读取到有效的非空 URL 规则映射且请求路径未命中规则时，进入各自的凭据验证。初始化权限缓存和刷新期间，空映射会拒绝这两类凭据。原有 ROOT 及反向角色按既有规则执行。
+API Key 和 HMAC 使用所属应用的接口授权。普通 Bearer 继续按现有角色、ROOT 和反向角色规则鉴权。
 
 ## 核心功能
 
@@ -134,7 +134,7 @@ macula:
 
 Opaque Token 缓存命中仍校验 `exp`，过期缓存删除并重新内省；写入 TTL 使用从当前时间到 `exp` 的剩余时间，而非 `exp - iat`。非法 `exp` 拒绝认证；无 `exp` 时最多缓存 5 分钟。缓存键和撤销接口保持不变。
 
-派生 JWT 的缓存键在原前缀后增加类型段：有 `JWT_ID` 使用 `id:`，否则使用 `u:`；保留 API Key 前缀和租户段，避免 ID 与主体名相同导致碰撞。升级不回读旧派生键，旧值自然过期，撤销入口继续调用 `AddJwtGlobalFilter.buildKey`。应用间隔离沿用各网关独立缓存的部署方式。
+派生 JWT 的缓存键在原前缀后增加类型段：有 `JWT_ID` 使用 `id:`，否则使用 `u:`；API Key 与 HMAC 分别使用 `apikey:`、`hmac:` 前缀，并保留租户段，以隔离不同认证来源的派生身份。升级不回读旧派生键，旧值自然过期，撤销入口继续调用 `AddJwtGlobalFilter.buildKey`。应用间隔离沿用各网关独立缓存的部署方式。
 
 将oauth2的token转换为JWT传递给微服务，微服务通过JWT获取用户信息和角色信息。
 
@@ -184,7 +184,7 @@ Spring Security 输入检查与分流 → API Key 校验（order=190）/ HMAC �
 
 API Key 记录位于 System Redis 的 `macula:cloud:system:application:apikey:{key}` Hash，要求非空字符串 `applicationCode`、`applicationId` 和合法的 `tenantId`。网关通过共享的 `TenantUtils.resolveGatewayTenantId` 执行应用名/租户编码最长前缀匹配，解析 `spring.application.name` 对应的归属租户；只有该租户与 API Key 的 `tenantId` 一致才允许接入。应用名、映射或密钥归属缺失、归属不匹配以及 Redis 查询失败均拒绝请求；调用方租户 Header 不能改变归属。升级前须准备好 `macula:cloud:system:tenants` 和密钥归属缓存，历史跨租户或缺少租户的 API Key 将无法继续调用。
 
-API Key 与 HMAC 均按应用缓存的 `permitUrls` 校验接口许可（`METHOD:/path` 模式，多个模式以逗号分隔，缺省允许），并共用 `TenantUtils.checkTenant` 校验网关归属并解析认证业务租户。JWT 的 `tenantId` 优先使用 API Key 记录的 `authTenantId`，未配置时回退到归属 `tenantId`；认证租户不影响归属准入，非法租户值拒绝认证。验证成功的身份通过请求属性传递，不创建虚拟 OAuth token，也不依赖 SecurityContext。JWT 保留 `sub`、`applicationId`、`nickname`、`authType=apikey` 和 `tenantId`，共用 JWT 缓存键规则，仅增加 `apikey:` 类型段，默认键为 `macula:cloud:gateway:jwt:apikey:tn{tenantId}:{applicationCode}`，存在 `jti` 时优先使用它作为身份段。各认证来源的租户段统一为 `tn{tenantId}:`，旧 `a{tenantId}:` 缓存不再命中并等待自然过期。转发前覆盖 Authorization 为 JWT，并移除原始 access_token Query 参数。
+API Key 与 HMAC 使用所属应用在 System Redis 中的接口授权，并共用 `TenantUtils.checkTenantAndIp` 校验归属租户及来源 IP，解析认证业务租户。JWT 的 `tenantId` 优先使用 API Key 记录的 `authTenantId`，未配置时回退到归属 `tenantId`；认证租户不影响归属准入，非法租户值拒绝认证。验证成功的身份通过请求属性传递，不创建虚拟 OAuth token，也不依赖 SecurityContext。JWT 保留 `sub`、`applicationId`、`nickname`、`authType=apikey` 和 `tenantId`，共用 JWT 缓存键规则，仅增加 `apikey:` 类型段，默认键为 `macula:cloud:gateway:jwt:apikey:u:tn{tenantId}:{applicationCode}`，存在 `jti` 时优先使用它作为身份段。各认证来源的租户段统一为 `tn{tenantId}:`，旧 `a{tenantId}:` 缓存不再命中并等待自然过期。转发前覆盖 Authorization 为 JWT，并移除原始 access_token Query 参数。
 
 `macula.gateway.apikey.enabled=false` 会拒绝 API Key Gateway 请求，包括 `ignore-urls` 中的路由。过滤器仍装配，避免关闭功能后原始凭据直接转发。此机制仅作用于 Gateway 路由；本地 WebFlux 端点不会获得 API Key 认证身份，需使用该端点自己的认证机制。
 
@@ -332,6 +332,7 @@ public class CryptoLocaleServiceImpl implements CryptoService, InitializingBean 
 - 验证签名
     - 后端根据URL规则和macula.gateway.force-sign判断是否强制验证签名
     - 后端根据验签规则验证签名，不通过则返回错误
+    - 验签成功后，网关用 Redis 原子登记 `macula:cloud:gateway:nonce:{nonce}`。有效期至少 300 秒，签名时间领先网关时覆盖剩余的签名有效窗口。同一 nonce 只允许登记一次。
 - 请求解密
     - 后端根据macula.gateway.force-crypto判断是否强制加解密，如果请求URL在列表中但是没有携带sm4-key则返回错误
     - 后端解密请求数据，然后将加密的返回数据替换Result的data
@@ -474,16 +475,11 @@ public class RedisConfiguration {
 
 `KongApiUtils.checkSign(exchange, secretKey)` 仅使用服务端传入的密钥校验请求时间、签名及请求内容，不查询 Redis、不检查租户或 URL 许可，也不发布身份。原接收 Redis 和路径/应用名的三参数、四参数 `checkSign` 重载已移除；自定义集成须迁移，不能把纯验签成功当成完整应用认证。
 
-完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属准入及业务租户解析 → URL 许可 → 纯验签 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。token 清理端点独立使用资源服务器 API Key，构造器第三个参数为 `sysRedisTemplate`，不再依赖此 HMAC 验证器。
+完整应用认证由 `KongApiGlobalFilter.validate(exchange)` 负责：读取应用缓存 → 归属及来源 IP 准入 → 纯验签 → 应用接口授权 → 构造 principal。返回成功后，GlobalFilter 发布 principal 并恢复请求体。该方法包含阻塞 Redis 查询，响应式调用方须使用 `boundedElastic`，提前缓存请求体并处理验证异常。验证结果不写入 `TenantContextHolder`。token 清理端点独立使用资源服务器 API Key，构造器第三个参数为 `sysRedisTemplate`，不再依赖此 HMAC 验证器。
 
 ### 应用与 API Key 的 URL/IP 准入
 
-业务 HMAC 与业务 API Key 统一调用 `TenantUtils.checkTenantAndUrls` 校验归属租户、URL 和来源 IP。缓存字段 `permitUrls` 使用每行一条的 `HTTP方法:/路径`，支持 Ant 通配符，同时兼容旧英文逗号及混合分隔；路径沿用各调用入口的 `StripPrefix` 时点。
-
-```text
-GET:/service/api/**
-POST:/service/api/orders
-```
+System Redis 按归属租户与应用 ID 发布 `macula:cloud:system:app_perms:{tenantId}:{applicationId}`。授权值为 `METHOD:/入口路径模式` 列表，支持 Ant 路径模式。API Key 与 HMAC 在认证后、发布 principal 前匹配改写前的网关入口路径。无匹配、缓存缺失或不可用时拒绝。Spring Security 只把待认证的应用凭据交给实际匹配的 Gateway 路由，其他受保护的 WebFlux 处理器拒绝这类凭据。普通 Bearer 继续使用角色 URL 规则。
 
 新增缓存字段 `permitIps`，每行一个 IPv4、IPv6 或 CIDR：
 
@@ -497,7 +493,6 @@ POST:/service/api/orders
 
 来源为请求的直连对端地址，不自行读取 `Forwarded` 或 `X-Forwarded-For`；经过代理时可能匹配代理 IP。部署须避免由不可信转发头重写对端地址，真实调用者 IP 需先建立可信代理边界。IPv4-mapped IPv6 按等价 IPv4 处理，mapped CIDR 前缀必须不少于 96。
 
-升级时先更新全部相关网关，再启用 System/Admin 多行 URL 和 IP 配置并重建凭据缓存。旧网关不能解释多行 URL，也不校验 IP，启用新配置后不能直接回退旧网关。普通 OAuth 请求的权限规则不受本次新增字段影响。
 
 ### CORS 与 CSRF 边界
 

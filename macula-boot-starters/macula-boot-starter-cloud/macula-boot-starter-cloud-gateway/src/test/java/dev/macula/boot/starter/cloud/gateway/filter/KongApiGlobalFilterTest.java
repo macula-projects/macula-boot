@@ -198,8 +198,8 @@ class KongApiGlobalFilterTest {
     @Test
     void enforcesUrlPermissionOutsideSignatureUtility() {
         var applications = KongApiUtilsTest.redis("12", "7");
-        when(applications.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + "app"))
-            .thenReturn(java.util.Map.of("secretKey", "test-secret", "tenantId", "12", "permitUrls", "POST:/other"));
+        when(applications.opsForValue().get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + "12:42"))
+            .thenReturn(java.util.List.of("POST:/other"));
         var filter = new KongApiGlobalFilter(applications);
         ReflectionTestUtils.setField(filter, "applicationName", "macula-samples-gateway");
         var exchange = KongApiUtilsTest.request("GET", "/orders", "app", "");
@@ -237,7 +237,7 @@ class KongApiGlobalFilterTest {
         var applications = KongApiUtilsTest.redis("12", "7");
         when(applications.<String, String>opsForHash().entries(CacheConstants.SECURITY_SYSTEM_APPS + "app"))
             .thenReturn(java.util.Map.of("secretKey", "test-secret", "tenantId", "12",
-                CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "POST:/other\nGET:/orders",
+                CacheConstants.APIKEY_APPLICATION_ID_ATTRIBUTE, "42",
                 CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24"));
         var filter = new KongApiGlobalFilter(applications);
         ReflectionTestUtils.setField(filter, "applicationName", "macula-samples-gateway");

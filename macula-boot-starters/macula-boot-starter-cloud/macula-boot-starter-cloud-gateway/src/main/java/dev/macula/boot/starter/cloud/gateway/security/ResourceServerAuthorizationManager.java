@@ -25,9 +25,7 @@ import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.KongApiUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -53,7 +51,6 @@ import java.util.Map;
  * @since 5.0.0
  */
 @RequiredArgsConstructor
-@Slf4j
 public class ResourceServerAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
 
     private final RedisTemplate<String, Object> sysRedisTemplate;
@@ -89,7 +86,8 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // API Key 只在此分流，由后续 GlobalFilter 校验凭据和租户准入。
         if (ApiKeyUtils.resolveApiKey(authorizationContext.getExchange()) != null) {
-            return checkOpenApi(restfulPath);
+            ApplicationCredentialRouteMapping.requireRoute(authorizationContext.getExchange());
+            return Mono.just(new AuthorizationDecision(true));
         }
 
         // Bear Token，需要验证权限（如果系统间访问需要验证权限要用oauth生成token，grant_type=client_credentials
@@ -100,30 +98,13 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // Hmac Token，属于系统访问的API
         if (KongApiUtils.resolveHmacToken(authorizationContext.getExchange()) != null) {
-            // 放行，由后面的KongApiGlobalFilter校验签名
-            return checkOpenApi(restfulPath);
+            // 只允许进入由 KongApiGlobalFilter 校验签名的 Gateway 路由。
+            ApplicationCredentialRouteMapping.requireRoute(authorizationContext.getExchange());
+            return Mono.just(new AuthorizationDecision(true));
         }
 
         // 没有 Token不放行
         return Mono.just(new AuthorizationDecision(false));
-    }
-
-    /**
-     * 仅在权限映射可用且入口没有角色规则时允许应用凭据继续核验。
-     *
-     * @param restfulPath 带应用名和方法的规则匹配路径
-     * @return 是否允许进入应用凭据验证链
-     */
-    private Mono<AuthorizationResult> checkOpenApi(String restfulPath) {
-        return loadUrlRules().map(rules -> {
-            // 权限刷新期间也可能读到空映射，不能据此判断路由开放。
-            boolean allowed = !rules.isEmpty() && rules.keySet().stream()
-                .noneMatch(pattern -> pathMatcher.match(pattern, restfulPath));
-            return (AuthorizationResult)new AuthorizationDecision(allowed);
-        }).onErrorResume(DataAccessException.class, failure -> {
-            log.debug("无法读取 Gateway URL 权限映射，应用凭据请求已拒绝");
-            return Mono.just(new AuthorizationDecision(false));
-        });
     }
 
     /**

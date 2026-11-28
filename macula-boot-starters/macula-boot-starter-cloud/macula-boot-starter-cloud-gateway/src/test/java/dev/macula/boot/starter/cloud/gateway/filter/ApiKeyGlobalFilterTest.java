@@ -49,6 +49,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 class ApiKeyGlobalFilterTest {
     private RedisTemplate<String, Object> redis;
     private HashOperations<String, Object, Object> hashes;
+    private org.springframework.data.redis.core.ValueOperations<String, Object> permissions;
     private ApiKeyGlobalFilter filter;
     private Map<Object, Object> identity;
 
@@ -60,6 +61,10 @@ class ApiKeyGlobalFilterTest {
         identity = new HashMap<>(Map.of("applicationCode", "app", "applicationId", "42", "tenantId", "12"));
         when(hashes.entries(anyString())).thenReturn(identity);
         when(hashes.entries(CacheConstants.SECURITY_SYSTEM_TENANTS)).thenReturn(Map.of("sample", "12"));
+        permissions = mock(org.springframework.data.redis.core.ValueOperations.class);
+        when(redis.opsForValue()).thenReturn(permissions);
+        when(permissions.get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + "12:42"))
+            .thenReturn(java.util.List.of("GET:/"));
         filter = new ApiKeyGlobalFilter(redis);
         ReflectionTestUtils.setField(filter, "applicationName", "sample-gateway");
     }
@@ -138,9 +143,9 @@ class ApiKeyGlobalFilterTest {
     /** API Key 应用许可按 HTTP 方法及路径匹配，不允许的接口不得到达下游。 */
     @Test
     void enforcesApplicationUrlPermission() {
-        identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "POST:/allowed");
+        when(permissions.get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + "12:42"))
+            .thenReturn(java.util.List.of("POST:/allowed"), java.util.List.of("GET:/"));
         assertRejected(request());
-        identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "GET:/");
         AtomicInteger calls = new AtomicInteger();
         filter.filter(request(), ignored -> Mono.fromRunnable(calls::incrementAndGet)).block();
         assertThat(calls).hasValue(1);
@@ -183,7 +188,6 @@ class ApiKeyGlobalFilterTest {
     /** APIKEY 继承后的 IP 配置必须先于身份发布生效，转发头不能绕过。 */
     @Test
     void enforcesPeerIpBeforePublishingApiKeyIdentity() {
-        identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_URLS, "POST:/other\nGET:/");
         identity.put(CacheConstants.SECURITY_SYSTEM_APPS_PERMIT_IPS, "192.0.2.0/24");
         AtomicInteger calls = new AtomicInteger();
         var allowed = MockServerWebExchange.from(MockServerHttpRequest.get("/")

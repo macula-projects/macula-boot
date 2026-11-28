@@ -70,7 +70,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -172,13 +171,9 @@ class CryptoDemoIT {
         Set<String> seen = ConcurrentHashMap.newKeySet();
         RedisTemplate<String, Object> redis = mock(RedisTemplate.class);
         ValueOperations<String, Object> values = mock(ValueOperations.class);
-        when(redis.hasKey(anyString())).thenAnswer(call -> seen.contains(call.getArgument(0)));
         when(redis.opsForValue()).thenReturn(values);
-        doAnswer(call -> {
-            seen.add(call.getArgument(0));
-            return null;
-        })
-            .when(values).set(anyString(), eq("x"), any(Duration.class));
+        when(values.setIfAbsent(anyString(), eq("x"), any(Duration.class)))
+            .thenAnswer(call -> seen.add(call.getArgument(0)));
         return redis;
     }
 

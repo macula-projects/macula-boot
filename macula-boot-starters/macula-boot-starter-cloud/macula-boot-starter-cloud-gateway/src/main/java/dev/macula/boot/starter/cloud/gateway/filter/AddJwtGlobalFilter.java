@@ -79,6 +79,8 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
     /**
      * JWT 缓存中标识业务租户段的前缀。
      */
+    private static final String HMAC_CACHE_SEGMENT = "hmac:";
+
     private static final String TENANT_CACHE_SEGMENT_PREFIX = "tn";
 
     private final JwtEncoder jwtEncoder;
@@ -102,12 +104,19 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         return Mono.defer(() -> resolvePrincipal(exchange)
                 .map(principal -> {
+                    boolean hmac = principal == exchange.getAttribute(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE);
                     ServerHttpRequest request = exchange.getRequest();
                     request = request.mutate()
                             .uri(UriComponentsBuilder.fromUri(request.getURI())
                                     .replaceQueryParam(SecurityConstants.QUERY_AUTHORIZATION_KEY).build(true).toUri())
                             .header(SecurityConstants.AUTHORIZATION_KEY,
-                                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal)).build();
+                                    SecurityConstants.TOKEN_PREFIX + generateJwtToken(principal,
+                                            hmac))
+                            .build();
+                    // 定制过滤器只需发布已验证的 principal，内部转发状态在 JWT 生成后统一整理。
+                    if (hmac || principal == exchange.getAttribute(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE)) {
+                        exchange.getAttributes().remove(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
+                    }
                     return exchange.mutate().request(request).build();
                 })
                 // 在 exchange 阶段处理空身份，避免对 Mono<Void> 兜底而重复执行下游。
@@ -151,13 +160,14 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
      * 优先复用身份对应的缓存，否则补齐标准 claims、调用定制器并以 RS256 签发 JWT。
      *
      * @param principal 已验证身份及其可信 claims
+     * @param hmac principal 是否由可信 HMAC 过滤器发布
      * @return 缓存中或本次签发的 JWT
      */
     @SneakyThrows
-    private String generateJwtToken(OAuth2AuthenticatedPrincipal principal) {
+    private String generateJwtToken(OAuth2AuthenticatedPrincipal principal, boolean hmac) {
         // OAuth 依赖每次登录使用不同 jti，应用身份则按各自的租户和主体规则复用缓存。
         String jwtStr;
-        jwtStr = (String) redisTemplate.opsForValue().get(buildKey(principal));
+        jwtStr = (String) redisTemplate.opsForValue().get(buildKey(principal, hmac));
         if (StrUtil.isNotBlank(jwtStr)) {
             return jwtStr;
         }
@@ -202,7 +212,7 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
 
         long between = ChronoUnit.MINUTES.between(claims.getIssuedAt(), claims.getExpiresAt());
         // 有效期内缓存JWT
-        redisTemplate.opsForValue().set(buildKey(principal), jwtStr, between, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(buildKey(principal, hmac), jwtStr, between, TimeUnit.MINUTES);
 
         return jwtStr;
     }
@@ -215,10 +225,23 @@ public class AddJwtGlobalFilter implements GlobalFilter, Ordered {
      */
     public static String buildKey(OAuth2AuthenticatedPrincipal principal) {
 
+        return buildKey(principal, false);
+    }
+
+    /**
+     * 隔离 HMAC 与 Bearer JWT 缓存，避免同主体或同 jti 继承用户身份。
+     *
+     * @param principal 已验证身份
+     * @param hmac 身份是否来自 HMAC 验签
+     * @return 包含身份来源和租户的缓存键
+     */
+    static String buildKey(OAuth2AuthenticatedPrincipal principal, boolean hmac) {
         String prefix = CacheConstants.GATEWAY_JWT_CACHE_KEY;
 
-        // APIKEY 加多一个前缀
-        if (GatewayConstants.APIKEY_AUTH_TYPE.equals(principal.getAttribute(GatewayConstants.AUTH_TYPE_ATTRIBUTE))) {
+        if (hmac) {
+            prefix += HMAC_CACHE_SEGMENT;
+        } else if (GatewayConstants.APIKEY_AUTH_TYPE.equals(
+                principal.getAttribute(GatewayConstants.AUTH_TYPE_ATTRIBUTE))) {
             prefix += GatewayConstants.APIKEY_AUTH_TYPE + ":";
         }
 

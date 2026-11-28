@@ -21,6 +21,7 @@ import cn.hutool.core.util.StrUtil;
 import com.nimbusds.jwt.JWTClaimNames;
 import dev.macula.boot.constants.GlobalConstants;
 import dev.macula.boot.constants.CacheConstants;
+import dev.macula.boot.starter.cloud.gateway.security.ApplicationPermissionAuthorizer;
 import dev.macula.boot.starter.cloud.gateway.utils.TenantUtils;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.result.ApiResultCode;
@@ -89,14 +90,16 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
                         return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
                     }
                     exchange.getAttributes().put(GatewayConstants.HMAC_PRINCIPAL_ATTRIBUTE, result.getData());
+                    // 已完成应用验证，网关的内部转发可以进入本地处理器。
+                    exchange.getAttributes().remove(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
                     return chain.filter(restoreRequestBody(exchange));
                 });
         });
     }
 
     /**
-     * 读取应用缓存，校验归属租户、URL 许可及签名，再构造可信 principal。
-     * 返回的 principal 由调用方决定是否发布；token 清理入口也必须复用此完整准入流程。
+     * 读取应用缓存，校验归属租户、来源 IP、签名和接口授权，再构造可信 principal。
+     * 返回的 principal 由调用方决定是否发布。
      * 本方法读取阻塞 Redis，响应式调用方须在 boundedElastic 上执行，并处理验证异常。
      *
      * @param exchange 当前 HMAC 请求，请求体须提前缓存
@@ -121,8 +124,8 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
             return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "秘钥未配置, 验签失败");
         }
 
-        // 检查归属租户以及是否允许URL
-        Result<Long> tenant = TenantUtils.checkTenantAndUrls(exchange, sysRedisTemplate, applicationName, apps);
+        // 先核对归属租户和来源 IP。
+        Result<Long> tenant = TenantUtils.checkTenantAndIp(exchange, sysRedisTemplate, applicationName, apps);
         if (!tenant.isSuccess()) {
             return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
         }
@@ -134,6 +137,10 @@ public class KongApiGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 只有所有准入与验签检查都通过后，才允许将应用信息标记为可信身份。
+        if (!ApplicationPermissionAuthorizer.isAllowed(sysRedisTemplate, exchange, apps)) {
+            return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
+        }
+
         return Result.success(createPrincipal(exchange, username, tenant.getData()));
     }
 

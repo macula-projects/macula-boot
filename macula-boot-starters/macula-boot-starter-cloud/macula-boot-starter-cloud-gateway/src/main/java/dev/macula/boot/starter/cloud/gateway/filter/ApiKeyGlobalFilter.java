@@ -28,6 +28,7 @@ import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
 import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
+import dev.macula.boot.starter.cloud.gateway.security.ApplicationPermissionAuthorizer;
 import dev.macula.boot.starter.cloud.gateway.utils.ApiKeyUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import dev.macula.boot.starter.cloud.gateway.utils.TenantUtils;
@@ -98,6 +99,8 @@ public class ApiKeyGlobalFilter implements GlobalFilter, Ordered {
                             return ResponseUtils.writeResult(exchange.getResponse(), HttpStatus.FORBIDDEN, result);
                         }
                         exchange.getAttributes().put(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE, result.getData());
+                        // 已完成应用验证，网关的内部转发可以进入本地处理器。
+                        exchange.getAttributes().remove(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
                         return chain.filter(exchange);
                     });
         });
@@ -123,10 +126,14 @@ public class ApiKeyGlobalFilter implements GlobalFilter, Ordered {
             return Result.failed(ApiResultCode.ACCESS_UNAUTHORIZED);
         }
 
-        // 检查归属租户以及是否允许URL
-        Result<Long> tenant = TenantUtils.checkTenantAndUrls(exchange, sysRedisTemplate, applicationName, apps);
+        // 先核对归属租户和来源 IP。
+        Result<Long> tenant = TenantUtils.checkTenantAndIp(exchange, sysRedisTemplate, applicationName, apps);
         if (!tenant.isSuccess()) {
             return Result.failed(tenant.getCode(), tenant.getMsg(), tenant.getCause());
+        }
+
+        if (!ApplicationPermissionAuthorizer.isAllowed(sysRedisTemplate, exchange, apps)) {
+            return Result.failed(ApiResultCode.AKSK_ACCESS_FORBIDDEN, "不允许访问该接口");
         }
 
         return Result.success(createPrincipal(code, applicationId, tenant.getData()));

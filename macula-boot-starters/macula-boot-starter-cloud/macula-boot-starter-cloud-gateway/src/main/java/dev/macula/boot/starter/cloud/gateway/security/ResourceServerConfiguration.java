@@ -25,6 +25,7 @@ import cn.hutool.core.convert.Convert;
 import dev.macula.boot.constants.SecurityConstants;
 import dev.macula.boot.result.ApiResultCode;
 import dev.macula.boot.result.Result;
+import dev.macula.boot.starter.cloud.gateway.constants.GatewayConstants;
 import dev.macula.boot.starter.cloud.gateway.filter.AddJwtGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.ApiKeyGlobalFilter;
 import dev.macula.boot.starter.cloud.gateway.filter.KongApiGlobalFilter;
@@ -33,6 +34,7 @@ import dev.macula.boot.starter.cloud.gateway.utils.ResponseUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
@@ -44,6 +46,8 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotatedTypeMetadata;
@@ -64,6 +68,8 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.WebFilter;
 import reactor.core.publisher.Mono;
 
 /**
@@ -162,6 +168,32 @@ public class ResourceServerConfiguration {
     @Bean
     public ResourceServerAuthorizationManager authorizationManager(RedisTemplate<String, Object> sysRedisTemplate) {
         return new ResourceServerAuthorizationManager(sysRedisTemplate);
+    }
+
+    /**
+     * 在处理器选择阶段确保等待应用认证的请求只能进入 Gateway 路由。
+     *
+     * @param mappings Spring WebFlux 的处理器映射
+     * @return 应用凭据的路由选择约束
+     */
+    @Bean
+    ApplicationCredentialRouteMapping applicationCredentialRouteMapping(ObjectProvider<HandlerMapping> mappings) {
+        return new ApplicationCredentialRouteMapping(mappings);
+    }
+
+    /**
+     * 为所有进入网关的请求保留入口路径。forward 路由改写路径时没有框架原 URL 属性。
+     *
+     * @return 入口路径记录过滤器
+     */
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    WebFilter applicationEntrancePathFilter() {
+        return (exchange, chain) -> {
+            exchange.getAttributes().putIfAbsent(GatewayConstants.APPLICATION_ENTRANCE_PATH_ATTRIBUTE,
+                    exchange.getRequest().getURI().getPath());
+            return chain.filter(exchange);
+        };
     }
 
     /**
