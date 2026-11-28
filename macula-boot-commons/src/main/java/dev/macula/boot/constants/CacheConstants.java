@@ -42,8 +42,8 @@ public interface CacheConstants {
     /** 应用认证后的业务租户，与应用归属租户分别维护。 */
     String SECURITY_SYSTEM_APPS_AUTH_TENANT_ID = "authTenantId";
 
-    /** 应用缓存里面的允许URL KEY */
-    String SECURITY_SYSTEM_APPS_PERMIT_URLS = "permitUrls";
+    /** 按归属租户 ID 和应用 ID 发布的接口授权快照。 */
+    String APPLICATION_PERMISSIONS_CACHE_PREFIX = "macula:cloud:system:app_perms:";
 
     /** 应用及 API Key 缓存中的来源 IP/CIDR 白名单，空值表示不限。 */
     String SECURITY_SYSTEM_APPS_PERMIT_IPS = "permitIps";
@@ -54,11 +54,14 @@ public interface CacheConstants {
     /** API Key 缓存中记录应用编码的字段。 */
     String APIKEY_APPLICATION_CODE_ATTRIBUTE = "applicationCode";
 
-    /** API Key 缓存与 JWT 中使用的应用 ID 字段。 */
+    /** HMAC 与 API Key 凭据缓存共用的应用 ID 字段，也用于 API Key 的 JWT。 */
     String APIKEY_APPLICATION_ID_ATTRIBUTE = "applicationId";
 
+    /** IAM 与其他服务共用的 Redis 键命名空间。 */
+    String IAM_REDIS_PREFIX = "macula:cloud:iam:";
+
     /** IAM 资源服务器专用回调凭据，按 resource client_id 发布，不能用于普通业务 API。 */
-    String IAM_CALLBACK_CREDENTIAL_PREFIX = "macula:cloud:iam:resource:callback:";
+    String IAM_CALLBACK_CREDENTIAL_PREFIX = IAM_REDIS_PREFIX + "resource:callback:";
 
     /** 回调凭据缓存中的 SHA-256 摘要。 */
     String IAM_CALLBACK_KEY_DIGEST = "apiKeyDigest";
@@ -67,16 +70,16 @@ public interface CacheConstants {
     String IAM_CALLBACK_PATH = "path";
 
     /** oauth 客户端信息 */
-    String OAUTH2_CLIENT_CACHE_KEY = "cloud:iam:oauth2:client";
+    String OAUTH2_CLIENT_CACHE_KEY = IAM_REDIS_PREFIX + "oauth2:client";
 
     /** 授权同意状态 */
-    String OAUTH2_CONSENT_KEY = "macula:cloud:iam:oauth2:consent:";
+    String OAUTH2_CONSENT_KEY = IAM_REDIS_PREFIX + "oauth2:consent:";
 
     /** OAuth2 Token保存 */
-    String OAUTH2_TOKEN_KEY = "macula:cloud:iam:oauth2:token";
+    String OAUTH2_TOKEN_KEY = IAM_REDIS_PREFIX + "oauth2:token";
 
     /** 小程序登录的SESSION-KEY 保存 */
-    String OAUTH2_TOKEN_WEAPP_SESSION_KEY = "macula:cloud:iam:oauth2:session-key";
+    String OAUTH2_TOKEN_WEAPP_SESSION_KEY = IAM_REDIS_PREFIX + "oauth2:session-key";
 
     /** 网关生成的JWT缓存 */
     String GATEWAY_JWT_CACHE_KEY = "macula:cloud:gateway:jwt:";
@@ -84,8 +87,8 @@ public interface CacheConstants {
     /** 网关TOKEN的introspect信息缓存 */
     String GATEWAY_TOKEN_CACHE_KEY = "macula:cloud:gateway:principal:";
 
-    /** 网关nonce参数信息缓存 */
-    String GATEWAY_NONCE_KEY = "macula:scg:nonce";
+    /** 网关签名防重放的 Redis 键前缀。 */
+    String GATEWAY_NONCE_KEY = "macula:cloud:gateway:nonce:";
 
     /** WEBSOCKET订阅关系KEY */
     String WEBSOCKET_USERS_KEY = "macula:ws:u:user:";

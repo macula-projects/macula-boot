@@ -100,6 +100,7 @@ class AddJwtGlobalFilterTest {
         ReflectionTestUtils.setField(filter, "issuerUri", "https://test.invalid");
         var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(
             org.springframework.mock.http.server.reactive.MockServerHttpRequest.get("/orders?access_token=sk-test&keep=yes"));
+        exchange.getAttributes().put(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE, true);
         exchange.getAttributes().put(GatewayConstants.APIKEY_PRINCIPAL_ATTRIBUTE,
             new DefaultOAuth2AuthenticatedPrincipal("app", Map.of("sub", "app", "tenantId", 12L,
                 "authType", "apikey", "applicationId", "42"), AuthorityUtils.NO_AUTHORITIES));
@@ -107,6 +108,7 @@ class AddJwtGlobalFilterTest {
         filter.filter(exchange, forwarded -> {
             assertThat(forwarded.getRequest().getHeaders().getFirst("Authorization")).isEqualTo("Bearer signed-key-jwt");
             assertThat(forwarded.getRequest().getQueryParams()).doesNotContainKey("access_token").containsKey("keep");
+            assertThat(forwarded.getAttributes()).doesNotContainKey(GatewayConstants.APPLICATION_ROUTE_REQUIRED_ATTRIBUTE);
             return Mono.fromRunnable(calls::incrementAndGet);
         }).block();
         assertThat(calls).hasValue(1);
@@ -198,10 +200,10 @@ class AddJwtGlobalFilterTest {
             }
         }
         assertThat(keys).containsExactlyInAnyOrder(
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn7:first",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn8:first",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn7:second",
-            CacheConstants.GATEWAY_JWT_CACHE_KEY + "u:tn8:second");
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "hmac:u:tn7:first",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "hmac:u:tn8:first",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "hmac:u:tn7:second",
+            CacheConstants.GATEWAY_JWT_CACHE_KEY + "hmac:u:tn8:second");
     }
 
     @Test

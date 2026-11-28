@@ -136,7 +136,13 @@ public class KongApiUtilsTest {
         RedisTemplate<String, Object> redis = mock(RedisTemplate.class);
         HashOperations<String, String, String> hashes = mock(HashOperations.class);
         when(redis.<String, String>opsForHash()).thenReturn(hashes);
+        org.springframework.data.redis.core.ValueOperations<String, Object> permissions =
+            mock(org.springframework.data.redis.core.ValueOperations.class);
+        when(redis.opsForValue()).thenReturn(permissions);
+        when(permissions.get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + owner + ":42"))
+            .thenReturn(java.util.List.of("GET:/orders", "POST:/orders"));
         Map<String, String> values = new HashMap<>();
+        values.put(CacheConstants.APIKEY_APPLICATION_ID_ATTRIBUTE, "42");
         values.put(CacheConstants.SECURITY_SYSTEM_APPS_SECRIT_KEY, "test-secret");
         if (owner != null) {
             values.put(GlobalConstants.TENANT_ID_NAME, owner);

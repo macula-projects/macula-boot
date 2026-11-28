@@ -72,6 +72,7 @@ class ApiKeySecurityChainTest {
     private AtomicInteger downstream;
     private RedisTemplate<String, Object> redis;
     private HashOperations<String, Object, Object> hashes;
+    private ValueOperations<String, Object> values;
 
     /** 装配真实安全链和过滤器，分别准备开放路径和已配置角色的路径。 */
     @BeforeEach
@@ -79,15 +80,18 @@ class ApiKeySecurityChainTest {
         downstream = new AtomicInteger();
         redis = mock(RedisTemplate.class);
         hashes = mock(HashOperations.class);
-        ValueOperations<String, Object> values = mock(ValueOperations.class);
+        values = mock(ValueOperations.class);
         when(redis.opsForHash()).thenReturn(hashes);
         when(redis.opsForValue()).thenReturn(values);
+        when(values.get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + "12:42")).thenReturn(
+            List.of("GET:/orders", "GET:/open-orders", "POST:/open-orders", "PUT:/open-orders",
+                "PATCH:/open-orders", "DELETE:/open-orders"));
         when(hashes.entries(anyString())).thenReturn(Map.of());
         when(hashes.entries(CacheConstants.APIKEY_CACHE_PREFIX + "sk-test")).thenReturn(
             Map.of("applicationCode", "app", "applicationId", "42", "tenantId", "12"));
         when(hashes.entries(CacheConstants.SECURITY_SYSTEM_TENANTS)).thenReturn(Map.of("sample", "12"));
         when(hashes.entries(CacheConstants.SECURITY_SYSTEM_APPS + "app")).thenReturn(
-            Map.of("secretKey", "test-secret", "tenantId", "12", "permitUrls", "GET:/open-orders,GET:/orders"));
+            Map.of("secretKey", "test-secret", "tenantId", "12", "applicationId", "42"));
         when(hashes.entries(CacheConstants.SECURITY_URL_PERM_ROLES_KEY))
             .thenReturn(Map.of("sample-gateway:GET:/orders", List.of("ADMIN")));
         introspector = mock(ReactiveOpaqueTokenIntrospector.class);
@@ -181,15 +185,20 @@ class ApiKeySecurityChainTest {
         verifyNoInteractions(introspector);
     }
 
-    /** 应用凭据不能进入有 URL 角色规则的路径。 */
+    /** 两种应用凭据共享应用权限；角色映射不能否决应用授权。 */
     @Test
-    void deniesApplicationCredentialsBeforeProtectedRoute() {
+    void applicationAuthorizationAppliesRegardlessOfRoleRules() {
         client.get().uri("/orders").header("Authorization", "Bearer sk-test")
-            .exchange().expectStatus().is4xxClientError();
+            .exchange().expectStatus().isOk();
         var request = KongApiUtilsTest.request("GET", "/orders", "app", "").getRequest();
         client.get().uri("/orders").headers(headers -> headers.addAll(request.getHeaders()))
-            .exchange().expectStatus().is4xxClientError();
-        assertThat(downstream).hasValue(0);
+            .exchange().expectStatus().isOk();
+        when(values.get(CacheConstants.APPLICATION_PERMISSIONS_CACHE_PREFIX + "12:42")).thenReturn(List.of());
+        client.get().uri("/orders").header("Authorization", "Bearer sk-test")
+            .exchange().expectStatus().isForbidden();
+        client.get().uri("/orders").headers(headers -> headers.addAll(request.getHeaders()))
+            .exchange().expectStatus().isForbidden();
+        assertThat(downstream).hasValue(2);
         verifyNoInteractions(introspector);
     }
 
