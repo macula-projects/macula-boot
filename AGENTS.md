@@ -37,6 +37,7 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Pdeploy
 ## 全局约束
 
 - 保持 Java 17 兼容；包名沿用 `dev.macula...`。
+- 持久化实体采用标准自增 `id` 和四个标准审计字段时，优先继承 MyBatis-Plus 的 `BaseEntity`，避免重复声明主键和审计字段。自然键、复合键、非标准主键策略或无需四列审计的表按实际结构映射。使用既有填充机制时应核对操作者和时间契约，特殊写入路径须显式维护审计值。
 - Java 排版由开发者编辑器负责；IDEA 自动使用版本化的 `.idea/codeStyles` 项目方案，`.editorconfig` 提供跨编辑器的基础行为。不要使用 Maven 自动重排源码。
 - CI 对分支中变更的 Java 文件执行 Checkstyle；新增 Java 文件必须使用 `.config/license-header` 定义的 Apache License 2.0 版权头。
 - 类、接口、枚举、注解、Record 及测试类必须使用类级 Javadoc 说明职责；顶层类型必须包含非空的 `@author`、`@since`，内部类型无需重复 `@author`，但仍须包含 `@since`，格式参考 `AsyncAutoConfiguration`。
