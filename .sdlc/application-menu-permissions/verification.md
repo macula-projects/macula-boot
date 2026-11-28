@@ -40,3 +40,8 @@
 - Cloud 执行 `mvn -o verify -Plocal`，使用文档指定的已编译历史夹具、隔离 MySQL 和 Redis，结果为 `BUILD SUCCESS`。共计 1433 项，0 失败、0 错误、89 项条件跳过。`ApplicationApiKeyIntegrationIT` 10 项全部通过，覆盖当前基线、菜单及接口目录变更、删除应用和保留通用安全的角色关联。`TinyIdGatewayIT` 5 项全部通过。MVC 用户边界、租户一致性和快照锁顺序通过相应单元测试。
 - Admin 执行 `npm run test:unit -- --run` 得到 `Tests 317 passed (317)`，`npm run build:docker` 成功。全量 Cypress 得到 `All specs passed`，145 项通过、38 项原有待执行。Cypress 覆盖应用授权树桌面与矮屏尺寸、角色入口和通用安全五个页签。已登录的浏览器也验证修正后的本地 Admin 实际加载了五个通用安全页签，未执行真实配置写入。
 - 初轮通用安全前端引用了错误地址。最终实现和测试统一使用控制器注册的 `/api/v1/iam/login-protection`，V56.15 在隔离数据库中验证保留原授权关联。
+
+## 移除额外处理器映射
+
+- 根据用户确认的 Gateway 契约，应用认证由路由全局过滤器执行。网关本地入口显式公开，或由专用 `WebFilter` 独立认证。原入口路径记录及内部转发授权回归继续保留。
+- Gateway 和依赖执行 `mvn -pl macula-boot-starters/macula-boot-starter-cloud/macula-boot-starter-cloud-gateway -am clean test`，152 项通过。全仓 `mvn verify` 输出 `BUILD SUCCESS`，共计 621 项，0 失败、0 错误、4 项条件跳过。变更 Java Checkstyle 为 0 项违规。

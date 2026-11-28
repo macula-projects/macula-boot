@@ -34,9 +34,6 @@ public interface GatewayConstants {
     /** API Key 过滤器在验证成功后构造的可信 principal。 */
     String APIKEY_PRINCIPAL_ATTRIBUTE = GatewayConstants.class.getName() + ".apiKeyPrincipal";
 
-    /** 安全链要求当前应用凭据先进入 Gateway 路由完成认证。 */
-    String APPLICATION_ROUTE_REQUIRED_ATTRIBUTE = GatewayConstants.class.getName() + ".applicationRouteRequired";
-
     /** HTTP 入站路径，在路由或转发改写前由服务端写入。 */
     String APPLICATION_ENTRANCE_PATH_ATTRIBUTE = GatewayConstants.class.getName() + ".applicationEntrancePath";
 

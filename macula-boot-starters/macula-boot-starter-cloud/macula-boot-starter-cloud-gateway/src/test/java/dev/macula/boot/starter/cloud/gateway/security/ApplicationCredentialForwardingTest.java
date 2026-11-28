@@ -22,7 +22,6 @@ import java.util.Map;
 
 import dev.macula.boot.constants.CacheConstants;
 import dev.macula.boot.starter.cloud.gateway.filter.ApiKeyGlobalFilter;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.gateway.handler.FilteringWebHandler;
 import org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping;
@@ -34,7 +33,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -53,17 +51,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 验证安全链分流最终受 WebFlux 实际处理器选择约束。
+ * 验证应用授权在内部转发前按网关入口路径匹配。
  *
  * @author Rain
  * @since 6.1.0
  */
 @SuppressWarnings("unchecked")
-class ApplicationCredentialRouteMappingTest {
+class ApplicationCredentialForwardingTest {
 
-    /** 本地端点优先选择时拒绝应用凭据，实际 Gateway 路由仍进入应用过滤链。 */
+    /** 公开本地端点可以直接访问，内部转发须完成应用授权。 */
     @Test
-    void protectsLocalHandlersAndDelegatesActualRoutes() {
+    void authorizesGatewayForwardAgainstEntrancePath() {
         var gatewayMapping = mock(RoutePredicateHandlerMapping.class);
         var gatewayHandler = mock(FilteringWebHandler.class);
         when(gatewayMapping.getOrder()).thenReturn(1);
@@ -89,8 +87,6 @@ class ApplicationCredentialRouteMappingTest {
                 var rewritten = exchange.mutate().request(exchange.getRequest().mutate().path("/local").build()).build();
                 return apiKeyFilter.filter(rewritten, dispatcher::handle);
             });
-            context.registerBean("applicationCredentialRouteMapping", ApplicationCredentialRouteMapping.class,
-                    () -> new ApplicationCredentialRouteMapping(context.getBeanProvider(HandlerMapping.class)));
             context.registerBean(FixtureLocalMapping.class);
             context.getBeanFactory().registerSingleton("routeMapping", gatewayMapping);
             context.registerBean(SimpleHandlerAdapter.class);
@@ -98,25 +94,9 @@ class ApplicationCredentialRouteMappingTest {
             context.registerBean("captureEntrance", WebFilter.class, () ->
                     new ResourceServerConfiguration(new OAuth2ResourceServerProperties(), redis)
                             .applicationEntrancePathFilter());
-            context.registerBean("securityFixture", WebFilter.class, () -> (exchange, chain) -> {
-                if (exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION) != null) {
-                    var manager = new ResourceServerAuthorizationManager(redis);
-                    return manager.authorize(Mono.empty(),
-                            new AuthorizationContext(exchange))
-                            .flatMap(decision -> {
-                                Assertions.assertTrue(decision.isGranted());
-                                return chain.filter(exchange);
-                            });
-                }
-                return chain.filter(exchange);
-            });
             context.refresh();
             dispatcher.setApplicationContext(context);
             var client = WebTestClient.bindToApplicationContext(context).build();
-            client.get().uri("/local").header(HttpHeaders.AUTHORIZATION, "Bearer sk-test")
-                    .exchange().expectStatus().isForbidden();
-            client.get().uri("/local").header(HttpHeaders.AUTHORIZATION, "hmac username=fixture")
-                    .exchange().expectStatus().isForbidden();
             client.get().uri("/local").exchange().expectStatus().isNoContent();
             client.get().uri("/routed").header(HttpHeaders.AUTHORIZATION, "Bearer sk-test")
                     .exchange().expectStatus().isForbidden();

@@ -86,7 +86,6 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // API Key 只在此分流，由后续 GlobalFilter 校验凭据和租户准入。
         if (ApiKeyUtils.resolveApiKey(authorizationContext.getExchange()) != null) {
-            ApplicationCredentialRouteMapping.requireRoute(authorizationContext.getExchange());
             return Mono.just(new AuthorizationDecision(true));
         }
 
@@ -98,8 +97,7 @@ public class ResourceServerAuthorizationManager implements ReactiveAuthorization
 
         // Hmac Token，属于系统访问的API
         if (KongApiUtils.resolveHmacToken(authorizationContext.getExchange()) != null) {
-            // 只允许进入由 KongApiGlobalFilter 校验签名的 Gateway 路由。
-            ApplicationCredentialRouteMapping.requireRoute(authorizationContext.getExchange());
+            // Gateway 路由由 KongApiGlobalFilter 校验签名及应用授权。
             return Mono.just(new AuthorizationDecision(true));
         }
 
